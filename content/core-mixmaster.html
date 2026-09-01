@@ -1,0 +1,1971 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>몬조운 - 몬스터를 조합하여 오늘의 운세를!</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Do+Hyeon&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-1:#180f2b;
+    --bg-2:#2a1a49;
+    --surface:#241a3d;
+    --surface-2:#33224f;
+    --surface-3:#3c2a5c;
+    --line: rgba(255,255,255,0.08);
+    --text:#f3ecff;
+    --text-dim:#b6a9d6;
+    --accent:#ff4fa3;
+    --accent-dim:#ff4fa355;
+    --good:#5ed99b;
+    --bad:#ff6b6b;
+    --fire:#ff6b47;
+    --water:#3ea8ff;
+    --grass:#5ed99b;
+    --electric:#ffd93d;
+    --earth:#c8905a;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -5%, #4a2a7a55, transparent),
+      radial-gradient(ellipse 700px 500px at 100% 10%, #ff4fa322, transparent),
+      linear-gradient(180deg, var(--bg-1), var(--bg-2) 60%, #170e28);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    padding:18px 14px 60px;
+  }
+  .wrap{max-width:640px;margin:0 auto; display:none;}
+  .wrap.app-visible{display:block; animation:fadein .4s ease;}
+
+  /* ---------- start screen ---------- */
+  .start-screen{
+    position:fixed;
+    inset:0;
+    z-index:500;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:space-between;
+    padding:56px 24px 46px;
+    overflow:hidden;
+    background:
+      radial-gradient(circle at 18% 22%, #ff6b4744 0%, transparent 38%),
+      radial-gradient(circle at 85% 14%, #3ea8ff3d 0%, transparent 40%),
+      radial-gradient(circle at 22% 82%, #5ed99b33 0%, transparent 42%),
+      radial-gradient(circle at 82% 86%, #b48cff44 0%, transparent 46%),
+      radial-gradient(circle at 50% 50%, #ffd93d22 0%, transparent 55%),
+      linear-gradient(180deg, #140b26, #1f1338 45%, #140b26);
+    transition: opacity .5s ease, visibility .5s ease;
+  }
+  .start-screen::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background-image:
+      radial-gradient(1.6px 1.6px at 12% 22%, #ffffffaa, transparent),
+      radial-gradient(1.6px 1.6px at 28% 68%, #ffffff88, transparent),
+      radial-gradient(1.6px 1.6px at 44% 15%, #ffffff99, transparent),
+      radial-gradient(1.6px 1.6px at 58% 78%, #ffffff77, transparent),
+      radial-gradient(1.6px 1.6px at 72% 30%, #ffffffaa, transparent),
+      radial-gradient(1.6px 1.6px at 85% 62%, #ffffff88, transparent),
+      radial-gradient(1.6px 1.6px at 92% 20%, #ffffff66, transparent),
+      radial-gradient(1.6px 1.6px at 8% 85%, #ffffff77, transparent),
+      radial-gradient(1.6px 1.6px at 65% 92%, #ffffff66, transparent),
+      radial-gradient(1.6px 1.6px at 35% 40%, #ffffff55, transparent);
+    animation: twinkleStars 2.6s ease-in-out infinite alternate;
+  }
+  @keyframes twinkleStars{ from{opacity:.4;} to{opacity:1;} }
+
+  .start-screen.hide{
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+  }
+
+  .start-orb{
+    position:absolute;
+    border-radius:50%;
+    filter:blur(22px);
+    opacity:.55;
+    animation: floatBounce 6s ease-in-out infinite;
+  }
+  .so1{ width:120px; height:120px; top:12%; left:8%; background:radial-gradient(circle, var(--fire), transparent 70%); animation-duration:7s; }
+  .so2{ width:90px; height:90px; top:20%; right:10%; background:radial-gradient(circle, var(--water), transparent 70%); animation-duration:8s; animation-delay:.4s; }
+  .so3{ width:100px; height:100px; bottom:22%; left:12%; background:radial-gradient(circle, var(--grass), transparent 70%); animation-duration:6.5s; animation-delay:.8s; }
+  .so4{ width:80px; height:80px; bottom:16%; right:14%; background:radial-gradient(circle, var(--electric), transparent 70%); animation-duration:7.5s; animation-delay:.2s; }
+  .so5{ width:140px; height:140px; top:50%; left:50%; transform:translate(-50%,-50%); background:radial-gradient(circle, #b48cff, transparent 70%); animation-duration:9s; opacity:.35; }
+
+  .start-tagline{
+    position:relative;
+    z-index:2;
+    font-size:13px;
+    letter-spacing:.14em;
+    font-weight:700;
+    color:var(--text-dim);
+    text-align:center;
+    text-transform:none;
+  }
+
+  .start-center{
+    position:relative;
+    z-index:2;
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .start-title-wrap{ text-align:center; }
+  .start-title{
+    font-family:'Do Hyeon','Baloo 2',cursive;
+    font-size:76px;
+    margin:0;
+    letter-spacing:.05em;
+    background:linear-gradient(90deg, #fff 10%, #ffd0ec 45%, var(--accent) 75%, #b48cff);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    filter:drop-shadow(0 0 28px #ff4fa355);
+  }
+  .start-subtitle{
+    margin-top:8px;
+    font-size:12px;
+    letter-spacing:.3em;
+    color:var(--text-dim);
+    font-weight:600;
+  }
+
+  .start-btn{
+    position:relative;
+    z-index:2;
+    width:auto;
+    padding:16px 64px;
+    font-size:19px;
+    letter-spacing:.12em;
+  }
+
+  @media (max-width:420px){
+    .start-title{font-size:56px;}
+    .start-orb{filter:blur(16px);}
+  }
+
+
+  /* header */
+  .hero{
+    text-align:center;
+    padding:10px 0 18px;
+  }
+  .hero-eyebrow{
+    font-size:11px;
+    letter-spacing:.16em;
+    color:var(--accent);
+    font-weight:700;
+    text-transform:uppercase;
+  }
+  .hero h1{
+    font-family:'Baloo 2',cursive;
+    font-size:34px;
+    margin:6px 0 4px;
+    background:linear-gradient(90deg,#fff, #ffd0ec 60%, var(--accent));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    letter-spacing:.01em;
+  }
+  .hero p{
+    font-size:13px;
+    color:var(--text-dim);
+    margin:0;
+  }
+
+  .statbar{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    margin-top:14px;
+    flex-wrap:wrap;
+  }
+  .stat-chip{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:7px 16px;
+    font-size:13px;
+    font-weight:600;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .stat-chip b{color:var(--accent);font-weight:800;}
+
+  /* tabs */
+  .tabs{
+    display:flex;
+    gap:6px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:5px;
+    margin:18px 0 16px;
+  }
+  .tab-btn{
+    flex:1;
+    background:transparent;
+    border:none;
+    color:var(--text-dim);
+    font-family:'Baloo 2',cursive;
+    font-size:14.5px;
+    font-weight:600;
+    padding:10px 4px;
+    border-radius:10px;
+    cursor:pointer;
+    transition:.18s;
+  }
+  .tab-btn.active{
+    background:linear-gradient(135deg,var(--accent),#c74fff);
+    color:#fff;
+    box-shadow:0 4px 16px #ff4fa355;
+  }
+  .tab-btn:not(.active):hover{color:#fff; background:var(--surface-2);}
+  .tab-btn.retreat-btn{
+    border:1px dashed var(--line);
+    color:var(--text-dim);
+    background:transparent;
+  }
+  .tab-btn.retreat-btn:hover:not(:disabled){
+    background:#ffb45422;
+    color:#ffb454;
+    border-color:#ffb45477;
+  }
+  .tab-btn.retreat-btn:disabled{
+    opacity:.35;
+    cursor:not-allowed;
+  }
+
+  /* full-screen flash effect on mix success */
+  .screen-flash{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:200;
+    opacity:0;
+  }
+  .screen-flash.flash-active{
+    animation: screenFlashAnim .65s ease-out;
+  }
+  @keyframes screenFlashAnim{
+    0%{opacity:0;}
+    12%{opacity:1;}
+    100%{opacity:0;}
+  }
+
+  .panel{display:none; animation:fadein .25s ease;}
+  .panel.active{display:block;}
+  @keyframes fadein{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:18px;
+    margin-bottom:14px;
+  }
+  .card h2{
+    font-family:'Baloo 2',cursive;
+    font-size:17px;
+    margin:0 0 12px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+  }
+  .limit-badge{
+    font-family:'Inter',sans-serif;
+    font-size:10.5px;
+    font-weight:600;
+    color:var(--text-dim);
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    padding:3px 10px;
+    border-radius:99px;
+    white-space:nowrap;
+  }
+  .day-over-banner{
+    text-align:center;
+    background:linear-gradient(135deg, #2a1b4d, #33224f);
+    border:1px solid #9b8cff44;
+    border-radius:14px;
+    padding:14px;
+    margin-bottom:14px;
+    font-size:13px;
+    color:var(--text-dim);
+  }
+  .muted{color:var(--text-dim); font-size:12.5px; line-height:1.6;}
+
+  /* legend */
+  .legend{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:5px;
+    flex-wrap:wrap;
+    font-size:12px;
+    color:var(--text-dim);
+    margin-top:10px;
+  }
+  .legend .el{font-weight:700;}
+  .legend .arrow{opacity:.5;}
+
+  /* orb */
+  .orb{
+    width:84px;height:84px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:38px;
+    margin:0 auto;
+    position:relative;
+    flex-shrink:0;
+  }
+  .orb::after{
+    content:'';
+    position:absolute;
+    inset:-6px;
+    border-radius:50%;
+    border:1.5px solid var(--orb-color, #fff);
+    opacity:.35;
+  }
+  .orb.small{width:56px;height:56px;font-size:26px;}
+  .orb.big{width:110px;height:110px;font-size:50px;}
+
+  .orb.hit{animation:hitshake .35s;}
+
+  /* grade ring - wraps an orb to show its 5-tier rank */
+  .decor-wrap{
+    position:relative;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .decor-wrap.ring-big.decor-grade2,
+  .decor-wrap.ring-big.decor-grade3,
+  .decor-wrap.ring-big.decor-grade4,
+  .decor-wrap.ring-big.decor-grade5{
+    animation: floatBounce 2.4s ease-in-out infinite;
+  }
+  .decor-wrap.ring-big.decor-grade4{animation-duration:2.0s;}
+  .decor-wrap.ring-big.decor-grade5{animation-duration:1.6s;}
+  @keyframes floatBounce{
+    0%,100%{transform:translateY(0);}
+    50%{transform:translateY(-5px);}
+  }
+
+  .aura-ring{
+    position:absolute;
+    inset:-9px;
+    border:2px dashed;
+    border-radius:50%;
+    opacity:.5;
+    animation:auraSpin 7s linear infinite;
+    pointer-events:none;
+  }
+  .aura-ring.aura-ring2{
+    inset:-17px;
+    opacity:.28;
+    animation-duration:11s;
+    animation-direction:reverse;
+  }
+  @keyframes auraSpin{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+
+  .spark{
+    position:absolute;
+    pointer-events:none;
+    animation:twinkle 1.5s ease-in-out infinite;
+    filter:drop-shadow(0 0 3px currentColor);
+  }
+  .decor-wrap.ring-big .spark{font-size:15px;}
+  .decor-wrap.ring-small .spark{font-size:10px;}
+  .spark1{top:-2px; left:2px;}
+  .spark2{top:-2px; right:2px; animation-delay:.25s;}
+  .spark3{bottom:0; left:-4px; animation-delay:.5s;}
+  .spark4{bottom:-4px; right:-2px; animation-delay:.75s;}
+  @keyframes twinkle{
+    0%,100%{opacity:.25; transform:scale(.7) rotate(0deg);}
+    50%{opacity:1; transform:scale(1.15) rotate(15deg);}
+  }
+
+  .crown{
+    position:absolute;
+    top:-16px;
+    left:50%;
+    transform:translateX(-50%) rotate(-6deg);
+    animation:crownwig 1.8s ease-in-out infinite;
+    filter:drop-shadow(0 2px 4px #00000060);
+  }
+  .decor-wrap.ring-big .crown{font-size:22px; top:-20px;}
+  .decor-wrap.ring-small .crown{font-size:13px; top:-13px;}
+  @keyframes crownwig{
+    0%,100%{transform:translateX(-50%) rotate(-6deg);}
+    50%{transform:translateX(-50%) rotate(6deg);}
+  }
+
+  .grade-ring{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    padding:4px;
+    border-style:solid;
+    position:relative;
+    z-index:1;
+  }
+  .grade-ring.ring-small{border-width:2.5px; padding:2.5px;}
+  .grade-ring.ring-big{border-width:3.5px; padding:5px;}
+  .grade-label{
+    font-size:10.5px;
+    font-weight:700;
+    margin-top:4px;
+  }
+  @keyframes hitshake{
+    0%,100%{transform:translateX(0);}
+    20%{transform:translateX(-6px) scale(.96);}
+    40%{transform:translateX(6px);}
+    60%{transform:translateX(-4px);}
+    80%{transform:translateX(4px);}
+  }
+
+  /* battle arena */
+  .arena{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .fighter{
+    flex:1;
+    text-align:center;
+  }
+  .fighter-name{
+    font-weight:700;
+    font-size:13.5px;
+    margin-top:8px;
+  }
+  .fighter-el{
+    font-size:11px;
+    color:var(--text-dim);
+    margin-top:1px;
+  }
+  .vs{
+    font-family:'Baloo 2',cursive;
+    color:var(--accent);
+    font-size:15px;
+    padding:0 4px;
+  }
+  .hpbar-track{
+    background:#150c26;
+    border-radius:99px;
+    height:9px;
+    margin-top:8px;
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .hpbar-fill{
+    height:100%;
+    border-radius:99px;
+    background:linear-gradient(90deg,var(--good),#8fffc0);
+    transition:width .5s ease;
+  }
+  .hpbar-fill.low{background:linear-gradient(90deg,var(--bad),#ff9a9a);}
+  .hp-text{font-size:10.5px; color:var(--text-dim); margin-top:3px;}
+
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    background:linear-gradient(135deg,var(--accent),#c74fff);
+    color:#fff;
+    border:none;
+    font-family:'Baloo 2',cursive;
+    font-weight:700;
+    font-size:15px;
+    padding:12px 22px;
+    border-radius:12px;
+    cursor:pointer;
+    width:100%;
+    box-shadow:0 6px 18px #ff4fa340;
+    transition:.15s;
+  }
+  .btn:hover{transform:translateY(-1px); box-shadow:0 8px 22px #ff4fa355;}
+  .btn:active{transform:translateY(0);}
+  .btn:disabled{opacity:.4; cursor:not-allowed; transform:none; box-shadow:none;}
+  .btn.ghost{
+    background:var(--surface-2);
+    box-shadow:none;
+    border:1px solid var(--line);
+  }
+  .btn.small{padding:8px 14px; font-size:13px; width:auto;}
+
+  .log{
+    background:#140b24;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:10px 12px;
+    height:110px;
+    overflow-y:auto;
+    font-size:12.5px;
+    color:var(--text-dim);
+    margin-bottom:12px;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .log div{opacity:0; animation:login .3s forwards;}
+  @keyframes login{to{opacity:1;}}
+
+  .result-banner{
+    text-align:center;
+    padding:14px;
+    border-radius:14px;
+    margin-bottom:12px;
+    font-family:'Baloo 2',cursive;
+    font-size:18px;
+    font-weight:700;
+  }
+  .result-banner.win{background:#5ed99b22; color:var(--good); border:1px solid #5ed99b55;}
+  .result-banner.lose{background:#ff6b6b22; color:var(--bad); border:1px solid #ff6b6b55;}
+  .result-banner .sub{display:block; font-family:'Inter'; font-size:12.5px; color:var(--text-dim); font-weight:500; margin-top:4px;}
+
+  /* grid of cores */
+  .core-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(130px,1fr));
+    gap:10px;
+  }
+  /* shop */
+  .shop-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(150px,1fr));
+    gap:12px;
+  }
+  .shop-item{
+    background:var(--surface-2);
+    border:1.5px solid var(--line);
+    border-radius:16px;
+    padding:18px 12px 14px;
+    text-align:center;
+  }
+  .shop-icon{font-size:34px;}
+  .shop-name{
+    font-family:'Baloo 2',cursive;
+    font-weight:700;
+    font-size:14px;
+    margin-top:8px;
+  }
+  .shop-desc{
+    font-size:11.5px;
+    color:var(--text-dim);
+    margin-top:5px;
+    line-height:1.5;
+    min-height:32px;
+  }
+  .shop-price{
+    font-weight:800;
+    color:var(--accent);
+    margin-top:8px;
+    font-size:14px;
+  }
+  .shop-item .btn.small{margin-top:10px;}
+  .core-card{
+    background:var(--surface-2);
+    border:2px solid var(--line);
+    border-radius:14px;
+    padding:12px 8px 10px;
+    text-align:center;
+    cursor:pointer;
+    transition:.15s;
+    position:relative;
+  }
+  .core-card:hover{filter:brightness(1.08);}
+  .core-card.selected{
+    background:#ff4fa318;
+    outline:2px solid var(--accent);
+    outline-offset:1px;
+  }
+  .core-card.active-equip{
+    box-shadow:0 0 0 1px var(--good) inset;
+  }
+  .core-card .tier{
+    position:absolute;
+    top:6px; left:8px;
+    font-size:9px;
+    font-weight:700;
+    padding:1.5px 7px;
+    border-radius:99px;
+    letter-spacing:.02em;
+  }
+  .core-card .equip-badge{
+    position:absolute;
+    top:6px; right:8px;
+    font-size:9.5px;
+    color:var(--good);
+    font-weight:700;
+  }
+  .core-card .name{
+    font-weight:700;
+    font-size:12.5px;
+    margin-top:6px;
+    line-height:1.25;
+  }
+  .core-card .stats{
+    font-size:10.5px;
+    color:var(--text-dim);
+    margin-top:5px;
+    display:flex;
+    justify-content:center;
+    gap:6px;
+  }
+  .core-card button{
+    margin-top:8px;
+    width:100%;
+    background:var(--surface-3);
+    border:1px solid var(--line);
+    color:var(--text);
+    font-size:11px;
+    padding:5px 0;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:600;
+  }
+  .core-card button:hover{background:#4a3468;}
+
+  .empty{
+    text-align:center;
+    color:var(--text-dim);
+    font-size:12.5px;
+    padding:20px 10px;
+  }
+
+  /* mix lab */
+  .mix-select-row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    margin-bottom:16px;
+  }
+  .mix-slot{
+    width:78px;height:78px;
+    border-radius:50%;
+    border:2px dashed var(--line);
+    display:flex;align-items:center;justify-content:center;
+    font-size:30px;
+    color:var(--text-dim);
+    background:var(--surface-2);
+  }
+  .mix-slot.filled{border-style:solid; border-color:var(--accent);}
+  .mix-plus{font-family:'Baloo 2',cursive; font-size:20px; color:var(--text-dim);}
+
+  .preview-box{
+    background:#140b24;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:12px;
+    margin-bottom:14px;
+    font-size:12.5px;
+    color:var(--text-dim);
+  }
+  .preview-box .row{display:flex; justify-content:space-between; margin-top:4px;}
+  .preview-box b{color:var(--text);}
+
+  /* overlay */
+  .overlay{
+    position:fixed; inset:0;
+    background:#0a0512cc;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:50;
+    padding:20px;
+  }
+  .overlay.show{display:flex;}
+  .overlay-card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:26px 22px;
+    max-width:340px;
+    width:100%;
+    text-align:center;
+    max-height:88vh;
+    overflow-y:auto;
+  }
+  .overlay-card.wide{
+    max-width:400px;
+  }
+  .fortune-row{
+    text-align:left;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:10px 12px;
+    margin-top:10px;
+  }
+  .fortune-label{
+    font-weight:700;
+    font-size:13px;
+    color:var(--accent);
+  }
+  .fortune-row p{
+    margin:4px 0 0;
+    font-size:12.5px;
+    color:var(--text);
+    line-height:1.55;
+  }
+  .mixing-stage{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    height:110px;
+  }
+  .mix-swirl{
+    animation: swirlmove 1.1s ease forwards;
+  }
+  @keyframes swirlmove{
+    0%{transform:translateX(0) scale(1); opacity:1;}
+    60%{transform:translateX(0) scale(1.15); opacity:.6;}
+    100%{transform:translateX(0) scale(0); opacity:0;}
+  }
+  .mix-result-orb{
+    opacity:0;
+    animation: popin .5s ease .9s forwards;
+  }
+  @keyframes popin{
+    from{opacity:0; transform:scale(.3);}
+    to{opacity:1; transform:scale(1);}
+  }
+  .mix-result-orb.mix-fail{
+    font-size:56px;
+    filter:grayscale(.4);
+    animation: popin .5s ease .9s forwards, failshake .4s ease 1.4s;
+  }
+  @keyframes failshake{
+    0%,100%{transform:scale(1) translateX(0);}
+    25%{transform:scale(1) translateX(-6px);}
+    75%{transform:scale(1) translateX(6px);}
+  }
+
+  footer{
+    text-align:center;
+    color:var(--text-dim);
+    font-size:11px;
+    margin-top:24px;
+    opacity:.6;
+  }
+
+  @media (max-width:420px){
+    .hero h1{font-size:27px;}
+    .orb.big{width:88px;height:88px;font-size:40px;}
+  }
+</style>
+</head>
+<body>
+
+<a href="../index.html" style="position:fixed; top:14px; left:14px; z-index:9999; display:flex; align-items:center; gap:6px; font-family:'Inter',sans-serif; font-size:12px; font-weight:700; color:#f3ecff; background:rgba(20,11,38,0.55); backdrop-filter:blur(4px); border:1px solid rgba(255,255,255,0.18); padding:7px 12px; border-radius:999px; text-decoration:none;">← 3분 놀이터</a>
+
+<div class="start-screen" id="startScreen">
+  <div class="start-orb so1"></div>
+  <div class="start-orb so2"></div>
+  <div class="start-orb so3"></div>
+  <div class="start-orb so4"></div>
+  <div class="start-orb so5"></div>
+
+  <div class="start-tagline">몬스터를 조합하여 오늘의 운세 알아보기!</div>
+
+  <div class="start-center">
+    <div class="start-title-wrap">
+      <h1 class="start-title">몬조운</h1>
+      <div class="start-subtitle">MONSTER FUSION FORTUNE</div>
+    </div>
+  </div>
+
+  <button class="btn start-btn" id="startBtn">START</button>
+</div>
+
+<div class="wrap" id="gameApp">
+
+  <div class="hero">
+    <div class="hero-eyebrow">CORE FUSION BATTLER</div>
+    <h1>몬조운</h1>
+    <p>야생 몬스터를 잡아 코어를 모으고, 두 코어를 믹스해서 더 강한 몬스터를 만드세요.</p>
+    <div class="statbar">
+      <div class="stat-chip">💰 골드 <b id="goldDisplay">0</b></div>
+      <div class="stat-chip">🚩 스테이지 <b id="stageDisplay">1</b></div>
+      <div class="stat-chip">🧪 보유 코어 <b id="coreCountDisplay">0</b></div>
+    </div>
+    <button class="btn ghost small" id="resetGameBtn" style="margin-top:12px; color:var(--bad); border-color:#ff6b6b55;">🔄 처음부터 다시하기</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="explore">⚔️ 탐험</button>
+    <button class="tab-btn" data-tab="mix">🧬 믹스 랩</button>
+    <button class="tab-btn" data-tab="inventory">📦 보유 코어</button>
+    <button class="tab-btn" data-tab="shop">🛒 상점</button>
+    <button class="tab-btn retreat-btn" id="prevStageBtn" title="한 단계 쉬운 스테이지로 돌아갑니다">⬅️ 이전 스테이지</button>
+  </div>
+
+  <!-- EXPLORE -->
+  <div class="panel active" id="panel-explore">
+    <div class="card">
+      <h2>⚔️ 야생 몬스터 조우 <span class="limit-badge" id="exploreLimitBadge"></span></h2>
+      <div id="gameOverBanner"></div>
+      <div class="arena" id="arena"></div>
+      <div class="log" id="battleLog"></div>
+      <div id="resultArea"></div>
+      <button class="btn" id="fightBtn">전투 시작</button>
+    </div>
+    <div class="legend">
+      상성:
+      <span class="el" style="color:var(--fire)">불🔥</span><span class="arrow">▶</span>
+      <span class="el" style="color:var(--grass)">풀🌿</span><span class="arrow">▶</span>
+      <span class="el" style="color:var(--earth)">대지🪨</span><span class="arrow">▶</span>
+      <span class="el" style="color:var(--electric)">전기⚡</span><span class="arrow">▶</span>
+      <span class="el" style="color:var(--water)">물💧</span><span class="arrow">▶</span>
+      <span class="el" style="color:var(--fire)">불🔥</span>
+    </div>
+  </div>
+
+  <!-- MIX LAB -->
+  <div class="panel" id="panel-mix">
+    <div class="card">
+      <h2>🧬 코어 믹스 랩 <span class="limit-badge" id="mixLimitBadge"></span></h2>
+      <p class="muted">코어 2개를 선택하면 두 코어의 능력치를 합쳐 더 강한 새 코어를 만듭니다. 선택한 두 코어는 사라지고 새 코어 1개로 합쳐져요.</p>
+      <div class="mix-select-row">
+        <div class="mix-slot" id="mixSlotA">?</div>
+        <div class="mix-plus">＋</div>
+        <div class="mix-slot" id="mixSlotB">?</div>
+      </div>
+      <div id="mixPreview"></div>
+      <button class="btn" id="mixBtn" disabled>믹스할 코어 2개를 선택하세요</button>
+    </div>
+    <div class="card">
+      <h2>보유 코어 (탭해서 선택)</h2>
+      <div class="core-grid" id="mixGrid"></div>
+    </div>
+  </div>
+
+  <!-- INVENTORY -->
+  <div class="panel" id="panel-inventory">
+    <div class="card">
+      <h2>📦 보유 코어</h2>
+      <p class="muted">전투에 내보낼 코어를 장착하세요. 장착된 코어로만 탐험 전투를 치를 수 있어요.</p>
+      <div class="legend" id="rankLegend"></div>
+      <div class="core-grid" id="invGrid" style="margin-top:12px;"></div>
+    </div>
+  </div>
+
+  <!-- SHOP -->
+  <div class="panel" id="panel-shop">
+    <div class="card">
+      <h2>🛒 상점</h2>
+      <p class="muted">골드로 아이템을 구매해서 오늘 하루 이용 횟수를 늘려보세요. 자정이 지나면 다시 초기화돼요.</p>
+      <div class="shop-grid" id="shopGrid"></div>
+    </div>
+  </div>
+
+  <footer>코어 믹서 · 웹 프로토타입</footer>
+</div>
+
+<div class="screen-flash" id="screenFlash"></div>
+
+<div class="overlay" id="mixOverlay">
+  <div class="overlay-card">
+    <h2 style="font-family:'Baloo 2',cursive; margin-top:0;">코어 융합 중...</h2>
+    <div class="mixing-stage" id="mixingStage"></div>
+    <div id="mixResultText" class="muted"></div>
+    <button class="btn" id="mixCloseBtn" style="display:none; margin-top:14px;">확인</button>
+  </div>
+</div>
+
+<div class="overlay" id="resetConfirmOverlay">
+  <div class="overlay-card">
+    <h2 style="font-family:'Baloo 2',cursive; margin-top:0;">처음부터 다시 시작할까요?</h2>
+    <p class="muted" style="margin:0;">골드, 코어, 스테이지, 오늘의 탐험/믹스 사용 횟수(구매한 추가권 포함)가 모두 초기화됩니다. 이 작업은 되돌릴 수 없어요.</p>
+    <div style="display:flex; gap:10px; margin-top:18px;">
+      <button class="btn ghost" id="resetCancelBtn" style="flex:1;">취소</button>
+      <button class="btn" id="resetConfirmBtn" style="flex:1; background:linear-gradient(135deg,var(--bad),#ff8a8a); box-shadow:0 6px 18px #ff6b6b40;">초기화하기</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="fortuneOverlay">
+  <div class="overlay-card wide">
+    <div class="hero-eyebrow" style="text-align:center;">오늘의 탐험 종료</div>
+    <h2 style="font-family:'Baloo 2',cursive; margin-top:4px; text-align:center;">🌙 오늘의 운세</h2>
+    <div id="fortuneBody"></div>
+    <button class="btn" id="fortuneCloseBtn" style="margin-top:16px;">확인</button>
+  </div>
+</div>
+
+<script>
+(function(){
+
+  // ---------- data ----------
+  const ELEMENTS = {
+    fire:     { name:'불',   color:'var(--fire)',     hex:'#ff6b47', emoji:'🔥', beats:'grass' },
+    grass:    { name:'풀',   color:'var(--grass)',    hex:'#5ed99b', emoji:'🌿', beats:'earth' },
+    earth:    { name:'대지', color:'var(--earth)',    hex:'#c8905a', emoji:'🪨', beats:'electric' },
+    electric: { name:'전기', color:'var(--electric)', hex:'#ffd93d', emoji:'⚡', beats:'water' },
+    water:    { name:'물',   color:'var(--water)',    hex:'#3ea8ff', emoji:'💧', beats:'fire' },
+  };
+
+  // 5-tier monster rank system: grade is derived from a core's fusion tier
+  const RANKS = [
+    { name:'브론즈',   color:'#cd7f32' }, // grade 1 (tier 1)
+    { name:'실버',     color:'#c6ccd6' }, // grade 2 (tier 2)
+    { name:'골드',     color:'#ffd54f' }, // grade 3 (tier 3-4)
+    { name:'플래티넘', color:'#7fe0d6' }, // grade 4 (tier 5-7)
+    { name:'다이아',   color:'#b48cff' }, // grade 5 (tier 8+)
+  ];
+
+  function gradeForTier(tier){
+    if (tier <= 1) return 1;
+    if (tier === 2) return 2;
+    if (tier <= 4) return 3;
+    if (tier <= 7) return 4;
+    return 5;
+  }
+  function rankOf(tier){ return RANKS[gradeForTier(tier)-1]; }
+
+  // fail probability for mixing, keyed by the RESULT grade (2=Silver..5=Diamond)
+  const MIX_FAIL_RATES = { 1:0, 2:0.20, 3:0.50, 4:0.80, 5:0.95 };
+  function mixFailRate(resultGrade){ return MIX_FAIL_RATES[resultGrade] || 0; }
+
+  const WILD_TEMPLATES = [
+    { key:'fire',     name:'불꽃도마뱀', emoji:'🦎', atk:9,  def:4,  hp:28 },
+    { key:'water',    name:'물결슬라임', emoji:'💧', atk:6,  def:7,  hp:34 },
+    { key:'grass',    name:'새싹여우',   emoji:'🦊', atk:8,  def:6,  hp:30 },
+    { key:'electric', name:'번개다람쥐', emoji:'🐿️', atk:11, def:3,  hp:24 },
+    { key:'earth',    name:'바위거북',   emoji:'🐢', atk:5,  def:10, hp:36 },
+  ];
+
+  // ---------- state ----------
+  let gold = 40;
+  let stage = 1;
+  let cores = [];
+  let activeCoreId = null;
+  let wild = null;
+  let battleBusy = false;
+  let mixSelection = [];
+
+  // daily action limits - explore 20/day, mix 3/day, persisted per-user
+  const EXPLORE_LIMIT = 20;
+  const MIX_LIMIT = 3;
+  function freshDailyUsage(){
+    return { date: todayStr(), exploreCount: 0, mixCount: 0, bonusExplore: 0, bonusMix: 0, acquiredToday: [], fortuneShown: false };
+  }
+  let dailyUsage = freshDailyUsage();
+
+  function todayStr(){
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+
+  async function loadDailyUsage(){
+    try{
+      const res = await window.storage.get('daily-usage', false);
+      if (res && res.value){
+        const parsed = JSON.parse(res.value);
+        if (parsed && parsed.date === todayStr()){
+          dailyUsage = Object.assign(freshDailyUsage(), parsed);
+        } else {
+          dailyUsage = freshDailyUsage();
+        }
+      }
+    } catch(e){
+      dailyUsage = freshDailyUsage();
+    }
+    renderLimitBadges();
+    renderArena();
+    renderMixGrid();
+  }
+
+  async function saveDailyUsage(){
+    try{ await window.storage.set('daily-usage', JSON.stringify(dailyUsage), false); }
+    catch(e){ /* best-effort */ }
+  }
+
+  function exploreLimitToday(){ return EXPLORE_LIMIT + (dailyUsage.bonusExplore || 0); }
+  function mixLimitToday(){ return MIX_LIMIT + (dailyUsage.bonusMix || 0); }
+  function exploreRemaining(){ return Math.max(0, exploreLimitToday() - dailyUsage.exploreCount); }
+  function mixRemaining(){ return Math.max(0, mixLimitToday() - dailyUsage.mixCount); }
+
+  function renderLimitBadges(){
+    const eb = document.getElementById('exploreLimitBadge');
+    const mb = document.getElementById('mixLimitBadge');
+    if (eb){
+      eb.textContent = `오늘 ${exploreRemaining()}/${exploreLimitToday()}회 남음`;
+      eb.style.color = exploreRemaining() <= 0 ? 'var(--bad)' : 'var(--text-dim)';
+    }
+    if (mb){
+      mb.textContent = `오늘 ${mixRemaining()}/${mixLimitToday()}회 남음`;
+      mb.style.color = mixRemaining() <= 0 ? 'var(--bad)' : 'var(--text-dim)';
+    }
+  }
+
+  // ---------- shop ----------
+  const SHOP_ITEMS = [
+    {
+      id: 'exploreTicket',
+      name: '추가 탐험권',
+      icon: '🎫',
+      desc: '오늘의 탐험 가능 횟수 +1',
+      price: 20,
+      apply: () => { dailyUsage.bonusExplore = (dailyUsage.bonusExplore || 0) + 1; },
+    },
+    {
+      id: 'mixTicket',
+      name: '추가 믹스권',
+      icon: '🧪',
+      desc: '오늘의 믹스 랩 가능 횟수 +1',
+      price: 70,
+      apply: () => { dailyUsage.bonusMix = (dailyUsage.bonusMix || 0) + 1; },
+    },
+  ];
+
+  function buyShopItem(id){
+    const item = SHOP_ITEMS.find(i => i.id === id);
+    if (!item) return;
+    if (gold < item.price) return;
+    gold -= item.price;
+    item.apply();
+    saveDailyUsage();
+    renderHeader();
+    renderLimitBadges();
+    renderArena();
+    renderMixGrid();
+    renderShop();
+  }
+  window.__buyShopItem = buyShopItem;
+
+  function renderShop(){
+    const grid = document.getElementById('shopGrid');
+    if (!grid) return;
+    grid.innerHTML = SHOP_ITEMS.map(item => {
+      const affordable = gold >= item.price;
+      return `
+        <div class="shop-item">
+          <div class="shop-icon">${item.icon}</div>
+          <div class="shop-name">${item.name}</div>
+          <div class="shop-desc">${item.desc}</div>
+          <div class="shop-price">💰 ${item.price}</div>
+          <button class="btn small" ${affordable ? '' : 'disabled'} onclick="window.__buyShopItem('${item.id}')">${affordable ? '구매하기' : '골드 부족'}</button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function uid(){ return 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+  function makeCore(tpl, tier){
+    const variance = () => Math.round((Math.random()*2-1)*1);
+    const hp = Math.max(10, tpl.hp + variance()*2);
+    return {
+      id: uid(),
+      name: tpl.name,
+      elementKey: tpl.key,
+      atk: Math.max(1, tpl.atk + variance()),
+      def: Math.max(1, tpl.def + variance()),
+      hp: hp,
+      maxHp: hp,
+      tier: tier || 1,
+      emoji: tpl.emoji,
+    };
+  }
+
+  function randomStarterCore(){
+    const tpl = WILD_TEMPLATES[Math.floor(Math.random() * WILD_TEMPLATES.length)];
+    return makeCore(tpl, 1);
+  }
+
+  // starter
+  cores.push(randomStarterCore());
+  activeCoreId = cores[0].id;
+
+  function genWild(stageNum){
+    const tpl = WILD_TEMPLATES[Math.floor(Math.random()*WILD_TEMPLATES.length)];
+    const scale = 1 + (stageNum-1)*0.16;
+    const jitter = () => Math.round((Math.random()*2-1)*2);
+    const hp = Math.max(14, Math.round(tpl.hp*scale) + jitter());
+    // wild monster rank climbs with stage: every 3 stages, one grade higher
+    const tier = Math.min(8, 1 + Math.floor((stageNum-1)/3) * 2);
+    return {
+      name: tpl.name,
+      elementKey: tpl.key,
+      emoji: tpl.emoji,
+      atk: Math.max(2, Math.round(tpl.atk*scale) + jitter()),
+      def: Math.max(1, Math.round(tpl.def*scale) + jitter()),
+      hp: hp,
+      maxHp: hp,
+      tier: tier,
+      tplRef: tpl,
+    };
+  }
+
+  wild = genWild(stage);
+
+  function activeCore(){ return cores.find(c => c.id === activeCoreId) || null; }
+  function findCore(id){ return cores.find(c => c.id === id); }
+
+  function typeMultiplier(atkEl, defEl){
+    if (ELEMENTS[atkEl].beats === defEl) return 1.3;
+    if (ELEMENTS[defEl].beats === atkEl) return 0.7;
+    return 1.0;
+  }
+
+  function orbHtml(elementKey, emoji, size){
+    const el = ELEMENTS[elementKey];
+    const sizeClass = size || '';
+    return `<div class="orb ${sizeClass}" style="--orb-color:${el.hex}; background:radial-gradient(circle at 32% 28%, ${el.hex}dd, ${el.hex}55 60%, #0000 100%), radial-gradient(circle, ${el.hex}33, transparent 70%);">${emoji}</div>`;
+  }
+
+  // wraps an orb in a colored ring showing the monster's 1-5 rank grade,
+  // adding sparkle/aura/crown flourishes that grow richer at higher grades
+  function gradeRingHtml(tier, elementKey, emoji, orbSize, ringSize){
+    const grade = gradeForTier(tier);
+    const rank = rankOf(tier);
+    const scale = 1 + (grade-1) * 0.035;
+
+    let aura = '';
+    if (grade >= 3) aura += `<div class="aura-ring" style="border-color:${rank.color};"></div>`;
+    if (grade >= 5) aura += `<div class="aura-ring aura-ring2" style="border-color:${rank.color};"></div>`;
+
+    const sparkleEmojis = ['✨','⭐','💫','🌟'];
+    let sparkles = '';
+    for (let i = 0; i < grade - 1; i++){
+      sparkles += `<span class="spark spark${i+1}" style="color:${rank.color};">${sparkleEmojis[i % sparkleEmojis.length]}</span>`;
+    }
+
+    const crown = grade === 5 ? `<span class="crown">👑</span>` : '';
+
+    return `
+      <div class="decor-wrap ${ringSize} decor-grade${grade}">
+        ${aura}
+        <div class="grade-ring ${ringSize}" style="border-color:${rank.color}; box-shadow:0 0 ${ringSize==='ring-big'?14:8}px ${rank.color}66; transform:scale(${scale.toFixed(3)});">
+          ${orbHtml(elementKey, emoji, orbSize)}
+        </div>
+        ${sparkles}
+        ${crown}
+      </div>
+    `;
+  }
+
+  // ---------- render: header ----------
+  function renderHeader(){
+    document.getElementById('goldDisplay').textContent = gold;
+    document.getElementById('stageDisplay').textContent = stage;
+    document.getElementById('coreCountDisplay').textContent = cores.length;
+    const retreatBtn = document.getElementById('prevStageBtn');
+    if (retreatBtn) retreatBtn.disabled = stage <= 1;
+  }
+
+  function triggerScreenFlash(color){
+    const el = document.getElementById('screenFlash');
+    if (!el) return;
+    el.style.background = `radial-gradient(circle, #ffffff 0%, ${color}cc 35%, transparent 72%)`;
+    el.classList.remove('flash-active');
+    void el.offsetWidth; // force reflow so the animation restarts every time
+    el.classList.add('flash-active');
+  }
+
+  function goToPreviousStage(){
+    if (battleBusy || stage <= 1) return;
+    stage -= 1;
+    wild = genWild(stage);
+    document.querySelectorAll('.tab-btn[data-tab]').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    const exploreTabBtn = document.querySelector('.tab-btn[data-tab="explore"]');
+    if (exploreTabBtn) exploreTabBtn.classList.add('active');
+    document.getElementById('panel-explore').classList.add('active');
+    document.getElementById('battleLog').innerHTML = '';
+    document.getElementById('resultArea').innerHTML = '';
+    renderHeader();
+    renderArena();
+  }
+
+  function openResetConfirm(){
+    const overlay = document.getElementById('resetConfirmOverlay');
+    if (overlay) overlay.classList.add('show');
+  }
+
+  function closeResetConfirm(){
+    const overlay = document.getElementById('resetConfirmOverlay');
+    if (overlay) overlay.classList.remove('show');
+  }
+
+  function resetGame(){
+    gold = 40;
+    stage = 1;
+    cores = [randomStarterCore()];
+    activeCoreId = cores[0].id;
+    wild = genWild(stage);
+    battleBusy = false;
+    mixSelection = [];
+    dailyUsage = freshDailyUsage();
+    saveDailyUsage();
+
+    document.querySelectorAll('.tab-btn[data-tab]').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    const exploreTabBtn = document.querySelector('.tab-btn[data-tab="explore"]');
+    if (exploreTabBtn) exploreTabBtn.classList.add('active');
+    document.getElementById('panel-explore').classList.add('active');
+    document.getElementById('battleLog').innerHTML = '';
+    document.getElementById('resultArea').innerHTML = '';
+    const fortuneOverlay = document.getElementById('fortuneOverlay');
+    if (fortuneOverlay) fortuneOverlay.classList.remove('show');
+
+    renderHeader();
+    renderArena();
+    renderInventory();
+    renderMixGrid();
+    renderShop();
+    renderLimitBadges();
+
+    closeResetConfirm();
+  }
+
+  // ---------- render: arena ----------
+  function renderArena(){
+    const p = activeCore();
+    const arena = document.getElementById('arena');
+    const fightBtn = document.getElementById('fightBtn');
+    const limitReached = exploreRemaining() <= 0;
+    const dayOver = exploreRemaining() <= 0 && mixRemaining() <= 0;
+    const banner = document.getElementById('gameOverBanner');
+    if (banner){
+      banner.innerHTML = dayOver ? `
+        <div class="day-over-banner">
+          🌙 오늘의 탐험과 믹스를 모두 마쳤어요.
+          <button class="btn ghost small" id="viewFortuneBtn" style="margin-top:8px;">오늘의 운세 다시보기</button>
+        </div>
+      ` : '';
+      const viewBtn = document.getElementById('viewFortuneBtn');
+      if (viewBtn) viewBtn.onclick = showFortuneOverlay;
+    }
+    if (!p){
+      arena.innerHTML = `<div class="empty" style="width:100%;">장착된 코어가 없습니다. 보유 코어 탭에서 코어를 장착하세요.</div>`;
+      fightBtn.disabled = true;
+      fightBtn.textContent = '전투 시작';
+      return;
+    }
+    if (limitReached && !battleBusy){
+      fightBtn.disabled = true;
+      fightBtn.textContent = '오늘의 탐험 횟수를 모두 사용했어요';
+    } else if (!battleBusy) {
+      fightBtn.disabled = false;
+      fightBtn.textContent = '전투 시작';
+    }
+    const pEl = ELEMENTS[p.elementKey];
+    const wEl = ELEMENTS[wild.elementKey];
+    const pRank = rankOf(p.tier);
+    const wRank = rankOf(wild.tier);
+    arena.innerHTML = `
+      <div class="fighter" id="fighterP">
+        ${gradeRingHtml(p.tier, p.elementKey, p.emoji, 'big', 'ring-big')}
+        <div class="fighter-name">${p.name}</div>
+        <div class="fighter-el" style="color:${pEl.hex}">${pEl.emoji} ${pEl.name}속성</div>
+        <div class="grade-label" style="color:${pRank.color}">${pRank.name}</div>
+        <div class="hpbar-track"><div class="hpbar-fill" id="hpFillP" style="width:100%"></div></div>
+        <div class="hp-text" id="hpTextP">${p.hp} / ${p.maxHp}</div>
+      </div>
+      <div class="vs">VS</div>
+      <div class="fighter" id="fighterW">
+        ${gradeRingHtml(wild.tier, wild.elementKey, wild.emoji, 'big', 'ring-big')}
+        <div class="fighter-name">${wild.name}</div>
+        <div class="fighter-el" style="color:${wEl.hex}">${wEl.emoji} ${wEl.name}속성 · Lv.${stage}</div>
+        <div class="grade-label" style="color:${wRank.color}">${wRank.name}</div>
+        <div class="hpbar-track"><div class="hpbar-fill" id="hpFillW" style="width:100%"></div></div>
+        <div class="hp-text" id="hpTextW">${wild.hp} / ${wild.maxHp}</div>
+      </div>
+    `;
+  }
+
+  function setHp(who, cur, max){
+    const fill = document.getElementById(who === 'p' ? 'hpFillP' : 'hpFillW');
+    const text = document.getElementById(who === 'p' ? 'hpTextP' : 'hpTextW');
+    const pct = Math.max(0, Math.round(cur/max*100));
+    fill.style.width = pct + '%';
+    fill.classList.toggle('low', pct <= 30);
+    text.textContent = `${Math.max(0,cur)} / ${max}`;
+  }
+
+  function shakeFighter(who){
+    const el = document.querySelector(`#fighter${who==='p'?'P':'W'} .orb`);
+    if (!el) return;
+    el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit');
+  }
+
+  // ---------- battle ----------
+  function simulateBattle(p, w){
+    // returns { steps:[{actor,dmg,mult,targetHpAfter}], winner }
+    const pState = { hp: p.hp };
+    const wState = { hp: w.hp };
+    const steps = [];
+    let round = 0;
+    while (pState.hp > 0 && wState.hp > 0 && round < 40){
+      round++;
+      // player attacks
+      const mult1 = typeMultiplier(p.elementKey, w.elementKey);
+      let dmg1 = Math.max(2, Math.round(p.atk*mult1 - w.def*0.4 + (Math.random()*2-1)));
+      wState.hp -= dmg1;
+      steps.push({ actor:'p', dmg:dmg1, mult:mult1, hpAfter: Math.max(0,wState.hp) });
+      if (wState.hp <= 0) break;
+      // wild attacks
+      const mult2 = typeMultiplier(w.elementKey, p.elementKey);
+      let dmg2 = Math.max(2, Math.round(w.atk*mult2 - p.def*0.4 + (Math.random()*2-1)));
+      pState.hp -= dmg2;
+      steps.push({ actor:'w', dmg:dmg2, mult:mult2, hpAfter: Math.max(0,pState.hp) });
+    }
+    const winner = pState.hp > 0 && wState.hp <= 0 ? 'p' : (wState.hp > 0 && pState.hp <= 0 ? 'w' : (pState.hp >= wState.hp ? 'p':'w'));
+    return { steps, winner };
+  }
+
+  function multLabel(m){
+    if (m > 1) return ' <span style="color:var(--good)">효과가 굉장했다!</span>';
+    if (m < 1) return ' <span style="color:var(--bad)">효과가 별로였다...</span>';
+    return '';
+  }
+
+  // ---------- sound engine (synthesized, no external audio files needed) ----------
+  let audioCtx = null;
+  function getAudioCtx(){
+    if (!audioCtx){
+      try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+      catch(e){ audioCtx = null; }
+    }
+    if (audioCtx && audioCtx.state === 'suspended'){ audioCtx.resume(); }
+    return audioCtx;
+  }
+
+  function playTone(freqStart, freqEnd, duration, type, volume){
+    const ctx = getAudioCtx();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freqStart, now);
+    osc.frequency.exponentialRampToValueAtTime(Math.max(freqEnd, 1), now + duration);
+    gain.gain.setValueAtTime(volume, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + duration + 0.02);
+  }
+
+  function playZapSound(){
+    const ctx = getAudioCtx();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(900, now);
+    osc.frequency.setValueAtTime(300, now + 0.03);
+    osc.frequency.setValueAtTime(1000, now + 0.06);
+    osc.frequency.setValueAtTime(250, now + 0.09);
+    osc.frequency.exponentialRampToValueAtTime(80, now + 0.15);
+    gain.gain.setValueAtTime(0.18, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.18);
+  }
+
+  // attack sound differs by the attacking monster's element
+  function playAttackSound(elementKey){
+    switch (elementKey){
+      case 'fire':     playTone(720, 180, 0.22, 'sawtooth', 0.18); break;
+      case 'water':    playTone(500, 260, 0.28, 'sine', 0.16); break;
+      case 'grass':    playTone(650, 500, 0.14, 'triangle', 0.14); break;
+      case 'electric': playZapSound(); break;
+      case 'earth':    playTone(140, 60, 0.3, 'square', 0.2); break;
+      default:         playTone(440, 440, 0.15, 'sine', 0.15);
+    }
+  }
+
+  // a single generic hit/hurt sound, used whenever the player's monster takes damage
+  // (always the same regardless of the attacker's element)
+  function playHitSound(){
+    const ctx = getAudioCtx();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(180, now);
+    osc.frequency.exponentialRampToValueAtTime(50, now + 0.18);
+    gain.gain.setValueAtTime(0.22, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.22);
+
+    try{
+      const bufferSize = Math.floor(ctx.sampleRate * 0.08);
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++){ data[i] = (Math.random()*2-1) * (1 - i/bufferSize); }
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+      const noiseGain = ctx.createGain();
+      noiseGain.gain.setValueAtTime(0.25, now);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 1200;
+      noise.connect(filter).connect(noiseGain).connect(ctx.destination);
+      noise.start(now);
+    } catch(e){ /* noise layer is a bonus, ignore failures */ }
+  }
+
+  function startBattle(){
+    if (battleBusy) return;
+    const p = activeCore();
+    if (!p) return;
+    if (exploreRemaining() <= 0) return;
+    battleBusy = true;
+    dailyUsage.exploreCount += 1;
+    saveDailyUsage();
+    renderLimitBadges();
+    document.getElementById('fightBtn').disabled = true;
+    document.getElementById('resultArea').innerHTML = '';
+    const log = document.getElementById('battleLog');
+    log.innerHTML = '';
+
+    const result = simulateBattle(p, wild);
+    let i = 0;
+    function nextStep(){
+      if (i >= result.steps.length){
+        finishBattle(result.winner, p);
+        return;
+      }
+      const s = result.steps[i];
+      const actorName = s.actor === 'p' ? p.name : wild.name;
+      const targetWho = s.actor === 'p' ? 'w' : 'p';
+      shakeFighter(targetWho);
+      setHp(targetWho, s.hpAfter, s.actor === 'p' ? wild.maxHp : p.maxHp);
+      if (s.actor === 'p'){
+        playAttackSound(p.elementKey); // sound depends on MY monster's element
+      } else {
+        playHitSound(); // MY monster got hit - always the same sound
+      }
+      const line = document.createElement('div');
+      line.innerHTML = `<b>${actorName}</b>의 공격! <b style="color:var(--accent)">${s.dmg}</b>의 피해.${multLabel(s.mult)}`;
+      log.appendChild(line);
+      log.scrollTop = log.scrollHeight;
+      i++;
+      setTimeout(nextStep, 550);
+    }
+    setTimeout(nextStep, 300);
+  }
+
+  function finishBattle(winner, p){
+    battleBusy = false;
+    const resultArea = document.getElementById('resultArea');
+    if (winner === 'p'){
+      const goldGain = 8 + stage*4 + Math.floor(Math.random()*6);
+      gold += goldGain;
+      let captureMsg = '';
+      let captured = false;
+      if (Math.random() < 0.55){
+        const newCore = makeCore(wild.tplRef, wild.tier);
+        cores.push(newCore);
+        captured = true;
+        recordAcquisition(newCore);
+        captureMsg = `<div>야생 <b>${wild.name}</b> 코어를 획득했습니다! 🧪</div>`;
+      }
+      resultArea.innerHTML = `
+        <div class="result-banner win">승리! 🎉<span class="sub">골드 +${goldGain}${captured ? ' · 코어 획득' : ''}</span></div>
+        ${captureMsg}
+        <button class="btn" id="continueBtn" style="margin-top:8px;">다음 스테이지로</button>
+      `;
+      document.getElementById('continueBtn').onclick = () => {
+        stage += 1;
+        wild = genWild(stage);
+        renderHeader();
+        renderArena();
+        document.getElementById('battleLog').innerHTML = '';
+        document.getElementById('resultArea').innerHTML = '';
+        renderInventory();
+      };
+    } else {
+      resultArea.innerHTML = `
+        <div class="result-banner lose">패배... 😵<span class="sub">코어는 잃지 않아요. 다른 코어로 다시 도전해보세요.</span></div>
+        <button class="btn ghost" id="retryBtn" style="margin-top:8px;">다시 도전</button>
+      `;
+      document.getElementById('retryBtn').onclick = () => {
+        // heal active core back to full for retry fairness, reroll wild
+        const pc = activeCore();
+        if (pc) pc.hp = pc.maxHp;
+        wild = genWild(stage);
+        renderArena();
+        document.getElementById('battleLog').innerHTML = '';
+        document.getElementById('resultArea').innerHTML = '';
+      };
+    }
+    saveDailyUsage();
+    renderHeader();
+    renderLimitBadges();
+    maybeEndGameForToday();
+  }
+
+  function renderRankLegend(){
+    const el = document.getElementById('rankLegend');
+    if (!el) return;
+    el.innerHTML = '등급: ' + RANKS.map(r => `<span class="el" style="color:${r.color}">${r.name}</span>`).join('<span class="arrow">▶</span>');
+  }
+
+  // ---------- render: inventory ----------
+  function renderInventory(){
+    const grid = document.getElementById('invGrid');
+    if (cores.length === 0){
+      grid.innerHTML = `<div class="empty">보유한 코어가 없습니다.</div>`;
+      return;
+    }
+    grid.innerHTML = cores.map(c => coreCardHtml(c, {
+      showEquip:true
+    })).join('');
+    cores.forEach(c => {
+      const btn = document.getElementById('equip-' + c.id);
+      if (btn) btn.onclick = () => { activeCoreId = c.id; renderInventory(); renderArena(); };
+    });
+  }
+
+  function coreCardHtml(c, opts){
+    opts = opts || {};
+    const isActive = c.id === activeCoreId;
+    const isSelected = mixSelection.includes(c.id);
+    const rank = rankOf(c.tier);
+    let cls = 'core-card';
+    if (opts.showEquip && isActive) cls += ' active-equip';
+    if (opts.showMix && isSelected) cls += ' selected';
+    return `
+      <div class="${cls}" style="border-color:${rank.color}${gradeForTier(c.tier)>=4?'; box-shadow:0 0 12px '+rank.color+'40':''};" ${opts.showMix ? `onclick="window.__toggleMix('${c.id}')"` : ''}>
+        <div class="tier" style="background:${rank.color}26; color:${rank.color}; border:1px solid ${rank.color}80;">${rank.name}</div>
+        ${opts.showEquip && isActive ? '<div class="equip-badge">장착중</div>' : ''}
+        ${gradeRingHtml(c.tier, c.elementKey, c.emoji, 'small', 'ring-small')}
+        <div class="name">${c.name}</div>
+        <div class="stats">
+          <span>⚔${c.atk}</span><span>🛡${c.def}</span><span>❤${c.maxHp}</span>
+        </div>
+        ${opts.showEquip ? `<button id="equip-${c.id}" ${isActive ? 'disabled style="opacity:.5;"':''}>${isActive?'장착됨':'장착하기'}</button>` : ''}
+      </div>
+    `;
+  }
+
+  // ---------- mix lab ----------
+  function renderMixGrid(){
+    const grid = document.getElementById('mixGrid');
+    if (cores.length === 0){
+      grid.innerHTML = `<div class="empty">보유한 코어가 없습니다.</div>`;
+      return;
+    }
+    grid.innerHTML = cores.map(c => coreCardHtml(c, { showMix:true })).join('');
+    renderMixSlots();
+  }
+
+  window.__toggleMix = function(id){
+    const idx = mixSelection.indexOf(id);
+    if (idx >= 0){
+      mixSelection.splice(idx,1);
+    } else {
+      if (mixSelection.length >= 2) mixSelection.shift();
+      mixSelection.push(id);
+    }
+    renderMixGrid();
+  };
+
+  function renderMixSlots(){
+    const slotA = document.getElementById('mixSlotA');
+    const slotB = document.getElementById('mixSlotB');
+    const [aId, bId] = mixSelection;
+    const a = aId ? findCore(aId) : null;
+    const b = bId ? findCore(bId) : null;
+
+    function fillSlot(slot, core){
+      if (core){
+        const el = ELEMENTS[core.elementKey];
+        const rank = rankOf(core.tier);
+        slot.classList.add('filled');
+        slot.style.background = `radial-gradient(circle at 32% 28%, ${el.hex}dd, ${el.hex}55 60%, transparent)`;
+        slot.style.borderColor = rank.color;
+        slot.style.boxShadow = `0 0 10px ${rank.color}55`;
+        slot.textContent = core.emoji;
+      } else {
+        slot.classList.remove('filled');
+        slot.style.background = '';
+        slot.style.borderColor = '';
+        slot.style.boxShadow = '';
+        slot.textContent = '?';
+      }
+    }
+    fillSlot(slotA, a);
+    fillSlot(slotB, b);
+
+    const btn = document.getElementById('mixBtn');
+    const preview = document.getElementById('mixPreview');
+    const limitReached = mixRemaining() <= 0;
+    if (limitReached){
+      btn.disabled = true;
+      btn.textContent = '오늘의 믹스 횟수를 모두 사용했어요';
+      if (a && b){
+        const pv = computeMixResult(a, b);
+        const pvRank = rankOf(pv.tier);
+        const aRank = rankOf(a.tier), bRank = rankOf(b.tier);
+        preview.innerHTML = `
+          <div class="preview-box">
+            <b>믹스 결과 미리보기</b>
+            <div class="row"><span>이름</span><b>${pv.name}</b></div>
+            <div class="row"><span>등급</span><b style="color:${pvRank.color}">${aRank.name}+${bRank.name} → ${pvRank.name}</b></div>
+            <div class="row"><span>속성</span><b>${ELEMENTS[pv.elementKey].emoji} ${ELEMENTS[pv.elementKey].name}</b></div>
+            <div class="row"><span>공격력</span><b>${a.atk}+${b.atk} → ${pv.atk}</b></div>
+            <div class="row"><span>방어력</span><b>${a.def}+${b.def} → ${pv.def}</b></div>
+            <div class="row"><span>체력</span><b>${a.maxHp}+${b.maxHp} → ${pv.maxHp}</b></div>
+          </div>
+        `;
+      } else {
+        preview.innerHTML = '';
+      }
+    } else if (a && b){
+      const pv = computeMixResult(a, b);
+      const pvRank = rankOf(pv.tier);
+      const aRank = rankOf(a.tier), bRank = rankOf(b.tier);
+      preview.innerHTML = `
+        <div class="preview-box">
+          <b>믹스 결과 미리보기</b>
+          <div class="row"><span>이름</span><b>${pv.name}</b></div>
+          <div class="row"><span>등급</span><b style="color:${pvRank.color}">${aRank.name}+${bRank.name} → ${pvRank.name}</b></div>
+          <div class="row"><span>속성</span><b>${ELEMENTS[pv.elementKey].emoji} ${ELEMENTS[pv.elementKey].name}</b></div>
+          <div class="row"><span>공격력</span><b>${a.atk}+${b.atk} → ${pv.atk}</b></div>
+          <div class="row"><span>방어력</span><b>${a.def}+${b.def} → ${pv.def}</b></div>
+          <div class="row"><span>체력</span><b>${a.maxHp}+${b.maxHp} → ${pv.maxHp}</b></div>
+          <div class="row" style="margin-top:8px; color:var(--bad);"><span style="color:var(--bad);">⚠ 믹스는 실패할 수 있어요</span><b style="color:var(--bad);">실패 시 코어 1개 소멸</b></div>
+        </div>
+      `;
+      btn.disabled = false;
+      btn.textContent = '믹스하기 🧬';
+    } else {
+      preview.innerHTML = '';
+      btn.disabled = true;
+      btn.textContent = a || b ? '코어를 하나 더 선택하세요' : '믹스할 코어 2개를 선택하세요';
+    }
+  }
+
+  // ---------- daily fortune system ----------
+  const LOVE_POOL = {
+    fire: [
+      '적극적으로 다가가면 좋은 인연이 찾아와요. 마음을 표현하기 좋은 타이밍이에요.',
+      '뜨거운 매력이 빛나는 하루! 오래 망설이던 고백을 해볼 만해요.',
+      '작은 다툼이 있어도 화끈하게 풀면 사이가 더 돈독해져요.',
+    ],
+    water: [
+      '차분한 대화 속에서 서로의 마음이 깊어지는 하루예요.',
+      '오래된 인연에게서 연락이 올 수 있어요. 마음을 열어보세요.',
+      '잔잔하지만 뭉클한 순간이 찾아올 수 있어요.',
+    ],
+    grass: [
+      '천천히 자라나는 감정처럼, 편안한 사람과의 관계가 깊어져요.',
+      '자연스러운 만남 속에서 새로운 인연의 싹이 틀 수 있어요.',
+      '함께 있으면 마음이 편안해지는 사람에게 집중해보세요.',
+    ],
+    electric: [
+      '예상치 못한 짜릿한 만남이 기다리고 있어요!',
+      '갑작스러운 연락이 관계에 활력을 불어넣어요.',
+      '스파크가 튀는 순간을 놓치지 마세요, 타이밍이 중요해요.',
+    ],
+    earth: [
+      '믿음직한 사람과의 관계가 더욱 단단해지는 하루예요.',
+      '오래 두고 봐야 진가를 아는 인연이 곁에 있을지도 몰라요.',
+      '안정적인 만남 속에서 편안함을 느낄 수 있어요.',
+    ],
+  };
+
+  const MONEY_POOL = {
+    fire: ['과감한 결정이 뜻밖의 이익을 가져다줄 수 있어요.', '충동구매만 조심하면 지출 관리가 잘 되는 하루예요.', '적극적인 투자 판단이 좋은 결과로 이어질 수 있어요.'],
+    water: ['들어오고 나가는 돈의 흐름이 순조로운 하루예요.', '저축이나 절약 계획을 세우기 좋은 날이에요.', '작은 부수입이 생길 수 있어요.'],
+    grass: ['꾸준히 모아온 것들이 서서히 결실을 맺어요.', '무리한 지출보다는 계획적인 소비가 유리해요.', '작더라도 안정적인 수입원이 힘이 되어줘요.'],
+    electric: ['예상치 못한 돈이 들어올 수 있는 날이에요.', '순간적인 판단이 재물운을 좌우해요, 신중하게 결정하세요.', '갑작스러운 지출이 생길 수 있으니 여유 자금을 준비하세요.'],
+    earth: ['묵직하고 든든한 재물운이 따르는 하루예요.', '큰 손실 없이 안정적으로 자산을 지킬 수 있어요.', '장기적인 계획이 빛을 발하는 시기예요.'],
+  };
+
+  const LUCKY_ITEM_POOL = {
+    fire: ['빨간 목도리', '주황색 팔찌', '태양 모양 열쇠고리'],
+    water: ['파란 손수건', '물방울 무늬 우산', '민트색 텀블러'],
+    grass: ['초록 화분', '나뭇잎 모양 브로치', '풀색 노트'],
+    electric: ['노란 우산', '반짝이는 이어폰', '노란색 볼펜'],
+    earth: ['갈색 가죽 지갑', '흙빛 도자기컵', '베이지색 스카프'],
+  };
+
+  const GRADE_LOVE_SUFFIX = {
+    1: '소소한 설렘을 느낄 수 있는 하루.',
+    2: '작은 설렘을 느낄 수 있는 하루.',
+    3: '기분 좋은 인연이 다가오는 하루.',
+    4: '특별한 만남이 예상되는 하루.',
+    5: '운명적인 만남이 기다리는 하루!',
+  };
+
+  const GRADE_MONEY_TONE = {
+    1: '소박하지만 꾸준한',
+    2: '소소하지만 꾸준한',
+    3: '기대 이상의',
+    4: '큰 행운이 따르는',
+    5: '인생 최고의',
+  };
+
+  function statTendencyLine(core){
+    if (core.atk > core.def * 1.15) return '오늘은 적극적으로 행동할수록 운이 따라요.';
+    if (core.def > core.atk * 1.15) return '오늘은 신중하고 차분하게 움직이면 운이 따라요.';
+    return '균형 잡힌 하루가 될 거예요, 마음 가는 대로 움직여보세요.';
+  }
+
+  function recordAcquisition(core){
+    if (!dailyUsage.acquiredToday) dailyUsage.acquiredToday = [];
+    dailyUsage.acquiredToday.push({
+      name: core.name, elementKey: core.elementKey, emoji: core.emoji,
+      atk: core.atk, def: core.def, maxHp: core.maxHp, tier: core.tier,
+    });
+  }
+
+  function strongestOfToday(){
+    const list = dailyUsage.acquiredToday || [];
+    if (list.length === 0){
+      const p = activeCore() || cores[0];
+      if (!p) return null;
+      return { name: p.name, elementKey: p.elementKey, emoji: p.emoji, atk: p.atk, def: p.def, maxHp: p.maxHp, tier: p.tier, fallback: true };
+    }
+    return list.reduce((best, c) => {
+      const score = c.atk + c.def + c.maxHp;
+      const bestScore = best.atk + best.def + best.maxHp;
+      return score > bestScore ? c : best;
+    }, list[0]);
+  }
+
+  function generateFortune(monster){
+    const grade = gradeForTier(monster.tier);
+    const rank = RANKS[grade-1];
+    const el = ELEMENTS[monster.elementKey];
+    const love = pickRandom(LOVE_POOL[monster.elementKey]) + ' ' + GRADE_LOVE_SUFFIX[grade];
+    const money = GRADE_MONEY_TONE[grade] + ' 하루예요. ' + pickRandom(MONEY_POOL[monster.elementKey]);
+    const luckyItem = pickRandom(LUCKY_ITEM_POOL[monster.elementKey]);
+    const tendency = statTendencyLine(monster);
+    return { love, money, luckyItem, tendency, grade, rank, el };
+  }
+
+  function showFortuneOverlay(){
+    const monster = strongestOfToday();
+    if (!monster) return;
+    const fortune = generateFortune(monster);
+    const overlay = document.getElementById('fortuneOverlay');
+    const body = document.getElementById('fortuneBody');
+    if (!overlay || !body) return;
+    body.innerHTML = `
+      <div style="text-align:center; margin-bottom:6px;">
+        ${gradeRingHtml(monster.tier, monster.elementKey, monster.emoji, 'big', 'ring-big')}
+        <div class="fighter-name" style="margin-top:10px;">${monster.name}</div>
+        <div class="grade-label" style="color:${fortune.rank.color};">${fortune.rank.name} · ${fortune.el.emoji} ${fortune.el.name}속성</div>
+        ${monster.fallback ? '<div class="muted" style="margin-top:6px;">오늘 새로 얻은 코어가 없어 현재 장착 코어를 기준으로 봐드려요.</div>' : '<div class="muted" style="margin-top:6px;">오늘 획득한 몬스터 중 가장 강력해요.</div>'}
+      </div>
+      <div class="fortune-row"><div class="fortune-label">💕 연애운</div><p>${fortune.love}</p></div>
+      <div class="fortune-row"><div class="fortune-label">💰 금전운</div><p>${fortune.money}</p></div>
+      <div class="fortune-row"><div class="fortune-label">🍀 행운의 아이템</div><p>${fortune.luckyItem}</p></div>
+      <p class="muted" style="margin-top:10px; text-align:center;">${fortune.tendency}</p>
+    `;
+    overlay.classList.add('show');
+  }
+
+  function maybeEndGameForToday(){
+    if (dailyUsage.fortuneShown) return;
+    if (exploreRemaining() > 0 || mixRemaining() > 0) return;
+    dailyUsage.fortuneShown = true;
+    saveDailyUsage();
+    showFortuneOverlay();
+  }
+
+  // ---------- mix naming system ----------
+  // adjectives evoke each element's flavor; combined per mix to fit the blended attributes
+  const ELEMENT_ADJ = {
+    fire:     ['불꽃', '화염', '홍염'],
+    water:    ['물결', '이슬', '청옥'],
+    grass:    ['새싹', '이끼', '청록'],
+    electric: ['번개', '전격', '스파크'],
+    earth:    ['바위', '대지', '암석'],
+  };
+
+  // the creature "species" scales with grade: cuter & humbler at low grade,
+  // more majestic & powerful-looking at high grade
+  const CREATURE_POOL_BY_GRADE = {
+    2: [ { name:'토끼', emoji:'🐰' }, { name:'다람쥐', emoji:'🐿️' }, { name:'아기사슴', emoji:'🦌' } ],
+    3: [ { name:'여우', emoji:'🦊' }, { name:'늑대', emoji:'🐺' }, { name:'스라소니', emoji:'🐆' } ],
+    4: [ { name:'백호', emoji:'🐯' }, { name:'그리폰', emoji:'🦅' }, { name:'유니콘', emoji:'🦄' } ],
+    5: [ { name:'드래곤', emoji:'🐉' }, { name:'전설룡', emoji:'🐲' }, { name:'성수', emoji:'🦢' } ],
+  };
+
+  function pickRandom(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+
+  function generateMixName(elA, elB, grade){
+    const adjA = pickRandom(ELEMENT_ADJ[elA]);
+    const adjB = elB !== elA ? pickRandom(ELEMENT_ADJ[elB]) : null;
+    const creaturePool = CREATURE_POOL_BY_GRADE[grade] || CREATURE_POOL_BY_GRADE[2];
+    const creature = pickRandom(creaturePool);
+    const namePrefix = adjB ? `${adjA}${adjB}` : adjA;
+    return { name: `${namePrefix}${creature.name}`, emoji: creature.emoji };
+  }
+
+  function computeMixResult(a, b){
+    const elementKey = Math.random() < 0.5 ? a.elementKey : b.elementKey;
+    const atk = Math.ceil((a.atk + b.atk) / 2 * 1.2);
+    const def = Math.ceil((a.def + b.def) / 2 * 1.2);
+    const maxHp = Math.ceil((a.maxHp + b.maxHp) / 2 * 1.2);
+    const tier = a.tier + b.tier;
+    const grade = gradeForTier(tier);
+    const generated = generateMixName(a.elementKey, b.elementKey, grade);
+    return { name: generated.name, elementKey, atk, def, maxHp, tier, emoji: generated.emoji };
+  }
+
+  function doMix(){
+    const [aId, bId] = mixSelection;
+    const a = findCore(aId), b = findCore(bId);
+    if (!a || !b) return;
+    if (mixRemaining() <= 0) return;
+    dailyUsage.mixCount += 1;
+    saveDailyUsage();
+    renderLimitBadges();
+    const pv = computeMixResult(a, b);
+    const resultGrade = gradeForTier(pv.tier);
+    const failRate = mixFailRate(resultGrade);
+    const isFail = Math.random() < failRate;
+
+    const overlay = document.getElementById('mixOverlay');
+    const stageDiv = document.getElementById('mixingStage');
+    const resultText = document.getElementById('mixResultText');
+    const closeBtn = document.getElementById('mixCloseBtn');
+    closeBtn.style.display = 'none';
+    resultText.innerHTML = '';
+
+    stageDiv.innerHTML = `
+      <div class="mix-swirl">${gradeRingHtml(a.tier, a.elementKey, a.emoji, 'small', 'ring-small')}</div>
+      <div class="mix-swirl" style="animation-delay:.05s">${gradeRingHtml(b.tier, b.elementKey, b.emoji, 'small', 'ring-small')}</div>
+    `;
+    overlay.classList.add('show');
+
+    setTimeout(() => {
+      if (isFail){
+        stageDiv.innerHTML = `<div class="mix-result-orb mix-fail">💥</div>`;
+        resultText.innerHTML = `<b style="color:var(--bad); font-size:14px;">믹스 실패...</b><br>코어가 불안정하게 반응해 재료 중 하나가 소멸했습니다.`;
+      } else {
+        const pvRank = rankOf(pv.tier);
+        stageDiv.innerHTML = `<div class="mix-result-orb">${gradeRingHtml(pv.tier, pv.elementKey, pv.emoji, 'big', 'ring-big')}</div>`;
+        resultText.innerHTML = `<b style="color:${pvRank.color}; font-size:14px;">${pvRank.name}</b> · <b style="color:var(--text); font-size:14px;">${pv.name}</b><br>새로운 코어가 탄생했습니다!`;
+        triggerScreenFlash(pvRank.color);
+      }
+      closeBtn.style.display = 'inline-flex';
+    }, 950);
+
+    closeBtn.onclick = () => {
+      const wasActiveParentA = a.id === activeCoreId;
+      const wasActiveParentB = b.id === activeCoreId;
+
+      if (isFail){
+        // only one of the two material cores is lost; the other survives
+        const lost = Math.random() < 0.5 ? a : b;
+        cores = cores.filter(c => c.id !== lost.id);
+        if (lost.id === activeCoreId){
+          activeCoreId = cores.length ? cores[0].id : null;
+        }
+      } else {
+        // success: both parents are consumed, new fused core is added
+        cores = cores.filter(c => c.id !== a.id && c.id !== b.id);
+        const newCore = {
+          id: uid(),
+          name: pv.name,
+          elementKey: pv.elementKey,
+          atk: pv.atk,
+          def: pv.def,
+          hp: pv.maxHp,
+          maxHp: pv.maxHp,
+          tier: pv.tier,
+          emoji: pv.emoji,
+        };
+        cores.push(newCore);
+        if (wasActiveParentA || wasActiveParentB) activeCoreId = newCore.id;
+        recordAcquisition(newCore);
+      }
+
+      mixSelection = [];
+      overlay.classList.remove('show');
+      saveDailyUsage();
+      renderHeader();
+      renderMixGrid();
+      renderInventory();
+      renderArena();
+      maybeEndGameForToday();
+    };
+  }
+
+  // ---------- tabs ----------
+  document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn[data-tab]').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+      if (btn.dataset.tab === 'mix') renderMixGrid();
+      if (btn.dataset.tab === 'inventory') renderInventory();
+      if (btn.dataset.tab === 'shop') renderShop();
+      if (btn.dataset.tab === 'explore') renderArena();
+    });
+  });
+
+  document.getElementById('fightBtn').addEventListener('click', startBattle);
+  document.getElementById('mixBtn').addEventListener('click', doMix);
+  document.getElementById('prevStageBtn').addEventListener('click', goToPreviousStage);
+  document.getElementById('resetGameBtn').addEventListener('click', openResetConfirm);
+  document.getElementById('startBtn').addEventListener('click', () => {
+    const startScreen = document.getElementById('startScreen');
+    const gameApp = document.getElementById('gameApp');
+    startScreen.classList.add('hide');
+    gameApp.classList.add('app-visible');
+    setTimeout(() => { startScreen.style.display = 'none'; }, 550);
+  });
+  document.getElementById('resetCancelBtn').addEventListener('click', closeResetConfirm);
+  document.getElementById('resetConfirmBtn').addEventListener('click', resetGame);
+  document.getElementById('fortuneCloseBtn').addEventListener('click', () => {
+    document.getElementById('fortuneOverlay').classList.remove('show');
+  });
+
+  // ---------- init ----------
+  renderHeader();
+  renderArena();
+  renderInventory();
+  renderMixGrid();
+  renderRankLegend();
+  renderLimitBadges();
+  renderShop();
+  loadDailyUsage();
+
+})();
+</script>
+
+<div style="max-width:640px;margin:20px auto 0;padding:0 14px;">
+  <div style="border:1.5px dashed rgba(255,255,255,0.16);border-radius:8px;background:#241a3d;min-height:90px;display:flex;align-items:center;justify-content:center;color:#b6a9d6;font-size:12px;letter-spacing:.08em;">
+    광고 영역 (콘텐츠 하단)
+  </div>
+  <footer style="text-align:center;color:#b6a9d6;font-size:12px;padding:22px 0 46px;">© 2026 3분 놀이터. 콘텐츠는 재미로 즐겨주세요.</footer>
+</div>
+
+</body>
+</html>

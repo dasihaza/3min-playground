@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>인생 최고의 딜레마 8선 | 3분 놀이터</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+  .vs-wrap{ display:flex; flex-direction:column; gap:12px; }
+  .vs-option{
+    background: var(--bg-soft); border:1.5px solid var(--line); border-radius:12px;
+    padding:22px 20px; text-align:center; cursor:pointer;
+    font-family:'Jua', sans-serif; font-size:18px; line-height:1.5;
+    transition: all .15s ease;
+  }
+  .vs-option:hover{ border-color: var(--coral); background:#fff; transform: translateY(-2px); }
+  .vs-divider{
+    text-align:center; font-family:'Jua', sans-serif; color: var(--coral);
+    font-size:13px; margin: -2px 0;
+  }
+  .q-num{ font-size:13px; font-weight:700; color: var(--ink-soft); letter-spacing:.06em; margin-bottom:8px; }
+  .result-title{ font-family:'Jua', sans-serif; font-size:24px; text-align:center; margin: 6px 0 10px; }
+  .result-blurb{ text-align:center; color: var(--ink-soft); font-size:14.5px; line-height:1.75; margin-bottom:22px; }
+  .bar-row{ display:flex; align-items:center; gap:10px; margin-bottom:10px; font-size:13px; }
+  .bar-track{ flex:1; height:10px; border-radius:6px; background: var(--bg-soft); overflow:hidden; }
+  .bar-fill{ height:100%; background: var(--coral); }
+  .actions{ display:flex; justify-content:center; gap:10px; margin-top:24px; }
+  .hidden{ display:none !important; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="site-header">
+    <a class="brand" href="../index.html">
+      <svg class="brand-mark" viewBox="0 0 34 34" fill="none">
+        <circle cx="17" cy="18" r="14" fill="#FAF7F0" stroke="#1D1B16" stroke-width="2"/>
+        <path d="M17 9 L17 18 L23 21" stroke="#E8483C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="13" y="2" width="8" height="4" rx="1.5" fill="#1D1B16"/>
+      </svg>
+      <span class="brand-word">3분 놀이터</span>
+    </a>
+    <a class="back-link" href="../index.html">← 다른 콘텐츠 보기</a>
+  </header>
+</div>
+
+<div class="content-shell">
+  <div class="content-card">
+
+    <!-- INTRO -->
+    <div id="screen-intro">
+      <span class="badge balance" style="margin-bottom:14px; display:inline-block;">밸런스게임</span>
+      <h1 style="font-family:'Jua',sans-serif; font-size:26px; margin:0 0 12px;">인생 최고의 딜레마 8선</h1>
+      <p style="color:var(--ink-soft); font-size:14.5px; line-height:1.7; margin:0 0 22px;">
+        고민할 필요 없어요, 3초 안에 더 끌리는 쪽을 고르면 됩니다. 8라운드 끝나면 당신의 선택 성향을 보여드릴게요.
+      </p>
+      <button class="btn" onclick="startGame()">게임 시작</button>
+    </div>
+
+    <!-- QUIZ -->
+    <div id="screen-game" class="hidden">
+      <div class="progress-row" id="progress"></div>
+      <div class="q-num" id="q-num"></div>
+      <div class="vs-wrap">
+        <div class="vs-option" id="opt-left" onclick="pick('left')"></div>
+        <div class="vs-divider">VS</div>
+        <div class="vs-option" id="opt-right" onclick="pick('right')"></div>
+      </div>
+    </div>
+
+    <!-- RESULT -->
+    <div id="screen-result" class="hidden">
+      <div class="result-title" id="result-title"></div>
+      <div class="result-blurb" id="result-blurb"></div>
+      <div id="bars"></div>
+      <div class="actions">
+        <button class="btn ghost" onclick="restart()">다시 하기</button>
+        <a class="btn" href="../index.html">다른 콘텐츠 보기</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 광고 슬롯 : 콘텐츠 하단 -->
+  <div class="ad-slot" style="margin-top:26px;">
+    <span class="ad-label">광고 영역 (콘텐츠 하단)</span>
+  </div>
+</div>
+
+<footer class="site-footer wrap">
+  <div>© 2026 3분 놀이터. 콘텐츠는 재미로 즐겨주세요.</div>
+</footer>
+
+<script>
+const ROUNDS = [
+  { left:"평생 여름", right:"평생 겨울" },
+  { left:"돈은 많지만 시간이 없다", right:"시간은 많지만 돈이 없다" },
+  { left:"하늘을 나는 능력", right:"순간이동 능력" },
+  { left:"인기 많은 삶", right:"존경받는 삶" },
+  { left:"매일 똑같은 하루 반복", right:"매일 완전히 다른 하루" },
+  { left:"과거로 돌아가 후회를 고친다", right:"미래를 미리 본다" },
+  { left:"최고의 요리 실력", right:"최고의 노래 실력" },
+  { left:"평생 혼자 여행", right:"평생 단체 여행" }
+];
+
+let current = 0;
+let leftCount = 0;
+
+function show(id){
+  ["screen-intro","screen-game","screen-result"].forEach(s=>{
+    document.getElementById(s).classList.toggle("hidden", s!==id);
+  });
+}
+
+function startGame(){
+  current = 0; leftCount = 0;
+  buildProgress();
+  show("screen-game");
+  renderRound();
+}
+
+function buildProgress(){
+  const p = document.getElementById("progress");
+  p.innerHTML = "";
+  ROUNDS.forEach((_,i)=>{
+    const seg = document.createElement("div");
+    seg.className = "seg"; seg.id = "seg-"+i;
+    seg.innerHTML = "<i></i>";
+    p.appendChild(seg);
+  });
+}
+function updateProgress(){
+  ROUNDS.forEach((_,i)=>{
+    document.getElementById("seg-"+i).classList.toggle("done", i < current);
+  });
+}
+
+function renderRound(){
+  updateProgress();
+  const r = ROUNDS[current];
+  document.getElementById("q-num").textContent = (current+1)+" / "+ROUNDS.length;
+  document.getElementById("opt-left").textContent = r.left;
+  document.getElementById("opt-right").textContent = r.right;
+}
+
+function pick(side){
+  if(side==="left") leftCount++;
+  current++;
+  if(current < ROUNDS.length){
+    renderRound();
+  } else {
+    renderResult();
+  }
+}
+
+function renderResult(){
+  const rightCount = ROUNDS.length - leftCount;
+  const leftPct = Math.round((leftCount/ROUNDS.length)*100);
+  const rightPct = 100 - leftPct;
+
+  let title, blurb;
+  if(leftPct >= 70){
+    title = "안정적인 익숙함파";
+    blurb = "새로운 것보다 검증된 확실함이 좋은 편이네요. 계획대로 흘러갈 때 마음이 편안한 타입이에요.";
+  } else if(rightPct >= 70){
+    title = "즉흥적인 변화파";
+    blurb = "예측 가능한 것보다 새로운 자극에 끌리는 편이네요. 매번 다른 선택을 하는 걸 두려워하지 않는 타입이에요.";
+  } else {
+    title = "균형 잡힌 상황판단파";
+    blurb = "그때그때 상황에 따라 유연하게 선택하는 편이네요. 극단적으로 치우치지 않는 게 오히려 당신의 강점일지도요.";
+  }
+
+  document.getElementById("result-title").textContent = title;
+  document.getElementById("result-blurb").textContent = blurb;
+  document.getElementById("bars").innerHTML =
+    '<div class="bar-row"><span style="width:70px;">왼쪽</span><div class="bar-track"><div class="bar-fill" style="width:'+leftPct+'%;"></div></div><span>'+leftPct+'%</span></div>' +
+    '<div class="bar-row"><span style="width:70px;">오른쪽</span><div class="bar-track"><div class="bar-fill" style="width:'+rightPct+'%; background:var(--marigold);"></div></div><span>'+rightPct+'%</span></div>';
+
+  show("screen-result");
+}
+
+function restart(){ startGame(); }
+</script>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>코딩 교육 게시판 | 3분 놀이터</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+  .notice{
+    background: rgba(59,110,168,0.10); border:1px solid rgba(59,110,168,0.3);
+    border-radius:8px; padding:12px 16px; font-size:12.5px; color: var(--ink-soft);
+    line-height:1.7; margin: 18px 0 6px;
+  }
+  .notice.setup{
+    background: rgba(232,72,60,0.08); border-color: rgba(232,72,60,0.3);
+  }
+  .board-shell{ max-width: 640px; margin: 0 auto; padding: 6px 20px 60px; }
+  .board-top{ margin: 18px 0 6px; }
+  .board-top h1{ font-family:'Jua',sans-serif; font-size:24px; margin:0 0 6px; }
+  .board-top p{ color: var(--ink-soft); font-size:14px; line-height:1.7; margin:0; }
+  .topics{ display:flex; flex-wrap:wrap; gap:8px; margin: 18px 0 8px; }
+  .topic-pill{
+    font-size:12.5px; font-weight:700; color: var(--ink-soft);
+    border:1px solid var(--line); border-radius:999px; padding:7px 14px;
+    background: var(--card-bg);
+  }
+  #giscus-mount{ margin-top: 24px; min-height: 120px; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="site-header">
+    <a class="brand" href="../index.html">
+      <svg class="brand-mark" viewBox="0 0 34 34" fill="none">
+        <circle cx="17" cy="18" r="14" fill="#FAF7F0" stroke="#1D1B16" stroke-width="2"/>
+        <path d="M17 9 L17 18 L23 21" stroke="#E8483C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="13" y="2" width="8" height="4" rx="1.5" fill="#1D1B16"/>
+      </svg>
+      <span class="brand-word">3분 놀이터</span>
+    </a>
+    <a class="back-link" href="../index.html">← 다른 콘텐츠 보기</a>
+  </header>
+
+  <div class="notice">
+    💬 이 게시판은 <strong>GitHub Discussions</strong>를 기반으로 한 실시간 댓글판(Giscus)이에요. 댓글을 남기려면 GitHub 계정으로 로그인해야 하고, 한 번 남긴 댓글은 이 사이트를 방문하는 모든 사람에게 보여요.
+  </div>
+
+  <!--
+    ▼ Giscus 연동 위치 안내 ▼
+    아래 <script class="giscus-script"> 태그의 data-repo / data-repo-id / data-category / data-category-id 값을
+    본인의 GitHub 저장소 값으로 교체해야 댓글창이 실제로 나타납니다.
+    값을 얻는 방법은 채팅 답변의 단계별 안내를 참고하세요. (공식 발급 페이지: https://giscus.app)
+  -->
+</div>
+
+<div class="board-shell">
+
+  <div class="board-top">
+    <span class="badge board" style="margin-bottom:10px; display:inline-block;">게시판</span>
+    <h1>코딩 교육 게시판</h1>
+    <p>코딩 공부 질문, 후기, 팁을 자유롭게 나누는 공간이에요. 아래 댓글창에 바로 남겨주세요.</p>
+  </div>
+
+  <div class="topics">
+    <span class="topic-pill">🐣 입문 / 시작 시기</span>
+    <span class="topic-pill">🛠️ 코딩 프로그램 제작 후기</span>
+    <span class="topic-pill">🧩 코딩테스트 준비</span>
+    <span class="topic-pill">👶 자녀 코딩 교육</span>
+  </div>
+
+  <div class="notice setup" id="setup-warning">
+    ⚠️ 아직 댓글창이 연결되지 않았어요. 아래 <code>giscus-script</code>의 4가지 data 값을 본인 저장소 값으로 채워주세요.
+  </div>
+
+  <div id="giscus-mount"></div>
+
+  <!-- 광고 슬롯 -->
+  <div class="ad-slot" style="margin-top:26px;">
+    <span class="ad-label">광고 영역 (게시판 하단)</span>
+  </div>
+</div>
+
+<footer class="site-footer wrap">
+  <div>© 2026 3분 놀이터. 콘텐츠는 재미로 즐겨주세요.</div>
+</footer>
+
+<script>
+(function(){
+  // ▼▼▼ 이 4개 값을 giscus.app에서 발급받은 본인 값으로 교체하세요 ▼▼▼
+  const REPO = "YOUR_GITHUB_ID/YOUR_REPO_NAME";      // 예: "minsu/3min-playground"
+  const REPO_ID = "YOUR_REPO_ID";                     // giscus.app에서 자동 생성됨
+  const CATEGORY = "General";                          // Discussions 카테고리 이름
+  const CATEGORY_ID = "YOUR_CATEGORY_ID";              // giscus.app에서 자동 생성됨
+  // ▲▲▲ 여기까지 ▲▲▲
+
+  const isConfigured = !REPO.includes("YOUR_GITHUB_ID") && !REPO_ID.includes("YOUR_REPO_ID") && !CATEGORY_ID.includes("YOUR_CATEGORY_ID");
+
+  if(!isConfigured){
+    return; // 안내 배너만 보여주고 스크립트는 삽입하지 않음
+  }
+
+  document.getElementById("setup-warning").style.display = "none";
+
+  const script = document.createElement("script");
+  script.src = "https://giscus.app/client.js";
+  script.setAttribute("data-repo", REPO);
+  script.setAttribute("data-repo-id", REPO_ID);
+  script.setAttribute("data-category", CATEGORY);
+  script.setAttribute("data-category-id", CATEGORY_ID);
+  script.setAttribute("data-mapping", "pathname");
+  script.setAttribute("data-strict", "0");
+  script.setAttribute("data-reactions-enabled", "1");
+  script.setAttribute("data-emit-metadata", "0");
+  script.setAttribute("data-input-position", "top");
+  script.setAttribute("data-theme", "light");
+  script.setAttribute("data-lang", "ko");
+  script.setAttribute("crossorigin", "anonymous");
+  script.className = "giscus-script";
+  script.async = true;
+
+  document.getElementById("giscus-mount").appendChild(script);
+})();
+</script>
+</body>
+</html>

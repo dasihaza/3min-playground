@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>오늘의 상식 퀴즈 5문제 | 3분 놀이터</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+  .q-num{ font-size:13px; font-weight:700; color: var(--ink-soft); letter-spacing:.06em; margin-bottom:8px; }
+  .q-text{ font-family:'Jua', sans-serif; font-size:20px; line-height:1.5; margin: 4px 0 20px; }
+  .opt{
+    display:block; width:100%; text-align:left;
+    background: var(--bg-soft); border:1.5px solid var(--line); border-radius:10px;
+    padding:14px 16px; margin-bottom:10px; font-size:15px; cursor:pointer;
+    font-family:'Noto Sans KR', sans-serif;
+    transition: all .15s ease;
+  }
+  .opt:hover{ border-color: var(--marigold); background:#fff; }
+  .opt.correct{ border-color: var(--teal); background: rgba(31,111,99,0.12); font-weight:700; }
+  .opt.wrong{ border-color: var(--coral); background: rgba(232,72,60,0.10); }
+  .opt[disabled]{ cursor:default; }
+  .next-btn{ margin-top:6px; }
+  .result-title{ font-family:'Jua', sans-serif; font-size:26px; text-align:center; margin: 6px 0 8px; }
+  .result-score{ text-align:center; font-size:15px; color: var(--ink-soft); margin-bottom:6px; }
+  .result-blurb{ text-align:center; color: var(--ink-soft); font-size:14.5px; line-height:1.75; margin-bottom:22px; }
+  .actions{ display:flex; justify-content:center; gap:10px; margin-top:20px; }
+  .hidden{ display:none !important; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="site-header">
+    <a class="brand" href="../index.html">
+      <svg class="brand-mark" viewBox="0 0 34 34" fill="none">
+        <circle cx="17" cy="18" r="14" fill="#FAF7F0" stroke="#1D1B16" stroke-width="2"/>
+        <path d="M17 9 L17 18 L23 21" stroke="#E8483C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="13" y="2" width="8" height="4" rx="1.5" fill="#1D1B16"/>
+      </svg>
+      <span class="brand-word">3분 놀이터</span>
+    </a>
+    <a class="back-link" href="../index.html">← 다른 콘텐츠 보기</a>
+  </header>
+</div>
+
+<div class="content-shell">
+  <div class="content-card">
+
+    <div id="screen-intro">
+      <span class="badge quiz" style="margin-bottom:14px; display:inline-block;">미니퀴즈</span>
+      <h1 style="font-family:'Jua',sans-serif; font-size:26px; margin:0 0 6px;">오늘의 상식 퀴즈 5문제</h1>
+      <div id="today-date" style="font-size:12.5px; font-weight:700; color:var(--marigold); margin-bottom:14px;"></div>
+      <p style="color:var(--ink-soft); font-size:14.5px; line-height:1.7; margin:0 0 22px;">
+        알쏭달쏭한 상식 다섯 고개! 문제는 매일 자동으로 바뀌어요. 5문제 다 맞히면 상식왕 인증 도장 드려요.
+      </p>
+      <button class="btn" onclick="startQuiz()">퀴즈 시작</button>
+    </div>
+
+    <div id="screen-quiz" class="hidden">
+      <div class="progress-row" id="progress"></div>
+      <div class="q-num" id="q-num"></div>
+      <div class="q-text" id="q-text"></div>
+      <div id="options"></div>
+      <button class="btn next-btn hidden" id="next-btn" onclick="nextQuestion()">다음 문제 →</button>
+    </div>
+
+    <div id="screen-result" class="hidden">
+      <div class="result-title" id="result-title"></div>
+      <div class="result-score" id="result-score"></div>
+      <div class="result-blurb" id="result-blurb"></div>
+      <div class="actions">
+        <button class="btn ghost" onclick="restart()">다시 풀기</button>
+        <a class="btn" href="../index.html">다른 콘텐츠 보기</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 광고 슬롯 : 콘텐츠 하단 -->
+  <div class="ad-slot" style="margin-top:26px;">
+    <span class="ad-label">광고 영역 (콘텐츠 하단)</span>
+  </div>
+</div>
+
+<footer class="site-footer wrap">
+  <div>© 2026 3분 놀이터. 콘텐츠는 재미로 즐겨주세요.</div>
+</footer>
+
+<script>
+/* 24개 문제 은행. 매일 날짜를 시드로 5개를 뽑아 보여줘요 — 별도 관리 없이 자동으로 매일 바뀝니다. */
+const QUESTION_BANK = [
+  { q:"세계에서 가장 작은 나라는 어디일까요?", opts:["모나코","바티칸시국","산마리노","나우루"], a:1 },
+  { q:"인체에서 가장 넓은 면적을 차지하는 장기는?", opts:["간","폐","피부","소장"], a:2 },
+  { q:"우리나라 최초의 인스턴트 라면 브랜드는?", opts:["신라면","진라면","너구리","삼양라면"], a:3 },
+  { q:"다음 중 실제로 존재하는 동물은?", opts:["유니콘","쿼카","페가수스","그리핀"], a:1 },
+  { q:"물의 화학식은 무엇일까요?", opts:["CO2","NaCl","H2O","O2"], a:2 },
+  { q:"대한민국의 수도는 어디일까요?", opts:["부산","인천","서울","대전"], a:2 },
+  { q:"하루는 총 몇 시간일까요?", opts:["12시간","20시간","24시간","30시간"], a:2 },
+  { q:"우리 몸에서 혈액세포를 만드는 곳은?", opts:["간","골수","위","폐"], a:1 },
+  { q:"세계에서 가장 높은 산은?", opts:["킬리만자로","에베레스트","몽블랑","후지산"], a:1 },
+  { q:"태양계에서 가장 큰 행성은?", opts:["지구","화성","목성","토성"], a:2 },
+  { q:"무지개는 보통 몇 가지 색으로 표현될까요?", opts:["5가지","6가지","7가지","8가지"], a:2 },
+  { q:"대한민국의 화폐 단위는?", opts:["엔","위안","원","달러"], a:2 },
+  { q:"축구 한 팀의 경기 인원은(골키퍼 포함) 몇 명일까요?", opts:["9명","10명","11명","12명"], a:2 },
+  { q:"다음 중 포유류가 아닌 동물은?", opts:["돌고래","박쥐","고래","상어"], a:3 },
+  { q:"표준 피아노 건반의 개수는?", opts:["76개","82개","88개","92개"], a:2 },
+  { q:"대한민국의 나라꽃은?", opts:["장미","무궁화","해바라기","진달래"], a:1 },
+  { q:"1년은 총 몇 개월일까요?", opts:["10개월","11개월","12개월","13개월"], a:2 },
+  { q:"다음 중 실제 별자리 이름은?", opts:["피카츄자리","오리온자리","스폰지밥자리","도라에몽자리"], a:1 },
+  { q:"우리 몸에서 가장 단단한 부분은?", opts:["뼈","치아","손톱","연골"], a:1 },
+  { q:"세계에서 가장 넓은 대륙은?", opts:["아프리카","유럽","아시아","북아메리카"], a:2 },
+  { q:"다음 중 곤충이 아닌 것은?", opts:["개미","나비","거미","벌"], a:2 },
+  { q:"2020년대 들어 세계 인구 1위 국가가 된 나라는?", opts:["미국","중국","인도","인도네시아"], a:2 },
+  { q:"김치를 담글 때 가장 많이 쓰이는 채소는?", opts:["무","배추","오이","당근"], a:1 },
+  { q:"다음 중 실제로 존재하는 나라 이름은?", opts:["나니아","아스가르드","부탄","나르니아"], a:2 }
+];
+
+/* 날짜 문자열을 시드로 바꿔주는 간단한 해시 + 시드 기반 난수 생성기 */
+function seededRng(seed){
+  let s = seed % 2147483647;
+  if(s <= 0) s += 2147483646;
+  return function(){
+    s = (s * 16807) % 2147483647;
+    return (s - 1) / 2147483646;
+  };
+}
+
+function getTodayDateString(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const day = String(d.getDate()).padStart(2,"0");
+  return { seed: y*10000 + Number(m)*100 + Number(day), display: y+"."+m+"."+day };
+}
+
+function pickTodayQuestions(){
+  const { seed, display } = getTodayDateString();
+  const rng = seededRng(seed);
+  const pool = QUESTION_BANK.slice();
+  // 시드 기반 셔플 (Fisher–Yates)
+  for(let i = pool.length - 1; i > 0; i--){
+    const j = Math.floor(rng() * (i+1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return { questions: pool.slice(0, 5), dateLabel: display };
+}
+
+let QUESTIONS = [];
+let current = 0;
+let correctCount = 0;
+let answered = false;
+
+document.addEventListener("DOMContentLoaded", ()=>{
+  const { questions, dateLabel } = pickTodayQuestions();
+  QUESTIONS = questions;
+  const dateEl = document.getElementById("today-date");
+  if(dateEl) dateEl.textContent = dateLabel + " 문제";
+});
+
+function show(id){
+  ["screen-intro","screen-quiz","screen-result"].forEach(s=>{
+    document.getElementById(s).classList.toggle("hidden", s!==id);
+  });
+}
+
+function startQuiz(){
+  current = 0; correctCount = 0;
+  buildProgress();
+  show("screen-quiz");
+  renderQuestion();
+}
+
+function buildProgress(){
+  const p = document.getElementById("progress");
+  p.innerHTML = "";
+  QUESTIONS.forEach((_,i)=>{
+    const seg = document.createElement("div");
+    seg.className = "seg"; seg.id = "seg-"+i;
+    seg.innerHTML = "<i></i>";
+    p.appendChild(seg);
+  });
+}
+function updateProgress(){
+  QUESTIONS.forEach((_,i)=>{
+    document.getElementById("seg-"+i).classList.toggle("done", i < current);
+  });
+}
+
+function renderQuestion(){
+  updateProgress();
+  answered = false;
+  const item = QUESTIONS[current];
+  document.getElementById("q-num").textContent = (current+1)+" / "+QUESTIONS.length;
+  document.getElementById("q-text").textContent = item.q;
+  document.getElementById("next-btn").classList.add("hidden");
+
+  const optWrap = document.getElementById("options");
+  optWrap.innerHTML = "";
+  item.opts.forEach((opt, idx)=>{
+    const btn = document.createElement("button");
+    btn.className = "opt";
+    btn.textContent = opt;
+    btn.onclick = ()=> selectOption(idx, btn);
+    optWrap.appendChild(btn);
+  });
+}
+
+function selectOption(idx, btnEl){
+  if(answered) return;
+  answered = true;
+  const item = QUESTIONS[current];
+  const allOpts = document.querySelectorAll("#options .opt");
+  allOpts.forEach(b=> b.disabled = true);
+
+  if(idx === item.a){
+    correctCount++;
+    btnEl.classList.add("correct");
+  } else {
+    btnEl.classList.add("wrong");
+    allOpts[item.a].classList.add("correct");
+  }
+  document.getElementById("next-btn").classList.remove("hidden");
+}
+
+function nextQuestion(){
+  current++;
+  if(current < QUESTIONS.length){
+    renderQuestion();
+  } else {
+    renderResult();
+  }
+}
+
+function renderResult(){
+  let title, blurb;
+  if(correctCount >= 5){ title = "완벽한 상식왕 👑"; blurb = "5문제 전부 맞혔어요! 오늘 하루 어디 가서 아는 척 좀 해도 되겠어요."; }
+  else if(correctCount >= 3){ title = "평균 이상, 준수해요"; blurb = "꽤 잘 아시네요. 조금만 더 하면 상식왕 등극!"; }
+  else { title = "다음엔 더 잘할 거예요"; blurb = "괜찮아요, 몰랐던 걸 오늘 하나 배웠으면 그걸로 충분해요."; }
+
+  document.getElementById("result-title").textContent = title;
+  document.getElementById("result-score").textContent = correctCount + " / " + QUESTIONS.length + " 문제 정답";
+  document.getElementById("result-blurb").textContent = blurb;
+  show("screen-result");
+}
+
+function restart(){ startQuiz(); }
+</script>
+</body>
+</html>

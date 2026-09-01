@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>커리어 나침반</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #efe7d8;
+    --paper-light: #faf6ec;
+    --ink: #2b2a24;
+    --ink-soft: #57544a;
+    --rust: #7a3b2e;
+    --pine: #35604f;
+    --brass: #b08d3e;
+    --line: rgba(43,42,36,0.18);
+    --shadow: 0 10px 30px rgba(43,42,36,0.12);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 10% -10%, rgba(176,141,62,0.10), transparent 60%),
+      radial-gradient(1000px 500px at 110% 10%, rgba(53,96,79,0.08), transparent 55%),
+      var(--paper);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:32px 16px;
+  }
+  .stage{
+    width:100%;
+    max-width:640px;
+    position:relative;
+  }
+  .card{
+    background: var(--paper-light);
+    border: 1px solid var(--line);
+    border-radius:4px;
+    box-shadow: var(--shadow);
+    padding:44px 40px;
+    position:relative;
+    overflow:hidden;
+  }
+  .card::before{
+    content:"";
+    position:absolute; inset:8px;
+    border:1px solid rgba(176,141,62,0.35);
+    pointer-events:none;
+  }
+  .eyebrow{
+    font-size:12px;
+    letter-spacing:0.32em;
+    color: var(--brass);
+    font-weight:700;
+    text-transform:uppercase;
+  }
+  h1{
+    font-family:'Gowun Batang', serif;
+    font-size:34px;
+    line-height:1.35;
+    margin:10px 0 14px;
+    font-weight:700;
+  }
+  p.lead{
+    color: var(--ink-soft);
+    font-size:15.5px;
+    line-height:1.75;
+    margin:0 0 28px;
+  }
+  .btn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    font-family:'Noto Sans KR', sans-serif;
+    font-weight:700;
+    font-size:15px;
+    padding:14px 26px;
+    border-radius:2px;
+    background: var(--ink);
+    color: var(--paper-light);
+    letter-spacing:0.02em;
+    transition: transform .15s ease, background .2s ease;
+  }
+  .btn:hover{ background: var(--rust); transform: translateY(-1px); }
+  .btn:active{ transform: translateY(0); }
+  .btn.ghost{
+    background:transparent;
+    color:var(--ink);
+    border:1px solid var(--line);
+  }
+  .btn.ghost:hover{ background: rgba(43,42,36,0.06); color:var(--ink); }
+
+  /* intro compass mark */
+  .mark{
+    width:78px; height:78px;
+    margin:0 0 22px;
+    position:relative;
+  }
+  .mark svg{ width:100%; height:100%; display:block; }
+
+  /* progress trail */
+  .trail{
+    display:flex;
+    gap:6px;
+    margin-bottom:26px;
+  }
+  .trail .step{
+    flex:1;
+    height:4px;
+    background: rgba(43,42,36,0.14);
+    border-radius:2px;
+    overflow:hidden;
+  }
+  .trail .step > i{
+    display:block; height:100%; width:0%;
+    background: var(--rust);
+    transition: width .35s ease;
+  }
+  .trail .step.done > i{ width:100%; }
+  .qmeta{
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-bottom:6px;
+  }
+  .qmeta .num{
+    font-family:'Gowun Batang', serif;
+    color: var(--brass);
+    font-size:14px; font-weight:700; letter-spacing:.1em;
+  }
+  .qmeta .stop{
+    font-size:12px; color: var(--ink-soft); letter-spacing:.08em;
+  }
+  h2.q{
+    font-family:'Gowun Batang', serif;
+    font-size:23px;
+    line-height:1.5;
+    margin:6px 0 24px;
+    font-weight:700;
+  }
+  .options{
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .opt{
+    text-align:left;
+    background: var(--paper);
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:15px 18px;
+    font-size:15px;
+    line-height:1.5;
+    cursor:pointer;
+    display:flex; align-items:flex-start; gap:12px;
+    transition: border-color .15s ease, background .15s ease, transform .1s ease;
+  }
+  .opt:hover{ border-color: var(--brass); background: #f4ecd9; }
+  .opt:active{ transform: scale(0.995); }
+  .opt .tag{
+    flex:0 0 auto;
+    width:22px; height:22px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:700; color: var(--ink-soft);
+    font-family:'Gowun Batang', serif;
+    margin-top:1px;
+  }
+
+  /* result */
+  .result-header{ text-align:center; margin-bottom:6px; }
+  .stamp-wrap{
+    display:flex; justify-content:center; margin-bottom:8px;
+  }
+  .type-eyebrow{
+    text-align:center;
+    font-size:12px; letter-spacing:.28em; color:var(--brass); font-weight:700;
+    text-transform:uppercase; margin-top:14px;
+  }
+  h1.type-name{
+    text-align:center;
+    margin:8px 0 6px;
+  }
+  p.type-blurb{
+    text-align:center;
+    max-width:460px;
+    margin:0 auto 30px;
+    color: var(--ink-soft);
+    font-size:15px; line-height:1.75;
+  }
+  .compass-wrap{ display:flex; justify-content:center; margin-bottom:30px; }
+  .jobs{
+    display:flex; flex-direction:column; gap:10px; margin-bottom:8px;
+  }
+  .job{
+    display:flex; align-items:center; gap:14px;
+    background: var(--paper);
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:14px 16px;
+  }
+  .job .num{
+    font-family:'Gowun Batang', serif;
+    font-weight:700; color: var(--rust); font-size:16px; width:22px; text-align:center;
+  }
+  .job .name{ font-weight:700; font-size:15px; }
+  .job .desc{ font-size:12.5px; color:var(--ink-soft); margin-top:2px; }
+  .divider{
+    border:none; border-top:1px dashed var(--line); margin:28px 0;
+  }
+  .secondary-note{
+    font-size:13px; color:var(--ink-soft); text-align:center; margin-bottom:26px; line-height:1.7;
+  }
+  .actions{ display:flex; gap:10px; justify-content:center; margin-top:8px; }
+  .footer-note{
+    text-align:center; font-size:11.5px; color:var(--ink-soft); opacity:.75; margin-top:22px;
+  }
+  .hidden{ display:none !important; }
+
+  @media (max-width:480px){
+    .card{ padding:30px 22px; }
+    h1{ font-size:27px; }
+    h2.q{ font-size:19px; }
+  }
+</style>
+</head>
+<body>
+<div style="max-width:640px;margin:0 auto;padding:18px 16px 0;display:flex;align-items:center;justify-content:space-between;font-family:'Noto Sans KR',sans-serif;">
+  <a href="../index.html" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:#2b2a24;">
+    <svg width="28" height="28" viewBox="0 0 34 34" fill="none">
+      <circle cx="17" cy="18" r="14" fill="#faf6ec" stroke="#2b2a24" stroke-width="2"/>
+      <path d="M17 9 L17 18 L23 21" stroke="#7a3b2e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="13" y="2" width="8" height="4" rx="1.5" fill="#2b2a24"/>
+    </svg>
+    <span style="font-weight:700;font-size:14px;">3분 놀이터</span>
+  </a>
+  <a href="../index.html" style="font-size:12.5px;font-weight:700;color:#57544a;border:1px solid rgba(43,42,36,0.18);padding:7px 12px;border-radius:999px;text-decoration:none;">← 다른 콘텐츠 보기</a>
+</div>
+<div class="stage">
+
+  <!-- INTRO -->
+  <div class="card" id="screen-intro">
+    <div class="mark">
+      <svg viewBox="0 0 78 78" fill="none">
+        <circle cx="39" cy="39" r="36" stroke="#b08d3e" stroke-width="1.4"/>
+        <circle cx="39" cy="39" r="29" stroke="#7a3b2e" stroke-width="1" stroke-dasharray="2 4"/>
+        <path d="M39 12 L44 39 L39 66 L34 39 Z" fill="#2b2a24" opacity="0.85"/>
+        <path d="M12 39 L39 34 L66 39 L39 44 Z" fill="#35604f" opacity="0.75"/>
+        <circle cx="39" cy="39" r="3.4" fill="#b08d3e"/>
+      </svg>
+    </div>
+    <div class="eyebrow">10개의 갈림길</div>
+    <h1>나의 커리어 나침반</h1>
+    <p class="lead">
+      열 개의 짧은 상황을 지나며 당신이 자연스럽게 고르는 선택들을 따라가 봅니다.
+      여정의 끝에서 나침반이 가리키는 방향과, 그 방향에 어울리는 직업들을 만나게 됩니다.
+      정답은 없습니다 — 가장 먼저 끌리는 답을 고르면 됩니다.
+    </p>
+    <button class="btn" onclick="startQuiz()">여정 시작하기</button>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="card hidden" id="screen-quiz">
+    <div class="trail" id="trail"></div>
+    <div class="qmeta">
+      <span class="num" id="q-num">01</span>
+      <span class="stop" id="q-stop"></span>
+    </div>
+    <h2 class="q" id="q-text"></h2>
+    <div class="options" id="q-options"></div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="card hidden" id="screen-result">
+    <div class="result-header">
+      <div class="stamp-wrap">
+        <svg width="72" height="72" viewBox="0 0 72 72" fill="none" id="result-icon"></svg>
+      </div>
+      <div class="type-eyebrow">당신의 나침반이 가리키는 방향</div>
+      <h1 class="type-name" id="type-name"></h1>
+      <p class="type-blurb" id="type-blurb"></p>
+    </div>
+
+    <div class="compass-wrap">
+      <svg width="260" height="260" viewBox="0 0 260 260" id="radar"></svg>
+    </div>
+
+    <div class="jobs" id="jobs"></div>
+
+    <div id="secondary-block"></div>
+
+    <hr class="divider">
+    <div class="actions">
+      <button class="btn ghost" onclick="restartQuiz()">다시 해보기</button>
+    </div>
+    <div class="footer-note">가볍게 즐기는 자기 이해 도구입니다. 진로는 결국 당신이 정합니다.</div>
+  </div>
+
+</div>
+
+<div style="max-width:640px;margin:22px auto 0;padding:0 16px;">
+  <div style="border:1.5px dashed rgba(43,42,36,0.18);border-radius:8px;background:#f2eee3;min-height:90px;display:flex;align-items:center;justify-content:center;color:#57544a;font-size:12px;letter-spacing:.08em;">
+    광고 영역 (콘텐츠 하단)
+  </div>
+  <footer style="text-align:center;color:#57544a;font-size:12px;padding:22px 0 46px;">© 2026 3분 놀이터. 콘텐츠는 재미로 즐겨주세요.</footer>
+</div>
+
+<script>
+/* ---------------- Data ---------------- */
+
+const TYPES = {
+  A: {
+    name: "분석가",
+    en: "The Analyst",
+    color: "#3b5a72",
+    blurb: "복잡한 정보를 논리적으로 정리하고, 근거를 바탕으로 최선의 답을 찾을 때 가장 몰입합니다. 감이 아니라 데이터와 원리로 세상을 이해하는 편입니다.",
+    jobs: [
+      { name: "데이터 사이언티스트", desc: "숫자 속에서 패턴과 인사이트를 찾아내는 일" },
+      { name: "연구원", desc: "가설을 세우고 실험으로 검증해나가는 일" },
+      { name: "전략 컨설턴트", desc: "복잡한 문제를 구조화해 해법을 설계하는 일" }
+    ]
+  },
+  B: {
+    name: "창작가",
+    en: "The Creator",
+    color: "#7a3b2e",
+    blurb: "머릿속의 이미지와 감각을 형태가 있는 결과물로 옮길 때 살아있음을 느낍니다. 남들이 지나친 것에서 새로운 표현을 찾아냅니다.",
+    jobs: [
+      { name: "UX/UI 디자이너", desc: "사람이 쓰기 편하고 아름다운 화면을 설계하는 일" },
+      { name: "콘텐츠 크리에이터", desc: "아이디어를 영상·글·이미지로 풀어내는 일" },
+      { name: "카피라이터", desc: "짧은 문장으로 마음을 움직이는 일" }
+    ]
+  },
+  C: {
+    name: "연결자",
+    en: "The Connector",
+    color: "#35604f",
+    blurb: "사람들 사이의 온도를 잘 감지하고, 각자의 입장을 이어주는 역할을 자연스럽게 맡습니다. 함께할 때 더 좋은 결과가 나온다고 믿습니다.",
+    jobs: [
+      { name: "마케터", desc: "브랜드와 사람의 마음을 이어주는 일" },
+      { name: "HR 매니저", desc: "조직과 구성원이 서로 맞춰가도록 돕는 일" },
+      { name: "상담가", desc: "사람의 이야기를 듣고 함께 길을 찾는 일" }
+    ]
+  },
+  D: {
+    name: "해결사",
+    en: "The Builder",
+    color: "#4a4438",
+    blurb: "일단 손을 움직여 부딪히며 배우는 편입니다. 이론보다 결과물, 계획보다 실행에서 확신을 얻습니다.",
+    jobs: [
+      { name: "소프트웨어 엔지니어", desc: "아이디어를 직접 동작하는 것으로 만드는 일" },
+      { name: "프로덕트 매니저", desc: "여러 조각을 실제로 굴러가게 조율하는 일" },
+      { name: "메이커/제작 전문가", desc: "손으로 직접 만들고 고치는 일" }
+    ]
+  },
+  E: {
+    name: "탐험가",
+    en: "The Explorer",
+    color: "#b08d3e",
+    blurb: "익숙한 길보다 아직 가보지 않은 길에 끌립니다. 변화와 새로운 시도 속에서 에너지를 얻고, 정해진 틀에 오래 머무르지 못합니다.",
+    jobs: [
+      { name: "여행 기획자", desc: "낯선 곳을 경험으로 설계하는 일" },
+      { name: "저널리스트", desc: "새로운 이야기를 발굴하고 전하는 일" },
+      { name: "스타트업 창업가", desc: "없던 것을 처음부터 만들어가는 일" }
+    ]
+  },
+  F: {
+    name: "수호자",
+    en: "The Guardian",
+    color: "#5c6b57",
+    blurb: "꾸준함과 신중함으로 신뢰를 쌓습니다. 화려하지 않아도 흔들림 없이 완성해내는 일에서 보람을 느낍니다.",
+    jobs: [
+      { name: "회계사", desc: "숫자와 규정을 꼼꼼히 지켜내는 일" },
+      { name: "품질관리 전문가", desc: "기준을 세우고 끝까지 지켜내는 일" },
+      { name: "운영 매니저", desc: "조직이 안정적으로 굴러가게 관리하는 일" }
+    ]
+  }
+};
+
+const QUESTIONS = [
+  {
+    text: "체육대회 반 대표를 정해야 하는데 아무도 안 나선다. 당신의 선택은?",
+    stop: "체육대회 소집",
+    options: [
+      { t:"A", label:"상대 반 전력을 분석해서 작전부터 짠다" },
+      { t:"B", label:"우리 반만의 응원 컨셉과 소품을 만든다" },
+      { t:"C", label:"한 명씩 설득해서 팀을 꾸린다" },
+      { t:"D", label:"그냥 내가 나가서 직접 뛴다" }
+    ]
+  },
+  {
+    text: "조별과제 발표 전날, 팀원 한 명이 갑자기 잠수를 탔다!",
+    stop: "조별과제 위기",
+    options: [
+      { t:"A", label:"남은 자료로 발표 논리부터 다시 짠다" },
+      { t:"D", label:"밤새서라도 그 사람 몫까지 만들어버린다" },
+      { t:"C", label:"단톡방에서 팀원들 다독이며 분위기를 추스른다" },
+      { t:"F", label:"마감까지 역할과 시간표를 다시 짠다" }
+    ]
+  },
+  {
+    text: "급식실에 처음 보는 신메뉴가 나왔다. 당신의 첫 반응은?",
+    stop: "급식실",
+    options: [
+      { t:"E", label:"일단 제일 먼저 도전해본다" },
+      { t:"B", label:"플레이팅이랑 색감부터 눈여겨본다" },
+      { t:"C", label:"친구들이랑 맛 품평하며 수다 떤다" },
+      { t:"A", label:"재료랑 칼로리부터 슬쩍 확인해본다" }
+    ]
+  },
+  {
+    text: "수학여행 자유시간, 두 시간이 주어졌다. 당신은?",
+    stop: "수학여행 자유시간",
+    options: [
+      { t:"F", label:"미리 짜둔 동선표대로 움직인다" },
+      { t:"E", label:"지도 없이 그냥 골목을 걸어본다" },
+      { t:"C", label:"다 같이 뭐 할지부터 투표한다" },
+      { t:"D", label:"숙소 와이파이나 고장난 물건부터 고쳐준다" }
+    ]
+  },
+  {
+    text: "좋아하는 유튜버/아이돌의 새 영상이 떴다! 제일 먼저 하는 일은?",
+    stop: "알고리즘의 늪",
+    options: [
+      { t:"B", label:"편집이랑 연출 포인트를 뜯어본다" },
+      { t:"A", label:"조회수랑 반응부터 분석한다" },
+      { t:"C", label:"바로 친구한테 링크 보내고 반응을 본다" },
+      { t:"E", label:"관련 채널까지 줄줄이 파고든다" }
+    ]
+  },
+  {
+    text: "시험기간, 스트레스가 최고조에 달했다! 당신만의 해소법은?",
+    stop: "시험기간",
+    options: [
+      { t:"A", label:"오답노트를 정리하며 원인을 찾는다" },
+      { t:"B", label:"다이어리를 꾸미거나 낙서를 한다" },
+      { t:"C", label:"단톡방에서 친구들이랑 하소연한다" },
+      { t:"E", label:"잠깐 나가서 평소 안 가던 곳을 걷는다" }
+    ]
+  },
+  {
+    text: "새 동아리를 만든다면, 당신이 맡고 싶은 역할은?",
+    stop: "동아리 창단",
+    options: [
+      { t:"D", label:"필요한 걸 직접 만들고 세팅하는 역할" },
+      { t:"F", label:"회칙이랑 회비를 관리하는 역할" },
+      { t:"C", label:"부원 모집하고 분위기 띄우는 역할" },
+      { t:"B", label:"홍보 포스터랑 SNS 콘텐츠 만드는 역할" }
+    ]
+  },
+  {
+    text: "새로 산 게임, 당신의 플레이 스타일은?",
+    stop: "게임 로딩 중",
+    options: [
+      { t:"A", label:"공략법과 스탯부터 분석하고 시작한다" },
+      { t:"D", label:"일단 부딪히며 몸으로 익힌다" },
+      { t:"C", label:"친구들이랑 팀 플레이할 때가 제일 재밌다" },
+      { t:"F", label:"규칙 안에서 안정적으로 클리어하는 게 좋다" }
+    ]
+  },
+  {
+    text: "진로상담 시간, 선생님이 물으신다. \"넌 뭐 할 때 시간 가는 줄 모르니?\"",
+    stop: "진로상담실",
+    options: [
+      { t:"A", label:"\"문제 풀이나 퍼즐에 몰입할 때요\"" },
+      { t:"B", label:"\"그림 그리거나 글 쓸 때요\"" },
+      { t:"C", label:"\"친구들이랑 어울릴 때요\"" },
+      { t:"E", label:"\"새로운 거 알아보고 도전할 때요\"" }
+    ]
+  },
+  {
+    text: "오늘 하루, 학교 대신 어디든 갈 수 있는 땡땡이 찬스가 생겼다면?",
+    stop: "땡땡이 찬스",
+    options: [
+      { t:"F", label:"계획표부터 짜서 알차게 하루를 보낸다" },
+      { t:"E", label:"어디 갈지 정하지 않고 무작정 나간다" },
+      { t:"B", label:"전시회나 공연을 보러 간다" },
+      { t:"D", label:"평소 만들어보고 싶었던 걸 직접 만든다" }
+    ]
+  }
+];
+
+/* ---------------- State ---------------- */
+let current = 0;
+let scores = { A:0,B:0,C:0,D:0,E:0,F:0 };
+
+/* ---------------- Screens ---------------- */
+function show(id){
+  ["screen-intro","screen-quiz","screen-result"].forEach(s=>{
+    document.getElementById(s).classList.toggle("hidden", s!==id);
+  });
+}
+
+function startQuiz(){
+  current = 0;
+  scores = { A:0,B:0,C:0,D:0,E:0,F:0 };
+  buildTrail();
+  show("screen-quiz");
+  renderQuestion();
+}
+
+function buildTrail(){
+  const trail = document.getElementById("trail");
+  trail.innerHTML = "";
+  QUESTIONS.forEach((_,i)=>{
+    const step = document.createElement("div");
+    step.className = "step";
+    step.id = "step-"+i;
+    step.innerHTML = "<i></i>";
+    trail.appendChild(step);
+  });
+}
+
+function updateTrail(){
+  QUESTIONS.forEach((_,i)=>{
+    document.getElementById("step-"+i).classList.toggle("done", i < current);
+  });
+}
+
+function renderQuestion(){
+  updateTrail();
+  const q = QUESTIONS[current];
+  document.getElementById("q-num").textContent = String(current+1).padStart(2,"0") + " / " + String(QUESTIONS.length).padStart(2,"0");
+  document.getElementById("q-stop").textContent = q.stop;
+  document.getElementById("q-text").textContent = q.text;
+
+  const optWrap = document.getElementById("q-options");
+  optWrap.innerHTML = "";
+  const labels = ["A","B","C","D"];
+  q.options.forEach((opt, idx)=>{
+    const el = document.createElement("button");
+    el.className = "opt";
+    el.innerHTML = '<span class="tag">'+labels[idx]+'</span><span>'+opt.label+'</span>';
+    el.onclick = ()=> selectOption(opt.t);
+    optWrap.appendChild(el);
+  });
+}
+
+function selectOption(type){
+  scores[type] += 1;
+  current += 1;
+  if(current < QUESTIONS.length){
+    renderQuestion();
+  } else {
+    renderResult();
+  }
+}
+
+function restartQuiz(){
+  startQuiz();
+}
+
+/* ---------------- Result ---------------- */
+function renderResult(){
+  const order = ["A","B","C","D","E","F"];
+  let ranked = order.map(k=>({k, v:scores[k]})).sort((a,b)=> b.v - a.v);
+  const top = ranked[0];
+  const topType = TYPES[top.k];
+
+  document.getElementById("type-name").textContent = topType.name;
+  document.getElementById("type-name").style.color = topType.color;
+  document.getElementById("type-blurb").textContent = topType.blurb;
+
+  // stamp icon
+  document.getElementById("result-icon").innerHTML =
+    '<circle cx="36" cy="36" r="32" stroke="'+topType.color+'" stroke-width="2" fill="none"/>' +
+    '<circle cx="36" cy="36" r="25" stroke="'+topType.color+'" stroke-width="1" stroke-dasharray="2 4" fill="none"/>' +
+    '<text x="36" y="42" text-anchor="middle" font-family="Gowun Batang, serif" font-size="15" font-weight="700" fill="'+topType.color+'">'+topType.name.slice(0,2)+'</text>';
+
+  // jobs
+  const jobsWrap = document.getElementById("jobs");
+  jobsWrap.innerHTML = "";
+  topType.jobs.forEach((j, i)=>{
+    const el = document.createElement("div");
+    el.className = "job";
+    el.innerHTML = '<span class="num">'+(i+1)+'</span><div><div class="name">'+j.name+'</div><div class="desc">'+j.desc+'</div></div>';
+    jobsWrap.appendChild(el);
+  });
+
+  // secondary note if close second
+  const second = ranked[1];
+  const secBlock = document.getElementById("secondary-block");
+  if(second.v >= top.v - 1 && second.v > 0){
+    const secType = TYPES[second.k];
+    secBlock.innerHTML = '<p class="secondary-note">'+topType.name+'의 기질에 <strong style="color:'+secType.color+'">'+secType.name+'</strong>의 색이 가깝게 섞여 있습니다. '+secType.jobs.map(j=>j.name).join(", ")+' 같은 방향도 함께 눈여겨볼 만합니다.</p>';
+  } else {
+    secBlock.innerHTML = "";
+  }
+
+  drawRadar(ranked);
+  show("screen-result");
+}
+
+function drawRadar(ranked){
+  const svg = document.getElementById("radar");
+  const cx = 130, cy = 130, maxR = 92;
+  const order = ["A","B","C","D","E","F"];
+  const maxScore = Math.max(...order.map(k=>scores[k]), 1);
+
+  function pt(i, r){
+    const angle = (-90 + i*60) * Math.PI/180;
+    return [cx + r*Math.cos(angle), cy + r*Math.sin(angle)];
+  }
+
+  let svgContent = "";
+
+  // grid rings
+  [0.25,0.5,0.75,1].forEach(f=>{
+    let pts = order.map((_,i)=> pt(i, maxR*f).join(",")).join(" ");
+    svgContent += '<polygon points="'+pts+'" fill="none" stroke="rgba(43,42,36,0.14)" stroke-width="1"/>';
+  });
+
+  // axis lines
+  order.forEach((_,i)=>{
+    const [x,y] = pt(i, maxR);
+    svgContent += '<line x1="'+cx+'" y1="'+cy+'" x2="'+x+'" y2="'+y+'" stroke="rgba(43,42,36,0.14)" stroke-width="1"/>';
+  });
+
+  // score polygon
+  let scorePts = order.map((k,i)=>{
+    const r = maxR * (scores[k]/maxScore) * 0.92;
+    return pt(i, Math.max(r,4)).join(",");
+  }).join(" ");
+  svgContent += '<polygon points="'+scorePts+'" fill="rgba(122,59,46,0.22)" stroke="#7a3b2e" stroke-width="2"/>';
+
+  // dots + labels
+  order.forEach((k,i)=>{
+    const r = maxR * (scores[k]/maxScore) * 0.92;
+    const [x,y] = pt(i, Math.max(r,4));
+    svgContent += '<circle cx="'+x+'" cy="'+y+'" r="3.5" fill="#7a3b2e"/>';
+    const [lx,ly] = pt(i, maxR + 20);
+    svgContent += '<text x="'+lx+'" y="'+ly+'" text-anchor="middle" dominant-baseline="middle" font-family="Gowun Batang, serif" font-size="13" font-weight="700" fill="#2b2a24">'+TYPES[k].name+'</text>';
+  });
+
+  svg.innerHTML = svgContent;
+}
+</script>
+</body>
+</html>
