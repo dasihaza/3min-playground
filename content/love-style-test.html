@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>나의 연애 스타일 테스트 | 3분 놀이터</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #fdf1ee;
+    --paper-light: #fffaf8;
+    --ink: #3a2a2f;
+    --ink-soft: #8a6a70;
+    --rose: #c4344b;
+    --sage: #5b7b6e;
+    --honey: #c08a2e;
+    --line: rgba(58,42,47,0.14);
+    --shadow: 0 10px 30px rgba(58,42,47,0.10);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1100px 550px at 8% -10%, rgba(196,52,75,0.08), transparent 60%),
+      radial-gradient(900px 480px at 105% 12%, rgba(91,123,110,0.08), transparent 55%),
+      var(--paper);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height:100vh;
+    padding:0;
+  }
+  .topbar{
+    max-width:640px; margin:0 auto; padding:14px 16px 0;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .topbar a.brand{ display:flex; align-items:center; gap:8px; text-decoration:none; color:var(--ink); }
+  .topbar .brand span{ font-weight:700; font-size:14px; }
+  .topbar .back{
+    font-size:12.5px; font-weight:700; color:var(--ink-soft);
+    border:1px solid var(--line); padding:7px 12px; border-radius:999px; text-decoration:none;
+  }
+  .stage{ width:100%; max-width:600px; margin:0 auto; padding:20px 16px 40px; }
+  .card{
+    background: var(--paper-light);
+    border: 1px solid var(--line);
+    border-radius:16px;
+    box-shadow: var(--shadow);
+    padding:40px 36px;
+    position:relative;
+  }
+  .eyebrow{ font-size:12px; letter-spacing:.28em; text-transform:uppercase; color:var(--honey); font-weight:700; }
+  h1{ font-family:'Gowun Batang', serif; font-size:31px; line-height:1.35; margin:10px 0 14px; font-weight:700; }
+  p.lead{ color:var(--ink-soft); font-size:15px; line-height:1.75; margin:0 0 28px; }
+  .btn{
+    appearance:none; border:none; cursor:pointer;
+    font-family:'Noto Sans KR', sans-serif; font-weight:700; font-size:15px;
+    padding:14px 26px; border-radius:999px;
+    background: var(--rose); color:#fff;
+    transition: transform .15s ease, background .2s ease;
+  }
+  .btn:hover{ transform: translateY(-1px); }
+  .btn.ghost{ background:transparent; color:var(--ink); border:1px solid var(--line); }
+
+  .heart-mark{ width:66px; height:66px; margin:0 0 18px; }
+
+  .trail{ display:flex; gap:6px; margin-bottom:26px; }
+  .trail .step{ flex:1; height:4px; background:rgba(58,42,47,0.12); border-radius:2px; overflow:hidden; }
+  .trail .step > i{ display:block; height:100%; width:0%; background:var(--rose); transition:width .35s ease; }
+  .trail .step.done > i{ width:100%; }
+
+  .qmeta{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px; }
+  .qmeta .num{ font-family:'Gowun Batang', serif; color:var(--honey); font-size:14px; font-weight:700; letter-spacing:.1em; }
+  .qmeta .stop{ font-size:12px; color:var(--ink-soft); letter-spacing:.06em; }
+  h2.q{ font-family:'Gowun Batang', serif; font-size:22px; line-height:1.5; margin:6px 0 22px; font-weight:700; }
+
+  .options{ display:flex; flex-direction:column; gap:10px; }
+  .opt{
+    text-align:left; background:var(--paper); border:1px solid var(--line); border-radius:10px;
+    padding:14px 18px; font-size:14.5px; line-height:1.5; cursor:pointer;
+    transition: border-color .15s ease, background .15s ease, transform .1s ease;
+  }
+  .opt:hover{ border-color:var(--rose); background:#fff5f4; }
+  .opt:active{ transform: scale(0.995); }
+
+  .result-header{ text-align:center; }
+  .stamp-wrap{ display:flex; justify-content:center; margin-bottom:8px; }
+  .type-eyebrow{ text-align:center; font-size:12px; letter-spacing:.24em; color:var(--honey); font-weight:700; text-transform:uppercase; margin-top:12px; }
+  h1.type-name{ text-align:center; margin:8px 0 6px; }
+  p.type-blurb{ text-align:center; max-width:440px; margin:0 auto 28px; color:var(--ink-soft); font-size:14.5px; line-height:1.75; }
+
+  .compass-wrap{ display:flex; justify-content:center; margin-bottom:28px; }
+
+  .traits{ display:flex; flex-direction:column; gap:10px; margin-bottom:8px; }
+  .trait{ display:flex; align-items:flex-start; gap:12px; background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:14px 16px; }
+  .trait .mark{ font-family:'Gowun Batang', serif; font-weight:700; color:var(--rose); font-size:16px; width:20px; }
+  .trait .txt{ font-size:13.5px; line-height:1.65; color:var(--ink); }
+
+  .divider{ border:none; border-top:1px dashed var(--line); margin:26px 0; }
+  .secondary-note{ font-size:13px; color:var(--ink-soft); text-align:center; margin-bottom:24px; line-height:1.7; }
+  .actions{ display:flex; gap:10px; justify-content:center; margin-top:8px; }
+  .footer-note{ text-align:center; font-size:11.5px; color:var(--ink-soft); opacity:.75; margin-top:20px; }
+  .hidden{ display:none !important; }
+
+  @media (max-width:480px){
+    .card{ padding:28px 22px; }
+    h1{ font-size:25px; }
+    h2.q{ font-size:18px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="../index.html">
+    <svg width="26" height="26" viewBox="0 0 34 34" fill="none">
+      <circle cx="17" cy="18" r="14" fill="#fdf1ee" stroke="#3a2a2f" stroke-width="2"/>
+      <path d="M17 9 L17 18 L23 21" stroke="#c4344b" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="13" y="2" width="8" height="4" rx="1.5" fill="#3a2a2f"/>
+    </svg>
+    <span>3분 놀이터</span>
+  </a>
+  <a class="back" href="../index.html">← 다른 콘텐츠 보기</a>
+</div>
+
+<div class="stage">
+
+  <!-- INTRO -->
+  <div class="card" id="screen-intro">
+    <svg class="heart-mark" viewBox="0 0 66 66" fill="none">
+      <circle cx="33" cy="33" r="30" stroke="#c08a2e" stroke-width="1.4"/>
+      <path d="M33 46 C18 36 12 27 18 20 C22.5 15 30 16.5 33 22 C36 16.5 43.5 15 48 20 C54 27 48 36 33 46 Z" fill="#c4344b" opacity="0.88"/>
+    </svg>
+    <div class="eyebrow">10개의 순간들</div>
+    <h1>나의 연애 스타일 테스트</h1>
+    <p class="lead">
+      썸, 다툼, 화해, 설렘의 순간들 — 열 가지 상황에서 당신이 자연스럽게 하는 선택을 따라가 봅니다.
+      끝에서 당신의 연애 스타일과, 그 스타일이 특히 빛나는 순간들을 만나게 됩니다.
+    </p>
+    <button class="btn" onclick="startQuiz()">테스트 시작하기</button>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="card hidden" id="screen-quiz">
+    <div class="trail" id="trail"></div>
+    <div class="qmeta">
+      <span class="num" id="q-num">01</span>
+      <span class="stop" id="q-stop"></span>
+    </div>
+    <h2 class="q" id="q-text"></h2>
+    <div class="options" id="q-options"></div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="card hidden" id="screen-result">
+    <div class="result-header">
+      <div class="stamp-wrap">
+        <svg width="68" height="68" viewBox="0 0 68 68" fill="none" id="result-icon"></svg>
+      </div>
+      <div class="type-eyebrow">당신의 연애 스타일은</div>
+      <h1 class="type-name" id="type-name"></h1>
+      <p class="type-blurb" id="type-blurb"></p>
+    </div>
+
+    <div class="compass-wrap">
+      <svg width="250" height="250" viewBox="0 0 250 250" id="radar"></svg>
+    </div>
+
+    <div class="traits" id="traits"></div>
+
+    <div id="secondary-block"></div>
+
+    <hr class="divider">
+    <div class="actions">
+      <button class="btn ghost" onclick="restartQuiz()">다시 해보기</button>
+      <a class="btn" href="../index.html">다른 콘텐츠 보기</a>
+    </div>
+    <div class="footer-note">가볍게 즐기는 재미용 테스트예요. 진짜 나를 아는 건 결국 나 자신이죠.</div>
+  </div>
+
+</div>
+
+<script>
+const TYPES = {
+  A: {
+    name: "설렘 추구형",
+    color: "#c4344b",
+    blurb: "연애의 원동력은 두근거림이에요. 새로운 자극과 이벤트가 없으면 금방 지루해지는 편이라, 관계에 계속 신선한 활력을 불어넣는 걸 즐깁니다.",
+    traits: [
+      "새로운 데이트 코스나 이벤트를 먼저 제안해요",
+      "권태기가 오면 여행이나 새로운 활동으로 돌파해요",
+      "예측 가능한 반복보다 즉흥적인 순간에 더 설레요"
+    ]
+  },
+  B: {
+    name: "안정 지향형",
+    color: "#5b7b6e",
+    blurb: "화려한 이벤트보다 한결같은 믿음이 더 중요해요. 편안하고 예측 가능한 관계 속에서 진짜 사랑을 느끼는 타입입니다.",
+    traits: [
+      "갈등이 생겨도 쉽게 흔들리지 않고 차분해요",
+      "매일 연락보다 꾸준한 신뢰를 더 중요하게 여겨요",
+      "오래 만날수록 편안함이 매력이 되는 스타일이에요"
+    ]
+  },
+  C: {
+    name: "밀당의 고수형",
+    color: "#8a4b6b",
+    blurb: "너무 쉽게 마음을 다 보이지 않는 게 매력 포인트라고 믿어요. 적당한 긴장감이 관계를 오래가게 한다고 생각하는 전략가 타입입니다.",
+    traits: [
+      "먼저 연락하기보다 상대의 리듬을 살피는 편이에요",
+      "관심 표현에 완급 조절을 잘 해요",
+      "너무 빤히 보이는 관계는 오히려 부담스러워해요"
+    ]
+  },
+  D: {
+    name: "올인형",
+    color: "#b23a2e",
+    blurb: "마음을 먹으면 100% 다 주는 편이에요. 표현에 거리낌이 없고, 상대에게 확신을 주는 걸 중요하게 생각합니다.",
+    traits: [
+      "좋아하는 마음을 숨기지 않고 바로 표현해요",
+      "갈등이 생기면 바로 대화로 풀고 싶어해요",
+      "연인을 우선순위 앞자리에 두는 편이에요"
+    ]
+  },
+  E: {
+    name: "친구 같은 연인형",
+    color: "#c08a2e",
+    blurb: "설렘보다 편안함이 먼저인 타입이에요. 연인이기 이전에 제일 친한 친구 같은 관계를 만드는 게 목표입니다.",
+    traits: [
+      "같이 있을 때 웃음이 끊이지 않는 걸 중요하게 여겨요",
+      "무거운 얘기도 장난스럽게 풀어내는 재주가 있어요",
+      "연애 감정보다 신뢰와 케미를 더 오래 기억해요"
+    ]
+  },
+  F: {
+    name: "츤데레형",
+    color: "#3e6e71",
+    blurb: "마음은 있는데 표현이 서툰 편이에요. 겉으론 무심한 척해도 속으로는 누구보다 상대를 신경 쓰는 타입입니다.",
+    traits: [
+      "챙겨주고 나서 괜히 무심한 척 딴소리를 해요",
+      "직접 말보다 행동으로 마음을 표현하는 편이에요",
+      "서운해도 티 안 내려다 결국 티가 나는 편이에요"
+    ]
+  }
+};
+
+const QUESTIONS = [
+  { text:"썸 타는 상대에게 갑자기 연락이 뜸해졌다. 당신의 반응은?", stop:"썸의 시작",
+    options:[ {t:"B",label:"믿고 차분히 기다린다"}, {t:"C",label:"똑같이 나도 연락을 줄인다"}, {t:"D",label:"무슨 일 있는지 먼저 물어본다"}, {t:"A",label:"새로운 사람들, 취미로 신경을 돌린다"} ] },
+  { text:"소개팅 첫 만남, 당신의 대화 스타일은?", stop:"첫 만남",
+    options:[ {t:"E",label:"재밌는 얘기로 분위기를 띄운다"}, {t:"D",label:"궁금한 걸 솔직하게 다 물어본다"}, {t:"C",label:"적당히 여지를 남기며 신비주의를 유지한다"}, {t:"F",label:"말보다 어색한 행동으로 관심을 표현한다"} ] },
+  { text:"연인이 갑자기 서프라이즈 이벤트를 준비했다. 당신의 기분은?", stop:"서프라이즈",
+    options:[ {t:"A",label:"완전 신나고 기대된다"}, {t:"B",label:"고맙지만 약간 부담스럽기도 하다"}, {t:"F",label:"겉으론 안 그런 척, 속으론 엄청 좋아한다"}, {t:"D",label:"나도 더 크게 되갚아줘야겠다고 생각한다"} ] },
+  { text:"다투고 난 뒤, 당신이 화해하는 방식은?", stop:"다툼 그 후",
+    options:[ {t:"D",label:"바로 대화로 풀어야 마음이 편하다"}, {t:"B",label:"시간을 두고 자연스럽게 풀린다"}, {t:"C",label:"상대가 먼저 다가오길 기다린다"}, {t:"E",label:"장난치듯 넘기며 분위기를 풀어본다"} ] },
+  { text:"연애할 때 가장 설레는 순간은?", stop:"설렘의 순간",
+    options:[ {t:"A",label:"처음 좋아한다는 걸 깨달았을 때"}, {t:"B",label:"서로 편하게 아무 말 안 해도 될 때"}, {t:"E",label:"같이 웃긴 얘기하며 놀 때"}, {t:"C",label:"밀고 당기기가 잘 통했을 때"} ] },
+  { text:"상대에게 서운한 일이 생겼다. 당신은?", stop:"서운함",
+    options:[ {t:"D",label:"솔직하게 바로 말한다"}, {t:"F",label:"괜찮은 척하지만 티가 난다"}, {t:"B",label:"일단 넘어가고 나중에 조용히 얘기한다"}, {t:"E",label:"장난스럽게 삐진 척 풀어달라 한다"} ] },
+  { text:"이상형에게 끌리는 포인트는?", stop:"이상형",
+    options:[ {t:"A",label:"예측 불가능한 매력"}, {t:"B",label:"한결같이 믿음직한 모습"}, {t:"E",label:"나를 웃게 해주는 사람"}, {t:"F",label:"겉과 속이 다른 반전 매력"} ] },
+  { text:"커플 메신저 프로필, 당신은 어떻게 하나요?", stop:"프로필 사진",
+    options:[ {t:"C",label:"굳이 티내지 않는다"}, {t:"D",label:"대놓고 커플 사진으로 바꾼다"}, {t:"E",label:"친구들과 다 같이 찍은 사진으로 한다"}, {t:"F",label:"무심한 척 프로필은 그대로 둔다"} ] },
+  { text:"연애 초반, 연락 빈도는 어느 정도가 좋나요?", stop:"연락의 온도",
+    options:[ {t:"D",label:"매일 자주 연락해야 안심된다"}, {t:"B",label:"적당히 여유 있게, 급할 거 없다"}, {t:"C",label:"너무 자주 하면 매력 없다고 생각한다"}, {t:"A",label:"연락보다 만나서 노는 게 더 좋다"} ] },
+  { text:"연애할 때 나의 최종 목표는?", stop:"연애의 목적지",
+    options:[ {t:"A",label:"함께 새로운 걸 계속 경험하는 것"}, {t:"B",label:"오래도록 편안하게 함께하는 것"}, {t:"E",label:"서로에게 최고의 친구가 되는 것"}, {t:"F",label:"표현은 서툴러도 진심을 다하는 것"} ] }
+];
+
+let current = 0;
+let scores = { A:0,B:0,C:0,D:0,E:0,F:0 };
+
+function show(id){
+  ["screen-intro","screen-quiz","screen-result"].forEach(s=>{
+    document.getElementById(s).classList.toggle("hidden", s!==id);
+  });
+}
+
+function startQuiz(){
+  current = 0;
+  scores = { A:0,B:0,C:0,D:0,E:0,F:0 };
+  buildTrail();
+  show("screen-quiz");
+  renderQuestion();
+}
+
+function buildTrail(){
+  const trail = document.getElementById("trail");
+  trail.innerHTML = "";
+  QUESTIONS.forEach((_,i)=>{
+    const step = document.createElement("div");
+    step.className = "step"; step.id = "step-"+i;
+    step.innerHTML = "<i></i>";
+    trail.appendChild(step);
+  });
+}
+function updateTrail(){
+  QUESTIONS.forEach((_,i)=>{
+    document.getElementById("step-"+i).classList.toggle("done", i < current);
+  });
+}
+
+function renderQuestion(){
+  updateTrail();
+  const q = QUESTIONS[current];
+  document.getElementById("q-num").textContent = String(current+1).padStart(2,"0") + " / " + String(QUESTIONS.length).padStart(2,"0");
+  document.getElementById("q-stop").textContent = q.stop;
+  document.getElementById("q-text").textContent = q.text;
+
+  const optWrap = document.getElementById("q-options");
+  optWrap.innerHTML = "";
+  q.options.forEach(opt=>{
+    const el = document.createElement("button");
+    el.className = "opt";
+    el.textContent = opt.label;
+    el.onclick = ()=> selectOption(opt.t);
+    optWrap.appendChild(el);
+  });
+}
+
+function selectOption(type){
+  scores[type] += 1;
+  current += 1;
+  if(current < QUESTIONS.length){
+    renderQuestion();
+  } else {
+    renderResult();
+  }
+}
+
+function restartQuiz(){ startQuiz(); }
+
+function renderResult(){
+  const order = ["A","B","C","D","E","F"];
+  let ranked = order.map(k=>({k, v:scores[k]})).sort((a,b)=> b.v - a.v);
+  const top = ranked[0];
+  const topType = TYPES[top.k];
+
+  document.getElementById("type-name").textContent = topType.name;
+  document.getElementById("type-name").style.color = topType.color;
+  document.getElementById("type-blurb").textContent = topType.blurb;
+
+  document.getElementById("result-icon").innerHTML =
+    '<circle cx="34" cy="34" r="30" stroke="'+topType.color+'" stroke-width="2" fill="none"/>' +
+    '<path d="M34 46 C21 37 16 29 21 23 C25 18.5 31.5 20 34 25 C36.5 20 43 18.5 47 23 C52 29 47 37 34 46 Z" fill="'+topType.color+'" opacity="0.85"/>';
+
+  const traitsWrap = document.getElementById("traits");
+  traitsWrap.innerHTML = "";
+  topType.traits.forEach((t,i)=>{
+    const el = document.createElement("div");
+    el.className = "trait";
+    el.innerHTML = '<span class="mark">'+(i+1)+'</span><span class="txt">'+t+'</span>';
+    traitsWrap.appendChild(el);
+  });
+
+  const second = ranked[1];
+  const secBlock = document.getElementById("secondary-block");
+  if(second.v >= top.v - 1 && second.v > 0){
+    const secType = TYPES[second.k];
+    secBlock.innerHTML = '<p class="secondary-note">'+topType.name+'에 <strong style="color:'+secType.color+'">'+secType.name+'</strong>의 색도 함께 섞여 있어요. 상황에 따라 그 모습도 자연스럽게 나올 거예요.</p>';
+  } else {
+    secBlock.innerHTML = "";
+  }
+
+  drawRadar();
+  show("screen-result");
+}
+
+function drawRadar(){
+  const svg = document.getElementById("radar");
+  const cx = 125, cy = 125, maxR = 88;
+  const order = ["A","B","C","D","E","F"];
+  const maxScore = Math.max(...order.map(k=>scores[k]), 1);
+
+  function pt(i, r){
+    const angle = (-90 + i*60) * Math.PI/180;
+    return [cx + r*Math.cos(angle), cy + r*Math.sin(angle)];
+  }
+
+  let svgContent = "";
+  [0.25,0.5,0.75,1].forEach(f=>{
+    let pts = order.map((_,i)=> pt(i, maxR*f).join(",")).join(" ");
+    svgContent += '<polygon points="'+pts+'" fill="none" stroke="rgba(58,42,47,0.12)" stroke-width="1"/>';
+  });
+  order.forEach((_,i)=>{
+    const [x,y] = pt(i, maxR);
+    svgContent += '<line x1="'+cx+'" y1="'+cy+'" x2="'+x+'" y2="'+y+'" stroke="rgba(58,42,47,0.12)" stroke-width="1"/>';
+  });
+  let scorePts = order.map((k,i)=>{
+    const r = maxR * (scores[k]/maxScore) * 0.92;
+    return pt(i, Math.max(r,4)).join(",");
+  }).join(" ");
+  svgContent += '<polygon points="'+scorePts+'" fill="rgba(196,52,75,0.20)" stroke="#c4344b" stroke-width="2"/>';
+
+  order.forEach((k,i)=>{
+    const r = maxR * (scores[k]/maxScore) * 0.92;
+    const [x,y] = pt(i, Math.max(r,4));
+    svgContent += '<circle cx="'+x+'" cy="'+y+'" r="3.5" fill="#c4344b"/>';
+    const [lx,ly] = pt(i, maxR + 20);
+    svgContent += '<text x="'+lx+'" y="'+ly+'" text-anchor="middle" dominant-baseline="middle" font-family="Gowun Batang, serif" font-size="12.5" font-weight="700" fill="#3a2a2f">'+TYPES[k].name.slice(0,2)+'</text>';
+  });
+
+  svg.innerHTML = svgContent;
+}
+</script>
+</body>
+</html>
