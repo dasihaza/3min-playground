@@ -169,6 +169,21 @@ function escapeHtml(str){
   return div.innerHTML;
 }
 
+function renderMarkdown(text){
+  let html = escapeHtml(text || "");
+  // 이미지: ![설명](주소)
+  html = html.replace(/!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)/g,
+    '<img src="$2" alt="$1" style="max-width:100%; border-radius:8px; margin:10px 0; display:block;">');
+  // 링크: [텍스트](주소)
+  html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+    '<a href="$2" target="_blank" rel="noopener" style="color:var(--ink); text-decoration:underline;">$1</a>');
+  // 굵게: **텍스트**
+  html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  // 줄바꿈
+  html = html.replace(/\n/g, '<br>');
+  return html;
+}
+
 function timeAgo(dateStr){
   const diffMs = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diffMs/60000);
@@ -260,7 +275,7 @@ async function openDetail(number){
   document.getElementById("detail-title").style.color = isOwner ? "#3B6EA8" : "var(--ink)";
   document.getElementById("detail-meta").textContent =
     (issue.user ? issue.user.login : "익명") + (isOwner ? " · 운영자" : "") + " · " + timeAgo(issue.created_at);
-  document.getElementById("detail-body").textContent = issue.body || "(내용 없음)";
+  document.getElementById("detail-body").innerHTML = renderMarkdown(issue.body || "(내용 없음)");
   document.getElementById("detail-gh-link").href = issue.html_url;
   document.getElementById("comment-count").textContent = "("+issue.comments+")";
   document.getElementById("comment-list").innerHTML = '<div class="loading-state">댓글을 불러오는 중...</div>';
@@ -282,7 +297,7 @@ async function openDetail(number){
       el.className = "comment-item";
       el.innerHTML =
         '<div class="comment-meta">'+escapeHtml(c.user ? c.user.login : "익명")+(isCOwner?' <span class="owner-tag">운영자</span>':'')+' · '+timeAgo(c.created_at)+'</div>' +
-        '<div class="comment-text">'+escapeHtml(c.body)+'</div>';
+        '<div class="comment-text">'+renderMarkdown(c.body)+'</div>';
       commentWrap.appendChild(el);
     });
   }catch(e){
