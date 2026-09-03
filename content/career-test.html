@@ -295,6 +295,7 @@
 
     <hr class="divider">
     <div class="actions">
+      <button class="btn" onclick="shareResult()">결과 공유하기</button>
       <button class="btn ghost" onclick="restartQuiz()">다시 해보기</button>
     </div>
     <div class="footer-note">가볍게 즐기는 자기 이해 도구입니다. 진로는 결국 당신이 정합니다.</div>
@@ -310,6 +311,25 @@
 </div>
 
 <script>
+/* ---------------- Share ---------------- */
+function shareContent(title, text){
+  const url = window.location.href;
+  if(navigator.share){
+    navigator.share({ title, text, url }).catch(()=>{});
+  } else if(navigator.clipboard){
+    navigator.clipboard.writeText(url).then(()=>{
+      alert("링크가 복사됐어요! 친구에게 붙여넣어 공유해보세요 🙂");
+    });
+  }
+}
+function shareResult(){
+  const typeName = document.getElementById("type-name").textContent;
+  shareContent(
+    "나의 커리어 나침반 결과: " + typeName,
+    "나는 '" + typeName + "'가 나왔어요! 너의 결과는 뭘까? 👉"
+  );
+}
+
 /* ---------------- Data ---------------- */
 
 const TYPES = {

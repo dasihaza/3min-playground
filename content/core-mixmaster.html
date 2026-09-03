@@ -905,7 +905,10 @@
     <div class="hero-eyebrow" style="text-align:center;">오늘의 탐험 종료</div>
     <h2 style="font-family:'Baloo 2',cursive; margin-top:4px; text-align:center;">🌙 오늘의 운세</h2>
     <div id="fortuneBody"></div>
-    <button class="btn" id="fortuneCloseBtn" style="margin-top:16px;">확인</button>
+    <div style="display:flex; gap:8px; margin-top:16px;">
+      <button class="btn" id="fortuneShareBtn">운세 공유하기</button>
+      <button class="btn" id="fortuneCloseBtn" style="background:transparent; border:1px solid rgba(255,255,255,0.2);">확인</button>
+    </div>
   </div>
 </div>
 
@@ -1769,6 +1772,7 @@
     const monster = strongestOfToday();
     if (!monster) return;
     const fortune = generateFortune(monster);
+    window.__lastFortune = { monster, fortune };
     const overlay = document.getElementById('fortuneOverlay');
     const body = document.getElementById('fortuneBody');
     if (!overlay || !body) return;
@@ -1945,6 +1949,25 @@
   document.getElementById('resetConfirmBtn').addEventListener('click', resetGame);
   document.getElementById('fortuneCloseBtn').addEventListener('click', () => {
     document.getElementById('fortuneOverlay').classList.remove('show');
+  });
+
+  function shareContent(title, text){
+    const url = window.location.href;
+    if(navigator.share){
+      navigator.share({ title, text, url }).catch(()=>{});
+    } else if(navigator.clipboard){
+      navigator.clipboard.writeText(url).then(()=>{
+        alert("링크가 복사됐어요! 친구에게 붙여넣어 공유해보세요 🙂");
+      });
+    }
+  }
+  document.getElementById('fortuneShareBtn').addEventListener('click', () => {
+    const data = window.__lastFortune;
+    if(!data){ shareContent("몬조운 오늘의 운세", "몬스터를 조합해서 오늘의 운세를 알아봤어요! 너도 해볼래? 👉"); return; }
+    shareContent(
+      "몬조운 오늘의 운세: " + data.monster.name,
+      data.monster.name + "(으)로 본 오늘의 운세! 연애운 " + data.fortune.love.slice(0,15) + "... 너도 몬스터 조합해서 운세 볼래? 👉"
+    );
   });
 
   // ---------- init ----------

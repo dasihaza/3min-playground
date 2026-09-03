@@ -71,6 +71,7 @@
       <div class="result-score" id="result-score"></div>
       <div class="result-blurb" id="result-blurb"></div>
       <div class="actions">
+        <button class="btn" onclick="shareResult()">결과 공유하기</button>
         <button class="btn ghost" onclick="restart()">다시 풀기</button>
         <a class="btn" href="../index.html">다른 콘텐츠 보기</a>
       </div>
@@ -145,6 +146,24 @@ function pickTodayQuestions(){
     [pool[i], pool[j]] = [pool[j], pool[i]];
   }
   return { questions: pool.slice(0, 5), dateLabel: display };
+}
+
+function shareContent(title, text){
+  const url = window.location.href;
+  if(navigator.share){
+    navigator.share({ title, text, url }).catch(()=>{});
+  } else if(navigator.clipboard){
+    navigator.clipboard.writeText(url).then(()=>{
+      alert("링크가 복사됐어요! 친구에게 붙여넣어 공유해보세요 🙂");
+    });
+  }
+}
+function shareResult(){
+  const score = document.getElementById("result-score").textContent;
+  shareContent(
+    "오늘의 상식 퀴즈 결과: " + score,
+    "오늘의 상식 퀴즈에서 " + score + " 맞혔어요! 너도 도전해볼래? 👉"
+  );
 }
 
 let QUESTIONS = [];

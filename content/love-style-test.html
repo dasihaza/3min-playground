@@ -173,6 +173,7 @@
 
     <hr class="divider">
     <div class="actions">
+      <button class="btn" onclick="shareResult()">결과 공유하기</button>
       <button class="btn ghost" onclick="restartQuiz()">다시 해보기</button>
       <a class="btn" href="../index.html">다른 콘텐츠 보기</a>
     </div>
@@ -267,6 +268,24 @@ const QUESTIONS = [
   { text:"연애할 때 나의 최종 목표는?", stop:"연애의 목적지",
     options:[ {t:"A",label:"함께 새로운 걸 계속 경험하는 것"}, {t:"B",label:"오래도록 편안하게 함께하는 것"}, {t:"E",label:"서로에게 최고의 친구가 되는 것"}, {t:"F",label:"표현은 서툴러도 진심을 다하는 것"} ] }
 ];
+
+function shareContent(title, text){
+  const url = window.location.href;
+  if(navigator.share){
+    navigator.share({ title, text, url }).catch(()=>{});
+  } else if(navigator.clipboard){
+    navigator.clipboard.writeText(url).then(()=>{
+      alert("링크가 복사됐어요! 친구에게 붙여넣어 공유해보세요 🙂");
+    });
+  }
+}
+function shareResult(){
+  const typeName = document.getElementById("type-name").textContent;
+  shareContent(
+    "나의 연애 스타일 테스트 결과: " + typeName,
+    "나는 '" + typeName + "'가 나왔어요! 너의 연애 스타일은? 👉"
+  );
+}
 
 let current = 0;
 let scores = { A:0,B:0,C:0,D:0,E:0,F:0 };
