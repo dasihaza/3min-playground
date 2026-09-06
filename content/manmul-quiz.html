@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>초등 상식 퀴즈(만물박사) | 3분 놀이터</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/manmul-questions.js"></script>
+<style>
+  .q-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .q-num{ font-size:13px; font-weight:700; color: var(--ink-soft); letter-spacing:.06em; }
+  .cat-pill{ font-size:11px; font-weight:700; color:#fff; background:var(--marigold); border-radius:999px; padding:3px 10px; }
+  .q-text{ font-family:'Jua', sans-serif; font-size:19px; line-height:1.55; margin: 4px 0 20px; }
+  .opt{
+    display:block; width:100%; text-align:left;
+    background: var(--bg-soft); border:1.5px solid var(--line); border-radius:10px;
+    padding:13px 16px; margin-bottom:9px; font-size:14.5px; cursor:pointer;
+    font-family:'Noto Sans KR', sans-serif; line-height:1.5;
+    transition: all .12s ease;
+  }
+  .opt:hover{ border-color: var(--marigold); background:#fff; }
+  .opt.correct{ border-color: var(--teal); background: rgba(31,111,99,0.12); font-weight:700; }
+  .opt.wrong{ border-color: var(--coral); background: rgba(232,72,60,0.10); }
+  .opt[disabled]{ cursor:default; }
+  .progress-mini{ font-size:12px; color:var(--ink-soft); text-align:right; margin-bottom:6px; }
+  .score-live{ font-size:12.5px; font-weight:700; color:var(--teal); }
+  .day-badge{
+    display:inline-block; font-size:12px; font-weight:700; color:#fff;
+    background:#3B6EA8; border-radius:999px; padding:4px 12px; margin-bottom:12px;
+  }
+  .result-title{ font-family:'Jua', sans-serif; font-size:26px; text-align:center; margin: 8px 0 8px; }
+  .result-score{ text-align:center; font-size:17px; font-weight:700; margin-bottom:6px; }
+  .result-blurb{ text-align:center; color: var(--ink-soft); font-size:14px; line-height:1.7; margin-bottom:20px; }
+  .cat-stats{ margin-bottom:20px; }
+  .cat-row{ display:flex; align-items:center; gap:10px; font-size:13px; margin-bottom:8px; }
+  .cat-row .name{ width:44px; font-weight:700; }
+  .cat-track{ flex:1; height:9px; border-radius:5px; background:var(--bg-soft); overflow:hidden; }
+  .cat-fill{ height:100%; background:var(--teal); }
+  .review-item{ border-top:1px solid var(--line); padding:12px 0; font-size:13.5px; line-height:1.6; }
+  .review-q{ font-weight:700; margin-bottom:4px; }
+  .review-a{ color:var(--teal); }
+  .review-mine{ color:var(--coral); }
+  .actions{ display:flex; justify-content:center; gap:10px; margin-top:20px; flex-wrap:wrap; }
+  .hidden{ display:none !important; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="site-header">
+    <a class="brand" href="../index.html">
+      <svg class="brand-mark" viewBox="0 0 34 34" fill="none">
+        <circle cx="17" cy="18" r="14" fill="#FAF7F0" stroke="#1D1B16" stroke-width="2"/>
+        <path d="M17 9 L17 18 L23 21" stroke="#E8483C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="13" y="2" width="8" height="4" rx="1.5" fill="#1D1B16"/>
+      </svg>
+      <span class="brand-word">3분 놀이터</span>
+    </a>
+    <a class="back-link" href="../index.html">← 다른 콘텐츠 보기</a>
+  </header>
+</div>
+
+<div class="content-shell">
+  <div class="content-card">
+
+    <!-- INTRO -->
+    <div id="screen-intro">
+      <span class="badge quiz" style="margin-bottom:12px; display:inline-block;">미니퀴즈</span>
+      <div><span class="day-badge" id="day-badge"></span></div>
+      <h1 style="font-family:'Jua',sans-serif; font-size:25px; margin:0 0 10px;">초등 상식 퀴즈(만물박사)</h1>
+      <p style="color:var(--ink-soft); font-size:14px; line-height:1.75; margin:0 0 8px;">
+        충북 동양일보 만물박사 선발대회를 준비하는 초등 4~6학년을 위한 예상문제예요.
+        국어·사회·역사·과학·수학·충북지역·상식을 두루 담았어요.
+      </p>
+      <p style="color:var(--ink-soft); font-size:13px; line-height:1.7; margin:0 0 22px;">
+        📅 <strong>매일 새로운 50문제</strong>가 출제돼요. 날짜가 바뀌면 자동으로 다른 문제 세트로 바뀝니다.
+      </p>
+      <button class="btn" onclick="startQuiz()">오늘의 문제 풀기</button>
+    </div>
+
+    <!-- QUIZ -->
+    <div id="screen-quiz" class="hidden">
+      <div class="progress-mini">
+        <span class="score-live" id="score-live"></span>
+      </div>
+      <div class="progress-row" id="progress"></div>
+      <div class="q-head">
+        <span class="q-num" id="q-num"></span>
+        <span class="cat-pill" id="q-cat"></span>
+      </div>
+      <div class="q-text" id="q-text"></div>
+      <div id="options"></div>
+      <button class="btn hidden" id="next-btn" style="margin-top:6px;" onclick="nextQuestion()">다음 문제 →</button>
+    </div>
+
+    <!-- RESULT -->
+    <div id="screen-result" class="hidden">
+      <div class="result-title" id="result-title"></div>
+      <div class="result-score" id="result-score"></div>
+      <div class="result-blurb" id="result-blurb"></div>
+
+      <h3 style="font-size:14px; margin-bottom:10px;">분야별 정답률</h3>
+      <div class="cat-stats" id="cat-stats"></div>
+
+      <h3 style="font-size:14px; margin-bottom:4px;">틀린 문제 다시 보기</h3>
+      <div id="review-list"></div>
+
+      <div class="actions">
+        <button class="btn" onclick="shareResult()">결과 공유하기</button>
+        <button class="btn ghost" onclick="startQuiz()">다시 풀기</button>
+        <a class="btn ghost" href="../index.html">다른 콘텐츠 보기</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 광고 슬롯 -->
+  <div class="ad-slot" style="margin-top:26px;">
+    <span class="ad-label">광고 영역 (콘텐츠 하단)</span>
+  </div>
+</div>
+
+<footer class="site-footer wrap">
+  <div>© 2026 3분 놀이터. 대회 대비용 예상문제이며 실제 출제 문제와는 다를 수 있어요.</div>
+</footer>
+
+<script>
+const QUESTIONS_PER_DAY = 50;
+
+function shareContent(title, text){
+  const url = window.location.href;
+  if(navigator.share){
+    navigator.share({ title, text, url }).catch(()=>{});
+  } else if(navigator.clipboard){
+    navigator.clipboard.writeText(url).then(()=>{
+      alert("링크가 복사됐어요! 친구에게 붙여넣어 공유해보세요 🙂");
+    });
+  }
+}
+function shareResult(){
+  const score = document.getElementById("result-score").textContent;
+  shareContent("초등 상식 퀴즈(만물박사) 결과", "초등 상식 퀴즈(만물박사)에서 " + score + " 맞혔어요! 너도 도전해볼래? 👉");
+}
+
+/* 날짜 시드 기반 난수 */
+function seededRng(seed){
+  let s = seed % 2147483647;
+  if(s <= 0) s += 2147483646;
+  return function(){
+    s = (s * 16807) % 2147483647;
+    return (s - 1) / 2147483646;
+  };
+}
+
+function todayInfo(){
+  const d = new Date();
+  const y = d.getFullYear(), m = d.getMonth()+1, day = d.getDate();
+  return {
+    seed: y*10000 + m*100 + day,
+    display: y + "." + String(m).padStart(2,"0") + "." + String(day).padStart(2,"0")
+  };
+}
+
+/* 오늘의 50문제 뽑기 (보기 순서도 함께 섞어 정답 위치 쏠림 방지) */
+function pickTodayQuestions(){
+  const { seed, display } = todayInfo();
+  const rng = seededRng(seed);
+  const pool = MANMUL_QUESTIONS.slice();
+  for(let i = pool.length - 1; i > 0; i--){
+    const j = Math.floor(rng() * (i+1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  const count = Math.min(QUESTIONS_PER_DAY, pool.length);
+  const picked = pool.slice(0, count).map(item=>{
+    // 보기 섞기: 정답 텍스트를 기억한 뒤 섞고, 새 위치를 다시 찾아요
+    const correctText = item.opts[item.a];
+    const shuffled = item.opts.slice();
+    for(let i = shuffled.length - 1; i > 0; i--){
+      const j = Math.floor(rng() * (i+1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return { q:item.q, cat:item.cat, opts:shuffled, a:shuffled.indexOf(correctText) };
+  });
+  return { questions: picked, dateLabel: display, total: pool.length };
+}
+
+let QUESTIONS = [];
+let current = 0;
+let correctCount = 0;
+let answered = false;
+let wrongList = [];
+let catStats = {};
+
+document.addEventListener("DOMContentLoaded", ()=>{
+  const info = todayInfo();
+  document.getElementById("day-badge").textContent = info.display + " 문제";
+});
+
+function show(id){
+  ["screen-intro","screen-quiz","screen-result"].forEach(s=>{
+    document.getElementById(s).classList.toggle("hidden", s!==id);
+  });
+}
+
+function startQuiz(){
+  const picked = pickTodayQuestions();
+  QUESTIONS = picked.questions;
+  current = 0; correctCount = 0; wrongList = []; catStats = {};
+  buildProgress();
+  show("screen-quiz");
+  renderQuestion();
+}
+
+function buildProgress(){
+  const p = document.getElementById("progress");
+  p.innerHTML = "";
+  QUESTIONS.forEach((_,i)=>{
+    const seg = document.createElement("div");
+    seg.className = "seg"; seg.id = "seg-"+i;
+    seg.innerHTML = "<i></i>";
+    p.appendChild(seg);
+  });
+}
+function updateProgress(){
+  QUESTIONS.forEach((_,i)=>{
+    document.getElementById("seg-"+i).classList.toggle("done", i < current);
+  });
+}
+
+function renderQuestion(){
+  updateProgress();
+  answered = false;
+  const item = QUESTIONS[current];
+  document.getElementById("q-num").textContent = (current+1) + " / " + QUESTIONS.length;
+  document.getElementById("q-cat").textContent = item.cat || "상식";
+  document.getElementById("q-text").textContent = item.q;
+  document.getElementById("score-live").textContent = "맞힌 문제 " + correctCount + "개";
+  document.getElementById("next-btn").classList.add("hidden");
+
+  const optWrap = document.getElementById("options");
+  optWrap.innerHTML = "";
+  item.opts.forEach((opt, idx)=>{
+    const btn = document.createElement("button");
+    btn.className = "opt";
+    btn.textContent = (idx+1) + ". " + opt;
+    btn.onclick = ()=> selectOption(idx, btn);
+    optWrap.appendChild(btn);
+  });
+}
+
+function selectOption(idx, btnEl){
+  if(answered) return;
+  answered = true;
+  const item = QUESTIONS[current];
+  const cat = item.cat || "상식";
+  if(!catStats[cat]) catStats[cat] = { correct:0, total:0 };
+  catStats[cat].total++;
+
+  const allOpts = document.querySelectorAll("#options .opt");
+  allOpts.forEach(b=> b.disabled = true);
+
+  if(idx === item.a){
+    correctCount++;
+    catStats[cat].correct++;
+    btnEl.classList.add("correct");
+  } else {
+    btnEl.classList.add("wrong");
+    allOpts[item.a].classList.add("correct");
+    wrongList.push({ q:item.q, mine:item.opts[idx], answer:item.opts[item.a] });
+  }
+  document.getElementById("score-live").textContent = "맞힌 문제 " + correctCount + "개";
+  const nextBtn = document.getElementById("next-btn");
+  nextBtn.textContent = (current === QUESTIONS.length-1) ? "결과 보기 →" : "다음 문제 →";
+  nextBtn.classList.remove("hidden");
+}
+
+function nextQuestion(){
+  current++;
+  if(current < QUESTIONS.length){
+    renderQuestion();
+  } else {
+    renderResult();
+  }
+}
+
+function renderResult(){
+  const total = QUESTIONS.length;
+  const pct = Math.round((correctCount/total)*100);
+
+  let title, blurb;
+  if(pct >= 90){ title = "만물박사 후보 👑"; blurb = "정말 뛰어난 실력이에요! 이 정도면 대회에서도 좋은 결과를 기대해볼 만해요."; }
+  else if(pct >= 70){ title = "실력이 탄탄해요"; blurb = "기본기가 잘 잡혀 있어요. 틀린 문제만 다시 짚어보면 훨씬 좋아질 거예요."; }
+  else if(pct >= 50){ title = "조금만 더!"; blurb = "절반 이상 맞혔어요. 약한 분야를 집중해서 보완해보면 금방 오를 거예요."; }
+  else { title = "이제 시작이에요"; blurb = "괜찮아요. 오늘 틀린 문제가 곧 내일의 실력이 돼요. 꾸준히 해봐요!"; }
+
+  document.getElementById("result-title").textContent = title;
+  document.getElementById("result-score").textContent = correctCount + " / " + total + " 문제 정답 (" + pct + "%)";
+  document.getElementById("result-blurb").textContent = blurb;
+
+  // 분야별 정답률
+  const statsWrap = document.getElementById("cat-stats");
+  statsWrap.innerHTML = "";
+  Object.keys(catStats).forEach(cat=>{
+    const s = catStats[cat];
+    const p = Math.round((s.correct/s.total)*100);
+    const row = document.createElement("div");
+    row.className = "cat-row";
+    row.innerHTML =
+      '<span class="name">'+cat+'</span>' +
+      '<div class="cat-track"><div class="cat-fill" style="width:'+p+'%;"></div></div>' +
+      '<span style="width:64px; text-align:right;">'+s.correct+'/'+s.total+' ('+p+'%)</span>';
+    statsWrap.appendChild(row);
+  });
+
+  // 오답 노트
+  const reviewWrap = document.getElementById("review-list");
+  if(wrongList.length === 0){
+    reviewWrap.innerHTML = '<div style="padding:16px 0; color:var(--ink-soft); font-size:13.5px;">틀린 문제가 없어요! 완벽해요 🎉</div>';
+  } else {
+    reviewWrap.innerHTML = "";
+    wrongList.forEach(w=>{
+      const el = document.createElement("div");
+      el.className = "review-item";
+      el.innerHTML =
+        '<div class="review-q">'+w.q+'</div>' +
+        '<div class="review-mine">내 답: '+w.mine+'</div>' +
+        '<div class="review-a">정답: '+w.answer+'</div>';
+      reviewWrap.appendChild(el);
+    });
+  }
+
+  show("screen-result");
+}
+</script>
+</body>
+</html>
