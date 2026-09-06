@@ -170,17 +170,40 @@ function escapeHtml(str){
 }
 
 function renderMarkdown(text){
-  let html = escapeHtml(text || "");
-  // 이미지: ![설명](주소)
-  html = html.replace(/!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)/g,
+  text = text || "";
+  const imgPlaceholders = [];
+
+  // GitHub이 드래그 업로드 시 삽입하는 원본 <img> 태그를 안전하게 추출 (https src만 허용)
+  text = text.replace(/<img\b[^>]*>/gi, function(tag){
+    const srcMatch = tag.match(/src\s*=\s*"([^"]+)"/i) || tag.match(/src\s*=\s*'([^']+)'/i);
+    if(!srcMatch || !/^https:\/\//i.test(srcMatch[1])) return "";
+    const altMatch = tag.match(/alt\s*=\s*"([^"]*)"/i) || tag.match(/alt\s*=\s*'([^']*)'/i);
+    const alt = altMatch ? altMatch[1].replace(/"/g,"&quot;") : "";
+    const safeSrc = srcMatch[1].replace(/"/g,"&quot;");
+    const safeImg = '<img src="'+safeSrc+'" alt="'+alt+'" style="max-width:100%; border-radius:8px; margin:10px 0; display:block;">';
+    const token = "@@IMG"+imgPlaceholders.length+"@@";
+    imgPlaceholders.push(safeImg);
+    return token;
+  });
+
+  let html = escapeHtml(text);
+
+  // 마크다운 이미지: ![설명](주소)
+  html = html.replace(/!\[([^\]]*)\]\((https:\/\/[^\s)]+)\)/g,
     '<img src="$2" alt="$1" style="max-width:100%; border-radius:8px; margin:10px 0; display:block;">');
   // 링크: [텍스트](주소)
-  html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+  html = html.replace(/\[([^\]]+)\]\((https:\/\/[^\s)]+)\)/g,
     '<a href="$2" target="_blank" rel="noopener" style="color:var(--ink); text-decoration:underline;">$1</a>');
   // 굵게: **텍스트**
   html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   // 줄바꿈
   html = html.replace(/\n/g, '<br>');
+
+  // 안전 검증된 이미지 태그 복원
+  imgPlaceholders.forEach(function(imgHtml, i){
+    html = html.replace("@@IMG"+i+"@@", imgHtml);
+  });
+
   return html;
 }
 
