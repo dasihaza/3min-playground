@@ -119,6 +119,7 @@ a{ color:inherit; text-decoration:none; }
 .badge.quiz{ background: var(--marigold); }
 .badge.game{ background: #6B4FA0; }
 .badge.board{ background: #3B6EA8; }
+.badge.teacher{ background: #4E9E7E; }
 .time-pill{
   display:flex; align-items:center; gap:5px;
   font-size:11.5px; font-weight:700; color: var(--ink-soft);
