@@ -190,10 +190,13 @@
   }
   .hidden{display:none !important;}
 
-  /* ===== 커튼 연출 ===== */
+  /* ===== 커튼 연출 (결과 카드 안에서만) ===== */
+  #step3{position:relative;overflow:hidden;}
+  #step3.revealing{min-height:300px;}
   #curtain{
-    position:fixed;inset:0;z-index:900;display:none;
+    position:absolute;inset:0;z-index:20;display:none;
     align-items:center;justify-content:center;overflow:hidden;
+    border-radius:13px;
   }
   #curtain.show{display:flex;}
   .curtain-half{
@@ -209,9 +212,9 @@
   #curtain.open .curtain-half.left{transform:translateX(-102%);}
   #curtain.open .curtain-half.right{transform:translateX(102%);}
   .valance{
-    position:absolute;top:0;left:0;right:0;height:60px;z-index:2;
+    position:absolute;top:0;left:0;right:0;height:38px;z-index:2;
     background:repeating-linear-gradient(90deg,#B8862B 0px,#D9A63F 18px,#B8862B 36px);
-    border-bottom:5px solid #8A6320;
+    border-bottom:4px solid #8A6320;
     transition:transform 1.15s cubic-bezier(.7,0,.25,1);
   }
   #curtain.open .valance{transform:translateY(-100%);}
@@ -221,7 +224,7 @@
   }
   #curtain.open .count-stage{opacity:0;}
   .count-num{
-    font-family:'Jua',sans-serif;font-size:clamp(80px,22vw,150px);line-height:1;
+    font-family:'Jua',sans-serif;font-size:clamp(56px,13vw,104px);line-height:1;
     text-shadow:0 5px 0 rgba(0,0,0,.28);
   }
   .count-num.pop{animation:pop .55s ease;}
@@ -231,11 +234,11 @@
     100%{transform:scale(1);opacity:1;}
   }
   .count-cap{
-    font-family:'Gaegu',cursive;font-weight:700;font-size:clamp(18px,4vw,24px);
-    color:#FFE6A8;margin-top:6px;
+    font-family:'Gaegu',cursive;font-weight:700;font-size:clamp(16px,3.2vw,21px);
+    color:#FFE6A8;margin-top:4px;
   }
   .sound-toggle{
-    position:fixed;right:14px;bottom:14px;z-index:20;
+    position:fixed;right:14px;bottom:14px;z-index:30;
     border:2px solid var(--line);background:#fff;border-radius:999px;
     padding:8px 14px;font-family:'Jua',sans-serif;font-size:13px;cursor:pointer;
     box-shadow:var(--shadow);color:var(--ink);
@@ -353,19 +356,19 @@
     <div id="result-area">
       <div class="hint">위에서 친구들을 넣고 자리 모양을 골라주세요 ✏️</div>
     </div>
+
+    <!-- 커튼 연출 -->
+    <div id="curtain" class="no-print" aria-hidden="true">
+      <div class="curtain-half left"></div>
+      <div class="curtain-half right"></div>
+      <div class="valance"></div>
+      <div class="count-stage">
+        <div class="count-num" id="count-num">3</div>
+        <div class="count-cap" id="count-cap">두구두구두구…</div>
+      </div>
+    </div>
   </div>
 
-</div>
-
-<!-- 커튼 연출 -->
-<div id="curtain" aria-hidden="true">
-  <div class="curtain-half left"></div>
-  <div class="curtain-half right"></div>
-  <div class="valance"></div>
-  <div class="count-stage">
-    <div class="count-num" id="count-num">3</div>
-    <div class="count-cap" id="count-cap">두구두구두구…</div>
-  </div>
 </div>
 
 <button class="sound-toggle no-print" id="sound-toggle" onclick="toggleSound()">🔊 소리 켜짐</button>
@@ -562,97 +565,130 @@ let audioCtx = null;
 function toggleSound(){
   soundOn = !soundOn;
   document.getElementById("sound-toggle").textContent = soundOn ? "🔊 소리 켜짐" : "🔇 소리 꺼짐";
+  if(soundOn) unlockAudio();
 }
 
-function getCtx(){
-  if(!soundOn) return null;
+/* 브라우저는 사용자가 화면을 건드리기 전엔 소리를 막아둬요.
+   그래서 첫 클릭/터치 때 미리 오디오를 깨워둡니다. */
+function unlockAudio(){
   try{
-    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if(audioCtx.state === "suspended") audioCtx.resume();
-    return audioCtx;
-  }catch(e){ return null; }
+    if(!audioCtx){
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return;
+      audioCtx = new AC();
+    }
+    if(audioCtx.state !== "running") audioCtx.resume();
+    // 무음 한 방울을 흘려보내 완전히 깨웁니다
+    const b = audioCtx.createBuffer(1, 1, audioCtx.sampleRate);
+    const s = audioCtx.createBufferSource();
+    s.buffer = b; s.connect(audioCtx.destination); s.start(0);
+  }catch(e){}
+}
+document.addEventListener("pointerdown", unlockAudio, { once:true });
+document.addEventListener("keydown", unlockAudio, { once:true });
+
+/* 오디오가 깨어난 뒤에 소리를 예약해요 (예약 시점이 지나가버리는 문제 방지) */
+function withAudio(fn){
+  if(!soundOn) return;
+  try{
+    if(!audioCtx){
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return;
+      audioCtx = new AC();
+    }
+    if(audioCtx.state === "running"){
+      fn(audioCtx);
+    } else {
+      audioCtx.resume().then(()=>{ if(soundOn) fn(audioCtx); }).catch(()=>{});
+    }
+  }catch(e){}
 }
 
 /* 두구두구두구 — 작은북 굴리는 소리 */
 function playDrumroll(seconds){
-  const ctx = getCtx();
-  if(!ctx) return;
-  const start = ctx.currentTime;
-  const hits = Math.floor(seconds * 18);
+  withAudio(ctx=>{
+    const start = ctx.currentTime + 0.05;
+    const hits = Math.floor(seconds * 18);
 
-  // 노이즈 버퍼 한 번만 만들어 재사용
-  const buf = ctx.createBuffer(1, ctx.sampleRate * 0.05, ctx.sampleRate);
-  const data = buf.getChannelData(0);
-  for(let i=0;i<data.length;i++) data[i] = (Math.random()*2-1) * (1 - i/data.length);
+    const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.05), ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for(let i=0;i<data.length;i++) data[i] = (Math.random()*2-1) * (1 - i/data.length);
 
-  for(let i=0;i<hits;i++){
-    const t = start + (i/hits) * seconds;
-    const src = ctx.createBufferSource();
-    src.buffer = buf;
-    const filt = ctx.createBiquadFilter();
-    filt.type = "bandpass";
-    filt.frequency.value = 240;
-    const g = ctx.createGain();
-    // 뒤로 갈수록 조금씩 커지게
-    const vol = 0.05 + 0.12 * (i/hits);
-    g.gain.setValueAtTime(vol, t);
-    g.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
-    src.connect(filt); filt.connect(g); g.connect(ctx.destination);
-    src.start(t); src.stop(t + 0.06);
-  }
+    for(let i=0;i<hits;i++){
+      const t = start + (i/hits) * seconds;
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      const filt = ctx.createBiquadFilter();
+      filt.type = "bandpass";
+      filt.frequency.value = 240;
+      const g = ctx.createGain();
+      const vol = 0.10 + 0.20 * (i/hits);   // 뒤로 갈수록 커지게
+      g.gain.setValueAtTime(vol, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+      src.connect(filt); filt.connect(g); g.connect(ctx.destination);
+      src.start(t); src.stop(t + 0.06);
+    }
+  });
 }
 
 /* 딴 따 라 딴! — 팡파르 */
 function playFanfare(){
-  const ctx = getCtx();
-  if(!ctx) return;
-  const t0 = ctx.currentTime + 0.02;
-  // 솔 - 도 - 미 - 도(높은) 느낌
-  const notes = [
-    { f:392.00, at:0.00, dur:0.16 },
-    { f:523.25, at:0.16, dur:0.16 },
-    { f:659.25, at:0.32, dur:0.16 },
-    { f:783.99, at:0.50, dur:0.55 }
-  ];
-  notes.forEach(n=>{
-    [1, 2].forEach((mult, idx)=>{   // 기본음 + 배음으로 나팔 느낌
-      const osc = ctx.createOscillator();
-      const g = ctx.createGain();
-      osc.type = idx === 0 ? "triangle" : "square";
-      osc.frequency.value = n.f * mult;
-      const peak = idx === 0 ? 0.20 : 0.05;
-      g.gain.setValueAtTime(0.0001, t0 + n.at);
-      g.gain.exponentialRampToValueAtTime(peak, t0 + n.at + 0.02);
-      g.gain.exponentialRampToValueAtTime(0.0001, t0 + n.at + n.dur);
-      osc.connect(g); g.connect(ctx.destination);
-      osc.start(t0 + n.at); osc.stop(t0 + n.at + n.dur + 0.05);
+  withAudio(ctx=>{
+    const t0 = ctx.currentTime + 0.05;
+    const notes = [
+      { f:392.00, at:0.00, dur:0.16 },
+      { f:523.25, at:0.16, dur:0.16 },
+      { f:659.25, at:0.32, dur:0.16 },
+      { f:783.99, at:0.50, dur:0.60 }
+    ];
+    notes.forEach(n=>{
+      [1, 2].forEach((mult, idx)=>{   // 기본음 + 배음으로 나팔 느낌
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.type = idx === 0 ? "triangle" : "square";
+        osc.frequency.value = n.f * mult;
+        const peak = idx === 0 ? 0.30 : 0.08;
+        g.gain.setValueAtTime(0.0001, t0 + n.at);
+        g.gain.exponentialRampToValueAtTime(peak, t0 + n.at + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + n.at + n.dur);
+        osc.connect(g); g.connect(ctx.destination);
+        osc.start(t0 + n.at); osc.stop(t0 + n.at + n.dur + 0.05);
+      });
     });
+    // 마지막 심벌
+    const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.7), ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for(let i=0;i<d.length;i++) d[i] = (Math.random()*2-1) * Math.pow(1 - i/d.length, 2.2);
+    const src = ctx.createBufferSource(); src.buffer = buf;
+    const hp = ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 5000;
+    const g2 = ctx.createGain(); g2.gain.value = 0.22;
+    src.connect(hp); hp.connect(g2); g2.connect(ctx.destination);
+    src.start(t0 + 0.50);
   });
-  // 마지막 심벌
-  const buf = ctx.createBuffer(1, ctx.sampleRate * 0.7, ctx.sampleRate);
-  const d = buf.getChannelData(0);
-  for(let i=0;i<d.length;i++) d[i] = (Math.random()*2-1) * Math.pow(1 - i/d.length, 2.2);
-  const src = ctx.createBufferSource(); src.buffer = buf;
-  const hp = ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 5000;
-  const g2 = ctx.createGain(); g2.gain.value = 0.16;
-  src.connect(hp); hp.connect(g2); g2.connect(ctx.destination);
-  src.start(t0 + 0.50);
 }
 
 /* ---------- 커튼 연출 ---------- */
 function revealWithCurtain(){
   const curtain = document.getElementById("curtain");
+  const step3 = document.getElementById("step3");
   const numEl = document.getElementById("count-num");
   const capEl = document.getElementById("count-cap");
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   curtain.classList.remove("open");
   curtain.classList.add("show");
+  step3.classList.add("revealing");
+  // 결과 카드가 보이는 상태에서 연출이 시작되도록
+  step3.scrollIntoView({ behavior:"smooth", block:"center" });
 
   if(reduced){
     curtain.classList.add("open");
     playFanfare();
-    setTimeout(()=>{ curtain.classList.remove("show","open"); scrollToResult(); }, 400);
+    setTimeout(()=>{
+      curtain.classList.remove("show","open");
+      step3.classList.remove("revealing");
+      scrollToResult();
+    }, 400);
     return;
   }
 
@@ -680,6 +716,7 @@ function revealWithCurtain(){
         curtain.classList.add("open");
         setTimeout(()=>{
           curtain.classList.remove("show","open");
+          step3.classList.remove("revealing");
           scrollToResult();
         }, 1200);
       }, 350);
