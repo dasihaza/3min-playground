@@ -92,10 +92,14 @@
   }
   .drop-hint .inner{
     background:rgba(255,255,255,.92);border:3px dashed var(--line);border-radius:20px;
-    padding:28px 30px;max-width:460px;
+    padding:28px 34px;max-width:560px;
   }
   .drop-hint h3{font-family:'Jua',sans-serif;font-size:20px;margin:0 0 10px;}
-  .drop-hint p{font-size:13.5px;color:var(--ink-soft);line-height:1.8;margin:0;}
+  .drop-hint p{
+    font-size:13.5px;color:var(--ink-soft);line-height:1.8;margin:0;
+    word-break:keep-all;      /* 한글이 낱글자로 쪼개지지 않게 */
+    overflow-wrap:break-word;
+  }
   .drop-hint kbd{
     background:#F2F5F8;border:2px solid var(--line);border-radius:7px;
     padding:2px 8px;font-family:'Jua',sans-serif;font-size:13px;
@@ -180,7 +184,10 @@
     <div class="inner">
       <h3>✏️ 무엇 위에 필기할까요?</h3>
       <p>
-        보여줄 화면을 캡처해서 <kbd>Ctrl</kbd> + <kbd>V</kbd> 로 붙여넣으세요.<br>
+        보여줄 화면을 캡처하세요.<br>
+        <span style="font-size:12.5px;opacity:.9;">(<kbd>Windows</kbd> + <kbd>Shift</kbd> + <kbd>S</kbd> → 저장할 영역 지정 → '캡처' 클릭)</span><br>
+        <span style="white-space:nowrap;">그런 다음 <kbd>Ctrl</kbd> + <kbd>V</kbd> 로 붙여 넣으세요.</span><br>
+        <br>
         이미지를 이 영역에 끌어다 놓아도 돼요.<br>
         그냥 이대로 <b>빈 화이트보드</b>처럼 써도 좋아요!
       </p>
