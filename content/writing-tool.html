@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>슥삭슥삭 필기도구 | 3분 놀이터</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EEF2F6;
+    --panel:#FFFFFF;
+    --ink:#33403C;
+    --ink-soft:#7B8A94;
+    --line:#DCE4EA;
+    --mint:#4FB89A;
+    --shadow:0 3px 0 rgba(51,64,60,.10);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:'Noto Sans KR',sans-serif;
+    display:flex;flex-direction:column;height:100vh;overflow:hidden;
+  }
+
+  /* ===== 도구 막대 ===== */
+  .toolbar{
+    background:var(--panel);border-bottom:2px solid var(--line);
+    padding:8px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+    flex:0 0 auto;box-shadow:0 2px 8px rgba(51,64,60,.06);
+  }
+  .brand{display:flex;align-items:center;gap:7px;text-decoration:none;color:var(--ink);font-weight:700;font-size:13px;margin-right:4px;}
+  .sep{width:2px;height:26px;background:var(--line);border-radius:2px;margin:0 2px;}
+
+  .tool{
+    border:2.5px solid var(--line);background:#fff;border-radius:11px;
+    height:40px;min-width:44px;padding:0 11px;cursor:pointer;
+    font-family:'Jua',sans-serif;font-size:14px;color:var(--ink);
+    display:flex;align-items:center;justify-content:center;gap:5px;
+    transition:all .12s ease;
+  }
+  .tool:hover{border-color:var(--mint);}
+  .tool.on{background:#EAF7F3;border-color:var(--mint);box-shadow:0 3px 0 var(--mint);}
+  .tool.danger:hover{border-color:#E8705C;}
+  .tool svg{width:19px;height:19px;}
+
+  .swatch{
+    width:30px;height:30px;border-radius:9px;cursor:pointer;border:3px solid #fff;
+    box-shadow:0 0 0 2px var(--line);
+  }
+  .swatch.on{box-shadow:0 0 0 3px var(--ink);transform:scale(1.08);}
+  .sizes{display:flex;gap:5px;align-items:center;}
+  .size-dot{
+    width:30px;height:30px;border-radius:9px;border:2.5px solid var(--line);background:#fff;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;
+  }
+  .size-dot.on{border-color:var(--mint);background:#EAF7F3;}
+  .size-dot i{display:block;background:var(--ink);border-radius:50%;}
+
+  .hint-chip{
+    font-family:'Gaegu',cursive;font-weight:700;font-size:13.5px;color:var(--ink-soft);
+    margin-left:auto;white-space:nowrap;
+  }
+
+  /* ===== 작업 영역 ===== */
+  .board{
+    flex:1;position:relative;overflow:hidden;background:#fff;
+    background-image:
+      linear-gradient(rgba(51,64,60,.055) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(51,64,60,.055) 1px, transparent 1px);
+    background-size:26px 26px;
+  }
+  #bg-img{
+    position:absolute;top:0;left:0;width:100%;height:100%;
+    object-fit:contain;pointer-events:none;display:none;
+  }
+  #canvas{position:absolute;top:0;left:0;touch-action:none;cursor:crosshair;}
+  #canvas.text-mode{cursor:text;}
+  #canvas.eraser-mode{cursor:cell;}
+
+  .drop-hint{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    pointer-events:none;text-align:center;padding:20px;
+  }
+  .drop-hint .inner{
+    background:rgba(255,255,255,.92);border:3px dashed var(--line);border-radius:20px;
+    padding:28px 30px;max-width:460px;
+  }
+  .drop-hint h3{font-family:'Jua',sans-serif;font-size:20px;margin:0 0 10px;}
+  .drop-hint p{font-size:13.5px;color:var(--ink-soft);line-height:1.8;margin:0;}
+  .drop-hint kbd{
+    background:#F2F5F8;border:2px solid var(--line);border-radius:7px;
+    padding:2px 8px;font-family:'Jua',sans-serif;font-size:13px;
+  }
+
+  /* 텍스트 입력창 */
+  #text-input{
+    position:absolute;display:none;z-index:10;
+    border:2.5px dashed var(--mint);border-radius:8px;background:rgba(255,255,255,.94);
+    padding:5px 8px;font-family:'Noto Sans KR',sans-serif;outline:none;
+    resize:none;overflow:hidden;line-height:1.35;
+  }
+
+  .hidden{display:none !important;}
+
+  @media (max-width:640px){
+    .hint-chip{display:none;}
+    .toolbar{padding:7px 8px;gap:6px;}
+    .tool{height:38px;min-width:40px;padding:0 8px;font-size:13px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <a class="brand" href="../index.html">
+    <svg width="22" height="22" viewBox="0 0 34 34" fill="none">
+      <circle cx="17" cy="18" r="14" fill="#fff" stroke="#33403C" stroke-width="2"/>
+      <path d="M17 9 L17 18 L23 21" stroke="#4FB89A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="13" y="2" width="8" height="4" rx="1.5" fill="#33403C"/>
+    </svg>
+    <span>필기도구</span>
+  </a>
+
+  <div class="sep"></div>
+
+  <button class="tool on" id="t-pen" onclick="setTool('pen')" title="펜 (P)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7-4-4-7 7-1 5z"/><path d="M15 8l1-1a2.8 2.8 0 014 4l-1 1"/></svg>
+    펜
+  </button>
+  <button class="tool" id="t-text" onclick="setTool('text')" title="텍스트 (T)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 6h14M12 6v13M9 19h6"/></svg>
+    글자
+  </button>
+  <button class="tool" id="t-eraser" onclick="setTool('eraser')" title="지우개 (E)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16l7-7 6 6-4 4H6z"/><path d="M11 9l4-4 6 6-4 4"/></svg>
+    지우개
+  </button>
+
+  <div class="sep"></div>
+
+  <div id="colors" style="display:flex;gap:5px;"></div>
+
+  <div class="sep"></div>
+
+  <div class="sizes" id="sizes"></div>
+
+  <div class="sep"></div>
+
+  <button class="tool" onclick="undo()" title="되돌리기 (Ctrl+Z)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 010 10h-4"/></svg>
+  </button>
+  <button class="tool" onclick="pasteFromClipboard()" title="화면 캡처 붙여넣기 (Ctrl+V)">
+    📋 붙여넣기
+  </button>
+  <button class="tool" onclick="saveImage()" title="그림으로 저장">
+    💾 저장
+  </button>
+  <button class="tool danger" onclick="clearAll()" title="모두 지우기">
+    🧹 전체지우기
+  </button>
+
+  <span class="hint-chip" id="hint">P 펜 · T 글자 · E 지우개 · Ctrl+V 캡처 붙여넣기</span>
+</div>
+
+<div class="board" id="board">
+  <img id="bg-img" alt="">
+  <canvas id="canvas"></canvas>
+  <textarea id="text-input" spellcheck="false"></textarea>
+
+  <div class="drop-hint" id="drop-hint">
+    <div class="inner">
+      <h3>✏️ 무엇 위에 필기할까요?</h3>
+      <p>
+        보여줄 화면을 캡처해서 <kbd>Ctrl</kbd> + <kbd>V</kbd> 로 붙여넣으세요.<br>
+        이미지를 이 영역에 끌어다 놓아도 돼요.<br>
+        그냥 이대로 <b>빈 화이트보드</b>처럼 써도 좋아요!
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+const COLORS = ["#E8382B","#2B6BE8","#1E9E63","#F5A623","#8B4FD8","#1D1B16"];
+const SIZES  = [3, 6, 11, 18];
+
+let tool = "pen";
+let color = COLORS[0];
+let size = SIZES[1];
+
+const board  = document.getElementById("board");
+const canvas = document.getElementById("canvas");
+const ctx    = canvas.getContext("2d");
+const bgImg  = document.getElementById("bg-img");
+const textEl = document.getElementById("text-input");
+
+let drawing = false;
+let lastX = 0, lastY = 0;
+let history = [];          // 되돌리기용 스냅샷
+let textStart = null;      // 텍스트 드래그 시작점
+
+/* ---------- 캔버스 크기 ---------- */
+function resizeCanvas(){
+  const snapshot = canvas.width ? ctx.getImageData(0,0,canvas.width,canvas.height) : null;
+  const r = board.getBoundingClientRect();
+  canvas.width = r.width;
+  canvas.height = r.height;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  if(snapshot) ctx.putImageData(snapshot, 0, 0);
+}
+window.addEventListener("resize", resizeCanvas);
+
+/* ---------- 도구 ---------- */
+function setTool(t){
+  tool = t;
+  ["pen","text","eraser"].forEach(k=>{
+    document.getElementById("t-"+k).classList.toggle("on", k===t);
+  });
+  canvas.classList.toggle("text-mode", t==="text");
+  canvas.classList.toggle("eraser-mode", t==="eraser");
+  hideTextInput(true);
+}
+
+/* 색상 버튼 */
+const colorWrap = document.getElementById("colors");
+COLORS.forEach((c,i)=>{
+  const b = document.createElement("div");
+  b.className = "swatch" + (i===0 ? " on" : "");
+  b.style.background = c;
+  b.title = "색 바꾸기";
+  b.onclick = ()=>{
+    color = c;
+    document.querySelectorAll(".swatch").forEach(x=>x.classList.remove("on"));
+    b.classList.add("on");
+    if(textEl.style.display === "block") textEl.style.color = c;
+  };
+  colorWrap.appendChild(b);
+});
+
+/* 굵기 버튼 */
+const sizeWrap = document.getElementById("sizes");
+SIZES.forEach((s,i)=>{
+  const b = document.createElement("div");
+  b.className = "size-dot" + (i===1 ? " on" : "");
+  b.title = "굵기";
+  b.innerHTML = '<i style="width:'+Math.min(s,16)+'px;height:'+Math.min(s,16)+'px;"></i>';
+  b.onclick = ()=>{
+    size = s;
+    document.querySelectorAll(".size-dot").forEach(x=>x.classList.remove("on"));
+    b.classList.add("on");
+  };
+  sizeWrap.appendChild(b);
+});
+
+/* ---------- 되돌리기 ---------- */
+function pushHistory(){
+  try{
+    history.push(canvas.toDataURL());
+    if(history.length > 25) history.shift();
+  }catch(e){}
+}
+function undo(){
+  hideTextInput(true);
+  if(history.length === 0) return;
+  const data = history.pop();
+  const img = new Image();
+  img.onload = ()=>{
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(img,0,0);
+  };
+  img.src = data;
+}
+
+/* ---------- 그리기 ---------- */
+function pos(e){
+  const r = canvas.getBoundingClientRect();
+  return { x: e.clientX - r.left, y: e.clientY - r.top };
+}
+
+canvas.addEventListener("pointerdown", e=>{
+  if(e.button !== 0) return;
+  canvas.setPointerCapture(e.pointerId);
+  const p = pos(e);
+
+  if(tool === "text"){
+    textStart = p;
+    return;
+  }
+
+  pushHistory();
+  drawing = true;
+  lastX = p.x; lastY = p.y;
+  // 점 하나만 찍어도 보이도록
+  ctx.globalCompositeOperation = (tool === "eraser") ? "destination-out" : "source-over";
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = (tool === "eraser") ? size * 3.2 : size;
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, ctx.lineWidth/2, 0, Math.PI*2);
+  ctx.fill();
+});
+
+canvas.addEventListener("pointermove", e=>{
+  if(!drawing) return;
+  const p = pos(e);
+  ctx.beginPath();
+  ctx.moveTo(lastX, lastY);
+  ctx.lineTo(p.x, p.y);
+  ctx.stroke();
+  lastX = p.x; lastY = p.y;
+});
+
+function endDraw(e){
+  if(tool === "text" && textStart){
+    const p = pos(e);
+    const w = Math.abs(p.x - textStart.x);
+    const h = Math.abs(p.y - textStart.y);
+    const x = Math.min(p.x, textStart.x);
+    const y = Math.min(p.y, textStart.y);
+    // 드래그가 거의 없으면 기본 크기로
+    showTextInput(x, y, Math.max(w, 180), Math.max(h, 40));
+    textStart = null;
+    return;
+  }
+  drawing = false;
+  ctx.globalCompositeOperation = "source-over";
+}
+canvas.addEventListener("pointerup", endDraw);
+canvas.addEventListener("pointercancel", ()=>{ drawing = false; textStart = null; });
+
+/* ---------- 텍스트 ---------- */
+function showTextInput(x, y, w, h){
+  const fontSize = Math.max(16, Math.min(72, Math.round(h * 0.62)));
+  textEl.style.display = "block";
+  textEl.style.left = x + "px";
+  textEl.style.top = y + "px";
+  textEl.style.width = w + "px";
+  textEl.style.height = Math.max(h, fontSize * 1.5) + "px";
+  textEl.style.fontSize = fontSize + "px";
+  textEl.style.color = color;
+  textEl.value = "";
+  textEl.dataset.x = x;
+  textEl.dataset.y = y;
+  textEl.dataset.size = fontSize;
+  textEl.dataset.w = w;
+  setTimeout(()=> textEl.focus(), 10);
+  document.getElementById("hint").textContent = "글자를 쓰고 Enter (줄바꿈은 Shift+Enter)";
+}
+
+function commitText(){
+  const val = textEl.value;
+  if(!val.trim()){ hideTextInput(true); return; }
+  pushHistory();
+  const x = +textEl.dataset.x, y = +textEl.dataset.y;
+  const fs = +textEl.dataset.size, maxW = +textEl.dataset.w;
+
+  ctx.globalCompositeOperation = "source-over";
+  ctx.fillStyle = textEl.style.color || color;
+  ctx.font = "700 " + fs + "px 'Noto Sans KR', sans-serif";
+  ctx.textBaseline = "top";
+
+  // 폭에 맞춰 줄바꿈
+  const lines = [];
+  val.split("\n").forEach(para=>{
+    let line = "";
+    for(const ch of para){
+      if(ctx.measureText(line + ch).width > maxW && line){
+        lines.push(line); line = ch;
+      } else line += ch;
+    }
+    lines.push(line);
+  });
+  lines.forEach((ln, i)=> ctx.fillText(ln, x + 5, y + 5 + i * fs * 1.35));
+
+  hideTextInput(true);
+}
+
+function hideTextInput(skipCommit){
+  textEl.style.display = "none";
+  textEl.value = "";
+  document.getElementById("hint").textContent = "P 펜 · T 글자 · E 지우개 · Ctrl+V 캡처 붙여넣기";
+}
+
+textEl.addEventListener("keydown", e=>{
+  if(e.key === "Enter" && !e.shiftKey){ e.preventDefault(); commitText(); }
+  if(e.key === "Escape"){ e.preventDefault(); hideTextInput(true); }
+  e.stopPropagation();
+});
+textEl.addEventListener("blur", ()=>{ if(textEl.style.display === "block") commitText(); });
+
+/* ---------- 배경 이미지 ---------- */
+function setBackground(src){
+  bgImg.src = src;
+  bgImg.style.display = "block";
+  document.getElementById("drop-hint").style.display = "none";
+}
+
+async function pasteFromClipboard(){
+  try{
+    const items = await navigator.clipboard.read();
+    for(const item of items){
+      const type = item.types.find(t=> t.startsWith("image/"));
+      if(type){
+        const blob = await item.getType(type);
+        setBackground(URL.createObjectURL(blob));
+        return;
+      }
+    }
+    alert("클립보드에 그림이 없어요.\n화면을 캡처한 뒤 다시 눌러주세요.");
+  }catch(e){
+    alert("붙여넣기 권한이 필요해요.\n화면을 캡처한 뒤 이 화면에서 Ctrl+V 를 눌러보세요.");
+  }
+}
+
+document.addEventListener("paste", e=>{
+  const items = e.clipboardData && e.clipboardData.items;
+  if(!items) return;
+  for(const it of items){
+    if(it.type.startsWith("image/")){
+      setBackground(URL.createObjectURL(it.getAsFile()));
+      e.preventDefault();
+      return;
+    }
+  }
+});
+
+board.addEventListener("dragover", e=>{ e.preventDefault(); });
+board.addEventListener("drop", e=>{
+  e.preventDefault();
+  const f = e.dataTransfer.files[0];
+  if(f && f.type.startsWith("image/")) setBackground(URL.createObjectURL(f));
+});
+
+/* ---------- 저장 / 전체지우기 ---------- */
+function saveImage(){
+  hideTextInput(true);
+  const out = document.createElement("canvas");
+  out.width = canvas.width; out.height = canvas.height;
+  const o = out.getContext("2d");
+  o.fillStyle = "#fff";
+  o.fillRect(0,0,out.width,out.height);
+
+  if(bgImg.style.display === "block" && bgImg.naturalWidth){
+    // object-fit: contain 과 같은 비율로 배경 그리기
+    const cw = out.width, ch = out.height;
+    const ir = bgImg.naturalWidth / bgImg.naturalHeight;
+    const cr = cw / ch;
+    let w, h, x, y;
+    if(ir > cr){ w = cw; h = cw / ir; x = 0; y = (ch - h)/2; }
+    else       { h = ch; w = ch * ir; y = 0; x = (cw - w)/2; }
+    o.drawImage(bgImg, x, y, w, h);
+  }
+  o.drawImage(canvas, 0, 0);
+
+  const a = document.createElement("a");
+  a.download = "필기_" + new Date().toISOString().slice(0,10) + ".png";
+  a.href = out.toDataURL("image/png");
+  a.click();
+}
+
+function clearAll(){
+  if(!confirm("필기와 배경을 모두 지울까요?")) return;
+  pushHistory();
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  bgImg.style.display = "none";
+  bgImg.src = "";
+  document.getElementById("drop-hint").style.display = "flex";
+  hideTextInput(true);
+}
+
+/* ---------- 단축키 ---------- */
+document.addEventListener("keydown", e=>{
+  if(e.target === textEl) return;
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z"){ e.preventDefault(); undo(); return; }
+  if(e.ctrlKey || e.metaKey || e.altKey) return;
+  const k = e.key.toLowerCase();
+  if(k === "p") setTool("pen");
+  if(k === "t") setTool("text");
+  if(k === "e") setTool("eraser");
+});
+
+resizeCanvas();
+</script>
+</body>
+</html>
