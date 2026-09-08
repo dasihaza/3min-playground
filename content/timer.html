@@ -119,6 +119,9 @@
   .btn.reset{background:#fff;color:var(--ink);box-shadow:0 4px 0 #C9C2B6;}
   .btn.reset:hover{box-shadow:0 3px 0 #C9C2B6;}
   .btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+  .btn.alarm{background:var(--coral);color:#fff;box-shadow:0 4px 0 #C4503F;animation:alarmPulse .8s ease-in-out infinite;}
+  .btn.alarm:hover{box-shadow:0 3px 0 #C4503F;}
+  @keyframes alarmPulse{50%{filter:brightness(1.18);}}
 
   /* ===== 설정 카드 ===== */
   .panel{
@@ -237,7 +240,7 @@
         <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>
       </svg>
     </button>
-    <div class="clock-brand">CLASSROOM TIMER <span style="opacity:.6;font-size:11px;">v4</span></div>
+    <div class="clock-brand">CLASSROOM TIMER <span style="opacity:.6;font-size:11px;">v6</span></div>
     <div class="lcd" id="lcd">
       <div class="time" id="time">03:00</div>
       <div class="lcd-label" id="lcd-label">준비됐어요</div>
@@ -305,9 +308,6 @@
     </label>
 
     <div id="next-alert" class="next-alert"></div>
-    <button type="button" class="btn" style="width:100%;margin-top:10px;font-size:14px;padding:11px;" onclick="testMinuteAlert()">
-      1분 알림 확인하기 (75초 타이머로 시작)
-    </button>
   </div>
 
 </div>
@@ -470,18 +470,6 @@ function updateNextAlert(){
     : "시작하면 " + fmt(60) + " 뒤에 첫 띵동이 울려요";
 }
 
-/* 1분 알림이 켜졌는지 75초짜리로 바로 확인 */
-function testMinuteAlert(){
-  document.getElementById("cb-minute").checked = true;
-  onOptChange();
-  document.querySelectorAll(".preset").forEach(x=>x.classList.remove("sel"));
-  document.getElementById("in-min").value = 1;
-  document.getElementById("in-sec").value = 15;
-  setTotal(75);
-  startTimer();
-  flashAlert("60초 뒤에 띵동이 울려요!");
-}
-
 /* 알림이 울렸다는 걸 눈으로도 보여줘요 */
 function flashAlert(text){
   const el = document.getElementById("next-alert");
@@ -556,20 +544,48 @@ function tickLoop(){
   if(remainSec <= 0) finish();
 }
 
+/* ===== 종료 알람 (멈출 때까지 반복) ===== */
+let alarmLoopId = null;
+
+function startAlarm(){
+  stopAlarm();
+  playEndChime();
+  alarmLoopId = setInterval(()=>{
+    if(audioCtx && audioCtx.state !== "running"){ try{ audioCtx.resume(); }catch(e){} }
+    playEndChime();
+  }, 1600);
+
+  const stopBtn = document.getElementById("pause-btn");
+  stopBtn.textContent = "알림 끄기";
+  stopBtn.disabled = false;
+  stopBtn.classList.add("alarm");
+  document.getElementById("lcd-label").textContent = "시간 끝! (알림 끄기를 눌러주세요)";
+}
+
+function stopAlarm(){
+  if(alarmLoopId){ clearInterval(alarmLoopId); alarmLoopId = null; }
+  const stopBtn = document.getElementById("pause-btn");
+  stopBtn.textContent = "일시정지";
+  stopBtn.classList.remove("alarm");
+  stopBtn.disabled = !running;
+  if(!running && remainSec <= 0) document.getElementById("lcd-label").textContent = "시간 끝!";
+}
+
 function finish(){
   running = false;
   remainSec = 0;
   if(loopId) clearInterval(loopId);
   loopId = null;
-  if(opts.end) playEndChime();
   document.getElementById("start-btn").textContent = "시작";
   document.getElementById("start-btn").disabled = false;
   document.getElementById("pause-btn").disabled = true;
   render();
+  if(opts.end) startAlarm();      // 멈출 때까지 계속 울려요
 }
 
 function startTimer(){
   unlockAudio();
+  stopAlarm();
   if(remainSec <= 0) remainSec = totalSec;
   if(remainSec <= 0){ alert("시간을 먼저 정해주세요."); return; }
   running = true;
@@ -585,6 +601,7 @@ function startTimer(){
 }
 
 function pauseTimer(){
+  if(alarmLoopId){ stopAlarm(); return; }   // 울리는 중이면 알람만 끔
   if(!running) return;
   running = false;
   if(loopId) clearInterval(loopId);
@@ -596,6 +613,7 @@ function pauseTimer(){
 }
 
 function resetTimer(){
+  stopAlarm();
   running = false;
   if(loopId) clearInterval(loopId);
   loopId = null;
@@ -609,6 +627,7 @@ function resetTimer(){
 }
 
 function setTotal(sec){
+  stopAlarm();
   totalSec = sec;
   remainSec = sec;
   running = false;
@@ -654,7 +673,9 @@ document.getElementById("in-sec").addEventListener("keydown", e=>{ if(e.key==="E
 document.addEventListener("keydown", e=>{
   if(e.code === "Space" && e.target.tagName !== "INPUT"){
     e.preventDefault();
-    if(running) pauseTimer(); else startTimer();
+    if(alarmLoopId) stopAlarm();
+    else if(running) pauseTimer();
+    else startTimer();
   }
   if(e.key === "Escape" && maxed && !document.fullscreenElement){
     toggleMax();
