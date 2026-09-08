@@ -75,9 +75,16 @@
     position:absolute;top:0;left:0;width:100%;height:100%;
     object-fit:contain;pointer-events:none;display:none;
   }
-  #canvas{position:absolute;top:0;left:0;touch-action:none;cursor:crosshair;}
+  #canvas{position:absolute;top:0;left:0;touch-action:none;}
+  /* 펜 모양 커서 — 펜 끝이 실제로 그려지는 지점에 오도록 맞췄어요 */
+  #canvas.pen-mode{
+    cursor:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDMyIDMyIj48ZyBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMyAyOWw2LTIgMTUtMTUtNC00TDUgMjN6Ii8+PHBhdGggZD0iTTIxIDdsMy0zYTMgMyAwIDAxNCA0bC0zIDMiLz48L2c+PGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMzM0MDNDIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTMgMjlsNi0yIDE1LTE1LTQtNEw1IDIzeiIgZmlsbD0iI0ZGRDM1QyIvPjxwYXRoIGQ9Ik0yMSA3bDMtM2EzIDMgMCAwMTQgNGwtMyAzIiBmaWxsPSIjNEZCODlBIi8+PHBhdGggZD0iTTUgMjNsNCA0Ii8+PC9nPjwvc3ZnPg==") 2 30, crosshair;
+  }
   #canvas.text-mode{cursor:text;}
-  #canvas.eraser-mode{cursor:cell;}
+  /* 지우개 모양 커서 */
+  #canvas.eraser-mode{
+    cursor:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDMyIDMyIj48ZyBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iNSIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTQgMjJsMTAtMTAgMTAgMTAtNiA2SDEweiIvPjwvZz48ZyBzdHJva2U9IiMzMzQwM0MiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTQgMjJsMTAtMTAgMTAgMTAtNiA2SDEweiIgZmlsbD0iI0ZGQjRBOCIvPjxwYXRoIGQ9Ik0xNCAxMmwxMCAxMCIgZmlsbD0ibm9uZSIvPjwvZz48L3N2Zz4=") 4 28, cell;
+  }
 
   .drop-hint{
     position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
@@ -218,6 +225,7 @@ function setTool(t){
   ["pen","text","eraser"].forEach(k=>{
     document.getElementById("t-"+k).classList.toggle("on", k===t);
   });
+  canvas.classList.toggle("pen-mode", t==="pen");
   canvas.classList.toggle("text-mode", t==="text");
   canvas.classList.toggle("eraser-mode", t==="eraser");
   hideTextInput(true);
@@ -482,6 +490,7 @@ document.addEventListener("keydown", e=>{
 });
 
 resizeCanvas();
+setTool("pen");
 </script>
 </body>
 </html>
