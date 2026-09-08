@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>두근두근 사다리타기 | 3분 놀이터</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky:#DFF1FB;
+    --sky-2:#C9E7F7;
+    --ink:#3B4A52;
+    --ink-soft:#7E8F99;
+    --line:#D7E6EE;
+    --grape:#8B7BD8;
+    --grape-dark:#6E5FB8;
+    --lemon:#FFD35C;
+    --peach:#FF9E7D;
+    --leaf:#6BC98E;
+    --pink:#FF8FB1;
+    --shadow:0 3px 0 rgba(59,74,82,.12);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 12% 8%, rgba(255,255,255,.85) 0 90px, transparent 91px),
+      radial-gradient(circle at 88% 16%, rgba(255,255,255,.6) 0 60px, transparent 61px),
+      linear-gradient(180deg, var(--sky), var(--sky-2));
+    background-attachment:fixed;
+    color:var(--ink);
+    font-family:'Noto Sans KR',sans-serif;
+    min-height:100vh;
+  }
+  .topbar{max-width:760px;margin:0 auto;padding:14px 18px 0;display:flex;align-items:center;justify-content:space-between;}
+  .topbar a{text-decoration:none;color:var(--ink);}
+  .topbar .brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;}
+  .topbar .back{font-size:12.5px;font-weight:700;color:var(--ink-soft);border:2px solid #fff;background:#fff;padding:6px 12px;border-radius:999px;box-shadow:var(--shadow);}
+
+  .shell{max-width:760px;margin:0 auto;padding:16px 18px 60px;}
+
+  .hero{text-align:center;padding:14px 0 6px;}
+  .hero h1{font-family:'Jua',sans-serif;font-size:clamp(26px,5.5vw,36px);margin:0 0 4px;color:var(--grape-dark);}
+  .hero p{font-family:'Gaegu',cursive;font-weight:700;font-size:17px;color:var(--ink-soft);margin:0;}
+
+  .card{
+    background:#fff;border-radius:20px;padding:20px 18px;margin-top:16px;
+    box-shadow:var(--shadow), 0 10px 22px rgba(59,74,82,.10);
+  }
+  .card h2{font-family:'Jua',sans-serif;font-size:17px;margin:0 0 4px;}
+  .card p.desc{font-size:12.5px;color:var(--ink-soft);margin:0 0 14px;line-height:1.6;}
+
+  .field{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+  .field label{font-family:'Jua',sans-serif;font-size:14.5px;width:78px;flex:0 0 auto;}
+  .stepper{display:flex;align-items:center;gap:6px;}
+  .step-btn{
+    width:36px;height:36px;border:none;border-radius:11px;cursor:pointer;
+    font-family:'Jua',sans-serif;font-size:19px;line-height:1;
+    background:var(--sky-2);color:var(--grape-dark);box-shadow:0 3px 0 #A9CFE4;
+  }
+  .step-btn:active{transform:translateY(2px);box-shadow:0 1px 0 #A9CFE4;}
+  .num-input{
+    width:62px;border:2.5px solid var(--line);border-radius:11px;padding:8px;
+    font-family:'Jua',sans-serif;font-size:18px;text-align:center;color:var(--ink);
+  }
+  .num-input:focus{outline:none;border-color:var(--grape);}
+  .field .unit{font-size:13px;color:var(--ink-soft);}
+
+  .btn{
+    font-family:'Jua',sans-serif;border:none;cursor:pointer;font-size:16px;
+    padding:14px 22px;border-radius:14px;
+    background:var(--grape);color:#fff;box-shadow:0 4px 0 var(--grape-dark);
+    transition:transform .1s ease;
+  }
+  .btn:hover{transform:translateY(1px);box-shadow:0 3px 0 var(--grape-dark);}
+  .btn:active{transform:translateY(4px);box-shadow:none;}
+  .btn.wide{width:100%;font-size:18px;padding:16px;}
+  .btn.lemon{background:var(--lemon);color:#7A5B00;box-shadow:0 4px 0 #E0B233;}
+  .btn.lemon:hover{box-shadow:0 3px 0 #E0B233;}
+  .btn.ghost{background:#fff;color:var(--ink);box-shadow:0 4px 0 var(--line);}
+  .btn.ghost:hover{box-shadow:0 3px 0 var(--line);}
+  .btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+
+  /* ===== 사다리 무대 ===== */
+  .stage{
+    background:#fff;border-radius:20px;padding:16px 10px 18px;margin-top:16px;
+    box-shadow:var(--shadow), 0 10px 22px rgba(59,74,82,.10);
+    overflow-x:auto;
+  }
+  .ladder-wrap{min-width:min-content;margin:0 auto;}
+  .heads{display:flex;justify-content:center;gap:0;margin-bottom:6px;}
+  .head{
+    flex:0 0 auto;text-align:center;cursor:pointer;
+    transition:transform .12s ease;
+  }
+  .head:hover{transform:translateY(-3px);}
+  .head .face{
+    width:44px;height:44px;margin:0 auto 3px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;font-size:22px;
+    background:var(--sky-2);box-shadow:0 3px 0 #A9CFE4;
+  }
+  .head .nm{font-family:'Jua',sans-serif;font-size:12.5px;}
+  .head.done .face{background:var(--line);box-shadow:0 3px 0 #C2D3DC;opacity:.55;}
+  .head.done .nm{opacity:.5;}
+
+  .feet{display:flex;justify-content:center;gap:0;margin-top:6px;}
+  .foot{flex:0 0 auto;text-align:center;}
+  .foot .box{
+    width:44px;height:44px;margin:0 auto;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;font-size:21px;
+    background:#F2F7FA;box-shadow:0 3px 0 var(--line);
+    transition:all .2s ease;
+  }
+  .foot.revealed.win .box{background:var(--lemon);box-shadow:0 3px 0 #E0B233;transform:scale(1.06);}
+  .foot.revealed.lose .box{background:#EDF2F5;box-shadow:0 3px 0 var(--line);}
+  .foot .lbl{font-family:'Jua',sans-serif;font-size:11.5px;margin-top:3px;min-height:15px;color:var(--ink-soft);}
+  .foot.revealed.win .lbl{color:#C98F00;}
+
+  svg.ladder{display:block;margin:0 auto;}
+
+  /* 결과 알림 */
+  .result-toast{
+    margin-top:14px;padding:14px;border-radius:14px;text-align:center;
+    font-family:'Jua',sans-serif;font-size:18px;min-height:24px;
+    background:#F2F7FA;color:var(--ink-soft);
+  }
+  .result-toast.win{background:#FFF6DA;color:#B8830A;animation:cheer .5s ease;}
+  .result-toast.lose{background:#EFF3F6;color:var(--ink-soft);}
+  @keyframes cheer{0%{transform:scale(.85);}55%{transform:scale(1.08);}100%{transform:scale(1);}}
+
+  .scoreline{
+    text-align:center;font-family:'Gaegu',cursive;font-weight:700;font-size:15px;
+    color:var(--ink-soft);margin-top:10px;
+  }
+  .stage-actions{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap;justify-content:center;}
+  .hidden{display:none !important;}
+
+  /* 색종이 */
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:50;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="../index.html">
+    <svg width="26" height="26" viewBox="0 0 34 34" fill="none">
+      <circle cx="17" cy="18" r="14" fill="#fff" stroke="#3B4A52" stroke-width="2"/>
+      <path d="M17 9 L17 18 L23 21" stroke="#FF8FB1" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="13" y="2" width="8" height="4" rx="1.5" fill="#3B4A52"/>
+    </svg>
+    <span>3분 놀이터</span>
+  </a>
+  <a class="back" href="../index.html">← 다른 콘텐츠 보기</a>
+</div>
+
+<div class="shell">
+
+  <div class="hero">
+    <h1>두근두근 사다리타기</h1>
+    <p>누가 당첨될까? 하나씩 눌러서 확인해요!</p>
+  </div>
+
+  <!-- 설정 -->
+  <div class="card" id="setup">
+    <h2>먼저 정해요</h2>
+    <p class="desc">참여할 사람 수와 당첨 개수를 정하면 바로 사다리가 만들어져요.</p>
+
+    <div class="field">
+      <label>사람 수</label>
+      <div class="stepper">
+        <button class="step-btn" onclick="bump('n-people',-1)">−</button>
+        <input class="num-input" type="number" id="n-people" value="6" min="2" max="26">
+        <button class="step-btn" onclick="bump('n-people',1)">+</button>
+      </div>
+      <span class="unit">2 ~ 26명</span>
+    </div>
+
+    <div class="field">
+      <label>당첨 개수</label>
+      <div class="stepper">
+        <button class="step-btn" onclick="bump('n-win',-1)">−</button>
+        <input class="num-input" type="number" id="n-win" value="2" min="1" max="25">
+        <button class="step-btn" onclick="bump('n-win',1)">+</button>
+      </div>
+      <span class="unit">사람 수보다 적게</span>
+    </div>
+
+    <button class="btn wide lemon" onclick="buildLadder()">사다리 만들기</button>
+  </div>
+
+  <!-- 사다리 -->
+  <div class="stage hidden" id="stage">
+    <div class="ladder-wrap" id="ladder-wrap">
+      <div class="heads" id="heads"></div>
+      <svg class="ladder" id="ladder"></svg>
+      <div class="feet" id="feet"></div>
+    </div>
+
+    <div class="result-toast" id="toast">누구부터 타볼까요?</div>
+    <div class="scoreline" id="scoreline"></div>
+
+    <div class="stage-actions">
+      <button class="btn lemon" id="all-btn" onclick="runAll()">한 번에 타기</button>
+      <button class="btn ghost" onclick="buildLadder()">사다리 새로 만들기</button>
+      <button class="btn ghost" onclick="backToSetup()">인원 다시 정하기</button>
+    </div>
+  </div>
+
+</div>
+
+<canvas id="confetti"></canvas>
+
+<script>
+/* ================= 소리 ================= */
+let audioCtx = null;
+function unlockAudio(){
+  try{
+    if(!audioCtx){
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return;
+      audioCtx = new AC();
+    }
+    if(audioCtx.state !== "running") audioCtx.resume();
+    const b=audioCtx.createBuffer(1,1,audioCtx.sampleRate);
+    const s=audioCtx.createBufferSource(); s.buffer=b; s.connect(audioCtx.destination); s.start(0);
+  }catch(e){}
+}
+document.addEventListener("pointerdown", unlockAudio, { once:true });
+
+function withAudio(fn){
+  try{
+    if(!audioCtx){
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return;
+      audioCtx = new AC();
+    }
+    if(audioCtx.state === "running") fn(audioCtx);
+    else audioCtx.resume().then(()=>fn(audioCtx)).catch(()=>{});
+  }catch(e){}
+}
+function tone(ctx,freq,at,dur,vol,type){
+  const o=ctx.createOscillator(), g=ctx.createGain();
+  o.type=type||"sine"; o.frequency.value=freq;
+  g.gain.setValueAtTime(0.0001,at);
+  g.gain.exponentialRampToValueAtTime(vol,at+0.015);
+  g.gain.exponentialRampToValueAtTime(0.0001,at+dur);
+  o.connect(g); g.connect(ctx.destination);
+  o.start(at); o.stop(at+dur+0.03);
+}
+function soundStep(){ withAudio(c=> tone(c, 520, c.currentTime+0.02, 0.07, 0.10, "square")); }
+function soundWin(){
+  withAudio(c=>{
+    const t=c.currentTime+0.03;
+    [523.25,659.25,783.99,1046.5].forEach((f,i)=>{
+      tone(c,f,t+i*0.11, i===3?0.55:0.16, i===3?0.30:0.24, "triangle");
+    });
+  });
+}
+function soundLose(){
+  withAudio(c=>{
+    const t=c.currentTime+0.03;
+    tone(c,392,t,0.18,0.20,"triangle");
+    tone(c,311.13,t+0.16,0.36,0.20,"triangle");
+  });
+}
+
+/* ================= 사다리 ================= */
+const FACES = ["🐰","🐻","🐼","🐨","🦊","🐯","🐸","🐵","🐧","🐤","🐷","🐮","🦁","🐙","🦄","🐳","🐢","🦉","🐝","🐹","🐬","🦋","🐿️","🦒","🐘","🦔"];
+
+let people = 6, wins = 2;
+let bridges = [];       // {row, col} 왼쪽 col 과 col+1 을 잇는 다리
+let results = [];       // 각 사람의 도착 칸
+let prizes = [];        // 각 도착칸의 당첨 여부
+let revealed = [];      // 각 사람이 이미 탔는지
+let animating = false;
+
+const COL_W = 58;       // 세로줄 간격
+const ROW_H = 30;       // 가로줄 간격
+const ROWS = 9;         // 가로줄 층 수
+const PAD = 14;
+
+function bump(id, d){
+  const el = document.getElementById(id);
+  const min = +el.min, max = +el.max;
+  let v = (parseInt(el.value,10) || min) + d;
+  v = Math.max(min, Math.min(max, v));
+  el.value = v;
+  syncLimits();
+}
+function syncLimits(){
+  const p = parseInt(document.getElementById("n-people").value,10) || 2;
+  const wEl = document.getElementById("n-win");
+  wEl.max = Math.max(1, p - 1);
+  if(parseInt(wEl.value,10) > +wEl.max) wEl.value = wEl.max;
+}
+document.getElementById("n-people").addEventListener("input", syncLimits);
+
+function shuffle(a){
+  a = a.slice();
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+function makeBridges(){
+  // occupied[r][c] = r층에서 c와 c+1 을 잇는 다리가 있는지
+  const occupied = Array.from({length:ROWS}, ()=> Array(people-1).fill(false));
+
+  const canPlace = (r,c)=>
+    !occupied[r][c] &&
+    !(c > 0 && occupied[r][c-1]) &&
+    !(c < people-2 && occupied[r][c+1]);
+
+  // 층마다 무작위로 놓기 (붙어 있으면 못 놓게)
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<people-1;c++){
+      if(Math.random() < 0.42 && canPlace(r,c)) occupied[r][c] = true;
+    }
+  }
+
+  // 모든 세로줄 사이에 최소 하나는 다리가 있도록 보강
+  for(let c=0;c<people-1;c++){
+    if(occupied.some(row=> row[c])) continue;
+    const rows = shuffle([...Array(ROWS).keys()]);
+    for(const r of rows){
+      if(canPlace(r,c)){ occupied[r][c] = true; break; }
+    }
+  }
+
+  const list = [];
+  for(let r=0;r<ROWS;r++)
+    for(let c=0;c<people-1;c++)
+      if(occupied[r][c]) list.push({ r, c });
+  return list;
+}
+
+function buildLadder(){
+  unlockAudio();
+  people = Math.max(2, Math.min(26, parseInt(document.getElementById("n-people").value,10) || 6));
+  wins   = Math.max(1, Math.min(people-1, parseInt(document.getElementById("n-win").value,10) || 1));
+  document.getElementById("n-people").value = people;
+  document.getElementById("n-win").value = wins;
+
+  // 가로 다리 놓기 (같은 층에서 붙어 있지 않게)
+  // 아무도 자리가 안 바뀌면 재미없으니 다시 만들어요
+  for(let attempt=0; attempt<30; attempt++){
+    bridges = makeBridges();
+    results = [];
+    for(let i=0;i<people;i++) results.push(walkTo(i).endCol);
+    if(results.some((v,i)=> v !== i)) break;
+  }
+
+  // 당첨 배치
+  prizes = Array(people).fill(false);
+  shuffle([...Array(people).keys()]).slice(0, wins).forEach(i=> prizes[i]=true);
+
+  revealed = Array(people).fill(false);
+  animating = false;
+
+  document.getElementById("setup").classList.add("hidden");
+  document.getElementById("stage").classList.remove("hidden");
+  document.getElementById("all-btn").disabled = false;
+  document.getElementById("toast").className = "result-toast";
+  document.getElementById("toast").textContent = "누구부터 타볼까요?";
+  renderAll();
+  updateScore();
+}
+
+function backToSetup(){
+  document.getElementById("stage").classList.add("hidden");
+  document.getElementById("setup").classList.remove("hidden");
+}
+
+/* 사다리를 따라 내려가며 지나온 좌표 기록 */
+function walkTo(startCol){
+  let col = startCol;
+  const pts = [[col, -1]];        // [세로줄, 층]  층 -1 = 출발점
+  for(let r=0;r<ROWS;r++){
+    if(bridges.some(b=> b.r===r && b.c===col)){          // 오른쪽으로
+      pts.push([col, r]); col += 1; pts.push([col, r]);
+    } else if(bridges.some(b=> b.r===r && b.c===col-1)){ // 왼쪽으로
+      pts.push([col, r]); col -= 1; pts.push([col, r]);
+    }
+  }
+  pts.push([col, ROWS]);          // 도착점
+  return { endCol: col, pts };
+}
+
+function xOf(col){ return PAD + col * COL_W; }
+function yOf(row){ return PAD + (row + 1) * ROW_H; }
+
+function renderAll(){
+  const w = PAD*2 + (people-1) * COL_W;
+  const h = PAD*2 + (ROWS+1) * ROW_H;
+  const svg = document.getElementById("ladder");
+  svg.setAttribute("width", w);
+  svg.setAttribute("height", h);
+  svg.setAttribute("viewBox", "0 0 "+w+" "+h);
+
+  let g = "";
+  // 세로줄
+  for(let c=0;c<people;c++){
+    g += '<line x1="'+xOf(c)+'" y1="'+yOf(-1)+'" x2="'+xOf(c)+'" y2="'+yOf(ROWS)+'" stroke="#D7E6EE" stroke-width="7" stroke-linecap="round"/>';
+  }
+  // 가로 다리
+  bridges.forEach(b=>{
+    g += '<line x1="'+xOf(b.c)+'" y1="'+yOf(b.r)+'" x2="'+xOf(b.c+1)+'" y2="'+yOf(b.r)+'" stroke="#B9D6E6" stroke-width="7" stroke-linecap="round"/>';
+  });
+  svg.innerHTML = g + '<g id="paths"></g><g id="walker"></g>';
+
+  // 머리 (사람)
+  const heads = document.getElementById("heads");
+  heads.innerHTML = "";
+  for(let i=0;i<people;i++){
+    const d = document.createElement("div");
+    d.className = "head" + (revealed[i] ? " done" : "");
+    d.style.width = COL_W + "px";
+    d.innerHTML = '<div class="face">'+FACES[i % FACES.length]+'</div><div class="nm">'+(i+1)+'번</div>';
+    d.onclick = ()=> runOne(i);
+    heads.appendChild(d);
+  }
+  heads.style.paddingLeft = (PAD - COL_W/2) + "px";
+  heads.style.paddingRight = (PAD - COL_W/2) + "px";
+
+  // 발 (당첨/꽝 칸)
+  const feet = document.getElementById("feet");
+  feet.innerHTML = "";
+  for(let i=0;i<people;i++){
+    const shown = revealed.some((rv,idx)=> rv && results[idx]===i);
+    const d = document.createElement("div");
+    d.className = "foot" + (shown ? " revealed " + (prizes[i] ? "win" : "lose") : "");
+    d.style.width = COL_W + "px";
+    d.innerHTML = '<div class="box">'+(shown ? (prizes[i] ? "🎁" : "💧") : "❓")+'</div>' +
+                  '<div class="lbl">'+(shown ? (prizes[i] ? "당첨!" : "꽝") : "")+'</div>';
+    feet.appendChild(d);
+  }
+  feet.style.paddingLeft = (PAD - COL_W/2) + "px";
+  feet.style.paddingRight = (PAD - COL_W/2) + "px";
+}
+
+const LINE_COLORS = ["#FF8FB1","#FFB454","#6BC98E","#8B7BD8","#4FB3E8","#FF7B6B","#C084D8","#3FBFA6","#E8A33D","#5C8FE8"];
+
+function drawPath(idx, pts, upto){
+  const color = LINE_COLORS[idx % LINE_COLORS.length];
+  let d = "";
+  pts.slice(0, upto+1).forEach((p,i)=>{
+    const x = xOf(p[0]), y = yOf(p[1]);
+    d += (i===0 ? "M" : "L") + x + " " + y + " ";
+  });
+  let el = document.getElementById("path-"+idx);
+  if(!el){
+    el = document.createElementNS("http://www.w3.org/2000/svg","path");
+    el.id = "path-"+idx;
+    el.setAttribute("fill","none");
+    el.setAttribute("stroke",color);
+    el.setAttribute("stroke-width","5");
+    el.setAttribute("stroke-linecap","round");
+    el.setAttribute("stroke-linejoin","round");
+    document.getElementById("paths").appendChild(el);
+  }
+  el.setAttribute("d", d.trim());
+}
+
+function drawWalker(idx, pt){
+  const wrap = document.getElementById("walker");
+  let el = document.getElementById("walker-dot");
+  if(!el){
+    el = document.createElementNS("http://www.w3.org/2000/svg","circle");
+    el.id = "walker-dot";
+    el.setAttribute("r","9");
+    el.setAttribute("fill", LINE_COLORS[idx % LINE_COLORS.length]);
+    el.setAttribute("stroke","#fff");
+    el.setAttribute("stroke-width","3");
+    wrap.appendChild(el);
+  }
+  el.setAttribute("fill", LINE_COLORS[idx % LINE_COLORS.length]);
+  el.setAttribute("cx", xOf(pt[0]));
+  el.setAttribute("cy", yOf(pt[1]));
+}
+function clearWalker(){
+  const el = document.getElementById("walker-dot");
+  if(el) el.remove();
+}
+
+function runOne(idx){
+  if(animating || revealed[idx]) return;
+  unlockAudio();
+  animating = true;
+  const { pts } = walkTo(idx);
+  const toast = document.getElementById("toast");
+  toast.className = "result-toast";
+  toast.textContent = FACES[idx % FACES.length] + " " + (idx+1) + "번 출발!";
+
+  let step = 0;
+  const timer = setInterval(()=>{
+    drawPath(idx, pts, step);
+    drawWalker(idx, pts[step]);
+    soundStep();
+    step++;
+    if(step >= pts.length){
+      clearInterval(timer);
+      clearWalker();
+      revealed[idx] = true;
+      animating = false;
+      renderAll();
+      showResult(idx);
+      // 이미 탄 사람들의 길은 계속 보이게
+      redrawRevealedPaths();
+    }
+  }, 130);
+}
+
+function redrawRevealedPaths(){
+  const g = document.getElementById("paths");
+  if(g) g.innerHTML = "";
+  revealed.forEach((rv, i)=>{
+    if(rv){
+      const { pts } = walkTo(i);
+      drawPath(i, pts, pts.length-1);
+    }
+  });
+}
+
+function showResult(idx){
+  const win = prizes[results[idx]];
+  const toast = document.getElementById("toast");
+  toast.className = "result-toast " + (win ? "win" : "lose");
+  toast.textContent = win
+    ? "🎉 " + (idx+1) + "번 " + FACES[idx % FACES.length] + " 당첨!"
+    : "💧 " + (idx+1) + "번 " + FACES[idx % FACES.length] + " 꽝… 다음에!";
+  if(win){ soundWin(); popConfetti(); } else { soundLose(); }
+  updateScore();
+}
+
+function updateScore(){
+  const done = revealed.filter(Boolean).length;
+  const got = revealed.reduce((s,rv,i)=> s + (rv && prizes[results[i]] ? 1 : 0), 0);
+  document.getElementById("scoreline").textContent =
+    done + " / " + people + "명 확인 · 당첨 " + got + " / " + wins + "개 나옴";
+  if(done === people) document.getElementById("all-btn").disabled = true;
+}
+
+function runAll(){
+  if(animating) return;
+  unlockAudio();
+  revealed = Array(people).fill(true);
+  renderAll();
+  redrawRevealedPaths();
+  const winners = [];
+  for(let i=0;i<people;i++) if(prizes[results[i]]) winners.push(i+1);
+  const toast = document.getElementById("toast");
+  toast.className = "result-toast win";
+  toast.textContent = "🎉 당첨: " + winners.join(", ") + "번!";
+  soundWin(); popConfetti();
+  updateScore();
+}
+
+/* ================= 색종이 ================= */
+const cv = document.getElementById("confetti");
+const cx = cv.getContext("2d");
+let bits = [];
+function resizeCv(){ cv.width = innerWidth; cv.height = innerHeight; }
+resizeCv(); addEventListener("resize", resizeCv);
+
+function popConfetti(){
+  const colors = ["#FF8FB1","#FFD35C","#6BC98E","#8B7BD8","#4FB3E8","#FF9E7D"];
+  for(let i=0;i<70;i++){
+    bits.push({
+      x: innerWidth/2 + (Math.random()-0.5)*220,
+      y: innerHeight*0.35 + (Math.random()-0.5)*60,
+      vx: (Math.random()-0.5)*7,
+      vy: Math.random()*-9 - 3,
+      s: 6 + Math.random()*7,
+      c: colors[Math.floor(Math.random()*colors.length)],
+      rot: Math.random()*Math.PI,
+      vr: (Math.random()-0.5)*0.3,
+      life: 90
+    });
+  }
+  if(bits.length) requestAnimationFrame(drawConfetti);
+}
+function drawConfetti(){
+  cx.clearRect(0,0,cv.width,cv.height);
+  bits = bits.filter(b=> b.life > 0);
+  bits.forEach(b=>{
+    b.x += b.vx; b.y += b.vy; b.vy += 0.32; b.rot += b.vr; b.life--;
+    cx.save(); cx.translate(b.x,b.y); cx.rotate(b.rot);
+    cx.fillStyle = b.c; cx.globalAlpha = Math.min(1, b.life/30);
+    cx.fillRect(-b.s/2, -b.s/2, b.s, b.s*0.6);
+    cx.restore();
+  });
+  if(bits.length) requestAnimationFrame(drawConfetti);
+  else cx.clearRect(0,0,cv.width,cv.height);
+}
+
+syncLimits();
+</script>
+</body>
+</html>
