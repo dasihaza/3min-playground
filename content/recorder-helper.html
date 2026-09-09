@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>도레미 리코더 도우미 | 3분 놀이터</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFF6E9;
+    --panel:#FFFFFF;
+    --ink:#42382C;
+    --ink-soft:#8A7E6D;
+    --line:#E8DCC8;
+    --wood:#C98F4B;
+    --wood-dark:#A6702F;
+    --leaf:#5FA97E;
+    --berry:#D4576B;
+    --sky:#4E93C4;
+    --shadow:0 3px 0 rgba(66,56,44,.10);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 90% 5%, rgba(201,143,75,.10) 0 220px, transparent 221px),
+      var(--bg);
+    background-attachment:fixed;
+    color:var(--ink);font-family:'Noto Sans KR',sans-serif;min-height:100vh;
+  }
+  .topbar{max-width:900px;margin:0 auto;padding:14px 18px 0;display:flex;align-items:center;justify-content:space-between;}
+  .topbar a{text-decoration:none;color:var(--ink);}
+  .topbar .brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;}
+  .topbar .back{font-size:12.5px;font-weight:700;color:var(--ink-soft);border:2px solid #fff;background:#fff;padding:6px 12px;border-radius:999px;box-shadow:var(--shadow);}
+
+  .shell{max-width:900px;margin:0 auto;padding:14px 18px 60px;}
+  .hero{text-align:center;padding:12px 0 4px;}
+  .hero h1{font-family:'Jua',sans-serif;font-size:clamp(25px,5vw,34px);margin:0 0 4px;color:var(--wood-dark);}
+  .hero p{font-family:'Gaegu',cursive;font-weight:700;font-size:17px;color:var(--ink-soft);margin:0;}
+
+  /* 탭 */
+  .tabs{display:flex;gap:8px;margin-top:16px;justify-content:center;flex-wrap:wrap;}
+  .tab{
+    font-family:'Jua',sans-serif;font-size:15px;padding:12px 20px;border-radius:14px;
+    border:2.5px solid var(--line);background:#fff;cursor:pointer;color:var(--ink);
+    box-shadow:var(--shadow);transition:all .12s ease;
+  }
+  .tab.on{background:var(--wood);color:#fff;border-color:var(--wood);box-shadow:0 3px 0 var(--wood-dark);}
+
+  .card{background:var(--panel);border-radius:18px;padding:20px 18px;margin-top:14px;box-shadow:var(--shadow),0 8px 18px rgba(66,56,44,.08);}
+  .card h2{font-family:'Jua',sans-serif;font-size:17px;margin:0 0 4px;}
+  .card p.desc{font-size:12.5px;color:var(--ink-soft);margin:0 0 14px;line-height:1.7;word-break:keep-all;}
+
+  .btn{
+    font-family:'Jua',sans-serif;border:none;cursor:pointer;font-size:15px;
+    padding:12px 20px;border-radius:13px;background:var(--leaf);color:#fff;
+    box-shadow:0 4px 0 #4A8B65;transition:transform .1s ease;
+  }
+  .btn:hover{transform:translateY(1px);box-shadow:0 3px 0 #4A8B65;}
+  .btn:active{transform:translateY(4px);box-shadow:none;}
+  .btn.ghost{background:#fff;color:var(--ink);box-shadow:0 4px 0 var(--line);}
+  .btn.ghost:hover{box-shadow:0 3px 0 var(--line);}
+  .btn.wood{background:var(--wood);box-shadow:0 4px 0 var(--wood-dark);}
+  .btn.small{font-size:13px;padding:9px 14px;border-radius:10px;}
+
+  /* ===== 건반 ===== */
+  .keys{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+  .key{
+    font-family:'Jua',sans-serif;font-size:14px;padding:11px 13px;border-radius:11px;
+    border:2.5px solid var(--line);background:#fff;cursor:pointer;min-width:52px;text-align:center;
+    transition:all .1s ease;
+  }
+  .key:hover{border-color:var(--wood);}
+  .key .oct{display:block;font-size:9.5px;color:var(--ink-soft);}
+  .key.sharp{background:#F5F0E6;}
+
+  #note-input{
+    width:100%;border:2.5px solid var(--line);border-radius:12px;padding:12px;
+    font-family:'Noto Sans KR',sans-serif;font-size:15px;min-height:78px;resize:vertical;line-height:1.7;
+  }
+  #note-input:focus{outline:none;border-color:var(--wood);}
+
+  /* ===== 운지법 카드 ===== */
+  .fingering-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:11px;margin-top:6px;
+  }
+  .fing{
+    border:2.5px solid var(--line);border-radius:14px;padding:10px 6px 8px;text-align:center;
+    background:#FFFDF8;
+  }
+  .fing .nm{font-family:'Jua',sans-serif;font-size:17px;margin-bottom:2px;}
+  .fing .en{font-size:10px;color:var(--ink-soft);margin-bottom:6px;}
+  .fing svg{display:block;margin:0 auto;}
+  .fing.chk{border-color:#F0C878;background:#FFF9EC;}
+  .fing.brk{background:#F2F5F8;border-style:dashed;display:flex;align-items:center;justify-content:center;color:var(--ink-soft);font-family:'Gaegu',cursive;font-weight:700;}
+
+  .legend{display:flex;gap:16px;justify-content:center;margin-top:14px;font-size:12px;color:var(--ink-soft);flex-wrap:wrap;}
+  .legend span{display:flex;align-items:center;gap:5px;}
+  .dot-s{width:13px;height:13px;border-radius:50%;border:2px solid var(--ink);display:inline-block;}
+
+  /* ===== 악보 필기 ===== */
+  .sheet-wrap{
+    position:relative;border:3px dashed var(--line);border-radius:16px;overflow:hidden;
+    background:#fff;min-height:300px;
+  }
+  #sheet-img{display:block;width:100%;pointer-events:none;}
+  #sheet-canvas{position:absolute;top:0;left:0;cursor:crosshair;touch-action:none;}
+  .sheet-hint{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    text-align:center;padding:24px;pointer-events:none;
+  }
+  .sheet-hint .in{max-width:440px;}
+  .sheet-hint h3{font-family:'Jua',sans-serif;font-size:18px;margin:0 0 8px;}
+  .sheet-hint p{font-size:13px;color:var(--ink-soft);line-height:1.8;margin:0;word-break:keep-all;}
+  kbd{background:#F5F0E6;border:2px solid var(--line);border-radius:6px;padding:1px 7px;font-family:'Jua',sans-serif;font-size:12.5px;}
+
+  .picked{
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;
+    background:#FFFDF8;border:2.5px solid var(--line);border-radius:12px;padding:10px 12px;
+  }
+  .picked b{font-family:'Jua',sans-serif;font-size:15px;}
+  .picked .cur{
+    font-family:'Jua',sans-serif;font-size:19px;color:#fff;background:var(--berry);
+    border-radius:9px;padding:4px 13px;
+  }
+
+  .row-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+  .hidden{display:none !important;}
+  .note-tip{
+    background:#FFF4E0;border:2px solid #F0D9A8;border-radius:12px;padding:11px 13px;
+    font-size:12.5px;color:#8A6A2F;line-height:1.7;margin-top:12px;word-break:keep-all;
+  }
+
+  @media print{
+    .topbar,.tabs,.hero,.row-tools,#pdf-status,#pdf-result,.note-tip,#edit-tip{display:none !important;}
+    body{background:#fff;}
+    .card{box-shadow:none;border:none;padding:0;margin:0;}
+    .fing{break-inside:avoid;}
+  }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="../index.html">
+    <svg width="26" height="26" viewBox="0 0 34 34" fill="none">
+      <circle cx="17" cy="18" r="14" fill="#fff" stroke="#42382C" stroke-width="2"/>
+      <path d="M17 9 L17 18 L23 21" stroke="#C98F4B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="13" y="2" width="8" height="4" rx="1.5" fill="#42382C"/>
+    </svg>
+    <span>3분 놀이터</span>
+  </a>
+  <a class="back" href="../index.html">← 다른 콘텐츠 보기</a>
+</div>
+
+<div class="shell">
+  <div class="hero">
+    <h1>도레미 리코더 도우미</h1>
+    <p>계이름을 넣으면 운지법이 뿅! 악보 위에도 적을 수 있어요</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab on" id="tab-1" onclick="showTab(1)">🎵 계이름 → 운지법</button>
+    <button class="tab" id="tab-2" onclick="showTab(2)">🖍️ 악보에 계이름 적기</button>
+    <button class="tab" id="tab-3" onclick="showTab(3)">📄 악보 PDF 자동 읽기</button>
+  </div>
+
+  <!-- ===== 탭 1 : 운지법 ===== -->
+  <div id="panel-1">
+    <div class="card">
+      <h2>계이름 넣기</h2>
+      <p class="desc">아래 건반을 눌러도 되고, 칸에 직접 써도 돼요. (예: 도 레 미 파 솔)<br>
+        쉼표는 <b>/</b>, 길게 부는 음은 <b>[도]</b>처럼 대괄호로 감싸요. 줄바꿈은 그대로 유지돼요.</p>
+
+      <div id="edit-notice" class="note-tip hidden" style="background:#EAF4FF;border-color:#B9D6F0;color:#2C5A85;margin:0 0 14px;">
+        ✏️ <b>PDF에서 읽어온 계이름이에요.</b> 악보와 비교하면서 틀린 음을 고쳐주세요.<br>
+        아래 칸에서 글자만 바꾸면 돼요. 예를 들어 <b>솔</b>이 잘못 나왔다면 <b>라</b>로 고치면 됩니다.
+        고친 뒤 <b>‘운지법 보기’</b>를 누르면 새 운지표가 만들어져요.
+      </div>
+
+      <div class="keys" id="keys"></div>
+
+      <textarea id="note-input" placeholder="도 레 미 파 솔 라 시 도'"></textarea>
+
+      <div class="row-tools">
+        <button class="btn" onclick="makeFingering()">운지법 보기</button>
+        <button class="btn ghost small" onclick="addToInput(' / ')">쉼표 넣기</button>
+        <button class="btn ghost small" onclick="backspaceNote()">← 하나 지우기</button>
+        <button class="btn ghost small" onclick="clearNotes()">모두 지우기</button>
+      </div>
+    </div>
+
+    <div class="card hidden" id="result-card">
+      <h2>운지법</h2>
+      <p class="desc">까맣게 칠한 구멍은 <b>막고</b>, 하얀 구멍은 <b>열어</b>요. 맨 위 반달은 엄지구멍이에요.</p>
+      <div class="fingering-grid" id="fingering"></div>
+      <div class="legend">
+        <span><i class="dot-s" style="background:var(--ink);"></i> 막기</span>
+        <span><i class="dot-s" style="background:#fff;"></i> 열기</span>
+        <span>◗ 엄지 살짝 열기</span>
+      </div>
+      <div id="edit-tip" class="note-tip hidden" style="background:#EAF4FF;border-color:#B9D6F0;color:#2C5A85;">
+        ✏️ <b>고치는 중이에요.</b> 구멍을 클릭할 때마다 <b>막기 → 반쯤 열기 → 열기</b> 순서로 바뀌어요.
+        고친 내용은 이 기기에 저장돼서 다음에 와도 그대로예요.
+      </div>
+      <div class="row-tools" style="justify-content:center;">
+        <button class="btn wood" onclick="window.print()">🖨️ 인쇄하기</button>
+        <button class="btn ghost" id="edit-btn" onclick="toggleEdit()">✏️ 운지법 고치기</button>
+        <button class="btn ghost small" onclick="document.getElementById('note-input').scrollIntoView({behavior:'smooth',block:'center'})">↑ 계이름 다시 고치기</button>
+        <button class="btn ghost small" onclick="resetFingering()">처음 상태로</button>
+      </div>
+    </div>
+
+    <div class="note-tip">
+      🎼 <b>독일식 소프라노 리코더</b> 기준이에요. 자연음(도·레·미·파·솔·라·시)은 표준 운지법이에요.<br>
+      ⚠️ 표시가 붙은 <b>반음(#·♭)은 교재마다 다를 수 있어요.</b> 학교 운지표와 다르면
+      <b>'운지법 고치기'</b>를 눌러 구멍을 클릭해 바로잡아 주세요. 고친 내용은 저장돼요.
+    </div>
+  </div>
+
+  <!-- ===== 탭 2 : 악보 필기 ===== -->
+  <div id="panel-2" class="hidden">
+    <div class="card">
+      <h2>악보 위에 계이름 적기</h2>
+      <p class="desc">악보를 붙여넣거나 끌어다 놓은 뒤, 아래에서 계이름을 고르고 악보의 음표를 클릭하면 그 자리에 계이름이 적혀요.</p>
+
+      <div class="picked">
+        <b>지금 고른 계이름</b>
+        <span class="cur" id="cur-note">도</span>
+        <span style="font-size:12px;color:var(--ink-soft);">→ 악보의 음표를 클릭하세요</span>
+      </div>
+
+      <div class="keys" id="keys2"></div>
+
+      <div class="row-tools" style="margin-bottom:12px;">
+        <button class="btn ghost small" onclick="pasteSheet()">📋 악보 붙여넣기</button>
+        <button class="btn ghost small" onclick="undoSheet()">← 되돌리기</button>
+        <button class="btn ghost small" onclick="clearSheet()">🧹 계이름 모두 지우기</button>
+        <button class="btn ghost small" onclick="saveSheet()">💾 저장</button>
+        <label class="btn ghost small" style="display:inline-flex;align-items:center;">
+          📁 파일 열기<input type="file" accept="image/*" style="display:none;" onchange="loadSheetFile(this)">
+        </label>
+      </div>
+
+      <div class="sheet-wrap" id="sheet-wrap">
+        <img id="sheet-img" alt="">
+        <canvas id="sheet-canvas"></canvas>
+        <div class="sheet-hint" id="sheet-hint">
+          <div class="in">
+            <h3>🎼 악보를 올려주세요</h3>
+            <p>
+              악보 이미지를 이 상자에 끌어다 놓거나<br>
+              <span style="white-space:nowrap;"><kbd>Ctrl</kbd> + <kbd>V</kbd> 로 붙여 넣으세요.</span><br>
+              PDF는 캡처해서 이미지로 넣어주세요.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ===== 탭 3 : 악보 PDF 자동 읽기 ===== -->
+  <div id="panel-3" class="hidden">
+    <div class="card">
+      <h2>악보 PDF 올리기</h2>
+      <p class="desc">악보 그리기 프로그램(뮤즈스코어·시벨리우스·피날레 등)에서 만든 PDF를 올리면 계이름을 자동으로 읽어요.</p>
+
+      <div class="row-tools" style="margin-bottom:12px;">
+        <label class="btn">📄 PDF 고르기<input type="file" accept="application/pdf" style="display:none;" onchange="readPdf(this)"></label>
+        <button class="btn ghost small" onclick="showTab(2)">스캔 악보는 여기로 →</button>
+      </div>
+
+      <div id="pdf-status" class="note-tip hidden"></div>
+
+      <div id="pdf-result" class="hidden">
+        <h2 style="margin-top:16px;">읽어낸 계이름</h2>
+        <p class="desc" id="pdf-meta"></p>
+        <div id="pdf-lines"></div>
+        <div class="row-tools" style="margin-top:12px;">
+          <button class="btn" onclick="pdfToFingering()">운지표 만들기</button>
+          <button class="btn ghost small" onclick="pdfToTab1()">계이름만 1번 탭으로 보내기</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card hidden" id="pdf-chart-card">
+      <h2 id="pdf-chart-title">운지표</h2>
+      <p class="desc">굵은 테두리는 길게 부는 음이에요. 인쇄해서 나눠줄 수 있어요.</p>
+      <div id="pdf-chart"></div>
+      <div class="row-tools" style="justify-content:center;margin-top:14px;">
+        <button class="btn wood" onclick="printChart()">🖨️ 인쇄하기</button>
+        <button class="btn" onclick="pdfToTab1()">✏️ 계이름 수정하기</button>
+      </div>
+    </div>
+
+    <div class="note-tip">
+      📌 <b>되는 것</b> : 악보 프로그램에서 저장한 PDF (한 성부 멜로디, 높은음자리표)<br>
+      🚫 <b>안 되는 것</b> : 종이를 스캔한 PDF·사진 — 글자가 아니라 그림이라 읽을 수 없어요.
+      이럴 땐 <b>‘악보에 계이름 적기’</b> 탭에서 직접 찍어주세요.
+    </div>
+  </div>
+</div>
+
+<script>
+
+/* ================= 악보 PDF 자동 읽기 =================
+   원리: 악보 프로그램이 만든 PDF에는 음표가 '글자'로 들어있어요.
+   그 글자의 기준선 좌표와 오선 위치를 비교하면 음높이를 정확히 알 수 있어요. */
+
+if(window.pdfjsLib){
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+}
+
+/* 악보 글꼴마다 음표 글자가 달라서 두 가지 방식을 모두 지원해요 */
+const HEAD_FILLED = new Set(["œ","\uE0A4","\uE0A3"]);   // 4분·8분음표 머리
+const HEAD_HOLLOW = new Set(["˙","\uE0A2","w","\uE0A0","\uE0A1"]); // 2분·온음표
+const ACC_FLAT    = new Set(["b","\uE260"]);
+const ACC_SHARP   = new Set(["#","\uE262"]);
+const ACC_NAT     = new Set(["n","\uE261"]);
+const SOLFA       = ["도","레","미","파","솔","라","시"];   // 음표 안에 적힌 계이름
+
+let pdfSong = null;   // 읽어낸 결과
+
+function setStatus(html, kind){
+  const el = document.getElementById("pdf-status");
+  el.classList.remove("hidden");
+  el.style.background = kind==="bad" ? "#FFECEC" : (kind==="ok" ? "#EAF7F0" : "#FFF4E0");
+  el.style.borderColor = kind==="bad" ? "#F0B8B8" : (kind==="ok" ? "#AEDCC4" : "#F0D9A8");
+  el.style.color = kind==="bad" ? "#A63A3A" : (kind==="ok" ? "#2C6E4E" : "#8A6A2F");
+  el.innerHTML = html;
+}
+
+async function readPdf(input){
+  const f = input.files[0];
+  if(!f) return;
+  document.getElementById("pdf-result").classList.add("hidden");
+  document.getElementById("pdf-chart-card").classList.add("hidden");
+  setStatus("악보를 읽는 중이에요…");
+
+  try{
+    const buf = await f.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({data:buf}).promise;
+    const all = [];
+    for(let pn=1; pn<=pdf.numPages; pn++){
+      const got = await readOnePage(pdf, pn);
+      all.push(...got);
+    }
+    if(all.length === 0){
+      setStatus("이 PDF에서는 음표를 찾지 못했어요.<br>" +
+        "종이를 스캔한 악보이거나 그림으로 저장된 PDF일 수 있어요. " +
+        "<b>‘악보에 계이름 적기’</b> 탭에서 직접 찍어주세요.", "bad");
+      return;
+    }
+    pdfSong = all;
+    showPdfResult(f.name.replace(/\.pdf$/i,""));
+  }catch(e){
+    setStatus("PDF를 여는 데 실패했어요. 다른 파일로 시도해보세요.<br><small>"+e.message+"</small>", "bad");
+  }
+}
+
+
+/* ★ 그림(벡터)으로 그려진 음표 머리 찾기
+   악보를 만들 때 음표가 글자가 아니라 도형으로 바뀌어 저장된 경우가 있어요.
+   그런 음표는 글자로는 안 잡히므로 도형의 크기·위치로 찾아냅니다. */
+async function findVectorHeads(page, vp, SP){
+  const OPS = pdfjsLib.OPS;
+  let ops;
+  try{ ops = await page.getOperatorList(); }catch(e){ return []; }
+  let ctm = vp.transform.slice();
+  const stack = [];
+  const found = [];
+
+  for(let i=0;i<ops.fnArray.length;i++){
+    const fn = ops.fnArray[i], args = ops.argsArray[i];
+    if(fn === OPS.save){ stack.push(ctm.slice()); }
+    else if(fn === OPS.restore){ if(stack.length) ctm = stack.pop(); }
+    else if(fn === OPS.transform){ ctm = pdfjsLib.Util.transform(ctm, args); }
+    else if(fn === OPS.constructPath){
+      const pathOps = args[0], co = args[1];
+      let ci = 0, minX=1e9, minY=1e9, maxX=-1e9, maxY=-1e9, started=false;
+      const pt = (px,py)=>{
+        const t = pdfjsLib.Util.applyTransform([px,py], ctm);
+        if(t[0]<minX)minX=t[0]; if(t[0]>maxX)maxX=t[0];
+        if(t[1]<minY)minY=t[1]; if(t[1]>maxY)maxY=t[1];
+        started = true;
+      };
+      const flush = ()=>{
+        if(started){
+          const w = maxX-minX, h = maxY-minY;
+          // 음표 머리는 가로로 살짝 긴 타원. 납작하고 긴 이음줄(슬러)은 제외해요.
+          if(w > SP*1.0 && w < SP*2.1 && h > SP*0.8 && h < SP*1.45 && (w/h) < 2.2)
+            found.push({ x:(minX+maxX)/2, y:(minY+maxY)/2, w });
+        }
+        minX=1e9;minY=1e9;maxX=-1e9;maxY=-1e9;started=false;
+      };
+      for(const op of pathOps){
+        if(op === OPS.moveTo){ flush(); pt(co[ci],co[ci+1]); ci+=2; }
+        else if(op === OPS.lineTo){ pt(co[ci],co[ci+1]); ci+=2; }
+        else if(op === OPS.curveTo){ pt(co[ci],co[ci+1]); pt(co[ci+2],co[ci+3]); pt(co[ci+4],co[ci+5]); ci+=6; }
+        else if(op === OPS.curveTo2 || op === OPS.curveTo3){ pt(co[ci],co[ci+1]); pt(co[ci+2],co[ci+3]); ci+=4; }
+        else if(op === OPS.rectangle){ pt(co[ci],co[ci+1]); pt(co[ci]+co[ci+2], co[ci+1]+co[ci+3]); ci+=4; }
+      }
+      flush();
+    }
+  }
+  /* 같은 자리에 겹쳐 그려진 것들 합치기 */
+  const uniq = [];
+  found.sort((a,b)=> b.w - a.w);
+  found.forEach(f=>{
+    if(!uniq.some(u=> Math.abs(u.x-f.x) < SP*0.55 && Math.abs(u.y-f.y) < SP*0.55)) uniq.push(f);
+  });
+  return uniq;
+}
+
+async function readOnePage(pdf, pageNo){
+  const page = await pdf.getPage(pageNo);
+  const vp = page.getViewport({ scale: 1 });
+
+  /* 1) 오선 찾기 — 페이지를 그려서 가로로 긴 검은 줄을 검출 */
+  const SC = 2;
+  const cv = document.createElement("canvas");
+  const v2 = page.getViewport({ scale: SC });
+  cv.width = v2.width; cv.height = v2.height;
+  await page.render({ canvasContext: cv.getContext("2d"), viewport: v2 }).promise;
+  const img = cv.getContext("2d").getImageData(0,0,cv.width,cv.height).data;
+  const rowDark = new Array(cv.height).fill(0);
+  for(let y=0;y<cv.height;y++){
+    let c=0;
+    for(let x=0;x<cv.width;x+=2){
+      const i=(y*cv.width+x)*4;
+      if(img[i]<128) c++;
+    }
+    rowDark[y]=c;
+  }
+  const need = (cv.width/2)*0.35;
+  let bands=[], cur=null;
+  for(let y=0;y<cv.height;y++){
+    if(rowDark[y]>need){ if(!cur) cur=[y,y]; else cur[1]=y; }
+    else if(cur){ bands.push((cur[0]+cur[1])/2/SC); cur=null; }
+  }
+  if(cur) bands.push((cur[0]+cur[1])/2/SC);
+  if(bands.length < 5) return [];
+
+  /* 5줄씩 묶어 시스템 만들기 */
+  const systems=[];
+  for(let i=0;i+4<bands.length;i+=5) systems.push(bands.slice(i,i+5));
+  if(systems.length===0) return [];
+  const SP = (systems[0][4]-systems[0][0])/4;
+  const HALF = SP/2;
+
+  /* 2) 음표·임시표 글자 모으기 */
+  const tc = await page.getTextContent();
+  const items = [];
+  tc.items.forEach(it=>{
+    const str = it.str || "";
+    if(!str.trim()) return;
+    const t = pdfjsLib.Util.transform(vp.transform, it.transform);
+    const x0 = t[4], y = t[5];
+    const w = it.width || 0;
+    const chars = [...str];
+    chars.forEach((c, i)=>{
+      if(!c.trim()) return;
+      // 한 덩어리에 글자가 여러 개면 가로 위치를 나눠서 계산
+      const x = chars.length > 1 ? x0 + (w * i / chars.length) : x0;
+      items.push({ c, x, y, h: it.height || 0, font: it.fontName, len: chars.length });
+    });
+  });
+
+  /* ★ 악보 전용 글꼴 가려내기
+     가사나 코드기호에 들어있는 b·#·n 같은 글자를 임시표로 착각하지 않도록,
+     음표 머리가 들어있는 글꼴에서 나온 기호만 인정해요. */
+  const musicFonts = new Set();
+  items.forEach(o=>{
+    if(HEAD_FILLED.has(o.c) || HEAD_HOLLOW.has(o.c)) musicFonts.add(o.font);
+  });
+  const isMusic = o => musicFonts.size === 0 || musicFonts.has(o.font);
+
+  const notes = items.filter(o=> isMusic(o) && (HEAD_FILLED.has(o.c) || HEAD_HOLLOW.has(o.c)));
+  const staffTop = systems[0][0] - SP*5, staffBot = systems[systems.length-1][4] + SP*5;
+  const accs  = items.filter(o=>
+        isMusic(o) &&
+        (ACC_FLAT.has(o.c)||ACC_SHARP.has(o.c)||ACC_NAT.has(o.c)) &&
+        o.y > staffTop && o.y < staffBot);
+
+  /* ★ 음표 머리 안에 계이름이 적힌 악보 (초등 교과서에 많아요)
+     이런 음표는 그림으로 그려져 글자로 안 잡히므로, 적힌 계이름 글자를 음표로 취급해요.
+     가사와 헷갈리지 않도록 '오선 위에 있을 것'을 조건으로 걸어요. */
+  const solfaNotes = [];
+  items.forEach(o=>{
+    if(SOLFA.indexOf(o.c) < 0) return;
+    const cy = o.y - (o.h || 0) * 0.212;      // 글자 중심 = 음표 자리
+    let si = 0, bd = 1e9;
+    systems.forEach((st,i)=>{ const d=Math.abs((st[0]+st[4])/2 - cy); if(d<bd){bd=d;si=i;} });
+    const st = systems[si];
+    const below = (cy - st[4]) / SP;          // 맨 아랫줄에서 몇 칸 아래인지
+    if(below > 2.5 || below < -6) return;     // 가사는 3칸 이상 아래 → 제외
+
+    /* ★ 이미 음표가 그 자리에 있으면 '계이름을 덧붙여 쓴 악보'예요.
+       새 음표로 세지 말고, 원래 음표에 이름표만 달아줍니다. (두 번 세는 것 방지) */
+    let hit = null, hd = 1e9;
+    notes.forEach(n=>{
+      const d = Math.max(Math.abs(n.x-o.x)/SP, Math.abs(n.y-cy)/SP);
+      if(d < hd){ hd = d; hit = n; }
+    });
+    if(hit && hd < 1.5){ hit.label = o.c; return; }
+
+    solfaNotes.push({ c:o.c, x:o.x, y:cy, s:si, solfa:true });
+  });
+  if(solfaNotes.length) notes.push(...solfaNotes);
+
+  /* 그림으로 그려진 음표 머리 보태기 (이미 있는 음표와 겹치면 제외) */
+  const vecHeads = await findVectorHeads(page, vp, SP);
+  vecHeads.forEach(v=>{
+    if(v.y < staffTop || v.y > staffBot) return;
+    const dup = notes.some(n=> Math.abs(n.x-v.x) < SP*1.3 && Math.abs(n.y-v.y) < SP*1.3);
+    if(dup) return;
+    let si=0, bd=1e9;
+    systems.forEach((st,i)=>{ const d=Math.abs((st[0]+st[4])/2 - v.y); if(d<bd){bd=d;si=i;} });
+    notes.push({ c:"", x:v.x, y:v.y, s:si, vector:true });
+  });
+
+  if(notes.length===0) return [];
+
+  const sysOf = o => {
+    let best=0, bd=1e9;
+    systems.forEach((st,i)=>{
+      const mid=(st[0]+st[4])/2, d=Math.abs(mid-o.y);
+      if(d<bd){ bd=d; best=i; }
+    });
+    return best;
+  };
+  notes.forEach(o=> o.s = sysOf(o));
+  accs.forEach(o=> o.s = sysOf(o));
+
+  /* 3) 음높이 계산 (높은음자리표: 맨 아래 줄 = 미(E4)) */
+  const LETTER = ["미","파","솔","라","시","도","레"];   // step 0 부터
+  const OCTUP  = [0,0,0,0,0,1,1];
+  function pitchOf(o){
+    const st = systems[o.s];
+    const raw = (st[4]-o.y)/HALF;
+    let step = Math.round(raw);
+    if(o.solfa || o.label){
+      const want = o.solfa ? o.c : o.label;
+      // 악보에 적힌 계이름이 정답이니, 그 글자에 맞는 가장 가까운 칸으로 맞춰요
+      let best = null;
+      for(let k=step-2; k<=step+2; k++){
+        if(LETTER[((k%7)+7)%7] === want){
+          if(best===null || Math.abs(k-raw) < Math.abs(best-raw)) best = k;
+        }
+      }
+      if(best !== null) step = best;
+    }
+    const idx = ((step % 7) + 7) % 7;
+    return { letter: LETTER[idx], oct: OCTUP[idx] + Math.floor(step/7), step };
+  }
+
+  const out = [];
+  systems.forEach((st, si)=>{
+    const ns = notes.filter(o=>o.s===si).sort((a,b)=>a.x-b.x);
+    if(ns.length===0) return;
+    const as = accs.filter(o=>o.s===si).sort((a,b)=>a.x-b.x);
+    const firstX = ns[0].x;
+    /* 조표 = 첫 음표보다 왼쪽에 있는 임시표 */
+    const keySig = {};
+    as.filter(a=> a.x < firstX - SP*0.4).forEach(a=>{
+      const p = pitchOf(a);
+      keySig[p.letter] = ACC_FLAT.has(a.c) ? "♭" : (ACC_SHARP.has(a.c) ? "#" : "");
+    });
+    const temps = as.filter(a=> a.x >= firstX - SP*0.4);
+
+    ns.forEach(o=>{
+      const p = pitchOf(o);
+      let mark = keySig[p.letter] || "";
+      /* 바로 왼쪽에 붙은 임시표가 있으면 우선 */
+      const hit = temps.filter(a=> (o.x - a.x) > 0 && (o.x - a.x) < SP*2.6
+                                && Math.abs(a.y - o.y) < SP*0.6);
+      if(hit.length){
+        const a = hit[hit.length-1];
+        mark = ACC_NAT.has(a.c) ? "" : (ACC_FLAT.has(a.c) ? "♭" : "#");
+      }
+      out.push({
+        letter: p.letter, oct: p.oct, mark,
+        long: !o.solfa && HEAD_HOLLOW.has(o.c),
+        sys: (pageNo-1)*100 + si
+      });
+    });
+  });
+  return out;
+}
+
+/* 계이름 → 도구가 아는 이름으로 (딴이름한소리 정리) */
+const ENH = { "레♭":"도#", "레#":"미♭", "미#":"파", "파♭":"미",
+              "솔♭":"파#", "솔#":"솔#", "라♭":"솔#", "라#":"시♭",
+              "시#":"도", "도♭":"시" };
+function toKo(n){
+  let base = n.letter + n.mark;
+  if(ENH[base]) base = ENH[base];
+  return base + (n.oct>=1 ? "'".repeat(n.oct) : "");
+}
+
+function showPdfResult(title){
+  const groups = {};
+  pdfSong.forEach(n=>{ (groups[n.sys] = groups[n.sys] || []).push(n); });
+  const keys = Object.keys(groups).sort((a,b)=>a-b);
+
+  const wrap = document.getElementById("pdf-lines");
+  wrap.innerHTML = "";
+  keys.forEach((k,i)=>{
+    const d = document.createElement("div");
+    d.style.cssText = "border-bottom:1px solid var(--line);padding:9px 0;font-size:14px;line-height:1.9;";
+    d.innerHTML = '<b style="font-family:Jua,sans-serif;font-size:13px;color:var(--wood-dark);">'+(i+1)+'째 줄</b><br>' +
+      groups[k].map(n=> (n.long?"[":"")+toKo(n)+(n.long?"]":"")).join("  ");
+    wrap.appendChild(d);
+  });
+
+  const unknown = pdfSong.filter(n=> !NOTES.some(x=>x.ko===toKo(n)));
+  document.getElementById("pdf-meta").innerHTML =
+    "총 <b>"+pdfSong.length+"음</b> · "+keys.length+"줄" +
+    (unknown.length ? ' · <span style="color:#C0392B;">리코더 음역 밖 '+unknown.length+'음</span>' : "");
+  document.getElementById("pdf-result").classList.remove("hidden");
+  document.getElementById("pdf-chart-title").textContent = title + " — 리코더 운지표";
+  setStatus("다 읽었어요! 아래에서 확인하고 운지표를 만들어보세요.<br>" +
+            "<b>계이름이 실제 악보와 맞는지 꼭 한 번 확인해주세요.</b> " +
+            "틀린 곳은 운지표의 <b>‘계이름 수정하기’</b>로 바로 고칠 수 있어요.<br>" +
+            "<small>길게 부는 음 표시([ ])는 악보에 따라 빠질 수 있으니 함께 봐주세요.</small>", "ok");
+}
+
+function pdfToTab1(){
+  const groups = {};
+  pdfSong.forEach(n=>{ (groups[n.sys] = groups[n.sys] || []).push(n); });
+  const keys = Object.keys(groups).sort((a,b)=>a-b);
+  document.getElementById("note-input").value =
+    keys.map(k=> groups[k].map(n=> n.long ? "["+toKo(n)+"]" : toKo(n)).join(" ")).join("\n");
+  showTab(1);
+  document.getElementById("edit-notice").classList.remove("hidden");
+  makeFingering();
+  document.getElementById("note-input").scrollIntoView({behavior:"smooth",block:"center"});
+}
+
+function pdfToFingering(){
+  const groups = {};
+  pdfSong.forEach(n=>{ (groups[n.sys] = groups[n.sys] || []).push(n); });
+  const keys = Object.keys(groups).sort((a,b)=>a-b);
+  const wrap = document.getElementById("pdf-chart");
+  wrap.innerHTML = "";
+  keys.forEach((k,i)=>{
+    const head = document.createElement("div");
+    head.style.cssText="font-family:Jua,sans-serif;font-size:14px;margin:14px 0 7px;padding-bottom:4px;border-bottom:2px solid var(--line);";
+    head.textContent = (i+1)+"째 줄";
+    wrap.appendChild(head);
+    const grid = document.createElement("div");
+    grid.className = "fingering-grid";
+    groups[k].forEach(n=>{
+      const ko = toKo(n);
+      const info = NOTES.find(x=>x.ko===ko);
+      const d = document.createElement("div");
+      d.className = "fing" + (info && info.chk ? " chk" : "");
+      if(n.long) d.style.cssText = "border-width:3px;border-color:var(--wood);background:#FFFBF4;";
+      d.innerHTML = '<div class="nm">'+ko+(info&&info.chk?' <span style="font-size:10px">⚠️</span>':'')+'</div>' +
+        (info ? recorderSvg(info.holes) : '<div style="font-size:11px;color:#C0392B;padding:22px 4px;">리코더<br>음역 밖</div>');
+      grid.appendChild(d);
+    });
+    wrap.appendChild(grid);
+  });
+  document.getElementById("pdf-chart-card").classList.remove("hidden");
+  document.getElementById("pdf-chart-card").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function printChart(){ window.print(); }
+
+/* ================= 음 정보 =================
+   holes: [엄지, 1, 2, 3, 4, 5, 6, 7]
+   1 = 막기, 0 = 열기, 0.5 = 엄지 살짝 열기 */
+const NOTES = [
+  { ko:"도",   en:"C",  oct:"낮은", holes:[1,1,1,1,1,1,1,1] },
+  { ko:"도#",  en:"C#", oct:"낮은", holes:[1,1,1,1,1,1,1,0.5], chk:true },
+  { ko:"레",   en:"D",  oct:"낮은", holes:[1,1,1,1,1,1,1,0] },
+  { ko:"미♭",  en:"Eb", oct:"낮은", holes:[1,1,1,1,1,1,0,1], chk:true },
+  { ko:"미",   en:"E",  oct:"낮은", holes:[1,1,1,1,1,1,0,0] },
+  { ko:"파",   en:"F",  oct:"낮은", holes:[1,1,1,1,1,0,0,0] },
+  { ko:"파#",  en:"F#", oct:"낮은", holes:[1,1,1,1,0,1,1,0], chk:true },
+  { ko:"솔",   en:"G",  oct:"낮은", holes:[1,1,1,1,0,0,0,0] },
+  { ko:"솔#",  en:"G#", oct:"낮은", holes:[1,1,1,0,1,1,0,0], chk:true },
+  { ko:"라",   en:"A",  oct:"낮은", holes:[1,1,1,0,0,0,0,0] },
+  { ko:"시♭",  en:"Bb", oct:"낮은", holes:[1,1,0,1,1,0,0,0], chk:true },
+  { ko:"시",   en:"B",  oct:"낮은", holes:[1,1,0,0,0,0,0,0] },
+  { ko:"도'",  en:"C5", oct:"높은", holes:[1,0,1,0,0,0,0,0] },
+  { ko:"도#'", en:"C#5",oct:"높은", holes:[0,0,1,1,1,1,0,0], chk:true },
+  { ko:"레'",  en:"D5", oct:"높은", holes:[0,0,1,0,0,0,0,0] },
+  { ko:"미♭'", en:"Eb5",oct:"높은", holes:[0.5,1,1,1,1,1,1,0], chk:true },
+  { ko:"미'",  en:"E5", oct:"높은", holes:[0.5,1,1,1,1,1,0,0] },
+  { ko:"파'",  en:"F5", oct:"높은", holes:[0.5,1,1,1,1,0,0,0] },
+  { ko:"파#'", en:"F#5",oct:"높은", holes:[0.5,1,1,1,0,1,1,0], chk:true },
+  { ko:"솔'",  en:"G5", oct:"높은", holes:[0.5,1,1,1,0,0,0,0] },
+  { ko:"솔#'", en:"G#5",oct:"높은", holes:[0.5,1,1,0,1,1,0,0], chk:true },
+  { ko:"라'",  en:"A5", oct:"높은", holes:[0.5,1,1,0,0,0,0,0] },
+  { ko:"시♭'", en:"Bb5",oct:"높은", holes:[0.5,1,0,1,1,0,0,0], chk:true },
+  { ko:"시'",  en:"B5", oct:"높은", holes:[0.5,1,0,1,0,0,0,0] },
+  { ko:"도''", en:"C6", oct:"높은", holes:[0.5,0,1,1,0,0,0,0] }
+];
+
+/* 선생님이 고친 운지법을 이 기기에 저장해요 */
+const FING_KEY = "sambun-recorder-fingering";
+(function loadCustom(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(FING_KEY) || "{}");
+    NOTES.forEach(n=>{ if(saved[n.ko]){ n.holes = saved[n.ko]; n.chk = false; n.edited = true; } });
+  }catch(e){}
+})();
+function saveCustom(){
+  try{
+    const o = {};
+    NOTES.forEach(n=>{ if(n.edited) o[n.ko] = n.holes; });
+    localStorage.setItem(FING_KEY, JSON.stringify(o));
+  }catch(e){}
+}
+const NOTE_MAP = {};
+NOTES.forEach(n=> NOTE_MAP[n.ko] = n);
+
+/* ---------- 탭 ---------- */
+function showTab(n){
+  for(let i=1;i<=3;i++){
+    document.getElementById("tab-"+i).classList.toggle("on", n===i);
+    document.getElementById("panel-"+i).classList.toggle("hidden", n!==i);
+  }
+}
+
+/* ---------- 건반 만들기 ---------- */
+function buildKeys(wrapId, onPick){
+  const wrap = document.getElementById(wrapId);
+  wrap.innerHTML = "";
+  NOTES.forEach(n=>{
+    const b = document.createElement("button");
+    b.className = "key";
+    b.innerHTML = n.ko + '<span class="oct">' + n.oct + '</span>';
+    b.onclick = ()=> onPick(n);
+    wrap.appendChild(b);
+  });
+}
+buildKeys("keys", n=> addToInput(n.ko + " "));
+
+/* ---------- 탭 1 : 운지법 ---------- */
+const input = document.getElementById("note-input");
+
+function addToInput(s){
+  input.value += s;
+  input.focus();
+}
+function backspaceNote(){
+  const parts = input.value.trim().split(/\s+/);
+  parts.pop();
+  input.value = parts.join(" ") + (parts.length ? " " : "");
+}
+function clearNotes(){
+  input.value = "";
+  document.getElementById("result-card").classList.add("hidden");
+}
+
+/* 리코더 그림 (idx 를 주면 구멍을 눌러 고칠 수 있어요) */
+function recorderSvg(holes, idx){
+  const W = 40, H = 122;
+  const clickable = (idx !== undefined);
+  let s = '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">';
+  s += '<defs><linearGradient id="half" x1="0" x2="1"><stop offset="50%" stop-color="#42382C"/><stop offset="50%" stop-color="#fff"/></linearGradient></defs>';
+  s += '<rect x="9" y="4" width="22" height="'+(H-8)+'" rx="11" fill="#F5E7D0" stroke="#C9A87A" stroke-width="2"/>';
+  const th = holes[0];
+  const thFill = th === 1 ? "#42382C" : (th === 0.5 ? "url(#half)" : "#fff");
+  s += '<circle cx="6" cy="24" r="5" fill="'+thFill+'" stroke="#42382C" stroke-width="1.8"'
+     + (clickable ? ' style="cursor:pointer" onclick="toggleHole('+idx+',0)"' : '') + '/>';
+  const ys = [20, 33, 46, 62, 75, 88, 102];
+  for(let i=1;i<=7;i++){
+    const v = holes[i];
+    const f = v === 1 ? "#42382C" : (v === 0.5 ? "url(#half)" : "#fff");
+    const r = (i>=6) ? 4 : 4.6;
+    s += '<circle cx="20" cy="'+ys[i-1]+'" r="'+r+'" fill="'+f+'" stroke="#42382C" stroke-width="1.8"'
+       + (clickable ? ' style="cursor:pointer" onclick="toggleHole('+idx+','+i+')"' : '') + '/>';
+  }
+  s += '</svg>';
+  return s;
+}
+
+/* 구멍을 눌러 막기 → 반쯤 → 열기 로 바꿔요 */
+let editMode = false;
+function toggleEdit(){
+  editMode = !editMode;
+  document.getElementById("edit-btn").textContent = editMode ? "✅ 고치기 끝내기" : "✏️ 운지법 고치기";
+  document.getElementById("edit-tip").classList.toggle("hidden", !editMode);
+  makeFingering(true);
+}
+function toggleHole(noteIdx, holeIdx){
+  if(!editMode) return;
+  const n = NOTES[noteIdx];
+  const cur = n.holes[holeIdx];
+  n.holes[holeIdx] = (cur === 1) ? 0.5 : (cur === 0.5 ? 0 : 1);
+  n.edited = true; n.chk = false;
+  saveCustom();
+  makeFingering(true);
+}
+function resetFingering(){
+  if(!confirm("고친 운지법을 모두 처음 상태로 되돌릴까요?")) return;
+  try{ localStorage.removeItem(FING_KEY); }catch(e){}
+  location.reload();
+}
+
+function makeFingering(keepScroll){
+  const raw = input.value.trim();
+  if(!raw){ alert("계이름을 먼저 넣어주세요."); return; }
+  const tokens = raw.split(/\s+/).filter(Boolean);
+  const grid = document.getElementById("fingering");
+  grid.innerHTML = "";
+  let unknown = [];
+
+  tokens.forEach(t=>{
+    if(t === "/" || t === "쉼"){
+      const d = document.createElement("div");
+      d.className = "fing brk";
+      d.textContent = "쉼표";
+      grid.appendChild(d);
+      return;
+    }
+    let isLong = false;
+    if(t.startsWith("[") && t.endsWith("]")){ isLong = true; t = t.slice(1,-1); }
+    const n = NOTE_MAP[t];
+    if(!n){ unknown.push(t); return; }
+    const idx = NOTES.indexOf(n);
+    const d = document.createElement("div");
+    d.className = "fing" + (n.chk ? " chk" : "");
+    if(isLong) d.style.cssText = "border-width:3px;border-color:var(--wood);background:#FFFBF4;";
+    d.innerHTML = '<div class="nm">'+n.ko+(n.chk?' <span title="확인이 필요한 반음">⚠️</span>':'')+'</div>'
+                + '<div class="en">'+n.en+(n.edited?' · 고침':'')+'</div>'
+                + recorderSvg(n.holes, editMode ? idx : undefined);
+    grid.appendChild(d);
+  });
+
+  document.getElementById("result-card").classList.remove("hidden");
+  if(unknown.length){
+    alert("이런 계이름은 몰라요: " + unknown.join(", ") + "\n\n쓸 수 있는 계이름은 위 건반을 참고해주세요.");
+  }
+  if(!keepScroll) document.getElementById("result-card").scrollIntoView({ behavior:"smooth", block:"start" });
+}
+
+/* ---------- 탭 2 : 악보에 적기 ---------- */
+let curNote = NOTES[0];
+buildKeys("keys2", n=>{
+  curNote = n;
+  document.getElementById("cur-note").textContent = n.ko;
+});
+
+const sheetWrap = document.getElementById("sheet-wrap");
+const sheetImg  = document.getElementById("sheet-img");
+const sheetCv   = document.getElementById("sheet-canvas");
+const sctx      = sheetCv.getContext("2d");
+let marks = [];
+
+function fitCanvas(){
+  sheetCv.width  = sheetWrap.clientWidth;
+  sheetCv.height = sheetWrap.clientHeight;
+  redrawMarks();
+}
+window.addEventListener("resize", fitCanvas);
+
+function setSheet(src){
+  sheetImg.onload = ()=>{
+    document.getElementById("sheet-hint").style.display = "none";
+    marks = [];
+    setTimeout(fitCanvas, 30);
+  };
+  sheetImg.src = src;
+}
+
+function loadSheetFile(el){
+  const f = el.files[0];
+  if(f) setSheet(URL.createObjectURL(f));
+}
+
+async function pasteSheet(){
+  try{
+    const items = await navigator.clipboard.read();
+    for(const it of items){
+      const type = it.types.find(t=> t.startsWith("image/"));
+      if(type){ setSheet(URL.createObjectURL(await it.getType(type))); return; }
+    }
+    alert("클립보드에 그림이 없어요. 악보를 캡처한 뒤 다시 눌러주세요.");
+  }catch(e){
+    alert("이 화면을 한 번 클릭한 다음 Ctrl+V 를 눌러보세요.");
+  }
+}
+
+document.addEventListener("paste", e=>{
+  const items = e.clipboardData && e.clipboardData.items;
+  if(!items) return;
+  for(const it of items){
+    if(it.type.startsWith("image/")){ setSheet(URL.createObjectURL(it.getAsFile())); e.preventDefault(); return; }
+  }
+});
+sheetWrap.addEventListener("dragover", e=> e.preventDefault());
+sheetWrap.addEventListener("drop", e=>{
+  e.preventDefault();
+  const f = e.dataTransfer.files[0];
+  if(f && f.type.startsWith("image/")) setSheet(URL.createObjectURL(f));
+});
+
+sheetCv.addEventListener("pointerdown", e=>{
+  if(!sheetImg.src) return;
+  const r = sheetCv.getBoundingClientRect();
+  marks.push({ x:e.clientX-r.left, y:e.clientY-r.top, ko:curNote.ko });
+  redrawMarks();
+});
+
+function redrawMarks(){
+  sctx.clearRect(0,0,sheetCv.width,sheetCv.height);
+  marks.forEach(m=>{
+    sctx.font = "700 19px 'Jua', 'Noto Sans KR', sans-serif";
+    sctx.textAlign = "center";
+    sctx.textBaseline = "middle";
+    const w = sctx.measureText(m.ko).width + 12;
+    sctx.fillStyle = "rgba(255,255,255,.88)";
+    sctx.beginPath();
+    sctx.roundRect(m.x - w/2, m.y - 14, w, 26, 7);
+    sctx.fill();
+    sctx.fillStyle = "#D4576B";
+    sctx.fillText(m.ko, m.x, m.y);
+  });
+}
+function undoSheet(){ marks.pop(); redrawMarks(); }
+function clearSheet(){ marks = []; redrawMarks(); }
+
+function saveSheet(){
+  if(!sheetImg.src){ alert("먼저 악보를 올려주세요."); return; }
+  const out = document.createElement("canvas");
+  const scale = sheetImg.naturalWidth / sheetCv.width;
+  out.width = sheetImg.naturalWidth;
+  out.height = sheetImg.naturalHeight;
+  const o = out.getContext("2d");
+  o.fillStyle = "#fff"; o.fillRect(0,0,out.width,out.height);
+  o.drawImage(sheetImg, 0, 0, out.width, out.height);
+  o.scale(scale, scale);
+  marks.forEach(m=>{
+    o.font = "700 19px 'Jua', 'Noto Sans KR', sans-serif";
+    o.textAlign = "center"; o.textBaseline = "middle";
+    const w = o.measureText(m.ko).width + 12;
+    o.fillStyle = "rgba(255,255,255,.88)";
+    o.beginPath(); o.roundRect(m.x - w/2, m.y - 14, w, 26, 7); o.fill();
+    o.fillStyle = "#D4576B";
+    o.fillText(m.ko, m.x, m.y);
+  });
+  const a = document.createElement("a");
+  a.download = "계이름악보.png";
+  a.href = out.toDataURL("image/png");
+  a.click();
+}
+
+fitCanvas();
+</script>
+</body>
+</html>
