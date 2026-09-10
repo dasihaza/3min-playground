@@ -132,8 +132,89 @@
     font-size:12.5px;color:#8A6A2F;line-height:1.7;margin-top:12px;word-break:keep-all;
   }
 
+
+  /* ===== 가이드 글 ===== */
+  .guide{ line-height:1.85; word-break:keep-all; }
+  .guide p{ margin:0 0 14px; font-size:14.5px; color:#4A4034; }
+  .g-kicker{
+    display:inline-block; font-family:'Jua',sans-serif; font-size:12px; letter-spacing:.06em;
+    background:var(--wood); color:#fff; border-radius:999px; padding:5px 14px; margin-bottom:12px;
+  }
+  .g-title{
+    font-family:'Jua',sans-serif; font-size:clamp(21px,3.6vw,27px); line-height:1.45;
+    margin:0 0 16px; color:var(--wood-dark);
+  }
+  .g-title em{ font-style:normal; color:var(--berry); }
+  .g-lead{ font-size:15.5px !important; color:var(--ink) !important; font-weight:500; }
+  .g-quote{
+    background:#FFF7EA; border-left:5px solid var(--wood); border-radius:0 12px 12px 0;
+    padding:15px 18px; font-size:14.5px; color:#6E5533; margin-top:6px;
+  }
+  .g-chap{ display:flex; align-items:center; gap:11px; margin-bottom:14px; }
+  .g-num{
+    flex:0 0 auto; width:36px; height:36px; border-radius:11px;
+    background:var(--leaf); color:#fff; font-family:'Jua',sans-serif; font-size:19px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .g-chap h2{ font-family:'Jua',sans-serif; font-size:19px; margin:0; line-height:1.4; }
+
+  .g-step{
+    border:2.5px solid var(--line); border-radius:14px; padding:15px 16px;
+    margin-bottom:12px; background:#FFFDF8;
+  }
+  .g-step p{ margin:0; font-size:14px; }
+  .g-step-head{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
+  .g-step-head b{ font-family:'Jua',sans-serif; font-size:16px; font-weight:400; }
+  .g-badge{
+    font-family:'Jua',sans-serif; font-size:12px; color:#fff; background:var(--wood);
+    border-radius:8px; padding:4px 11px; flex:0 0 auto;
+  }
+  .g-badge.alt{ background:var(--berry); }
+  .g-sub{ font-size:11.5px; color:var(--ink-soft); }
+  .g-tip{
+    margin-top:10px; background:#EAF4FF; border:2px solid #C4DDF2; border-radius:11px;
+    padding:11px 13px; font-size:13.5px; color:#2C5A85; line-height:1.75;
+  }
+
+  .g-check{
+    background:#F2FAF5; border:2.5px solid #BFE3CE; border-radius:14px;
+    padding:14px 16px; margin-bottom:16px;
+  }
+  .g-check-title{ font-family:'Jua',sans-serif; font-size:15px; margin-bottom:9px; color:#2F6B48; }
+  .g-check-row{ font-size:13.5px; margin-bottom:6px; display:flex; gap:9px; align-items:flex-start; }
+  .g-chip{
+    flex:0 0 auto; background:#fff; border:2px solid #BFE3CE; border-radius:7px;
+    padding:2px 9px; font-size:12px; font-weight:700; color:#2F6B48;
+  }
+
+  .g-table-wrap{ overflow-x:auto; margin-bottom:16px; }
+  .g-table{ width:100%; border-collapse:collapse; font-size:13.5px; min-width:520px; }
+  .g-table th{
+    background:var(--wood); color:#fff; font-family:'Jua',sans-serif; font-weight:400;
+    padding:11px 12px; text-align:left; font-size:14px;
+  }
+  .g-table th:first-child{ border-radius:10px 0 0 0; }
+  .g-table th:last-child{ border-radius:0 10px 0 0; }
+  .g-table td{ border-bottom:1.5px solid var(--line); padding:11px 12px; vertical-align:top; line-height:1.7; }
+  .g-table tr:nth-child(even) td{ background:#FFFDF8; }
+  .g-table td:first-child{ font-weight:700; color:var(--wood-dark); white-space:nowrap; }
+  .g-note{ font-size:11.5px; color:var(--ink-soft); }
+
+  .g-outro{ background:linear-gradient(170deg,#FFFDF7,#FFF4E4); }
+  .g-outro-title{ font-family:'Jua',sans-serif; font-size:18px; margin:0 0 12px; color:var(--wood-dark); }
+  .g-end{
+    font-family:'Gaegu',cursive; font-weight:700; font-size:19px; text-align:center;
+    color:var(--berry); margin:18px 0 4px;
+  }
+  .g-cta{ display:flex; gap:9px; justify-content:center; flex-wrap:wrap; margin-top:16px; }
+
+  @media (max-width:520px){
+    .g-step{ padding:13px 13px; }
+    .guide p{ font-size:14px; }
+  }
+
   @media print{
-    .topbar,.tabs,.hero,.row-tools,#pdf-status,#pdf-result,.note-tip,#edit-tip{display:none !important;}
+    .topbar,.tabs,.hero,.row-tools,#pdf-status,#pdf-result,.note-tip,#edit-tip,#panel-0{display:none !important;}
     body{background:#fff;}
     .card{box-shadow:none;border:none;padding:0;margin:0;}
     .fing{break-inside:avoid;}
@@ -162,9 +243,185 @@
   </div>
 
   <div class="tabs">
+    <button class="tab" id="tab-0" onclick="showTab(0)">📖 도레미 리코더 도우미 가이드</button>
     <button class="tab on" id="tab-1" onclick="showTab(1)">🎵 계이름 → 운지법</button>
     <button class="tab" id="tab-2" onclick="showTab(2)">🖍️ 악보에 계이름 적기</button>
     <button class="tab" id="tab-3" onclick="showTab(3)">📄 악보 PDF 자동 읽기</button>
+  </div>
+
+
+  <!-- ===== 탭 0 : 가이드 ===== -->
+  <div id="panel-0" class="hidden">
+
+    <div class="card guide">
+      <div class="g-kicker">초등 음악 수업 길잡이</div>
+      <h1 class="g-title">즐거운 음악 시간의 첫걸음,<br>리코더를 위한 <em>‘도레미 리코더 도우미’</em> 활용 가이드</h1>
+
+      <p class="g-lead">
+        초등학교 음악 수업에서 기악 활동은 아이들이 가장 눈을 반짝이는 시간입니다.
+        눈으로 악보를 읽고, 손가락으로 구멍을 막으며, 자신의 숨결로 소리를 빚어내는 과정은
+        아이들에게 순수한 성취감과 예술적 즐거움을 선사합니다.
+      </p>
+      <p class="g-p">
+        그중에서도 <b>리코더</b>는 휴대하기 간편하고 소리 내기 쉬워 초등 음악 교육과정에서 가장 널리 쓰이는
+        기초 선율 악기입니다. 하지만 교실에서는 의외로 많은 아이들이 초반부터 어려움을 겪습니다.
+        악보의 음표와 리코더 지공(손가락 구멍) 위치를 머릿속에서 한 번에 연결하지 못하거나,
+        조금만 구멍이 덜 막혀도 ‘삑—’ 하는 소리가 나며 쉽게 자신감을 잃기 때문입니다.
+      </p>
+      <div class="g-quote">
+        아이들이 악기 연주의 즐거움을 느끼기도 전에 복잡한 운지법의 벽에 부딪혀 좌절하지 않도록,
+        <b>‘도레미 리코더 도우미’</b>가 탄생했습니다.
+        계이름만 입력하면 직관적인 운지표가 만들어지고, 인쇄해서 맞춤형 학습지로도 쓸 수 있어
+        교실 수업과 가정 학습 모두에 든든한 길잡이가 되어 줍니다.
+      </div>
+    </div>
+
+    <!-- 1장 -->
+    <div class="card guide">
+      <div class="g-chap"><span class="g-num">1</span>
+        <h2>리코더 운지법을 쉽게 가르치는 4단계 지도법</h2>
+      </div>
+      <p class="g-p">
+        처음 접하는 아이들에게는 단계적인 감각 훈련이 필수입니다.
+        악보를 보고 바로 불게 하기보다, 아래 네 단계를 거치면 훨씬 쉽게 적응합니다.
+      </p>
+
+      <div class="g-step">
+        <div class="g-step-head"><span class="g-badge">1단계</span><b>‘동그라미 자국’ 만들기</b><span class="g-sub">밀착 감각 익히기</span></div>
+        <p>소리가 갈라지는 가장 큰 이유는 손가락 힘이 부족해서가 아니라 <b>구멍을 완전히 덮지 못해서</b>입니다.
+           손톱 쪽으로 누르면 틈이 생기기 쉬우니, <b>지문 중심의 도톰한 살</b>로 덮도록 지도합니다.</p>
+        <div class="g-tip">💡 <b>수업 팁</b> — “손가락으로 구멍을 5초간 꾹 눌렀다 떼어보자.
+          손가락에 예쁜 <b>동그라미 도장</b>이 찍혔니?” 라고 물으면 아이들이 스스로 위치를 교정합니다.</div>
+      </div>
+
+      <div class="g-step">
+        <div class="g-step-head"><span class="g-badge">2단계</span><b>소리 없는 연습</b><span class="g-sub">Ghost Playing</span></div>
+        <p>악기를 물고 소리를 내면서 손가락까지 신경 쓰면 뇌에 과부하가 걸립니다.
+           먼저 <b>소리 없이</b> 박자에 맞춰 손가락만 움직이는 연습을 충분히 합니다.
+           <b>‘솔–라–시’</b>처럼 왼손만 쓰는 음부터 시작해 손에 익은 뒤 소리를 내면 성공률이 크게 올라갑니다.</p>
+      </div>
+
+      <div class="g-step">
+        <div class="g-step-head"><span class="g-badge">3단계</span><b>‘따뜻한 입김’ 불어넣기</b><span class="g-sub">호흡 조절</span></div>
+        <p>리코더는 세게 불수록 좋은 소리가 나는 악기가 <b>아닙니다</b>.
+           “촛불을 단번에 끄는 바람(후—)”이 아니라,
+           <b>“추운 날 언 손을 녹이듯 가만히 내쉬는 따뜻한 입김(하—, 투—)”</b>을 불어넣도록 안내합니다.
+           혀끝을 가볍게 튕기는 <b>텅잉</b>을 함께 지도하면 음 하나하나가 또렷해집니다.</p>
+      </div>
+
+      <div class="g-step">
+        <div class="g-step-head"><span class="g-badge">4단계</span><b>시각적 도구로 인지 부하 줄이기</b></div>
+        <p>오선보를 읽고 → 계이름으로 바꾸고 → 다시 운지법으로 치환하는 <b>3단계 사고 과정</b>은
+           초등학생에게 큰 부담입니다. <b>‘도레미 리코더 도우미’</b>로 악보 위에 운지 그림을 함께 놓아 주면
+           시각적 연결이 즉각 이루어져, 흐름을 끊지 않고 자연스럽게 완곡할 수 있습니다.</p>
+      </div>
+    </div>
+
+    <!-- 2장 -->
+    <div class="card guide">
+      <div class="g-chap"><span class="g-num">2</span>
+        <h2>독일식(G) vs 바로크식(B) 완벽 정리</h2>
+      </div>
+      <p class="g-p">
+        신학기 준비물로 리코더를 가져올 때 가장 흔한 혼란이 <b>독일식</b>과 <b>바로크식</b>의 혼용입니다.
+        겉모습은 거의 같지만 <b>음계 운지 방식이 달라서</b>, 교사와 학생 모두 차이를 알고 있어야 합니다.
+      </p>
+
+      <div class="g-check">
+        <div class="g-check-title">🔍 우리 반 리코더 구분하는 법</div>
+        <div class="g-check-row"><span class="g-chip">뒷면 표시</span>
+          <b>G</b> → 독일식 &nbsp;·&nbsp; <b>B</b> → 바로크식</div>
+        <div class="g-check-row"><span class="g-chip">4·5번 구멍</span>
+          독일식은 <b>4번이 더 큼</b>(크다–작다), 바로크식은 <b>4번이 더 작음</b>(작다–크다)</div>
+      </div>
+
+      <div class="g-table-wrap">
+        <table class="g-table">
+          <thead><tr><th>비교 항목</th><th>독일식 (German)</th><th>바로크식 (Baroque)</th></tr></thead>
+          <tbody>
+            <tr><td>개발 배경</td>
+                <td>20세기 초, 교육용으로 <b>다장조</b> 연주를 쉽게 개량</td>
+                <td>르네상스·바로크 시대부터 내려온 <b>전통 표준</b> 구조</td></tr>
+            <tr><td>‘파(F)’ 운지</td>
+                <td>왼손 1·2·3번 + 오른손 4번<br><span class="g-note">단순 순차 운지</span></td>
+                <td>왼손 1·2·3번 + 오른손 4·6·7번<br><span class="g-note">포크 운지</span></td></tr>
+            <tr><td>장점</td>
+                <td>초보자가 다장조 음계를 손가락 순서대로 쉽게 배움</td>
+                <td>반음(올림표·내림표) 음정의 정확도가 매우 우수</td></tr>
+            <tr><td>단점</td>
+                <td>반음(F#, B♭)이나 고음역에서 음정이 불안정</td>
+                <td>‘파’에서 손가락 하나를 건너뛰어야 해 초기 진입장벽</td></tr>
+            <tr><td>권장 대상</td>
+                <td><b>3~4학년</b> 기초 입문 과정</td>
+                <td><b>5~6학년 이상</b> 및 리코더 합주 동아리</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="g-p">
+        입문 단계에서는 손가락을 순서대로 떼기만 하면 되는 <b>독일식</b>이 널리 쓰이지만,
+        학년이 올라가 다양한 조표(#, ♭)가 등장하면 음정이 정확한 <b>바로크식</b>이 훨씬 유리합니다.
+        지도 교사는 <b>학급 아이들의 악기 뒷면을 미리 확인</b>해 학생별 운지 차이를 알고 지도해야 합니다.
+      </p>
+    </div>
+
+    <!-- 3장 -->
+    <div class="card guide">
+      <div class="g-chap"><span class="g-num">3</span>
+        <h2>가장 자주 틀리는 ‘파(F)’와 ‘시(B)’ 꿀팁</h2>
+      </div>
+      <p class="g-p">
+        아이들이 첫 고비를 만나는 음이 바로 <b>파</b>와 <b>시</b>입니다.
+        이 두 음만 확실히 잡아주어도 연주 완성도가 크게 올라갑니다.
+      </p>
+
+      <div class="g-step">
+        <div class="g-step-head"><span class="g-badge alt">파 ①</span><b>바로크식 ‘파’ — 포크 운지</b></div>
+        <p><b>운지법</b> — 왼손 0(엄지)·1·2·3번을 모두 막고,
+           오른손은 4·6·7번을 막되 <b>5번(중지)만 떼어냅니다.</b></p>
+        <div class="g-tip">💡 <b>지도 꿀팁</b> — “가운데 손가락 하나만 쏙 들어 올려 <b>창문</b>을 만들어 주자!”
+          라고 설명하면 직관적으로 이해합니다. 오른손 새끼손가락(7번) 구멍은
+          <b>두 개(더블홀)</b>로 나뉘어 있는데, 둘 다 완전히 막아야 정직한 ‘파’ 소리가 납니다.</div>
+      </div>
+
+      <div class="g-step">
+        <div class="g-step-head"><span class="g-badge alt">파 ②</span><b>독일식 ‘파’ — 음정 흔들림 방지</b></div>
+        <p>독일식은 위에서부터 차례로 막으면 되어 잡기 쉽지만, 구조적 한계로 음정이
+           <b>원래보다 살짝 높게(샵된 소리)</b> 나기 쉽습니다.</p>
+        <div class="g-tip">💡 <b>연주 팁</b> — 호흡을 살짝 줄여 부드럽게 불고,
+          음정이 너무 높게 들리면 <b>오른손 맨 아래 7번 구멍을 반쯤 덮어</b> 주면 한결 안정됩니다.</div>
+      </div>
+
+      <div class="g-step">
+        <div class="g-step-head"><span class="g-badge alt">시</span><b>‘시’ — 악기가 덜렁거릴 때</b></div>
+        <p>‘시’는 왼손 <b>0번(엄지)과 1번(검지) 딱 두 개</b>만 누르기 때문에,
+           악기를 잡는 손가락이 부족해 아래로 떨어지기 쉽습니다.</p>
+        <div class="g-tip">💡 <b>지도 꿀팁</b> — 연주하지 않는 <b>오른손 엄지</b>를 리코더 뒷면 4번 구멍 아래에
+          단단히 받쳐 지지대 역할을 하게 합니다. “오른손 엄지가 <b>든든한 받침대 기둥</b>이 되어야
+          왼손이 자유롭게 춤출 수 있다”고 알려주면 음 이탈을 확실히 막을 수 있습니다.</div>
+      </div>
+    </div>
+
+    <!-- 마치며 -->
+    <div class="card guide g-outro">
+      <h2 class="g-outro-title">마치며</h2>
+      <p class="g-p">
+        악기 교육의 궁극적인 목표는 모든 아이를 전문 연주자로 만드는 것이 아니라,
+        <b>자신의 손으로 멜로디를 완성해 내는 기쁨</b>을 맛보게 하는 것입니다.
+        작은 플라스틱 피리 하나가 교실을 풍성한 화음으로 채울 때,
+        아이들은 협동의 가치와 음악이 주는 위로를 배웁니다.
+      </p>
+      <p class="g-p">
+        <b>‘도레미 리코더 도우미’</b>는 리코더를 처음 쥐는 학생부터 수업을 준비하는 선생님까지,
+        운지법의 스트레스 없이 <b>음악 본연의 아름다움</b>에 집중하도록 돕는 수업 파트너가 되어 줄 것입니다.
+      </p>
+      <div class="g-end">오늘 음악 시간, 아이들과 함께 즐거운 리코더 여행을 떠나 보세요! 🎶</div>
+      <div class="g-cta">
+        <button class="btn" onclick="showTab(1)">🎵 계이름 넣고 운지표 만들기</button>
+        <button class="btn ghost" onclick="showTab(3)">📄 악보 PDF로 시작하기</button>
+      </div>
+    </div>
+
   </div>
 
   <!-- ===== 탭 1 : 운지법 ===== -->
@@ -723,10 +980,11 @@ NOTES.forEach(n=> NOTE_MAP[n.ko] = n);
 
 /* ---------- 탭 ---------- */
 function showTab(n){
-  for(let i=1;i<=3;i++){
+  for(let i=0;i<=3;i++){
     document.getElementById("tab-"+i).classList.toggle("on", n===i);
     document.getElementById("panel-"+i).classList.toggle("hidden", n!==i);
   }
+  window.scrollTo({top:0, behavior:"smooth"});
 }
 
 /* ---------- 건반 만들기 ---------- */
