@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2학기 아침활동지 | 3분 놀이터</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#3F3A42; --ink-soft:#8B8391; --line:#EDE2E8;
+    --pink:#FF8FA8; --pink-d:#E06D88;
+    --g3:#5FC9AE; --g3d:#46A691;
+    --g4:#7BB8E8; --g4d:#5A96C7;
+    --g5:#FFB454; --g5d:#E0942F;
+    --g6:#A88BD8; --g6d:#8A6DBA;
+    --shadow:0 3px 0 rgba(63,58,66,.10);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    color:var(--ink); font-family:'Noto Sans KR',sans-serif; min-height:100vh;
+    background:linear-gradient(180deg,#FFF3E4 0%, #FFEDE6 45%, #FDF3F6 100%);
+    background-attachment:fixed;
+  }
+  /* 아침 하늘 */
+  .sky{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0;}
+  .sun{
+    position:absolute;top:52px;right:10%;width:150px;height:150px;border-radius:50%;
+    background:radial-gradient(circle at 38% 36%, #FFE9A8, #FFC861 62%, #FFB24A);
+    box-shadow:0 0 0 22px rgba(255,205,110,.20), 0 0 0 46px rgba(255,205,110,.11);
+  }
+  .cloud{position:absolute;background:#fff;border-radius:999px;opacity:.85;}
+  .cloud::before,.cloud::after{content:"";position:absolute;background:#fff;border-radius:50%;}
+  .c1{width:132px;height:40px;top:112px;left:6%;}
+  .c1::before{width:58px;height:58px;top:-24px;left:20px;}
+  .c1::after{width:44px;height:44px;top:-16px;left:66px;}
+  .c2{width:104px;height:32px;top:214px;right:22%;opacity:.7;}
+  .c2::before{width:46px;height:46px;top:-19px;left:16px;}
+  .c2::after{width:34px;height:34px;top:-12px;left:54px;}
+  .c3{width:88px;height:28px;top:330px;left:14%;opacity:.6;}
+  .c3::before{width:40px;height:40px;top:-16px;left:14px;}
+  .hill{
+    position:absolute;bottom:0;left:0;right:0;height:190px;
+    background:radial-gradient(120% 100% at 50% 100%, #BFE6C9 0%, #D7F0DC 60%, transparent 61%);
+    opacity:.55;
+  }
+
+  .topbar{position:relative;z-index:2;max-width:880px;margin:0 auto;padding:14px 18px 0;
+          display:flex;align-items:center;justify-content:space-between;}
+  .topbar a{text-decoration:none;color:var(--ink);}
+  .topbar .brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;}
+  .topbar .back{font-size:12.5px;font-weight:700;color:var(--ink-soft);
+                border:2px solid #fff;background:#fff;padding:6px 12px;border-radius:999px;box-shadow:var(--shadow);}
+
+  .shell{position:relative;z-index:2;max-width:880px;margin:0 auto;padding:26px 18px 70px;}
+
+  .hero{text-align:center;margin-bottom:26px;}
+  .hero .emoji{font-size:44px;line-height:1;margin-bottom:8px;}
+  .hero h1{font-family:'Jua',sans-serif;font-size:clamp(26px,5.5vw,36px);margin:0 0 8px;color:var(--pink-d);}
+  .hero p{font-family:'Gaegu',cursive;font-weight:700;font-size:18px;color:#8A7E6D;margin:0;line-height:1.6;}
+
+  .info{
+    background:rgba(255,255,255,.82);border:2px dashed var(--line);border-radius:16px;
+    padding:13px 16px;margin:0 auto 24px;max-width:620px;
+    font-size:12.5px;color:var(--ink-soft);line-height:1.85;text-align:center;word-break:keep-all;
+  }
+  .info b{color:var(--ink);}
+
+  .grades{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;}
+  .gcard{
+    display:block;text-decoration:none;color:var(--ink);background:#fff;
+    border-radius:22px;padding:22px 20px 20px;position:relative;overflow:hidden;
+    box-shadow:var(--shadow),0 10px 22px rgba(63,58,66,.10);
+    transition:transform .14s ease, box-shadow .14s ease;
+  }
+  .gcard:hover{transform:translateY(-4px);box-shadow:0 6px 0 rgba(63,58,66,.10),0 16px 30px rgba(63,58,66,.14);}
+  .gcard .ribbon{position:absolute;top:0;left:0;right:0;height:7px;}
+  .gcard .num{
+    font-family:'Jua',sans-serif;font-size:40px;line-height:1;margin-bottom:2px;
+  }
+  .gcard .sub{font-family:'Jua',sans-serif;font-size:15px;margin-bottom:12px;color:var(--ink-soft);}
+  .gcard ul{list-style:none;padding:0;margin:0 0 14px;}
+  .gcard li{font-size:12.5px;color:var(--ink-soft);line-height:1.9;display:flex;gap:6px;align-items:flex-start;}
+  .gcard li i{font-style:normal;flex:0 0 auto;}
+  .gcard .go{
+    font-family:'Jua',sans-serif;font-size:14px;color:#fff;border-radius:999px;
+    padding:9px 0;text-align:center;
+  }
+  .g3 .num{color:var(--g3);} .g3 .go{background:var(--g3);box-shadow:0 3px 0 var(--g3d);} .g3 .ribbon{background:var(--g3);}
+  .g4 .num{color:var(--g4);} .g4 .go{background:var(--g4);box-shadow:0 3px 0 var(--g4d);} .g4 .ribbon{background:var(--g4);}
+  .g5 .num{color:var(--g5);} .g5 .go{background:var(--g5);box-shadow:0 3px 0 var(--g5d);} .g5 .ribbon{background:var(--g5);}
+  .g6 .num{color:var(--g6);} .g6 .go{background:var(--g6);box-shadow:0 3px 0 var(--g6d);} .g6 .ribbon{background:var(--g6);}
+
+  .foot{
+    text-align:center;font-family:'Gaegu',cursive;font-weight:700;font-size:16px;
+    color:#9C8F84;margin-top:30px;
+  }
+  @media (max-width:520px){ .sun{width:110px;height:110px;right:6%;} }
+</style>
+</head>
+<body>
+
+<div class="sky">
+  <div class="sun"></div>
+  <div class="cloud c1"></div>
+  <div class="cloud c2"></div>
+  <div class="cloud c3"></div>
+  <div class="hill"></div>
+</div>
+
+<div class="topbar">
+  <a class="brand" href="../index.html">
+    <svg width="26" height="26" viewBox="0 0 34 34" fill="none">
+      <circle cx="17" cy="18" r="14" fill="#fff" stroke="#3F3A42" stroke-width="2"/>
+      <path d="M17 9 L17 18 L23 21" stroke="#FF8FA8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="13" y="2" width="8" height="4" rx="1.5" fill="#3F3A42"/>
+    </svg>
+    <span>3분 놀이터</span>
+  </a>
+  <a class="back" href="../index.html">← 다른 콘텐츠 보기</a>
+</div>
+
+<div class="shell">
+
+  <div class="hero">
+    <div class="emoji">🌅</div>
+    <h1>2학기 아침활동지</h1>
+    <p>오늘도 기분 좋게 하루를 열어요!<br>학년을 골라 주세요</p>
+  </div>
+
+  <div class="info">
+    하루 한 장, <b>90일치</b>가 준비되어 있어요. 날짜를 고르면 그날의 활동지가 나오고,
+    <b>답지 보기</b>를 켠 채 인쇄하면 답지도 바로 뽑을 수 있어요.
+  </div>
+
+  <div class="grades">
+
+    <a class="gcard g3" href="morning-worksheet3.html">
+      <span class="ribbon"></span>
+      <div class="num">3학년</div>
+      <div class="sub">2학기</div>
+      <ul>
+        <li><i>🧮</i><span>수학 10문제 · 곱셈, 나눗셈, 원, 분수, 들이와 무게, 그림그래프</span></li>
+        <li><i>🔤</i><span>기초 영어 단어 3개</span></li>
+        <li><i>🙇</i><span>바른 높임말 배우기</span></li>
+      </ul>
+      <div class="go">활동지 열기 →</div>
+    </a>
+
+    <a class="gcard g4" href="morning-worksheet4.html">
+      <span class="ribbon"></span>
+      <div class="num">4학년</div>
+      <div class="sub">2학기</div>
+      <ul>
+        <li><i>🧮</i><span>수학 10문제 · 분수·소수의 덧뺄셈, 삼각형, 사각형, 꺾은선그래프, 다각형</span></li>
+        <li><i>🔤</i><span>필수 영어 단어 3개</span></li>
+        <li><i>🗣️</i><span>우리 속담과 그 뜻</span></li>
+      </ul>
+      <div class="go">활동지 열기 →</div>
+    </a>
+
+    <a class="gcard g5" href="morning-worksheet5.html">
+      <span class="ribbon"></span>
+      <div class="num">5학년</div>
+      <div class="sub">2학기</div>
+      <ul>
+        <li><i>🧮</i><span>수학 10문제 · 어림하기, 분수·소수의 곱셈, 합동과 대칭, 직육면체, 평균</span></li>
+        <li><i>✍️</i><span>한자 2자 (쉬운 급수)</span></li>
+        <li><i>📜</i><span>명심보감 한 구절</span></li>
+      </ul>
+      <div class="go">활동지 열기 →</div>
+    </a>
+
+    <a class="gcard g6" href="morning-worksheet.html">
+      <span class="ribbon"></span>
+      <div class="num">6학년</div>
+      <div class="sub">2학기</div>
+      <ul>
+        <li><i>🧮</i><span>수학 10문제 · 분수·소수의 나눗셈, 공간과 입체, 비례식, 원의 넓이, 원기둥</span></li>
+        <li><i>✍️</i><span>한자 2자</span></li>
+        <li><i>📜</i><span>명심보감 한 구절</span></li>
+      </ul>
+      <div class="go">활동지 열기 →</div>
+    </a>
+
+  </div>
+
+  <div class="foot">좋은 아침이에요! 오늘도 힘차게 시작해요 ☀️</div>
+</div>
+
+</body>
+</html>

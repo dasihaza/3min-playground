@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>아침을 여는 활동지 · 4학년 2학기 | 3분 놀이터</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<!-- 자료 파일이 있으면 그것을 쓰고, 없으면 아래 내장 자료를 씁니다 -->
+<script src="../assets/morning-data4.js" onerror="void 0"></script>
+<script>
+/* ===== 내장 자료 (외부 파일이 없어도 활동지가 열리도록) ===== */
+const WORDS_BUILTIN = [
+/* 학용품·교실 */
+{w:"pencil",k:"연필"},{w:"eraser",k:"지우개"},{w:"ruler",k:"자"},
+{w:"book",k:"책"},{w:"notebook",k:"공책"},{w:"bag",k:"가방"},
+{w:"desk",k:"책상"},{w:"chair",k:"의자"},{w:"board",k:"칠판"},
+{w:"crayon",k:"크레용"},{w:"scissors",k:"가위"},{w:"glue",k:"풀"},
+{w:"paper",k:"종이"},{w:"pen",k:"펜"},{w:"classroom",k:"교실"},
+{w:"school",k:"학교"},{w:"teacher",k:"선생님"},{w:"student",k:"학생"},
+{w:"friend",k:"친구"},{w:"class",k:"수업, 반"},{w:"lesson",k:"수업"},
+/* 가족·사람 */
+{w:"family",k:"가족"},{w:"father",k:"아버지"},{w:"mother",k:"어머니"},
+{w:"brother",k:"형, 오빠, 남동생"},{w:"sister",k:"누나, 언니, 여동생"},{w:"baby",k:"아기"},
+{w:"grandfather",k:"할아버지"},{w:"grandmother",k:"할머니"},{w:"uncle",k:"삼촌"},
+{w:"aunt",k:"이모, 고모"},{w:"boy",k:"소년"},{w:"girl",k:"소녀"},
+{w:"man",k:"남자"},{w:"woman",k:"여자"},{w:"people",k:"사람들"},
+{w:"child",k:"아이"},{w:"name",k:"이름"},{w:"age",k:"나이"},
+/* 몸 */
+{w:"head",k:"머리"},{w:"hair",k:"머리카락"},{w:"face",k:"얼굴"},
+{w:"eye",k:"눈"},{w:"nose",k:"코"},{w:"mouth",k:"입"},
+{w:"ear",k:"귀"},{w:"tooth",k:"이"},{w:"hand",k:"손"},
+{w:"finger",k:"손가락"},{w:"arm",k:"팔"},{w:"leg",k:"다리"},
+{w:"foot",k:"발"},{w:"body",k:"몸"},{w:"neck",k:"목"},
+/* 동물 */
+{w:"dog",k:"개"},{w:"cat",k:"고양이"},{w:"bird",k:"새"},
+{w:"fish",k:"물고기"},{w:"rabbit",k:"토끼"},{w:"horse",k:"말"},
+{w:"cow",k:"소"},{w:"pig",k:"돼지"},{w:"sheep",k:"양"},
+{w:"chicken",k:"닭"},{w:"duck",k:"오리"},{w:"mouse",k:"쥐"},
+{w:"tiger",k:"호랑이"},{w:"lion",k:"사자"},{w:"bear",k:"곰"},
+{w:"elephant",k:"코끼리"},{w:"monkey",k:"원숭이"},{w:"snake",k:"뱀"},
+{w:"frog",k:"개구리"},{w:"bee",k:"벌"},{w:"butterfly",k:"나비"},
+{w:"ant",k:"개미"},{w:"spider",k:"거미"},{w:"turtle",k:"거북"},
+/* 음식 */
+{w:"apple",k:"사과"},{w:"banana",k:"바나나"},{w:"orange",k:"오렌지"},
+{w:"grape",k:"포도"},{w:"strawberry",k:"딸기"},{w:"watermelon",k:"수박"},
+{w:"bread",k:"빵"},{w:"rice",k:"밥, 쌀"},{w:"soup",k:"국, 수프"},
+{w:"milk",k:"우유"},{w:"water",k:"물"},{w:"juice",k:"주스"},
+{w:"egg",k:"달걀"},{w:"meat",k:"고기"},{w:"cheese",k:"치즈"},
+{w:"cake",k:"케이크"},{w:"candy",k:"사탕"},{w:"cookie",k:"과자"},
+{w:"ice cream",k:"아이스크림"},{w:"pizza",k:"피자"},{w:"salad",k:"샐러드"},
+{w:"sugar",k:"설탕"},{w:"salt",k:"소금"},{w:"food",k:"음식"},
+{w:"breakfast",k:"아침 식사"},{w:"lunch",k:"점심 식사"},{w:"dinner",k:"저녁 식사"},
+/* 색깔·모양 */
+{w:"red",k:"빨간색"},{w:"blue",k:"파란색"},{w:"yellow",k:"노란색"},
+{w:"green",k:"초록색"},{w:"black",k:"검은색"},{w:"white",k:"흰색"},
+{w:"pink",k:"분홍색"},{w:"purple",k:"보라색"},{w:"brown",k:"갈색"},
+{w:"color",k:"색깔"},{w:"circle",k:"원"},{w:"square",k:"정사각형"},
+{w:"triangle",k:"삼각형"},{w:"line",k:"선"},{w:"shape",k:"모양"},
+/* 숫자·수량 */
+{w:"one",k:"하나"},{w:"two",k:"둘"},{w:"three",k:"셋"},
+{w:"four",k:"넷"},{w:"five",k:"다섯"},{w:"six",k:"여섯"},
+{w:"seven",k:"일곱"},{w:"eight",k:"여덟"},{w:"nine",k:"아홉"},
+{w:"ten",k:"열"},{w:"number",k:"숫자"},{w:"many",k:"많은"},
+{w:"few",k:"적은"},{w:"all",k:"모두"},{w:"some",k:"약간의"},
+/* 시간·요일 */
+{w:"Monday",k:"월요일"},{w:"Tuesday",k:"화요일"},{w:"Wednesday",k:"수요일"},
+{w:"Thursday",k:"목요일"},{w:"Friday",k:"금요일"},{w:"Saturday",k:"토요일"},
+{w:"Sunday",k:"일요일"},{w:"today",k:"오늘"},{w:"tomorrow",k:"내일"},
+{w:"yesterday",k:"어제"},{w:"morning",k:"아침"},{w:"afternoon",k:"오후"},
+{w:"evening",k:"저녁"},{w:"night",k:"밤"},{w:"day",k:"날, 하루"},
+{w:"week",k:"주"},{w:"month",k:"달"},{w:"year",k:"해, 년"},
+{w:"time",k:"시간"},{w:"hour",k:"시간(1시간)"},{w:"minute",k:"분"},
+/* 날씨·자연 */
+{w:"sun",k:"해"},{w:"moon",k:"달"},{w:"star",k:"별"},
+{w:"sky",k:"하늘"},{w:"cloud",k:"구름"},{w:"rain",k:"비"},
+{w:"snow",k:"눈"},{w:"wind",k:"바람"},{w:"weather",k:"날씨"},
+{w:"hot",k:"더운"},{w:"cold",k:"추운"},{w:"warm",k:"따뜻한"},
+{w:"cool",k:"시원한"},{w:"spring",k:"봄"},{w:"summer",k:"여름"},
+{w:"fall",k:"가을"},{w:"winter",k:"겨울"},{w:"tree",k:"나무"},
+{w:"flower",k:"꽃"},{w:"grass",k:"풀"},{w:"leaf",k:"잎"},
+{w:"mountain",k:"산"},{w:"river",k:"강"},{w:"sea",k:"바다"},
+{w:"beach",k:"해변"},{w:"stone",k:"돌"},{w:"sand",k:"모래"},
+/* 집·물건 */
+{w:"house",k:"집"},{w:"home",k:"집, 가정"},{w:"room",k:"방"},
+{w:"door",k:"문"},{w:"window",k:"창문"},{w:"bed",k:"침대"},
+{w:"table",k:"탁자"},{w:"kitchen",k:"부엌"},{w:"bathroom",k:"욕실"},
+{w:"clock",k:"시계"},{w:"phone",k:"전화기"},{w:"computer",k:"컴퓨터"},
+{w:"key",k:"열쇠"},{w:"box",k:"상자"},{w:"cup",k:"컵"},
+{w:"plate",k:"접시"},{w:"spoon",k:"숟가락"},{w:"fork",k:"포크"},
+{w:"towel",k:"수건"},{w:"soap",k:"비누"},{w:"mirror",k:"거울"},
+/* 옷 */
+{w:"clothes",k:"옷"},{w:"shirt",k:"셔츠"},{w:"pants",k:"바지"},
+{w:"skirt",k:"치마"},{w:"dress",k:"원피스"},{w:"coat",k:"외투"},
+{w:"hat",k:"모자"},{w:"shoes",k:"신발"},{w:"socks",k:"양말"},
+{w:"gloves",k:"장갑"},{w:"glasses",k:"안경"},{w:"umbrella",k:"우산"},
+/* 동작 */
+{w:"go",k:"가다"},{w:"come",k:"오다"},{w:"eat",k:"먹다"},
+{w:"drink",k:"마시다"},{w:"read",k:"읽다"},{w:"write",k:"쓰다"},
+{w:"run",k:"달리다"},{w:"walk",k:"걷다"},{w:"jump",k:"뛰다"},
+{w:"sit",k:"앉다"},{w:"stand",k:"서다"},{w:"sleep",k:"자다"},
+{w:"play",k:"놀다"},{w:"study",k:"공부하다"},{w:"listen",k:"듣다"},
+{w:"look",k:"보다"},{w:"speak",k:"말하다"},{w:"sing",k:"노래하다"},
+{w:"dance",k:"춤추다"},{w:"draw",k:"그리다"},{w:"swim",k:"수영하다"},
+{w:"open",k:"열다"},{w:"close",k:"닫다"},{w:"help",k:"돕다"},
+{w:"make",k:"만들다"},{w:"give",k:"주다"},{w:"take",k:"가져가다"},
+{w:"buy",k:"사다"},{w:"wash",k:"씻다"},{w:"clean",k:"청소하다"},
+/* 상태·느낌 */
+{w:"happy",k:"행복한"},{w:"sad",k:"슬픈"},{w:"angry",k:"화난"},
+{w:"tired",k:"피곤한"},{w:"hungry",k:"배고픈"},{w:"thirsty",k:"목마른"},
+{w:"big",k:"큰"},{w:"small",k:"작은"},{w:"long",k:"긴"},
+{w:"short",k:"짧은"},{w:"tall",k:"키가 큰"},{w:"fast",k:"빠른"},
+{w:"slow",k:"느린"},{w:"new",k:"새로운"},{w:"old",k:"오래된"},
+{w:"good",k:"좋은"},{w:"bad",k:"나쁜"},{w:"easy",k:"쉬운"},
+{w:"hard",k:"어려운"},{w:"strong",k:"강한"},{w:"kind",k:"친절한"},
+{w:"pretty",k:"예쁜"},{w:"nice",k:"멋진"},{w:"dirty",k:"더러운"},
+/* 장소·이동 */
+{w:"park",k:"공원"},{w:"store",k:"가게"},{w:"market",k:"시장"},
+{w:"hospital",k:"병원"},{w:"library",k:"도서관"},{w:"museum",k:"박물관"},
+{w:"zoo",k:"동물원"},{w:"restaurant",k:"식당"},{w:"bank",k:"은행"},
+{w:"street",k:"거리"},{w:"bus",k:"버스"},{w:"car",k:"자동차"},
+{w:"train",k:"기차"},{w:"bike",k:"자전거"},{w:"ship",k:"배"},
+{w:"airplane",k:"비행기"},{w:"road",k:"길"},{w:"bridge",k:"다리"},
+/* 운동·취미 */
+{w:"soccer",k:"축구"},{w:"baseball",k:"야구"},{w:"basketball",k:"농구"},
+{w:"tennis",k:"테니스"},{w:"ball",k:"공"},{w:"game",k:"경기, 게임"},
+{w:"music",k:"음악"},{w:"song",k:"노래"},{w:"piano",k:"피아노"},
+{w:"picture",k:"그림, 사진"},{w:"movie",k:"영화"},{w:"story",k:"이야기"},
+/* 기타 */
+{w:"world",k:"세계"},{w:"country",k:"나라"},{w:"city",k:"도시"},
+{w:"map",k:"지도"},{w:"money",k:"돈"},{w:"gift",k:"선물"},
+{w:"letter",k:"편지"},{w:"question",k:"질문"},{w:"answer",k:"대답"},
+{w:"idea",k:"생각"},{w:"work",k:"일, 일하다"},{w:"job",k:"직업"},
+{w:"doctor",k:"의사"},{w:"nurse",k:"간호사"},{w:"police",k:"경찰"},
+{w:"farmer",k:"농부"},{w:"cook",k:"요리사"},{w:"singer",k:"가수"},
+{w:"fire",k:"불"},{w:"light",k:"빛"},{w:"air",k:"공기"},
+{w:"life",k:"삶"},{w:"love",k:"사랑"},{w:"hope",k:"희망"},
+{w:"dream",k:"꿈"},{w:"health",k:"건강"},{w:"safe",k:"안전한"},
+{w:"together",k:"함께"},{w:"always",k:"항상"},{w:"never",k:"결코 ~않다"}
+];
+const SOKDAM_BUILTIN = [
+{p:"티끌 모아 태산", m:"아주 작은 것도 모으고 모으면 나중에 큰 것이 된다."},
+{p:"가는 말이 고와야 오는 말이 곱다", m:"내가 남에게 좋게 말해야 남도 나에게 좋게 말한다."},
+{p:"낮말은 새가 듣고 밤말은 쥐가 듣는다", m:"아무도 안 듣는 것 같아도 말은 조심해야 한다."},
+{p:"발 없는 말이 천 리 간다", m:"말은 순식간에 멀리까지 퍼지니 함부로 하면 안 된다."},
+{p:"백지장도 맞들면 낫다", m:"쉬운 일이라도 서로 힘을 합치면 훨씬 수월하다."},
+{p:"소 잃고 외양간 고친다", m:"일이 잘못된 뒤에야 뒤늦게 손을 쓴다."},
+{p:"우물 안 개구리", m:"넓은 세상을 모르고 자기가 아는 것만 옳다고 여긴다."},
+{p:"등잔 밑이 어둡다", m:"가까이 있는 것을 오히려 잘 알지 못한다."},
+{p:"호랑이도 제 말 하면 온다", m:"남의 이야기를 하고 있으면 공교롭게 그 사람이 나타난다."},
+{p:"천 리 길도 한 걸음부터", m:"아무리 큰 일도 작은 시작에서 비롯된다."},
+{p:"시작이 반이다", m:"일단 시작하면 이미 절반은 이룬 것이나 마찬가지다."},
+{p:"공든 탑이 무너지랴", m:"정성을 다해 한 일은 쉽게 헛되지 않는다."},
+{p:"열 번 찍어 아니 넘어가는 나무 없다", m:"꾸준히 노력하면 결국 이루어진다."},
+{p:"지렁이도 밟으면 꿈틀한다", m:"아무리 약한 사람도 너무 괴롭히면 반항한다."},
+{p:"원숭이도 나무에서 떨어진다", m:"아무리 잘하는 사람도 실수할 때가 있다."},
+{p:"가랑비에 옷 젖는 줄 모른다", m:"작은 일이라도 자꾸 쌓이면 큰 영향을 준다."},
+{p:"티끌 모아도 태산이라", m:"작은 것이라도 꾸준히 모으면 크게 이룬다."},
+{p:"돌다리도 두들겨 보고 건너라", m:"잘 아는 일이라도 조심해서 확인하고 해야 한다."},
+{p:"아는 길도 물어 가랬다", m:"익숙한 일도 신중하게 확인하며 해야 한다."},
+{p:"급할수록 돌아가라", m:"서두를수록 차분하게 확실한 방법을 택해야 한다."},
+{p:"바늘 도둑이 소도둑 된다", m:"작은 나쁜 버릇이 나중에 큰 잘못으로 이어진다."},
+{p:"세 살 버릇 여든까지 간다", m:"어릴 때 든 버릇은 늙어서도 고치기 어렵다."},
+{p:"콩 심은 데 콩 나고 팥 심은 데 팥 난다", m:"모든 일은 원인에 따라 그에 맞는 결과가 나온다."},
+{p:"뿌린 대로 거둔다", m:"자신이 한 대로 그 결과를 돌려받는다."},
+{p:"웃는 낯에 침 못 뱉는다", m:"웃으며 대하는 사람에게는 화를 내기 어렵다."},
+{p:"미운 놈 떡 하나 더 준다", m:"미울수록 더 잘 대해 주어야 관계가 좋아진다."},
+{p:"열 손가락 깨물어 안 아픈 손가락 없다", m:"자식은 누구나 다 똑같이 소중하다."},
+{p:"고생 끝에 낙이 온다", m:"어려움을 견디고 나면 좋은 날이 온다."},
+{p:"참는 자에게 복이 있다", m:"잘 참고 견디는 사람에게 좋은 일이 생긴다."},
+{p:"꿩 먹고 알 먹는다", m:"한 가지 일로 두 가지 이익을 얻는다."},
+{p:"누워서 떡 먹기", m:"아주 쉬운 일을 이르는 말."},
+{p:"식은 죽 먹기", m:"힘들이지 않고 아주 쉽게 할 수 있는 일."},
+{p:"하늘의 별 따기", m:"이루기가 몹시 어려운 일."},
+{p:"그림의 떡", m:"보기만 하고 가질 수는 없는 것."},
+{p:"남의 떡이 더 커 보인다", m:"내 것보다 남의 것이 더 좋아 보인다."},
+{p:"배보다 배꼽이 더 크다", m:"중심이 되는 것보다 딸린 것이 더 크다."},
+{p:"작은 고추가 더 맵다", m:"몸집은 작아도 재주나 힘이 더 야무지다."},
+{p:"빈 수레가 요란하다", m:"잘 모르는 사람이 더 시끄럽게 떠든다."},
+{p:"벼는 익을수록 고개를 숙인다", m:"훌륭한 사람일수록 더 겸손해진다."},
+{p:"모르는 게 약이다", m:"차라리 모르고 지내는 편이 마음이 편할 때가 있다."},
+{p:"백문이 불여일견", m:"백 번 듣는 것보다 한 번 직접 보는 것이 낫다."},
+{p:"믿는 도끼에 발등 찍힌다", m:"믿었던 사람이나 일에서 오히려 해를 입는다."},
+{p:"가재는 게 편", m:"비슷한 처지에 있는 사람끼리 서로 편을 든다."},
+{p:"초록은 동색", m:"처지가 같은 사람끼리 서로 어울린다."},
+{p:"울며 겨자 먹기", m:"하기 싫은 일을 어쩔 수 없이 억지로 한다."},
+{p:"똥 묻은 개가 겨 묻은 개 나무란다", m:"자기 잘못은 모르고 남의 작은 잘못을 흉본다."},
+{p:"제 눈에 안경", m:"보잘것없어도 자기 마음에 들면 좋아 보인다."},
+{p:"개구리 올챙이 적 생각 못 한다", m:"형편이 나아지면 어려웠던 때를 잊는다."},
+{p:"꼬리가 길면 밟힌다", m:"나쁜 일을 오래 하면 결국 들키게 된다."},
+{p:"낫 놓고 기역 자도 모른다", m:"아주 기본적인 것도 알지 못할 만큼 무식하다."},
+{p:"닭 쫓던 개 지붕 쳐다본다", m:"애쓰던 일이 헛되어 어이없게 되었다."},
+{p:"도토리 키 재기", m:"비슷비슷해서 견주어 볼 필요가 없다."},
+{p:"둘째 가라면 서럽다", m:"어떤 일에서 남에게 뒤지지 않을 만큼 뛰어나다."},
+{p:"뛰는 놈 위에 나는 놈 있다", m:"아무리 잘해도 더 뛰어난 사람이 있다."},
+{p:"마른하늘에 날벼락", m:"예상치 못한 나쁜 일을 갑자기 당한다."},
+{p:"말 한마디에 천 냥 빚도 갚는다", m:"말을 잘하면 어려운 일도 해결할 수 있다."},
+{p:"목마른 놈이 우물 판다", m:"급하고 필요한 사람이 먼저 나서서 일한다."},
+{p:"바늘 가는 데 실 간다", m:"아주 가까워 늘 함께 다니는 사이."},
+{p:"번갯불에 콩 볶아 먹겠다", m:"행동이 지나치게 빠르고 성급하다."},
+{p:"사공이 많으면 배가 산으로 간다", m:"지시하는 사람이 많으면 일이 엉뚱하게 된다."},
+{p:"서당 개 삼 년이면 풍월을 읊는다", m:"오래 보고 들으면 저절로 익히게 된다."},
+{p:"쇠뿔도 단김에 빼라", m:"마음먹은 일은 망설이지 말고 바로 해야 한다."},
+{p:"싼 게 비지떡", m:"값이 싼 물건은 품질도 그만큼 나쁘다."},
+{p:"아니 땐 굴뚝에 연기 날까", m:"원인이 없으면 결과도 생기지 않는다."},
+{p:"언 발에 오줌 누기", m:"잠깐 도움이 될 뿐 근본적인 해결은 못 된다."},
+{p:"엎친 데 덮친 격", m:"어려운 일에 또 다른 어려움이 겹친다."},
+{p:"우물에 가 숭늉 찾는다", m:"순서를 무시하고 성급하게 결과를 바란다."},
+{p:"입에 쓴 약이 병에는 좋다", m:"듣기 싫은 충고가 오히려 도움이 된다."},
+{p:"작은 물이 큰 물 된다", m:"작은 것이 모여 큰 것을 이룬다."},
+{p:"잔칫날 잘 먹으려고 사흘 굶는다", m:"앞일만 믿고 당장 해야 할 것을 소홀히 한다."},
+{p:"첫술에 배부르랴", m:"어떤 일이든 처음부터 큰 성과를 얻기는 어렵다."},
+{p:"칼로 물 베기", m:"싸워도 금방 다시 사이가 좋아진다."},
+{p:"티끌 하나 없다", m:"아주 깨끗하고 흠이 없다."},
+{p:"팔이 안으로 굽는다", m:"누구나 가까운 사람에게 마음이 기운다."},
+{p:"하나를 보면 열을 안다", m:"작은 행동 하나로 그 사람 전체를 짐작할 수 있다."},
+{p:"하루 강아지 범 무서운 줄 모른다", m:"철없이 함부로 덤비는 것을 이르는 말."},
+{p:"호미로 막을 것을 가래로 막는다", m:"작을 때 처리하지 않아 나중에 큰 힘이 든다."},
+{p:"윗물이 맑아야 아랫물이 맑다", m:"윗사람이 바르게 해야 아랫사람도 바르게 한다."},
+{p:"쥐구멍에도 볕 들 날 있다", m:"어려운 처지에도 언젠가 좋은 날이 온다."},
+{p:"개천에서 용 난다", m:"어려운 환경에서도 훌륭한 인물이 나온다."},
+{p:"구슬이 서 말이라도 꿰어야 보배", m:"좋은 것도 다듬고 쓸모 있게 해야 값어치가 있다."},
+{p:"낮에 난 도깨비", m:"체면 없이 엉뚱한 짓을 하는 사람."},
+{p:"눈 감으면 코 베어 간다", m:"세상인심이 몹시 각박하다."},
+{p:"달면 삼키고 쓰면 뱉는다", m:"자기에게 이로우면 취하고 아니면 버린다."},
+{p:"도둑이 제 발 저리다", m:"잘못한 사람은 저절로 마음이 조마조마해진다."},
+{p:"떡 줄 사람은 생각도 않는데 김칫국부터 마신다", m:"상대의 마음도 모르고 혼자 기대한다."},
+{p:"뚝배기보다 장맛", m:"겉모습보다 속내용이 더 중요하다."},
+{p:"산 넘어 산", m:"어려운 일이 자꾸 계속해서 생긴다."},
+{p:"소문난 잔치에 먹을 것 없다", m:"기대가 컸던 일이 막상 별것 아니다."},
+{p:"시장이 반찬", m:"배가 고프면 무엇을 먹어도 맛있다."},
+{p:"아이 말도 귀담아들어라", m:"어린 사람의 말이라도 새겨들을 만하다."}
+];
+/* 외부 파일이 정상 로드됐으면 그쪽을 우선 사용 */
+const WD = (typeof WORDS !== "undefined" && WORDS.length) ? WORDS : WORDS_BUILTIN;
+const SD = (typeof SOKDAM !== "undefined" && SOKDAM.length) ? SOKDAM : SOKDAM_BUILTIN;
+</script>
+<style>
+  :root{
+    --bg:#FFF7F2; --card:#FFFFFF; --ink:#3F3A42; --ink-soft:#8B8391;
+    --line:#EDE2E8; --pink:#FF8FA8; --pink-d:#E06D88;
+    --mint:#5FC9AE; --lemon:#FFD166; --sky:#7BB8E8; --grape:#A88BD8;
+    --shadow:0 3px 0 rgba(63,58,66,.09);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 8% 6%, rgba(255,209,102,.18) 0 120px, transparent 121px),
+      radial-gradient(circle at 94% 12%, rgba(123,184,232,.16) 0 100px, transparent 101px),
+      var(--bg);
+    background-attachment:fixed;
+    color:var(--ink); font-family:'Noto Sans KR',sans-serif; min-height:100vh;
+  }
+  .topbar{max-width:880px;margin:0 auto;padding:14px 18px 0;display:flex;align-items:center;justify-content:space-between;}
+  .topbar a{text-decoration:none;color:var(--ink);}
+  .topbar .brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;}
+  .topbar .back{font-size:12.5px;font-weight:700;color:var(--ink-soft);border:2px solid #fff;background:#fff;padding:6px 12px;border-radius:999px;box-shadow:var(--shadow);}
+  .shell{max-width:880px;margin:0 auto;padding:14px 18px 60px;}
+
+  /* 조작 패널 */
+  .panel{background:var(--card);border-radius:20px;padding:16px 18px;box-shadow:var(--shadow),0 8px 18px rgba(63,58,66,.08);margin-bottom:16px;}
+  .panel h2{font-family:'Jua',sans-serif;font-size:16px;margin:0 0 10px;}
+  .row{display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
+  .btn{font-family:'Jua',sans-serif;border:none;cursor:pointer;font-size:15px;padding:11px 18px;border-radius:13px;
+       background:var(--pink);color:#fff;box-shadow:0 4px 0 var(--pink-d);transition:transform .1s ease;}
+  .btn:hover{transform:translateY(1px);box-shadow:0 3px 0 var(--pink-d);}
+  .btn:active{transform:translateY(4px);box-shadow:none;}
+  .btn.ghost{background:#fff;color:var(--ink);box-shadow:0 4px 0 var(--line);}
+  .btn.ghost:hover{box-shadow:0 3px 0 var(--line);}
+  .btn.mint{background:var(--mint);box-shadow:0 4px 0 #46A691;}
+  .btn.mint:hover{box-shadow:0 3px 0 #46A691;}
+  .btn.small{font-size:13px;padding:9px 14px;border-radius:10px;}
+  .day-input{width:78px;border:2.5px solid var(--line);border-radius:11px;padding:9px;font-family:'Jua',sans-serif;font-size:18px;text-align:center;color:var(--ink);}
+  .day-input:focus{outline:none;border-color:var(--pink);}
+  .unit-tag{font-size:12.5px;color:var(--ink-soft);font-family:'Gaegu',cursive;font-weight:700;}
+
+  /* 활동지 */
+  .sheet{background:#fff;border-radius:22px;padding:26px 26px 30px;box-shadow:var(--shadow),0 10px 24px rgba(63,58,66,.10);}
+  .sheet-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;border-bottom:3px dashed var(--line);padding-bottom:14px;margin-bottom:20px;flex-wrap:wrap;}
+  .sheet-title{font-family:'Jua',sans-serif;font-size:23px;color:var(--pink-d);margin:0;}
+  .sheet-sub{font-family:'Gaegu',cursive;font-weight:700;font-size:15px;color:var(--ink-soft);margin-top:2px;}
+  .namebox{font-size:12.5px;color:var(--ink-soft);display:flex;gap:14px;}
+  .namebox b{font-weight:700;color:var(--ink);}
+  .u-line{display:inline-block;border-bottom:1.5px solid var(--line);min-width:56px;}
+
+  .sec{margin-bottom:24px;}
+  .sec-head{display:flex;align-items:center;gap:9px;margin-bottom:12px;}
+  .sec-ico{width:32px;height:32px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:17px;flex:0 0 auto;}
+  .sec-ico.m{background:#FFE9EF;} .sec-ico.h{background:#E7F6F1;} .sec-ico.b{background:#FFF4DA;}
+  .sec-head h3{font-family:'Jua',sans-serif;font-size:16.5px;margin:0;}
+  .sec-head .tag{font-size:11.5px;color:var(--ink-soft);background:#F6F2F5;border-radius:999px;padding:3px 10px;}
+
+  /* ===== 수학 ===== */
+  .q{border:2px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;background:#FFFDFE;}
+  .q-num{display:inline-block;width:21px;height:21px;line-height:21px;border-radius:7px;background:var(--sky);color:#fff;
+         font-family:'Jua',sans-serif;font-size:11.5px;text-align:center;margin-right:7px;vertical-align:middle;}
+  .q-num.w{background:var(--pink);}
+  .q-txt{font-size:13.5px;line-height:2.0;}
+  .q-ans{margin-top:7px;border-bottom:1.5px dotted #CFC6D0;height:20px;}
+  .ans-shown{color:var(--pink-d);font-weight:700;font-family:'Jua',sans-serif;font-size:14px;border:none;height:auto;padding-top:3px;}
+
+  /* 계산 문제 2단 배치 */
+  .calc-grid{width:100%;border-collapse:separate;border-spacing:8px 0;margin-bottom:14px;table-layout:fixed;}
+  .calc-grid td{width:50%;padding:0 0 8px 0;vertical-align:top;}
+  .calc-grid .q{margin:0;}
+  .calc-grid .q-txt{font-size:13px;line-height:1.95;}
+  .calc-grid .q-ans{height:18px;}
+  .word-lbl{font-family:'Gaegu',cursive;font-weight:700;font-size:14px;color:var(--ink-soft);margin:4px 0 8px;clear:both;}
+  .q.word{background:#FFFBFC;border-color:#F5DCE4;}
+  .gridbox{margin-bottom:12px;}
+
+  /* 분수 : 분수선이 ÷ 기호와 같은 높이에 오도록 */
+  .frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;
+        margin:0 4px;line-height:1.08;font-size:.94em;position:relative;top:-0.08em;}
+  .frac .n{border-bottom:1.5px solid currentColor;padding:0 5px 1px;}
+  .frac .d{padding:1px 5px 0;}
+  .mixed{display:inline-flex;align-items:center;gap:1px;vertical-align:middle;position:relative;top:-0.08em;}
+  .mixed .frac{top:0;margin-left:2px;margin-right:0;}
+  .op{margin:0 3px;}
+
+  /* 쌓기나무 격자 */
+  .grid3{border-collapse:separate;border-spacing:4px;margin:10px auto 4px;}
+  .grid3 td{width:34px;height:34px;border:2px solid var(--line);border-radius:6px;text-align:center;
+            vertical-align:middle;font-family:'Jua',sans-serif;font-size:15px;background:#fff;}
+  .grid3 td.zero{background:#F7F4F6;color:#C9C0C7;}
+  .grid-cap{text-align:center;font-size:11.5px;color:var(--ink-soft);margin-bottom:2px;}
+
+  @media (max-width:460px){ .calc-grid, .calc-grid tbody, .calc-grid tr, .calc-grid td{display:block;width:100%;} }
+
+
+  /* 영어 단어 */
+  .word-wrap{display:flex;gap:10px;flex-wrap:wrap;}
+  .eword{flex:1 1 190px;border:2px solid var(--line);border-radius:14px;padding:11px 13px;background:#FBFEFD;}
+  .ew-top{display:flex;align-items:baseline;gap:8px;margin-bottom:9px;flex-wrap:wrap;}
+  .ew-top b{font-family:'Jua',sans-serif;font-size:20px;color:#2F7F6B;}
+  .ew-top span{font-size:12.5px;color:var(--ink-soft);}
+  .ew-line{border-bottom:1.5px dotted #CFE0DA;height:22px;margin-bottom:6px;}
+  .ew-fill{color:var(--pink-d);font-weight:700;font-family:'Jua',sans-serif;font-size:15px;}
+
+  /* 속담 */
+  .myung{border:2px solid #F3E2BC;background:#FFFBF0;border-radius:14px;padding:15px 16px;}
+  .sok-p{font-family:'Jua',sans-serif;font-size:18px;color:#7A5E20;line-height:1.5;margin-bottom:7px;}
+  .sok-m{font-size:13.5px;line-height:1.75;}
+  .write-line{margin-top:12px;}
+  .write-line div{border-bottom:1.5px dotted #DCCDA8;height:26px;margin-bottom:7px;}
+  .write-lbl{font-size:12px;color:var(--ink-soft);margin-bottom:6px;}
+
+  /* 자료 표 */
+  .dtable{border-collapse:collapse;margin:6px auto 10px;}
+  .dtable th,.dtable td{border:1.5px solid var(--line);padding:6px 14px;text-align:center;font-size:13px;}
+  .dtable th{background:#F6F2F5;font-family:'Jua',sans-serif;font-weight:400;}
+  .tbl-cap{text-align:center;font-size:12px;color:var(--ink-soft);margin-bottom:2px;}
+
+  .foot{text-align:center;font-family:'Gaegu',cursive;font-weight:700;font-size:15px;color:var(--ink-soft);
+        border-top:3px dashed var(--line);padding-top:14px;margin-top:6px;}
+  .hidden{display:none !important;}
+
+  @media print{
+    .topbar,.panel,.no-print{display:none !important;}
+    body{background:#fff;}
+    .shell{padding:0;max-width:none;}
+    .sheet{box-shadow:none;border-radius:0;padding:0;}
+    .sec{page-break-inside:avoid;}
+    @page{size:A4;margin:12mm 11mm;}
+    .calc-grid{display:table !important;width:100% !important;}
+    .calc-grid tbody{display:table-row-group !important;}
+    .calc-grid tr{display:table-row !important;}
+    .calc-grid td{display:table-cell !important;width:50% !important;}
+  }
+  @media (max-width:560px){ .sheet{padding:18px 16px 22px;} }
+</style>
+</head>
+<body>
+
+<div class="topbar no-print">
+  <a class="brand" href="../index.html">
+    <svg width="26" height="26" viewBox="0 0 34 34" fill="none">
+      <circle cx="17" cy="18" r="14" fill="#fff" stroke="#3F3A42" stroke-width="2"/>
+      <path d="M17 9 L17 18 L23 21" stroke="#FF8FA8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="13" y="2" width="8" height="4" rx="1.5" fill="#3F3A42"/>
+    </svg>
+    <span>3분 놀이터</span>
+  </a>
+  <a class="back" href="morning-hub.html">← 학년 다시 고르기</a>
+</div>
+
+<div class="shell">
+
+  <div class="panel no-print">
+    <h2>🌅 아침을 여는 활동지 · 4학년 2학기</h2>
+    <div class="row">
+      <button class="btn ghost small" onclick="moveDay(-1)">← 어제</button>
+      <span style="font-family:'Jua',sans-serif;">제</span>
+      <input class="day-input" type="number" id="day" min="1" max="90" value="1" onchange="render()">
+      <span style="font-family:'Jua',sans-serif;">일차</span>
+      <button class="btn ghost small" onclick="moveDay(1)">내일 →</button>
+      <button class="btn ghost small" onclick="todayDay()">오늘 날짜로</button>
+      <span class="unit-tag" id="unit-tag"></span>
+    </div>
+    <div class="row" style="margin-top:11px;">
+      <button class="btn mint" id="ans-btn" onclick="toggleAnswer()">✅ 답지 보기</button>
+      <button class="btn" onclick="window.print()">🖨️ 인쇄하기</button>
+      <span style="font-size:12px;color:var(--ink-soft);">답지 보기를 켠 채 인쇄하면 답지가 인쇄돼요</span>
+    </div>
+  </div>
+
+  <div class="sheet" id="sheet"></div>
+</div>
+
+<script>
+/* ===== 단원 배정 (교과서 차시 비중에 맞춰 90일 분배) ===== */
+const UNITS = [
+  { n:1, name:"분수의 덧셈과 뺄셈",  days:17 },
+  { n:2, name:"삼각형",              days:14 },
+  { n:3, name:"소수의 덧셈과 뺄셈",  days:17 },
+  { n:4, name:"사각형",              days:15 },
+  { n:5, name:"자료와 꺾은선그래프", days:14 },
+  { n:6, name:"다각형",              days:13 }
+];
+const DAY_UNIT = [];
+UNITS.forEach(u=>{ for(let i=0;i<u.days;i++) DAY_UNIT.push(u); });
+
+/* ===== 날짜 고정 난수 ===== */
+function rng(seed){
+  let s = seed % 2147483647; if(s<=0) s += 2147483646;
+  return ()=>{ s = (s*16807) % 2147483647; return (s-1)/2147483646; };
+}
+const ri = (r,a,b)=> a + Math.floor(r()*(b-a+1));
+const gcd = (a,b)=> b ? gcd(b,a%b) : a;
+
+/* ===== 표시 도우미 ===== */
+function frac(n,d){ return '<span class="frac"><span class="n">'+n+'</span><span class="d">'+d+'</span></span>'; }
+function mixed(w,n,d){ return w ? '<span class="mixed">'+w+frac(n,d)+'</span>' : frac(n,d); }
+function fracStr(n,d){                       // 답: 기약분수 → 대분수
+  const g = gcd(n,d); n/=g; d/=g;
+  if(d===1) return ""+n;
+  if(n>d){ const w=Math.floor(n/d); return w+"와 "+(n%d)+"/"+d; }
+  return n+"/"+d;
+}
+function round2(x){ return Math.round(x*100)/100; }
+function won(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+
+/* ===== 4학년 2학기 수학 문제 생성기 ===== */
+function pickN(r, arr, n){
+  const pool = arr.slice(), out = [];
+  for(let i=0;i<n && pool.length;i++) out.push(pool.splice(Math.floor(r()*pool.length),1)[0]);
+  return out;
+}
+const NAMES = ["민준","서연","도윤","지우","하준","수아","시우","하은","지호","예린","준우","다인","태현","서윤","건우","채원"];
+const nm = r => NAMES[ri(r,0,NAMES.length-1)];
+
+/* ---------- 1단원 : 분수의 덧셈과 뺄셈 (분모가 같은 분수) ---------- */
+const C1 = [
+  r=>{ const d=ri(r,4,12), a=ri(r,1,d-2), b=ri(r,1,d-1-a);
+       return {q:frac(a,d)+' + '+frac(b,d), a:fracStr(a+b,d)}; },
+  r=>{ const d=ri(r,4,10), a=ri(r,2,d-1), b=ri(r,2,d-1);
+       return {q:frac(a,d)+' + '+frac(b,d), a:fracStr(a+b,d)}; },
+  r=>{ const d=ri(r,4,12), a=ri(r,2,d-1), b=ri(r,1,a-1);
+       return {q:frac(a,d)+' − '+frac(b,d), a:fracStr(a-b,d)}; },
+  r=>{ const d=ri(r,3,11), b=ri(r,1,d-1);
+       return {q:'1 − '+frac(b,d), a:fracStr(d-b,d)}; },
+  r=>{ const d=ri(r,3,9), w1=ri(r,1,4), n1=ri(r,1,d-1), w2=ri(r,1,3), n2=ri(r,1,d-1);
+       return {q:mixed(w1,n1,d)+' + '+mixed(w2,n2,d), a:fracStr((w1*d+n1)+(w2*d+n2),d)}; },
+  r=>{ const d=ri(r,3,9), w1=ri(r,3,7), n1=ri(r,1,d-1), w2=ri(r,1,2), n2=ri(r,1,d-1);
+       return {q:mixed(w1,n1,d)+' − '+mixed(w2,n2,d), a:fracStr((w1*d+n1)-(w2*d+n2),d)}; },
+  r=>{ const d=ri(r,3,9), a=ri(r,2,6), n=ri(r,1,d-1);
+       return {q:a+' − '+frac(n,d), a:fracStr(a*d-n,d)}; },
+  r=>{ const d=ri(r,4,10), w=ri(r,1,4), n=ri(r,1,d-1), b=ri(r,1,d-1);
+       return {q:mixed(w,n,d)+' + '+frac(b,d), a:fracStr(w*d+n+b,d)}; },
+  r=>{ const d=ri(r,4,10), w=ri(r,2,6), n=ri(r,2,d-1), b=ri(r,1,n-1>0?n-1:1);
+       return {q:mixed(w,n,d)+' − '+frac(b,d), a:fracStr(w*d+n-b,d)}; },
+  r=>{ const d=ri(r,4,10), a=ri(r,1,d-1), b=ri(r,1,d-1), c=ri(r,1,d-1);
+       return {q:frac(a,d)+' + '+frac(b,d)+' + '+frac(c,d), a:fracStr(a+b+c,d)}; },
+  r=>{ const d=ri(r,5,12), a=ri(r,3,d-1), b=ri(r,1,a-2>0?a-2:1);
+       return {q:'☐ + '+frac(b,d)+' = '+frac(a,d)+'  에서 ☐', a:fracStr(a-b,d)}; }
+];
+const W1 = [
+  r=>{ const d=ri(r,4,10), a=ri(r,1,d-2), b=ri(r,1,d-1-a), who=nm(r);
+       return {q:who+'이(가) 우유를 아침에 '+frac(a,d)+' L, 점심에 '+frac(b,d)+' L 마셨습니다. 모두 몇 L를 마셨나요?',
+               a:fracStr(a+b,d)+' L'}; },
+  r=>{ const d=ri(r,4,12), a=ri(r,3,d-1), b=ri(r,1,a-1);
+       return {q:'끈 '+frac(a,d)+' m 중에서 '+frac(b,d)+' m를 썼습니다. 남은 끈은 몇 m인가요?',
+               a:fracStr(a-b,d)+' m'}; },
+  r=>{ const d=ri(r,3,8), w1=ri(r,1,3), n1=ri(r,1,d-1), w2=ri(r,1,3), n2=ri(r,1,d-1);
+       return {q:'집에서 학교까지 '+mixed(w1,n1,d)+' km, 학교에서 도서관까지 '+mixed(w2,n2,d)+' km입니다. 모두 몇 km인가요?',
+               a:fracStr((w1*d+n1)+(w2*d+n2),d)+' km'}; },
+  r=>{ const d=ri(r,4,10), n=ri(r,1,d-1), who=nm(r);
+       return {q:'피자 한 판을 '+d+'조각으로 나누었습니다. '+who+'이(가) '+n+'조각을 먹었다면 남은 피자는 얼마인가요? (분수로)',
+               a:fracStr(d-n,d)+' 판'}; },
+  r=>{ const d=ri(r,3,9), a=ri(r,2,6), n=ri(r,1,d-1);
+       return {q:'물 '+a+' L 중 '+frac(n,d)+' L를 사용했습니다. 남은 물은 몇 L인가요?',
+               a:fracStr(a*d-n,d)+' L'}; },
+  r=>{ const d=ri(r,4,10), a=ri(r,1,d-2), b=ri(r,1,d-1-a);
+       return {q:'밭의 '+frac(a,d)+' 에는 상추를, '+frac(b,d)+' 에는 무를 심었습니다. 심은 부분은 밭 전체의 얼마인가요?',
+               a:fracStr(a+b,d)}; },
+  r=>{ const d=ri(r,4,9), w=ri(r,2,5), n=ri(r,1,d-1), b=ri(r,1,d-1);
+       return {q:'설탕 '+mixed(w,n,d)+' kg에 '+frac(b,d)+' kg을 더 넣었습니다. 설탕은 모두 몇 kg인가요?',
+               a:fracStr(w*d+n+b,d)+' kg'}; }
+];
+
+/* ---------- 2단원 : 삼각형 ---------- */
+const C2 = [
+  r=>{ const a=ri(r,30,80), b=ri(r,30,80);
+       return {q:'삼각형의 두 각이 '+a+'°, '+b+'°일 때 나머지 한 각', a:(180-a-b)+'°'}; },
+  r=>{ const a=ri(r,20,70);
+       return {q:'이등변삼각형의 꼭지각이 '+a+'°일 때 <b>한 밑각</b>의 크기', a:((180-a)/2)+'°'}; },
+  r=>{ const b=ri(r,30,75);
+       return {q:'이등변삼각형의 한 밑각이 '+b+'°일 때 <b>꼭지각</b>의 크기', a:(180-2*b)+'°'}; },
+  r=>({q:'<b>정삼각형</b>의 한 각의 크기', a:'60°'}),
+  r=>{ const s=ri(r,3,15);
+       return {q:'한 변이 '+s+' cm인 정삼각형의 <b>둘레</b>', a:(s*3)+' cm'}; },
+  r=>{ const a=ri(r,4,14), b=ri(r,5,16);
+       return {q:'두 변이 '+a+' cm인 이등변삼각형의 나머지 한 변이 '+b+' cm일 때 <b>둘레</b>', a:(a*2+b)+' cm'}; },
+  r=>{ const L=ri(r,4,12)*3;
+       return {q:'둘레가 '+L+' cm인 정삼각형의 <b>한 변</b>', a:(L/3)+' cm'}; },
+  r=>{ const pick=ri(r,0,2);
+       const t=[['세 각이 모두 예각인','예각삼각형'],['한 각이 직각인','직각삼각형'],['한 각이 둔각인','둔각삼각형']][pick];
+       return {q:t[0]+' 삼각형의 이름', a:t[1]}; },
+  r=>{ const a=ri(r,95,150), b=ri(r,10,30);
+       return {q:'삼각형의 두 각이 '+a+'°, '+b+'°입니다. 이 삼각형의 이름은?', a:'둔각삼각형'}; },
+  r=>{ const b=ri(r,20,60);
+       return {q:'직각삼각형의 한 예각이 '+b+'°일 때 나머지 한 예각', a:(90-b)+'°'}; },
+  r=>{ const s=ri(r,3,12);
+       return {q:'세 변이 모두 '+s+' cm인 삼각형의 이름', a:'정삼각형'}; }
+];
+const W2 = [
+  r=>{ const s=ri(r,4,15), who=nm(r);
+       return {q:who+'이(가) 한 변이 '+s+' cm인 정삼각형 모양 깃발을 만들었습니다. 테두리에 두를 끈은 몇 cm 필요한가요?',
+               a:(s*3)+' cm'}; },
+  r=>{ const a=ri(r,5,14), b=ri(r,6,18);
+       return {q:'두 변의 길이가 같은 삼각형 모양 표지판이 있습니다. 같은 두 변이 '+a+' cm, 나머지 한 변이 '+b+' cm일 때 둘레는?',
+               a:(a*2+b)+' cm'}; },
+  r=>{ const a=ri(r,30,70);
+       return {q:'이등변삼각형 모양 옷걸이의 꼭지각이 '+a+'°입니다. 두 밑각의 합은 몇 도인가요?', a:(180-a)+'°'}; },
+  r=>{ const L=ri(r,5,15)*3;
+       return {q:'철사 '+L+' cm를 남김없이 써서 정삼각형을 만들었습니다. 한 변은 몇 cm인가요?', a:(L/3)+' cm'}; },
+  r=>{ const n=ri(r,2,6), s=ri(r,3,10);
+       return {q:'한 변이 '+s+' cm인 정삼각형 '+n+'개의 둘레를 모두 합하면 몇 cm인가요?', a:(3*s*n)+' cm'}; },
+  r=>{ const a=ri(r,40,80), b=ri(r,40,80);
+       return {q:'삼각자의 두 각이 '+a+'°, '+b+'°입니다. 나머지 한 각은 몇 도인가요?', a:(180-a-b)+'°'}; }
+];
+
+/* ---------- 3단원 : 소수의 덧셈과 뺄셈 ---------- */
+function dec(x,k){ return x.toFixed(k); }
+const C3 = [
+  r=>{ const a=ri(r,11,89)/10, b=ri(r,11,89)/10;
+       return {q:dec(a,1)+' + '+dec(b,1), a:dec(Math.round((a+b)*10)/10,1)}; },
+  r=>{ const a=ri(r,120,890)/100, b=ri(r,110,890)/100;
+       return {q:dec(a,2)+' + '+dec(b,2), a:dec(Math.round((a+b)*100)/100,2)}; },
+  r=>{ const a=ri(r,45,98)/10, b=ri(r,11,40)/10;
+       return {q:dec(a,1)+' − '+dec(b,1), a:dec(Math.round((a-b)*10)/10,1)}; },
+  r=>{ const a=ri(r,450,980)/100, b=ri(r,110,400)/100;
+       return {q:dec(a,2)+' − '+dec(b,2), a:dec(Math.round((a-b)*100)/100,2)}; },
+  r=>{ const a=ri(r,2,9), b=ri(r,11,89)/10;
+       return {q:a+' + '+dec(b,1), a:dec(Math.round((a+b)*10)/10,1)}; },
+  r=>{ const a=ri(r,5,15), b=ri(r,11,45)/10;
+       return {q:a+' − '+dec(b,1), a:dec(Math.round((a-b)*10)/10,1)}; },
+  r=>{ const a=ri(r,110,890)/100, b=ri(r,2,9)/10;
+       return {q:dec(a,2)+' + '+dec(b,1), a:dec(Math.round((a+b)*100)/100,2)}; },
+  r=>{ const a=ri(r,11,89)/10, b=ri(r,11,89)/10;
+       return {q:dec(a,1)+' 와(과) '+dec(b,1)+' 중 <b>더 큰 수</b>', a:dec(Math.max(a,b),1)}; },
+  r=>{ const n=ri(r,1,9), pick=ri(r,0,1);
+       return pick? {q:'0.'+n+' 의 <b>10배</b>', a:''+n}
+                  : {q:''+n+' 의 <b>1/10</b>', a:'0.'+n}; },
+  r=>{ const a=ri(r,110,890)/100;
+       return {q:dec(a,2)+' 에서 <b>소수 첫째 자리</b> 숫자', a:''+Math.floor(a*10)%10}; },
+  r=>{ const a=ri(r,11,45)/10, b=ri(r,11,45)/10, c=ri(r,11,45)/10;
+       return {q:dec(a,1)+' + '+dec(b,1)+' + '+dec(c,1), a:dec(Math.round((a+b+c)*10)/10,1)}; }
+];
+const W3 = [
+  r=>{ const a=ri(r,11,49)/10, b=ri(r,11,49)/10, who=nm(r);
+       return {q:who+'이(가) 어제 '+dec(a,1)+' km, 오늘 '+dec(b,1)+' km를 걸었습니다. 모두 몇 km를 걸었나요?',
+               a:dec(Math.round((a+b)*10)/10,1)+' km'}; },
+  r=>{ const a=ri(r,50,95)/10, b=ri(r,11,45)/10;
+       return {q:'물통에 물이 '+dec(a,1)+' L 있었는데 '+dec(b,1)+' L를 사용했습니다. 남은 물은 몇 L인가요?',
+               a:dec(Math.round((a-b)*10)/10,1)+' L'}; },
+  r=>{ const a=ri(r,120,480)/100, b=ri(r,110,450)/100;
+       return {q:'가방의 무게가 '+dec(a,2)+' kg, 책의 무게가 '+dec(b,2)+' kg입니다. 합하면 몇 kg인가요?',
+               a:dec(Math.round((a+b)*100)/100,2)+' kg'}; },
+  r=>{ const a=ri(r,60,98)/10, b=ri(r,11,50)/10;
+       return {q:'끈 '+dec(a,1)+' m에서 '+dec(b,1)+' m를 잘라 썼습니다. 남은 끈은 몇 m인가요?',
+               a:dec(Math.round((a-b)*10)/10,1)+' m'}; },
+  r=>{ const a=ri(r,11,49)/10, b=ri(r,11,49)/10;
+       return {q:'리본 두 개의 길이가 각각 '+dec(a,1)+' m, '+dec(b,1)+' m입니다. 어느 것이 얼마나 더 긴가요?',
+               a:dec(Math.abs(a-b)===0?0:Math.round(Math.abs(a-b)*10)/10,1)+' m 더 긺'}; },
+  r=>{ const a=ri(r,120,380)/100, n=ri(r,2,4);
+       return {q:'한 봉지에 '+dec(a,2)+' kg인 밀가루가 '+n+'봉지 있습니다. 모두 몇 kg인가요?',
+               a:dec(Math.round(a*n*100)/100,2)+' kg'}; },
+  r=>{ const a=ri(r,11,49)/10, b=ri(r,11,49)/10, c=ri(r,11,49)/10;
+       return {q:'세 사람이 각각 '+dec(a,1)+' L, '+dec(b,1)+' L, '+dec(c,1)+' L의 주스를 마셨습니다. 모두 몇 L인가요?',
+               a:dec(Math.round((a+b+c)*10)/10,1)+' L'}; }
+];
+
+/* ---------- 4단원 : 사각형 ---------- */
+const C4 = [
+  r=>({q:'두 직선이 만나서 이루는 각이 90°일 때 두 직선의 관계', a:'수직'}),
+  r=>({q:'한 직선에 수직인 두 직선의 관계', a:'평행'}),
+  r=>({q:'평행선 사이의 거리를 잴 때 그어야 하는 선분', a:'수직인 선분'}),
+  r=>{ const a=ri(r,40,140);
+       return {q:'평행사변형의 한 각이 '+a+'°일 때 <b>이웃한 각</b>', a:(180-a)+'°'}; },
+  r=>{ const a=ri(r,40,140);
+       return {q:'평행사변형의 한 각이 '+a+'°일 때 <b>마주 보는 각</b>', a:a+'°'}; },
+  r=>{ const a=ri(r,3,12), b=ri(r,4,14);
+       return {q:'이웃한 두 변이 '+a+' cm, '+b+' cm인 평행사변형의 <b>둘레</b>', a:(2*(a+b))+' cm'}; },
+  r=>{ const s=ri(r,3,14);
+       return {q:'한 변이 '+s+' cm인 마름모의 <b>둘레</b>', a:(4*s)+' cm'}; },
+  r=>{ const a=ri(r,70,120), b=ri(r,70,120), c=ri(r,60,110);
+       return {q:'사각형의 세 각이 '+a+'°, '+b+'°, '+c+'°일 때 나머지 한 각', a:(360-a-b-c)+'°'}; },
+  r=>({q:'네 변의 길이가 모두 같고 네 각이 모두 직각인 사각형', a:'정사각형'}),
+  r=>({q:'평행한 변이 <b>한 쌍이라도</b> 있는 사각형의 이름', a:'사다리꼴'}),
+  r=>({q:'마주 보는 두 쌍의 변이 서로 평행한 사각형의 이름', a:'평행사변형'}),
+  r=>{ const L=ri(r,4,12)*4;
+       return {q:'둘레가 '+L+' cm인 마름모의 <b>한 변</b>', a:(L/4)+' cm'}; }
+];
+const W4 = [
+  r=>{ const a=ri(r,4,12), b=ri(r,5,15), who=nm(r);
+       return {q:who+'이(가) 이웃한 두 변이 '+a+' cm, '+b+' cm인 평행사변형 모양 카드의 둘레에 색테이프를 붙였습니다. 몇 cm 필요한가요?',
+               a:(2*(a+b))+' cm'}; },
+  r=>{ const s=ri(r,4,14);
+       return {q:'한 변이 '+s+' cm인 마름모 모양 연을 만들었습니다. 테두리 길이는 몇 cm인가요?', a:(4*s)+' cm'}; },
+  r=>{ const a=ri(r,50,130);
+       return {q:'평행사변형 모양 창문의 한 각이 '+a+'°입니다. 이웃한 각의 크기는 몇 도인가요?', a:(180-a)+'°'}; },
+  r=>{ const L=ri(r,5,14)*4;
+       return {q:'철사 '+L+' cm를 남김없이 써서 마름모를 만들었습니다. 한 변은 몇 cm인가요?', a:(L/4)+' cm'}; },
+  r=>{ const a=ri(r,80,110), b=ri(r,80,110);
+       return {q:'사각형 모양 액자의 두 각이 '+a+'°, '+b+'°이고 나머지 두 각이 서로 같습니다. 한 각은 몇 도인가요?',
+               a:((360-a-b)/2)+'°'}; },
+  r=>{ const s=ri(r,3,12), n=ri(r,2,5);
+       return {q:'한 변이 '+s+' cm인 정사각형 타일 '+n+'개의 둘레를 모두 합하면 몇 cm인가요?', a:(4*s*n)+' cm'}; }
+];
+
+/* ---------- 5단원 : 자료와 꺾은선그래프 ---------- */
+function makeTable(r){
+  const labels=["3월","4월","5월","6월","7월"];
+  const vals=[]; let v=ri(r,10,30);
+  for(let i=0;i<5;i++){ vals.push(v); v = Math.max(5, v + ri(r,-8,10)); }
+  const unit=["권","명","cm","개","분"][ri(r,0,4)];
+  const title=["읽은 책 수","방문한 학생 수","키의 변화","모은 붙임딱지","운동한 시간"][ri(r,0,4)];
+  let head='', row='';
+  for(let i=0;i<5;i++){ head+='<th>'+labels[i]+'</th>'; row+='<td>'+vals[i]+'</td>'; }
+  const html='<div class="tbl-cap">'+title+' (단위: '+unit+')</div>'
+           + '<table class="dtable"><tr>'+head+'</tr><tr>'+row+'</tr></table>';
+  return {labels, vals, unit, title, html};
+}
+const C5 = [
+  (r,T)=>({q:'값이 <b>가장 큰</b> 달은 언제인가요?', a:T.labels[T.vals.indexOf(Math.max.apply(null,T.vals))]}),
+  (r,T)=>({q:'값이 <b>가장 작은</b> 달은 언제인가요?', a:T.labels[T.vals.indexOf(Math.min.apply(null,T.vals))]}),
+  (r,T)=>({q:'가장 큰 값과 가장 작은 값의 <b>차</b>', a:(Math.max.apply(null,T.vals)-Math.min.apply(null,T.vals))+' '+T.unit}),
+  (r,T)=>({q:'다섯 달의 값을 모두 <b>더하면</b>?', a:T.vals.reduce(function(a,b){return a+b;},0)+' '+T.unit}),
+  (r,T)=>{ let mi=0,mx=0; for(let i=1;i<5;i++){ const d=Math.abs(T.vals[i]-T.vals[i-1]); if(d>mx){mx=d;mi=i;} }
+           return {q:'앞 달과 비교해 <b>변화가 가장 큰</b> 달은?', a:T.labels[mi]}; },
+  (r,T)=>({q:''+T.labels[1]+'은(는) '+T.labels[0]+'보다 얼마나 늘거나 줄었나요?',
+           a:(T.vals[1]-T.vals[0]>=0?'+':'')+(T.vals[1]-T.vals[0])+' '+T.unit}),
+  (r,T)=>({q:''+T.labels[4]+'의 값은 얼마인가요?', a:T.vals[4]+' '+T.unit}),
+  (r,T)=>{ let c=0; for(let i=1;i<5;i++) if(T.vals[i]>T.vals[i-1]) c++;
+           return {q:'앞 달보다 <b>늘어난</b> 달은 몇 번인가요?', a:c+' 번'}; },
+  (r,T)=>{ let c=0; for(let i=1;i<5;i++) if(T.vals[i]<T.vals[i-1]) c++;
+           return {q:'앞 달보다 <b>줄어든</b> 달은 몇 번인가요?', a:c+' 번'}; },
+  (r,T)=>({q:'꺾은선그래프로 나타낼 때 <b>가로축</b>에 들어갈 것은?', a:'달(월)'}),
+  (r,T)=>({q:'꺾은선그래프가 막대그래프보다 잘 나타내는 것은?', a:'변화하는 모습(변화의 정도)'})
+];
+const W5 = [
+  (r,T)=>({q:''+T.title+' 자료입니다. 5월과 7월 중 어느 달이 더 많으며, 얼마나 더 많은가요?',
+           a:(T.vals[2]>=T.vals[4]?'5월':'7월')+'이 '+Math.abs(T.vals[2]-T.vals[4])+' '+T.unit+' 더 많음'}),
+  (r,T)=>({q:'위 자료를 꺾은선그래프로 그릴 때, 세로 눈금 한 칸을 1'+T.unit+'로 하면 가장 큰 값은 몇 칸 높이인가요?',
+           a:Math.max.apply(null,T.vals)+' 칸'}),
+  (r,T)=>{ const nx=T.vals[4]+ri(r,1,5);
+           return {q:'8월에 '+nx+' '+T.unit+'가 되었다면, 7월보다 얼마나 늘었나요?', a:(nx-T.vals[4])+' '+T.unit}; },
+  (r,T)=>({q:'다섯 달 중 값이 20 '+T.unit+' 이상인 달은 몇 번인가요?',
+           a:T.vals.filter(function(v){return v>=20;}).length+' 번'}),
+  (r,T)=>({q:'3월부터 7월까지 값이 가장 많이 늘어난 두 달 사이를 찾아 쓰세요.',
+           a:(function(){let mi=1,mx=-1e9; for(let i=1;i<5;i++){const d=T.vals[i]-T.vals[i-1]; if(d>mx){mx=d;mi=i;}} return T.labels[mi-1]+' → '+T.labels[mi];})()}),
+  (r,T)=>({q:'위 자료에서 3월과 7월의 값을 비교하면 전체적으로 늘었나요, 줄었나요?',
+           a:T.vals[4]>T.vals[0]?'늘었다':(T.vals[4]<T.vals[0]?'줄었다':'같다')})
+];
+
+/* ---------- 6단원 : 다각형 ---------- */
+const C6 = [
+  r=>{ const n=ri(r,3,8);
+       return {q:'변이 '+n+'개인 다각형의 이름', a:['','','','삼','사','오','육','칠','팔'][n]+'각형'}; },
+  r=>{ const n=ri(r,4,8);
+       return {q:''+['','','','삼','사','오','육','칠','팔'][n]+'각형의 <b>꼭짓점</b> 수', a:n+' 개'}; },
+  r=>{ const n=ri(r,4,9);
+       return {q:''+['','','','삼','사','오','육','칠','팔','구'][n]+'각형의 <b>대각선</b> 개수', a:(n*(n-3)/2)+' 개'}; },
+  r=>{ const n=ri(r,3,8), s=ri(r,2,12);
+       return {q:'한 변이 '+s+' cm인 정'+['','','','삼','사','오','육','칠','팔'][n]+'각형의 <b>둘레</b>', a:(n*s)+' cm'}; },
+  r=>{ const n=ri(r,3,8);
+       return {q:'정'+['','','','삼','사','오','육','칠','팔'][n]+'각형의 <b>한 각</b>의 크기',
+               a:(Math.round((n-2)*180/n*10)/10)+'°'}; },
+  r=>{ const n=ri(r,3,8);
+       return {q:''+['','','','삼','사','오','육','칠','팔'][n]+'각형의 <b>모든 각의 합</b>', a:((n-2)*180)+'°'}; },
+  r=>({q:'변의 길이가 모두 같고 각의 크기도 모두 같은 다각형', a:'정다각형'}),
+  r=>{ const n=ri(r,3,8), L=ri(r,2,10)*n;
+       return {q:'둘레가 '+L+' cm인 정'+['','','','삼','사','오','육','칠','팔'][n]+'각형의 <b>한 변</b>', a:(L/n)+' cm'}; },
+  r=>({q:'대각선이 하나도 없는 다각형', a:'삼각형'}),
+  r=>({q:'두 대각선의 길이가 같은 사각형 두 가지', a:'직사각형, 정사각형'}),
+  r=>{ const n=ri(r,5,8);
+       return {q:'정'+['','','','삼','사','오','육','칠','팔'][n]+'각형의 대각선은 모두 몇 개인가요?', a:(n*(n-3)/2)+' 개'}; }
+];
+const W6 = [
+  r=>{ const n=ri(r,3,8), s=ri(r,3,12), who=nm(r);
+       return {q:who+'이(가) 한 변이 '+s+' cm인 정'+['','','','삼','사','오','육','칠','팔'][n]+'각형 모양 종이의 테두리를 색연필로 그렸습니다. 몇 cm를 그렸나요?',
+               a:(n*s)+' cm'}; },
+  r=>{ const n=ri(r,4,8), L=ri(r,3,9)*n;
+       return {q:'철사 '+L+' cm로 정'+['','','','삼','사','오','육','칠','팔'][n]+'각형을 만들었습니다. 한 변은 몇 cm인가요?',
+               a:(L/n)+' cm'}; },
+  r=>{ const n=ri(r,5,8);
+       return {q:''+['','','','삼','사','오','육','칠','팔'][n]+'각형 모양 교실 바닥에 꼭짓점끼리 모두 이으면 대각선은 몇 개인가요?',
+               a:(n*(n-3)/2)+' 개'}; },
+  r=>{ const n=ri(r,5,8);
+       return {q:'정'+['','','','삼','사','오','육','칠','팔'][n]+'각형 모양 타일의 한 각은 몇 도인가요?',
+               a:(Math.round((n-2)*180/n*10)/10)+'°'}; },
+  r=>{ const s=ri(r,3,10), n=ri(r,2,5);
+       return {q:'한 변이 '+s+' cm인 정육각형 '+n+'개의 둘레를 모두 합하면 몇 cm인가요?', a:(6*s*n)+' cm'}; },
+  r=>{ const n=ri(r,4,7);
+       return {q:''+['','','','삼','사','오','육','칠'][n]+'각형의 모든 각의 크기의 합은 몇 도인가요?', a:((n-2)*180)+'°'}; }
+];
+
+/* ---------- 하루치 문제 ---------- */
+function makeMath(unit, r){
+  if(unit===5){
+    const T = makeTable(r);
+    return { grid:T.html,
+             calc: pickN(r,C5,8).map(f=>f(r,T)),
+             word: pickN(r,W5,2).map(f=>f(r,T)) };
+  }
+  const CALC=[C1,C2,C3,C4,C5,C6][unit-1];
+  const WORD=[W1,W2,W3,W4,W5,W6][unit-1];
+  return { grid:null,
+           calc: pickN(r,CALC,8).map(f=>f(r)),
+           word: pickN(r,WORD,2).map(f=>f(r)) };
+}
+
+/* ===== 그리기 ===== */
+let showAns=false;
+
+function moveDay(d){
+  const el=document.getElementById("day");
+  el.value = Math.max(1, Math.min(90, (parseInt(el.value,10)||1)+d));
+  render();
+}
+function todayDay(){
+  // 2학기 시작을 8월 20일로 보고 그날부터 며칠째인지 (주말 제외 없이 단순 계산)
+  const now=new Date(); const start=new Date(now.getFullYear(),7,20);
+  let d=Math.floor((now-start)/86400000)+1;
+  if(d<1||d>90) d=1;
+  document.getElementById("day").value=d; render();
+}
+function toggleAnswer(){
+  showAns=!showAns;
+  document.getElementById("ans-btn").textContent = showAns ? "📝 활동지로 돌아가기" : "✅ 답지 보기";
+  render();
+}
+
+function render(){
+  let day = parseInt(document.getElementById("day").value,10) || 1;
+  day = Math.max(1, Math.min(90, day));
+  document.getElementById("day").value = day;
+
+  const unit = DAY_UNIT[day-1];
+  document.getElementById("unit-tag").textContent =
+    "수학 " + unit.n + "단원 · " + unit.name;
+
+  const r = rng(day*7919 + 13);
+  const M = makeMath(unit.n, r);
+  const w1 = WD[((day-1)*3) % WD.length];
+  const w2 = WD[((day-1)*3+1) % WD.length];
+  const w3 = WD[((day-1)*3+2) % WD.length];
+  const sd = SD[(day-1) % SD.length];
+
+  let html = '';
+  html += '<div class="sheet-head"><div>'
+        + '<h1 class="sheet-title">🌅 아침을 여는 활동지</h1>'
+        + '<div class="sheet-sub">4학년 2학기 · 제 '+day+' 일차'
+        + (showAns ? ' <span style="color:var(--pink-d)">— 답지</span>' : '') + '</div></div>'
+        + '<div class="namebox"><span>날짜 <b class="u-line"></b></span>'
+        + '<span>이름 <b class="u-line"></b></span></div></div>';
+
+  /* 수학 */
+  html += '<div class="sec"><div class="sec-head"><span class="sec-ico m">🧮</span>'
+        + '<h3>수학</h3><span class="tag">'+unit.n+'단원 · '+unit.name+'</span></div>';
+  if(M.grid) html += '<div class="gridbox">'+M.grid+'</div>';
+  html += '<table class="calc-grid">';
+  for(var k=0;k<M.calc.length;k+=2){
+    html += '<tr>';
+    for(var j=k;j<k+2;j++){
+      if(j<M.calc.length){
+        var o=M.calc[j];
+        html += '<td><div class="q"><div class="q-txt"><span class="q-num">'+(j+1)+'</span>'+o.q+'</div>'
+              + (showAns ? '<div class="q-ans ans-shown">'+o.a+'</div>' : '<div class="q-ans"></div>')
+              + '</div></td>';
+      } else html += '<td></td>';
+    }
+    html += '</tr>';
+  }
+  html += '</table><div class="word-lbl">✏️ 문장을 읽고 풀어 보세요</div>';
+  M.word.forEach(function(o,i){
+    html += '<div class="q word"><div class="q-txt"><span class="q-num w">'+(9+i)+'</span>'+o.q+'</div>'
+          + (showAns ? '<div class="q-ans ans-shown">답 : '+o.a+'</div>' : '<div class="q-ans"></div>')
+          + '</div>';
+  });
+  html += '</div>';
+
+  /* 한자 */
+  html += '<div class="sec"><div class="sec-head"><span class="sec-ico h">🔤</span>'
+        + '<h3>오늘의 영어 단어</h3><span class="tag">세 단어</span></div><div class="word-wrap">';
+  [w1,w2,w3].forEach(function(o){
+    html += '<div class="eword"><div class="ew-top"><b>'+o.w+'</b><span>'+o.k+'</span></div>'
+          + '<div class="ew-line">'+(showAns ? '<span class="ew-fill">'+o.w+'</span>' : '')+'</div>'
+          + '<div class="ew-line">'+(showAns ? '<span class="ew-fill">'+o.w+'</span>' : '')+'</div></div>';
+  });
+  html += '</div></div>';
+
+  html += '<div class="sec"><div class="sec-head"><span class="sec-ico b">🗣️</span>'
+        + '<h3>오늘의 속담</h3><span class="tag">따라 쓰고 뜻 새기기</span></div>'
+        + '<div class="myung"><div class="sok-p">\u201C'+sd.p+'\u201D</div>'
+        + '<div class="sok-m"><b>뜻</b> \u2014 '+sd.m+'</div>'
+        + '<div class="write-line"><div class="write-lbl">\u270F\uFE0F 소리 내어 읽고 아래에 따라 써 보세요.</div>'
+        + (showAns
+            ? '<div style="border:none;height:auto;color:var(--pink-d);font-weight:700;">'+sd.p+'</div>'
+            : '<div></div><div></div>')
+        + '</div></div></div>';
+
+  html += '<div class="foot">오늘도 힘차게 시작해요! 💪  ('+day+' / 90 일차)</div>';
+  document.getElementById("sheet").innerHTML = html;
+}
+
+document.getElementById("day").addEventListener("keydown", e=>{ if(e.key==="Enter") render(); });
+render();
+</script>
+</body>
+</html>
