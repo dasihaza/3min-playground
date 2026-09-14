@@ -17,11 +17,11 @@
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{background:var(--bg);color:var(--ink);font-family:'Noto Sans KR',sans-serif;min-height:100vh;}
-  .topbar{max-width:1020px;margin:0 auto;padding:14px 18px 0;display:flex;align-items:center;justify-content:space-between;}
+  .topbar{max-width:1000px;margin:0 auto;padding:14px 18px 0;display:flex;align-items:center;justify-content:space-between;}
   .topbar a{text-decoration:none;color:var(--ink);}
   .topbar .brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;}
   .topbar .back{font-size:12.5px;font-weight:700;color:var(--ink-soft);border:2px solid #fff;background:#fff;padding:6px 12px;border-radius:999px;box-shadow:var(--shadow);}
-  .shell{max-width:1020px;margin:0 auto;padding:16px 18px 60px;}
+  .shell{max-width:1000px;margin:0 auto;padding:16px 18px 60px;}
 
   .hero h1{font-family:'Jua',sans-serif;font-size:26px;margin:0 0 5px;color:var(--navy);}
   .hero p{font-size:13.5px;color:var(--ink-soft);margin:0 0 16px;line-height:1.7;word-break:keep-all;}
@@ -30,50 +30,40 @@
   .card h2{font-family:'Jua',sans-serif;font-size:16px;margin:0 0 4px;}
   .card .desc{font-size:12.5px;color:var(--ink-soft);margin:0 0 12px;line-height:1.7;word-break:keep-all;}
 
-  textarea{width:100%;min-height:160px;border:2px solid var(--line);border-radius:10px;padding:12px;
-           font-family:'Noto Sans KR',sans-serif;font-size:13px;line-height:1.7;resize:vertical;}
+  textarea{width:100%;min-height:165px;border:2px solid var(--line);border-radius:10px;padding:12px;
+           font-family:'Noto Sans KR',sans-serif;font-size:13.5px;line-height:1.7;resize:vertical;}
   textarea:focus{outline:none;border-color:var(--navy);}
 
   .btn{font-family:'Jua',sans-serif;border:none;cursor:pointer;font-size:14.5px;padding:11px 20px;border-radius:10px;
-       background:var(--navy);color:#fff;box-shadow:0 3px 0 var(--navy-d);transition:transform .1s;}
+       background:var(--navy);color:#fff;box-shadow:0 3px 0 var(--navy-d);}
   .btn:hover{transform:translateY(1px);box-shadow:0 2px 0 var(--navy-d);}
-  .btn:active{transform:translateY(3px);box-shadow:none;}
   .btn.mint{background:var(--mint);box-shadow:0 3px 0 var(--mint-d);}
-  .btn.mint:hover{box-shadow:0 2px 0 var(--mint-d);}
   .btn.ghost{background:#fff;color:var(--ink);box-shadow:0 3px 0 var(--line);}
-  .btn.ghost:hover{box-shadow:0 2px 0 var(--line);}
   .btn.sm{font-size:13px;padding:9px 15px;}
   .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
 
   table.items{width:100%;border-collapse:collapse;font-size:13px;}
   table.items th{background:#EEF2F8;color:var(--navy);font-weight:700;padding:9px 8px;border:1px solid var(--line);white-space:nowrap;}
-  table.items th.hl{background:#FFF3D6;color:#8A6A2F;}
   table.items td{border:1px solid var(--line);padding:0;}
   table.items td input{width:100%;border:none;padding:8px;font-family:'Noto Sans KR',sans-serif;font-size:13px;background:transparent;}
   table.items td input:focus{outline:2px solid var(--navy);outline-offset:-2px;background:#F7FAFF;}
   table.items td.num input{text-align:right;}
-  table.items td.qty{background:#FFFCF2;}
-  table.items td.qty input{text-align:center;font-weight:700;color:#8A6A2F;}
-  table.items td.del{width:36px;text-align:center;}
-  .delbtn{border:none;background:none;cursor:pointer;color:#C0C8D2;font-size:15px;padding:4px 6px;}
+  table.items td.qty input{text-align:right;background:#FFFBEC;font-weight:700;}
+  table.items td.amt{text-align:right;padding:8px;white-space:nowrap;color:var(--ink-soft);}
+  table.items td.del{width:34px;text-align:center;}
+  .delbtn{border:none;background:none;cursor:pointer;color:#C0C8D2;font-size:15px;}
   .delbtn:hover{color:#E05A5A;}
   .tbl-wrap{overflow-x:auto;}
-  tr.bad td{background:#FFF6F6;}
 
   .total{display:flex;justify-content:flex-end;align-items:baseline;gap:10px;margin-top:12px;font-family:'Jua',sans-serif;}
   .total span{font-size:13px;color:var(--ink-soft);font-family:'Noto Sans KR',sans-serif;}
   .total b{font-size:22px;color:var(--navy);}
 
   .note{background:#FFF8E8;border:1.5px solid #F0DCA8;border-radius:10px;padding:11px 13px;
-        font-size:12.5px;color:#8A6A2F;line-height:1.85;margin-top:12px;word-break:keep-all;}
+        font-size:12.5px;color:#8A6A2F;line-height:1.8;margin-top:12px;word-break:keep-all;}
   .note.warn{background:#FDECEC;border-color:#F2C0C0;color:#9E3B3B;}
-  .note.big{font-size:13px;}
-  .hint{font-size:12px;color:var(--ink-soft);margin-top:8px;line-height:1.8;}
+  .note.ok{background:#EAF7F1;border-color:#AEDCC4;color:#2C6E4E;}
   .hidden{display:none !important;}
-  .sample{background:#F7F9FC;border:1px dashed var(--line);border-radius:8px;padding:10px 12px;
-          font-size:12px;color:var(--ink-soft);line-height:1.9;margin-top:10px;}
-  .tag{display:inline-block;font-size:11.5px;background:#EEF2F8;color:var(--navy);
-       border-radius:999px;padding:3px 10px;margin-left:6px;vertical-align:middle;}
 </style>
 </head>
 <body>
@@ -91,53 +81,32 @@
 </div>
 
 <div class="shell">
-
   <div class="hero">
     <h1>📋 품의 자동완성기</h1>
-    <p>쇼핑몰 장바구니를 통째로 복사해 붙여넣으면 품목내역 표를 만들어요.
-       <b>수량만 채우면</b> 예상단가가 자동으로 계산됩니다.</p>
+    <p>장바구니 화면을 통째로 복사해 붙여넣으면 품목내역 표가 만들어져요.
+       확인·수정한 뒤 엑셀로 내려받아 품의에 붙이면 됩니다.</p>
   </div>
 
   <div class="card">
     <h2>1. 장바구니 붙여넣기</h2>
-    <p class="desc">장바구니 화면에서 <b>Ctrl+A → Ctrl+C</b>로 전체를 복사한 뒤 아래에 붙여넣으세요.
-       판매자·쿠폰·배송비 같은 글자가 섞여 들어와도 알아서 걸러냅니다.</p>
+    <p class="desc">장바구니 화면에서 <b>Ctrl+A → Ctrl+C</b> 로 전체를 복사한 뒤 아래에 붙여넣으세요.<br>판매자명·배송비·쿠폰이 섞여 있어도 되고, 링크가 있든 없든 모두 읽어요.</p>
     <textarea id="src" placeholder="여기에 붙여넣으세요…"></textarea>
     <div class="row" style="margin-top:10px;">
-      <button class="btn" onclick="doParse()">표로 만들기</button>
-      <button class="btn ghost sm" onclick="loadSample()">예시 넣어보기</button>
-      <button class="btn ghost sm" onclick="document.getElementById('src').value='';">지우기</button>
-      <button class="btn ghost sm" onclick="toggleHelp()">도움말</button>
-    </div>
-    <div id="help" class="sample hidden">
-      · <b>G마켓·옥션</b> : 장바구니에서 Ctrl+A 로 전체 선택해 복사하면 가장 정확해요<br>
-      · <b>쿠팡·네이버 등</b> : 품목 목록만 드래그해 복사해도 됩니다<br>
-      · <b>엑셀·한글 표</b> : 표를 복사해 붙여넣으면 열을 그대로 인식해요<br>
-      · 인식이 어긋나면 표에서 칸을 눌러 바로 고치면 됩니다
+      <button class="btn" onclick="run()">표로 만들기</button>
+      <button class="btn ghost sm" onclick="loadSample()">예시로 확인해보기</button>
+      <button class="btn ghost sm" onclick="document.getElementById('src').value=''">지우기</button>
     </div>
   </div>
 
   <div class="card hidden" id="result-card">
-    <h2>2. 수량 채우고 확인하기 <span class="tag" id="mode"></span></h2>
-    <p class="desc">노란 <b>수량</b> 칸을 채우면 예상단가가 저절로 계산돼요.
-       단가를 직접 고치면 금액이 다시 계산됩니다.</p>
-
-    <div id="qty-note" class="note big hidden">
-      ✍️ <b>수량은 직접 넣어 주세요.</b> 장바구니의 수량은 입력칸 안에 있어서 복사되지 않아요.
-      대신 <b>금액(합계)</b>은 정확히 읽어 왔으니, 수량만 넣으면
-      <b>예상단가 = 금액 ÷ 수량</b> 으로 자동 계산됩니다.
-    </div>
-
+    <h2>2. 확인하고 고치기</h2>
+    <p class="desc">칸을 눌러 바로 고칠 수 있어요. <b>수량</b>이나 <b>예상단가</b>를 바꾸면 금액이 다시 계산됩니다.</p>
     <div class="tbl-wrap">
-      <table class="items" id="tbl">
+      <table class="items">
         <thead><tr>
-          <th style="min-width:220px;">내용</th>
-          <th style="min-width:130px;">규격</th>
-          <th style="width:64px;">단위</th>
-          <th style="width:74px;" class="hl">수량</th>
-          <th style="width:110px;">예상단가</th>
-          <th style="width:110px;">금액</th>
-          <th></th>
+          <th style="min-width:210px;">내용</th><th style="min-width:110px;">규격</th>
+          <th style="width:66px;">단위</th><th style="width:66px;">수량</th>
+          <th style="width:104px;">예상단가</th><th style="width:104px;">금액</th><th></th>
         </tr></thead>
         <tbody id="tbody"></tbody>
       </table>
@@ -146,323 +115,264 @@
       <button class="btn ghost sm" onclick="addRow()">+ 줄 추가</button>
     </div>
     <div class="total"><span>합계</span><b id="sum">0</b><span>원</span></div>
-    <div id="check" class="note warn hidden"></div>
+    <div id="check" class="note hidden"></div>
   </div>
 
   <div class="card hidden" id="save-card">
     <h2>3. 내려받기</h2>
     <p class="desc"><b>내용 · 규격 · 단위 · 수량 · 예상단가</b> 순서로 저장돼요.</p>
     <div class="row">
-      <button class="btn mint" onclick="saveXlsx()">📗 엑셀(.xlsx) 내려받기</button>
-      <button class="btn ghost sm" onclick="saveXls()">.xls 로 내려받기</button>
-      <button class="btn ghost sm" onclick="copyTable()">표 복사하기</button>
+      <button class="btn mint" onclick="save('xlsx')">📗 엑셀(.xlsx)</button>
+      <button class="btn ghost sm" onclick="save('xls')">.xls 로 받기</button>
+      <button class="btn ghost sm" onclick="copyTable()">표 복사</button>
     </div>
-    <div class="hint">에듀파인에서 형식 오류가 나면 <b>.xls</b>로 받아보세요.</div>
   </div>
 
   <div class="note">
-    ⚠️ 자동으로 읽은 내용은 <b>반드시 눈으로 확인</b>해 주세요. 특히 묶음 상품은
-    상품명이 행사 문구로 되어 있을 수 있으니, 필요하면 <b>내용</b> 칸을 알맞게 고쳐 주세요.
+    ⚠️ 자동으로 읽은 내용은 <b>눈으로 한 번 확인</b>해 주세요.
+    특히 <b>수량</b>과 <b>할인 전/후 금액</b>이 맞는지 살펴봐 주시면 좋아요.
   </div>
 </div>
 
 <script>
-/* ================= 공통 ================= */
-function onlyNum(s){ var m=String(s).replace(/[^\d]/g,''); return m?parseInt(m,10):0; }
-function comma(n){ return String(Math.round(n||0)).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
-function $all(root, sel){ return Array.prototype.slice.call(root.querySelectorAll(sel)); }
+/* ===================================================================
+   품의 자동완성기
+   ① 상품 링크(또는 '상품명:')를 기준으로 품목을 나눈다
+   ② 각 덩어리 안에서 수량 · 금액 · 옵션을 찾는다
+   ③ 예상단가 = 금액 ÷ 수량
+   =================================================================== */
 
-/* 제목이 행사 문구일 때, 옵션 쪽에서 진짜 상품명 찾기 */
-var PROMO = /(~\s*\d+\s*%|\d+\s*%\s*OFF|빅세일|기획전|타임딜|균일가|초특가|핫딜|모음전)/i;
-function hangulCount(s){ return (String(s).match(/[가-힣]/g)||[]).length; }
-function splitOption(opt){
-  var parts = opt.split('+').map(function(x){
-    return x.replace(/\([^)]*원\)/g,'')
-            .replace(/\(\s*\d[\d\-]*\s*\)/g,'')
-            .replace(/^\s*\d+\s*\)\s*/,'')
-            .replace(/^\s*옵션\s*[\d~\-]*\s*/,'')
-            .replace(/\s+/g,' ').trim();
-  }).filter(Boolean);
-  var best='', bh=-1;
-  parts.forEach(function(x){ var h=hangulCount(x); if(h>bh){bh=h;best=x;} });
-  var rest = parts.filter(function(x){ return x!==best; });
-  return { name: bh>=2 ? best : '', spec: rest.length ? rest[rest.length-1] : '' };
+function num(s){ var t=String(s).replace(/[^\d]/g,''); return t?parseInt(t,10):0; }
+function comma(n){ return String(Math.round(n||0)).replace(/\B(?=(\d{3})+(?!\d))/g,','); }
+
+var SKIP_LINK = /최저가|쿠폰적용가|장바구니\s*담기|으로\s*이동|결제할인|더보기|배너|이벤트/;
+
+/* ---------- ① 품목 나누기 ---------- */
+var NAME_NOISE = /^(수량|상품\s*수량|쿠폰|상품\s*금액|무료배송|배송비|배송|판매자|스토어|브랜드|삭제|수정|옵션|구매할|상품\s*상세|전체\s*선택|선택\s*삭제|주문|결제|할인|소계|합계|총|계산값|장바구니|최저가|더보기|이미지|리뷰|[\d,]+\s*원?)$/;
+
+function findStarts(lines){
+  var starts=[], i, m;
+
+  /* 방법 ① 상품 링크 */
+  for(i=0;i<lines.length;i++){
+    m = lines[i].match(/\[([^\]]+)\]\((https?:[^)]+)\)/);
+    if(m && /item/i.test(m[2]) && !SKIP_LINK.test(m[1])) starts.push({ i:i, name:m[1] });
+  }
+  if(starts.length) return starts;
+
+  /* 방법 ② '상품명:' */
+  for(i=0;i<lines.length;i++){
+    m = lines[i].match(/상품\s*명\s*[:：]\s*(.+)$/);
+    if(m) starts.push({ i:i, name:m[1] });
+  }
+  if(starts.length) return starts;
+
+  /* 방법 ③ 링크도 상품명 표시도 없는 순수 글자 장바구니
+     → '상품 금액' 줄을 품목의 끝으로 보고, 그 앞쪽에서 품명을 고른다 */
+  var ends=[];
+  for(i=0;i<lines.length;i++) if(/상품\s*금액/.test(lines[i])) ends.push(i);
+  if(!ends.length) return starts;
+
+  var prev = 0;
+  for(var e=0;e<ends.length;e++){
+    /* 이름 후보 : 구간 시작 ~ 수량/금액 줄 직전 */
+    var stop = ends[e];
+    for(var k=prev;k<ends[e];k++){
+      if(/^\s*(수량|상품\s*수량)/.test(lines[k])){ stop=k; break; }
+    }
+    var best='', bestIdx=prev;
+    for(k=prev;k<stop;k++){
+      var t = lines[k].replace(/^\s*\*+\s*/,'').trim();
+      if(!t || NAME_NOISE.test(t)) continue;
+      if(t.length > best.length){ best=t; bestIdx=k; }
+    }
+    if(best) starts.push({ i:bestIdx, name:best });
+    prev = ends[e]+1;
+  }
+  return starts;
 }
 
+/* ---------- ② 수량 ---------- */
+function getQty(block){
+  var i, k, m;
+  for(i=0;i<block.length;i++){
+    var L = block[i].trim();
+    m = L.match(/^수량\s*[:：]?\s*(\d{1,4})\s*(개|EA|ea)?$/);
+    if(m) return parseInt(m[1],10);
+    if(/^상품\s*수량$/.test(L)){
+      for(k=i+1; k<block.length && k<=i+5; k++){
+        var t = block[k].trim();
+        if(!t) continue;
+        if(/^\d{1,4}$/.test(t)) return parseInt(t,10);
+        if(/증가|감소/.test(t)) continue;
+        break;
+      }
+    }
+  }
+  return 1;
+}
 
-/* ===== 규격 뽑아내기 : 무게·길이·용량·사이즈만 =====
-   예) A4 용지 80g 2박스 → 80g   /   블랙 + 그레이 + L → L
-       사이즈중형 32P X 6팩 → 중형 /  생수 2리터 24병 → 2L  */
-function normUnit(u){
-  u = u.replace(/리터/,'L').replace(/밀리리터/,'mL');
-  if(u==='ML'||u==='ml') return 'mL';
+/* ---------- ② 금액 : '상품 금액 :' 뒤 첫 번째 값 ---------- */
+function getAmount(block){
+  for(var i=0;i<block.length;i++){
+    if(!/상품\s*금액/.test(block[i])) continue;
+    /* 같은 줄에 금액이 있는 경우 */
+    var same = block[i].match(/상품\s*금액\s*[:：]?\s*([\d,]{3,})\s*원?/);
+    if(same) return num(same[1]);
+    /* 다음 줄들에 떨어져 있는 경우 → 첫 번째 금액 */
+    for(var k=i+1;k<block.length && k<=i+4;k++){
+      var m = block[k].trim().match(/^([\d,]{3,})\s*원?/);
+      if(m){ var v=num(m[1]); if(v>=100) return v; }
+    }
+  }
+  /* '상품 금액' 표시가 없으면 덩어리 안의 첫 금액 */
+  for(i=0;i<block.length;i++){
+    var L=block[i].trim();
+    if(/^[\d,]{4,}\s*원?$/.test(L)){ var v2=num(L); if(v2>=100) return v2; }
+  }
+  return 0;
+}
+
+/* ---------- ② 옵션 줄 ---------- */
+function getOption(block){
+  var i, k;
+  for(i=0;i<block.length;i++){
+    var L = block[i].trim();
+    if(L.charAt(0)!=='*') continue;
+    var t = L.replace(/^\*+\s*/,'').trim();
+    if(!t || /구매할\s*상품|상품\s*상세/.test(t)) continue;
+    return t;
+  }
+  for(i=0;i<block.length;i++){
+    if(/옵션\s*선택\s*정보|옵션\s*정보/.test(block[i])){
+      for(k=i+1;k<block.length && k<=i+3;k++){
+        var s=block[k].replace(/^\s*\*+\s*/,'').trim();
+        if(s) return s;
+      }
+    }
+  }
+  return '';
+}
+
+/* ---------- 규격 : 무게 · 길이 · 용량 · 사이즈 ---------- */
+function tidyUnit(u){
+  if(u==='리터') return 'L';
+  if(u==='밀리리터') return 'mL';
+  if(u==='ml'||u==='ML') return 'mL';
   if(u==='l') return 'L';
   return u;
 }
-function findSpec(src){
+function getSpec(src){
   if(!src) return '';
-  var t = ' ' + src.replace(/\s+/g,' ') + ' ';
+  var t = ' ' + src.replace(/\([+\-\u2212]?\s*[\d,]+\s*원\)/g,' ').replace(/\s+/g,' ') + ' ';
   var m;
 
-  /* ① 우리말 크기 */
-  m = t.match(/(특대|대형|중형|소형|점보|왕특大|왕특대)/);
+  m = t.match(/(특대|대형|중형|소형|점보)/);
   if(m) return m[1];
 
-  /* ② 옷 사이즈 (앞뒤가 글자가 아닐 때만) */
   m = t.match(/(?:^|[\s+(,\/])(XS|S|M|L|XL|XXL|XXXL|2XL|3XL|4XL|FREE)(?:[\s+),\/]|$)/);
   if(m) return m[1];
 
-  /* ③ 숫자 + 단위 (무게·길이·용량·전력 등) */
   m = t.match(/(\d+(?:\.\d+)?)\s*(mg|kg|g|mL|ml|ML|L|리터|밀리리터|cc|mm|cm|m|인치|호|절|W|와트)(?![a-zA-Z0-9]|리터|터)/);
-  if(m) return m[1] + normUnit(m[2]);
+  if(m){
+    var spec = m[1] + tidyUnit(m[2]);
+    var pre = t.slice(0, m.index).match(/([A-Za-z]\d)\s*(용지|지)?\s*$/);
+    if(pre) spec = pre[1] + (pre[2]||'') + ' ' + spec;
+    return spec;
+  }
 
-  /* ④ 신발 치수처럼 홀로 있는 세 자리 수 (200~320) */
   m = t.match(/(?:^|[\s+(])(\d{3})(?:[\s+)]|$)/);
-  if(m && +m[1]>=200 && +m[1]<=320) return m[1] + 'mm';
+  if(m && +m[1]>=200 && +m[1]<=320) return m[1]+'mm';
 
-  /* ⑤ 종이 규격 */
-  m = t.match(/(?:^|[\s(])(A[3-6]|B[3-6])(?:[\s)]|$)/i);
+  m = t.match(/(?:^|[\s(])(A[3-6]|B[3-6])(?:용지|지)?(?:[\s)]|$)/i);
   if(m) return m[1].toUpperCase();
 
   return '';
 }
 
-/* ===== 수량 뽑아내기 =====
-   붙여넣으면 '상품수량' 다음 줄에 숫자만 오는 경우가 많습니다.
-   '상품 수 1 증가...' 같은 줄은 숫자만 있는 줄이 아니므로 걸러집니다. */
-function findQty(seg){
-  var idx = seg.search(/상품\s*수량/);
-  if(idx < 0) return 0;
-  var rest = seg.slice(idx).split(/\r?\n/);
-  for(var i=1; i<rest.length && i<=6; i++){
-    var line = rest[i].trim();
-    if(!line) continue;
-    if(/^\d{1,3}$/.test(line)) return parseInt(line,10);
-    if(/증가|감소/.test(line)) continue;      /* 버튼 줄은 건너뜀 */
-    if(/^(쿠폰|상품\s*금액|옵션)/.test(line)) break;
+/* ---------- 행사용 제목이면 옵션에서 진짜 상품명 ---------- */
+var PROMO = /빅세일|~\s*\d+\s*%|OFF|모음전|균일가|특가전|기획전/i;
+function nameFromOption(opt){
+  var parts = opt.split(/\s*\+\s*/);
+  for(var i=0;i<parts.length;i++){
+    var m = parts[i].match(/^(?:\d+\)\s*)?(.+?)\s*\(\s*\d{4,}\s*\)/);
+    if(m && m[1].replace(/\s/g,'').length>=2) return m[1].replace(/^\d+\)\s*/,'').trim();
   }
-  return 0;
+  return '';
 }
 
-/* ================= 방식 A : '상품명:' 기준 (G마켓·옥션) =================
-   상품명과 금액이 또렷이 적혀 있어 가장 정확합니다.
-   수량은 입력칸 안에 있어 복사되지 않으므로 1로 두고 선생님이 채웁니다. */
-function parseByName(text){
-  var marks=[], re=/상품\s*명\s*[:：]/g, m;
-  while((m=re.exec(text))!==null) marks.push(m.index);
-  if(!marks.length) return null;
+/* ---------- 전체 ---------- */
+function parseCart(text){
+  var lines = text.split(/\r?\n/);
+  var starts = findStarts(lines);
+  if(!starts.length) return [];
 
-  var items=[];
-  for(var i=0;i<marks.length;i++){
-    var seg = text.slice(marks[i], (i+1<marks.length) ? marks[i+1] : text.length);
-
-    var name = seg.slice(seg.search(/[:：]/)+1);
-    var cut = name.search(/\]|\n/);
-    if(cut>=0) name = name.slice(0,cut);
-    name = name.replace(/\s+/g,' ').trim();
-    if(!name) continue;
-
-    /* 금액 : 콜론이 있는 '상품 금액 :' 만 인정 → 소계·할인금액·주문금액과 구분 */
-    var pm = seg.match(/상품\s*금액\s*[:：]\s*([\d,]+)/);
-    if(!pm) continue;
-    var amount = onlyNum(pm[1]);
-    if(!amount) continue;
-
-    /* 규격 : 수량칸 앞쪽의 '*' 줄(옵션) */
-    var spec='', head = seg.split(/상품\s*수량/)[0], lines = head.split(/\r?\n/);
-    for(var k=0;k<lines.length;k++){
-      var t = lines[k].trim();
-      if(t.charAt(0)==='*' && !/구매할\s*상품/.test(t)){ spec = t.replace(/^\*+\s*/,''); break; }
-    }
-    var rawOpt = spec.replace(/\([+\-−]?\s*[\d,]+\s*원\)/g,'').trim();
-
-    /* 제목이 행사 문구면 옵션에서 실제 상품명을 꺼내 온다 */
-    if(PROMO.test(name) && spec){
-      var f = splitOption(spec);
-      if(f.name){ name = f.name; spec = f.spec || spec; }
-    }
-    name = name.replace(/^\(무료배송\)\s*/,'').replace(/\s+/g,' ').trim();
-
-    /* 규격 : 옵션에서 먼저 찾고, 없으면 상품명에서 찾는다 */
-    var spec2 = findSpec(rawOpt) || findSpec(name);
-
-    /* 수량 : '상품수량' 다음 줄의 숫자. 없으면 1 */
-    var qty = findQty(seg) || 1;
-
-    /* 예상단가 = 금액 ÷ 수량 (G마켓은 금액만 보여 줌) */
-    var unitPrice = Math.round(amount / qty);
-
-    items.push({ name:name.slice(0,150), spec:spec2.slice(0,40), unit:'개',
-                 qty:qty, price:unitPrice, amount:amount });
-  }
-  return items.length?items:null;
-}
-
-/* ================= 방식 B : 단가·수량·금액이 나란한 장바구니 ================= */
-var NOISE = new RegExp('^('
- + '전체\\s*선택|선택\\s*삭제|전체\\s*삭제|삭제|수정|변경|옵션\\s*변경|재입고|알림|찜|좋아요'
- + '|무료\\s*배송|배송비|배송|로켓배송|도착\\s*보장|오늘\\s*출발|내일\\s*도착|택배|묶음배송|조건부\\s*무료'
- + '|판매자|셀러|스토어|브랜드|원산지|제조사|쿠폰|카드|무이자|적립|포인트|마일리지'
- + '|주문\\s*하기|바로\\s*구매|장바구니|구매하기|결제|선물하기|상품\\s*수량|상품\\s*수'
- + '|상품\\s*금액|배송비\\s*합계|할인\\s*금액|주문\\s*금액|총\\s*결제|결제\\s*예정|합계|총계|소계'
- + '|이미지|사진|더보기|상세|리뷰|후기|평점|별점|최저가|가격인하|계산값'
- + '|\\d+\\s*%)');
-var SPEC_RE = new RegExp(
-   '^(옵션|규격|사이즈|색상|선택)\\s*[:：]?\\s*(.+)$|'
- + '^\\s*\\d+\\s*(mm|cm|ml|L|g|kg|호|인치|매|구)\\s*$|'
- + '^\\s*(XS|S|M|L|XL|XXL|2XL|3XL|FREE|프리)\\s*$|'
- + '^\\s*(소형|중형|대형|특대)\\s*$');
-
-function classify(line){
-  var l = line.trim();
-  if(!l) return null;
-  if(/^[₩\s]*[\d,]{3,}\s*원?$/.test(l)){
-    var v = onlyNum(l);
-    if(v>=100) return {t:'money', v:v};
-    if(v>0)    return {t:'int', v:v};
-    return null;
-  }
-  var m = l.match(/^수량\s*[:：]?\s*(\d{1,3})\s*(개|EA|ea)?$/) || l.match(/^(\d{1,3})\s*(개|EA|ea)$/);
-  if(m) return {t:'int', v:parseInt(m[1],10)};
-  if(/^\d{1,3}$/.test(l)) return {t:'int', v:parseInt(l,10)};
-  if(NOISE.test(l)) return null;
-  return {t:'text', v:l};
-}
-function pickNameSpec(texts){
-  var name='', spec='', cand=[];
-  texts.forEach(function(t){
-    var m = t.match(SPEC_RE);
-    if(m) spec = spec || (m[2] ? m[2].trim() : t.trim());
-    else cand.push(t.trim());
-  });
-  cand.forEach(function(c){ if(c.length>name.length) name=c; });
-  if(!name && cand.length) name=cand[0];
-  if(!name && spec){ name=spec; spec=''; }
-  return { name:name.replace(/^\[[^\]]*\]\s*/,'').slice(0,150), spec:spec.slice(0,80) };
-}
-function parseSmart(text){
-  var toks=[];
-  text.split(/\r?\n/).forEach(function(line){
-    var parts = line.indexOf('\t')>=0 ? line.split('\t') : [line];
-    parts.forEach(function(p){ var c=classify(p); if(c) toks.push(c); });
-  });
-  var items=[], buf=[], i=0;
-  while(i<toks.length){
-    var t=toks[i];
-    if(t.t==='text'){ buf.push(t.v); i++; continue; }
-    var win=toks.slice(i,i+7), found=null, a,b,c;
-    for(a=0;a<win.length&&!found;a++){ if(win[a].t!=='money') continue;
-      for(b=a+1;b<win.length&&!found;b++){ if(win[b].t!=='int'||win[b].v<1||win[b].v>999) continue;
-        for(c=b+1;c<win.length&&!found;c++){ if(win[c].t!=='money') continue;
-          if(win[a].v*win[b].v===win[c].v) found={price:win[a].v,qty:win[b].v,end:i+c}; } } }
-    if(!found) for(a=0;a<win.length&&!found;a++){ if(win[a].t!=='money') continue;
-      for(c=a+1;c<win.length&&!found;c++) if(win[c].t==='money'&&win[c].v===win[a].v) found={price:win[a].v,qty:1,end:i+c}; }
-    if(!found&&t.t==='money'){ var qty=1,end=i;
-      for(b=1;b<win.length;b++){ if(win[b].t==='int'&&win[b].v>=1&&win[b].v<=999){qty=win[b].v;end=i+b;break;} if(win[b].t==='money') break; }
-      found={price:t.v,qty:qty,end:end}; }
-    if(found){ var ns=pickNameSpec(buf);
-      if(ns.name) items.push({name:ns.name,spec:ns.spec,unit:'개',qty:found.qty,price:found.price,amount:found.price*found.qty});
-      buf=[]; i=found.end+1; } else i++;
-  }
-  return items;
-}
-
-/* ================= 방식 C : 엑셀·한글 표 ================= */
-function parseTable(lines){
-  var rows = lines.map(function(l){ return l.split('\t').map(function(c){ return c.trim(); }); })
-                  .filter(function(r){ return r.length>=3 && r.join('').trim(); });
-  if(rows.length<2) return null;
   var out=[];
-  rows.forEach(function(r){
-    if(/내용|품명|상품명|물품|규격|단가|수량/.test(r.join('')) &&
-       !r.some(function(c){ return /^[\d,]{3,}$/.test(c); })) return;
-    var nums=[], texts=[];
-    r.forEach(function(c){ if(/^[\d,]+\s*원?$/.test(c)&&onlyNum(c)>0) nums.push(onlyNum(c)); else if(c) texts.push(c); });
-    if(!texts.length) return;
-    var qty=1, price=0, ok=false, a,b,c;
-    if(nums.length===1) price=nums[0];
-    else if(nums.length>=2){
-      for(a=0;a<nums.length&&!ok;a++) for(b=0;b<nums.length&&!ok;b++) for(c=0;c<nums.length&&!ok;c++)
-        if(a!==b&&b!==c&&nums[b]<=999&&nums[a]*nums[b]===nums[c]){ price=nums[a];qty=nums[b];ok=true; }
-      if(!ok){ var s=Math.min.apply(null,nums), g=Math.max.apply(null,nums);
-               if(s<=999){qty=s;price=g;} else price=nums[0]; }
+  for(var s=0; s<starts.length; s++){
+    var from = starts[s].i;
+    var to   = (s+1<starts.length) ? starts[s+1].i : lines.length;
+    var block = lines.slice(from, to);
+
+    var name = starts[s].name
+                 .replace(/^상품\s*명\s*[:：]\s*/,'')
+                 .replace(/^\(무료배송\)\s*/,'')
+                 .replace(/\s+/g,' ').trim();
+    var opt    = getOption(block);
+    var qty    = getQty(block);
+    var amount = getAmount(block);
+    if(!name || !amount) continue;
+
+    if(PROMO.test(name)){
+      var real = nameFromOption(opt);
+      if(real) name = real;
     }
-    var ns=pickNameSpec(texts);
-    out.push({name:ns.name||texts[0],spec:ns.spec||(texts[1]||''),unit:'개',qty:qty||1,price:price,amount:price*(qty||1)});
-  });
-  return out.length?out:null;
+
+    var spec  = getSpec(opt) || getSpec(name);
+    var price = Math.round(amount / (qty||1));
+
+    out.push({ name:name.slice(0,150), spec:spec.slice(0,40), unit:'개', qty:qty||1, price:price });
+  }
+  return out;
 }
 
-/* ================= 실행 ================= */
-function doParse(){
-  var text=document.getElementById('src').value;
-  if(!text.trim()){ alert('먼저 장바구니 내용을 붙여넣어 주세요.'); return; }
-  var lines=text.split(/\r?\n/);
-  var tabbed=lines.filter(function(l){ return l.indexOf('\t')>=0; }).length;
-
-  var rows = parseByName(text), mode='';
-  if(rows && rows.length){ mode='상품명 기준으로 읽음 · 수량을 채워 주세요'; }
-  else {
-    if(tabbed>=2){ rows = parseTable(lines); if(rows&&rows.length) mode='표 형식으로 읽음'; }
-    if(!rows || !rows.length){ rows = parseSmart(text); mode='목록 형식으로 읽음'; }
-  }
-  if(!rows || !rows.length){
-    alert('품목을 찾지 못했어요.\n아래 표에 직접 입력해 주세요.');
-    rows=[{name:'',spec:'',unit:'개',qty:1,price:0,amount:0}]; mode='직접 입력';
-  }
-  render(rows, mode, !!(mode.indexOf('상품명')===0));
-}
-
-/* ================= 표 ================= */
+/* =================== 화면 =================== */
 var tb = document.getElementById('tbody');
+function $all(root,sel){ return Array.prototype.slice.call(root.querySelectorAll(sel)); }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
 
-function render(rows, mode, needQty){
+function run(){
+  var text = document.getElementById('src').value;
+  if(!text.trim()){ alert('먼저 장바구니 내용을 붙여넣어 주세요.'); return; }
+  var rows = parseCart(text);
+  var found = rows.length;
+  if(!found) rows = [{name:'',spec:'',unit:'개',qty:1,price:0}];
+
   tb.innerHTML='';
   for(var i=0;i<rows.length;i++) addRow(rows[i]);
   document.getElementById('result-card').classList.remove('hidden');
   document.getElementById('save-card').classList.remove('hidden');
-  document.getElementById('mode').textContent = (mode||'') + ' · 품목 ' + rows.length + '개';
-  document.getElementById('qty-note').classList.toggle('hidden', !needQty);
+
+  var c=document.getElementById('check');
+  if(found){ c.className='note ok'; c.innerHTML='\u2705 품목 <b>'+found+'개</b>를 읽었어요. 수량과 금액을 확인해 주세요.'; }
+  else     { c.className='note warn'; c.innerHTML='품목을 찾지 못했어요. 장바구니 화면 전체를 복사했는지 확인하거나, 아래 표에 직접 입력해 주세요.'; }
+  c.classList.remove('hidden');
   recalc();
   document.getElementById('result-card').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 function addRow(r){
-  r = r || {name:'',spec:'',unit:'개',qty:1,price:0,amount:0};
-  var amt = (r.amount!==undefined && r.amount!==null) ? r.amount : (r.price||0)*(r.qty||1);
+  r = r || {name:'',spec:'',unit:'개',qty:1,price:0};
   var tr=document.createElement('tr');
   tr.innerHTML =
      '<td><input value="'+esc(r.name)+'"></td>'
    + '<td><input value="'+esc(r.spec)+'"></td>'
-   + '<td><input value="'+esc(r.unit||'개')+'" style="text-align:center;"></td>'
+   + '<td><input value="'+esc(r.unit||'개')+'" style="text-align:center"></td>'
    + '<td class="qty"><input value="'+(r.qty||1)+'"></td>'
    + '<td class="num"><input value="'+comma(r.price)+'"></td>'
-   + '<td class="num"><input value="'+comma(amt)+'"></td>'
-   + '<td class="del"><button class="delbtn" title="줄 삭제">✕</button></td>';
+   + '<td class="amt">0</td>'
+   + '<td class="del"><button class="delbtn">\u2715</button></td>';
   tb.appendChild(tr);
-
-  var inp = $all(tr,'input');   // 0내용 1규격 2단위 3수량 4단가 5금액
-  // 수량을 바꾸면 : 금액은 그대로 두고 단가를 다시 계산
-  inp[3].addEventListener('input', function(){
-    var q=onlyNum(inp[3].value), amt=onlyNum(inp[5].value);
-    if(q>0 && amt>0) inp[4].value = comma(Math.round(amt/q));
-    recalc();
-  });
-  // 단가를 바꾸면 : 금액을 다시 계산
-  inp[4].addEventListener('input', function(){
-    var q=onlyNum(inp[3].value)||1, p=onlyNum(inp[4].value);
-    inp[5].value = comma(p*q);
-    recalc();
-  });
-  // 금액을 바꾸면 : 단가를 다시 계산
-  inp[5].addEventListener('input', function(){
-    var q=onlyNum(inp[3].value)||1, amt=onlyNum(inp[5].value);
-    inp[4].value = comma(Math.round(amt/q));
-    recalc();
-  });
-  inp[0].addEventListener('input', recalc);
-  inp[1].addEventListener('input', recalc);
+  $all(tr,'input').forEach(function(inp){ inp.addEventListener('input', recalc); });
   tr.querySelector('.delbtn').onclick=function(){ tr.remove(); recalc(); };
   recalc();
 }
@@ -472,63 +382,54 @@ function readRows(){
   $all(tb,'tr').forEach(function(tr){
     var i=$all(tr,'input');
     out.push({ name:i[0].value.trim(), spec:i[1].value.trim(), unit:i[2].value.trim()||'개',
-               qty:onlyNum(i[3].value)||0, price:onlyNum(i[4].value)||0, amount:onlyNum(i[5].value)||0 });
+               qty:num(i[3].value), price:num(i[4].value) });
   });
   return out;
 }
-
 function recalc(){
-  var sum=0, warn=[];
-  $all(tb,'tr').forEach(function(tr, idx){
+  var sum=0;
+  $all(tb,'tr').forEach(function(tr){
     var i=$all(tr,'input');
-    var q=onlyNum(i[3].value), p=onlyNum(i[4].value), amt=onlyNum(i[5].value);
-    sum += amt;
-    var bad=false;
-    if(!i[0].value.trim()){ warn.push((idx+1)+'번 줄 : 내용이 비어 있어요'); bad=true; }
-    else if(q===0){ warn.push((idx+1)+'번 줄 : 수량을 넣어 주세요'); bad=true; }
-    else if(amt===0){ warn.push((idx+1)+'번 줄 : 금액이 0원이에요'); bad=true; }
-    else if(q>0 && amt % q !== 0){
-      warn.push((idx+1)+'번 줄 : 금액이 수량으로 나누어떨어지지 않아요 (수량 확인)'); bad=true;
-    }
-    tr.classList.toggle('bad', bad);
+    var amt=num(i[3].value)*num(i[4].value);
+    sum+=amt;
+    tr.querySelector('.amt').textContent=comma(amt);
   });
-  document.getElementById('sum').textContent = comma(sum);
-  var c=document.getElementById('check');
-  if(warn.length){ c.innerHTML='🔎 확인이 필요해요<br>· '+warn.slice(0,8).join('<br>· '); c.classList.remove('hidden'); }
-  else c.classList.add('hidden');
+  document.getElementById('sum').textContent=comma(sum);
 }
 
-/* ================= 저장 ================= */
-function buildSheet(){
+/* =================== 저장 =================== */
+function sheet(){
   var rows=readRows().filter(function(r){ return r.name; });
   if(!rows.length){ alert('저장할 품목이 없어요.'); return null; }
   var aoa=[['내용','규격','단위','수량','예상단가']];
-  rows.forEach(function(r){ aoa.push([r.name, r.spec, r.unit, r.qty, r.price]); });
+  rows.forEach(function(r){ aoa.push([r.name,r.spec,r.unit,r.qty,r.price]); });
   var ws=XLSX.utils.aoa_to_sheet(aoa);
-  ws['!cols']=[{wch:38},{wch:22},{wch:8},{wch:8},{wch:12}];
+  ws['!cols']=[{wch:36},{wch:16},{wch:8},{wch:8},{wch:12}];
   var wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, '품목내역');
   return wb;
 }
-function today(){ var d=new Date();
-  return d.getFullYear()+('0'+(d.getMonth()+1)).slice(-2)+('0'+d.getDate()).slice(-2); }
-function saveXlsx(){ var wb=buildSheet(); if(wb) XLSX.writeFile(wb, '품목내역_'+today()+'.xlsx'); }
-function saveXls(){ var wb=buildSheet(); if(wb) XLSX.writeFile(wb, '품목내역_'+today()+'.xls', {bookType:'biff8'}); }
+function save(kind){
+  var wb=sheet(); if(!wb) return;
+  var d=new Date(), tag=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');
+  if(kind==='xls') XLSX.writeFile(wb,'품목내역_'+tag+'.xls',{bookType:'biff8'});
+  else             XLSX.writeFile(wb,'품목내역_'+tag+'.xlsx');
+}
 function copyTable(){
   var rows=readRows().filter(function(r){ return r.name; });
-  var txt=['내용\t규격\t단위\t수량\t예상단가'].concat(rows.map(function(r){
-    return [r.name,r.spec,r.unit,r.qty,r.price].join('\t'); })).join('\n');
+  var txt=['내용\t규격\t단위\t수량\t예상단가'].concat(
+    rows.map(function(r){ return [r.name,r.spec,r.unit,r.qty,r.price].join('\t'); })).join('\n');
   if(navigator.clipboard) navigator.clipboard.writeText(txt).then(function(){ alert('복사했어요! 엑셀에 붙여넣으세요.'); });
 }
 
-/* ================= 도움말 ================= */
-function toggleHelp(){ document.getElementById('help').classList.toggle('hidden'); }
 function loadSample(){
   document.getElementById('src').value =
-"* 구매할 상품 상세 정보\n[상품명:나비잠 기저귀 울트라씬듀얼핏 팬티 6팩 모음](https://item.gmarket.co.kr)\n옵션선택 정보\n   * 사이즈중형 32P X 6팩\n상품수량\n\n1\n상품 수 1 증가상품 수 1 감소\n쿠폰적용\n상품 금액 :57,250원\n상품 삭제\n\n"+
-"* 구매할 상품 상세 정보\n[상품명:무라벨 빈병회수 스파클 생수 2리터 24병](https://item.gmarket.co.kr)\n상품수량\n\n3\n상품 수 1 증가상품 수 1 감소\n상품 금액 :41,970원\n상품 삭제\n\n"+
-"[상품명:올반 핫도그 (찰15+크런치15) 냉동 간식 편의식 핫바](https://item.gmarket.co.kr)\n상품수량\n\n2\n상품 수 1 증가상품 수 1 감소\n상품 금액 :53,800원\n주문금액53,800원";
-  doParse();
+"더블에이 A4용지 80g 2박스(4000매) A4 복사용지\n더블에이 A4용지 80g 2박스(4000매) A4 복사용지\n"+
+"수량5개\n쿠폰적용\n상품 금액 :\n247,500원\n222,550원\n복사용지MRO\n무료배송\n\n"+
+"무라벨 빈병회수 스파클 생수 2리터 24병\n수량3개\n쿠폰적용\n상품 금액 :\n41,970원\n무료배송\n\n"+
+"나비잠 기저귀 울트라씬듀얼핏 팬티 6팩 모음\n옵션선택 정보\n   * 사이즈중형 32P X 6팩\n"+
+"상품수량\n\n1\n상품 수 1 증가상품 수 1 감소\n상품 금액 :\n57,250원\n상품 삭제";
+  run();
 }
 </script>
 </body>
