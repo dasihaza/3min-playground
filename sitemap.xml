@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://3min-playground.com/</loc>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://3min-playground.com/privacy.html</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://3min-playground.com/content/recorder-helper.html</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://3min-playground.com/content/career-test.html</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://3min-playground.com/content/love-style-test.html</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://3min-playground.com/content/morning-hub.html</loc>
+    <priority>0.8</priority>
+  </url>
+</urlset>
