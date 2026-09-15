@@ -41,7 +41,7 @@
     font-size:12.5px; font-weight:700; color:var(--ink-soft);
     border:1px solid var(--line); padding:7px 12px; border-radius:999px; text-decoration:none;
   }
-  .stage{ width:100%; max-width:600px; margin:0 auto; padding:20px 16px 40px; }
+  .stage{ width:100%; max-width:600px; margin:0 auto; padding:20px 16px 30px; }
   .card{
     background: var(--paper-light);
     border: 1px solid var(--line);
@@ -103,10 +103,79 @@
   .footer-note{ text-align:center; font-size:11.5px; color:var(--ink-soft); opacity:.75; margin-top:20px; }
   .hidden{ display:none !important; }
 
+  /* --- 추가된 아티클 영역 스타일 --- */
+  .article-section {
+    max-width: 600px;
+    width: 100%;
+    margin: 0 auto 40px;
+    padding: 36px 32px;
+    background: var(--paper-light);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    color: var(--ink);
+    line-height: 1.7;
+  }
+  .article-section h2.article-title {
+    font-family: 'Gowun Batang', serif;
+    font-size: 23px;
+    font-weight: 700;
+    color: var(--rose);
+    text-align: center;
+    margin-bottom: 24px;
+    line-height: 1.4;
+  }
+  .article-section h3 {
+    font-family: 'Gowun Batang', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--sage);
+    margin: 28px 0 12px;
+  }
+  .article-section p {
+    font-size: 14.5px;
+    color: var(--ink-soft);
+    margin-bottom: 16px;
+  }
+  .article-section strong {
+    color: var(--ink);
+    font-weight: 700;
+  }
+  .article-section ul {
+    padding-left: 20px;
+    margin-bottom: 16px;
+  }
+  .article-section li {
+    font-size: 14.5px;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+  }
+  .article-section .highlight-box {
+    background: var(--paper);
+    padding: 20px;
+    border-radius: 10px;
+    margin: 24px 0;
+    border-left: 4px solid var(--honey);
+  }
+  .article-section .highlight-box p {
+    margin: 0;
+    color: var(--ink);
+    font-weight: 500;
+    text-align: center;
+  }
+  .global-footer {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 12px;
+    padding: 12px 0 46px;
+  }
+
   @media (max-width:480px){
     .card{ padding:28px 22px; }
     h1{ font-size:25px; }
     h2.q{ font-size:18px; }
+    .article-section { padding: 28px 22px; margin: 0 16px 40px; width: auto; }
+    .article-section h2.article-title { font-size: 21px; }
   }
 </style>
 </head>
@@ -180,6 +249,42 @@
     <div class="footer-note">가볍게 즐기는 재미용 테스트예요. 진짜 나를 아는 건 결국 나 자신이죠.</div>
   </div>
 
+</div>
+
+<!-- 추가된 아티클(설명글) 영역 -->
+<div class="article-section">
+  <div style="font-size: 13px; font-weight: 700; color: var(--honey); letter-spacing: 0.1em; text-align: center; margin-bottom: 8px;">나를 비추는 거울, 연애</div>
+  <h2 class="article-title">10가지 질문으로 알아보는<br>나의 연애 스타일 테스트</h2>
+  
+  <p>누군가를 좋아하고 관계를 맺어가는 과정은 우리 인생에서 가장 중요하고 아름다운 경험 중 하나입니다. 교실에서 짝꿍에게 설레던 풋풋한 마음부터, 깊은 신뢰를 바탕으로 삶을 나누는 어른들의 사랑까지, '연애'와 '관계'는 나이를 불문하고 모두의 가슴을 뛰게 하는 보편적이고 흥미로운 주제입니다.</p>
+
+  <p>우리는 흔히 연애를 '타인과 가까워지는 과정'이라고 생각하지만, 사실 그 이면에는 <strong>'진짜 내 모습을 발견하는 과정'</strong>이 숨어 있습니다. 누군가와 깊은 관계를 맺을 때 비로소 내가 감정을 어떻게 표현하는지, 갈등 상황에서 어떻게 대처하는지 등 평소에는 잘 몰랐던 나의 밑바닥 성향이 드러나기 때문입니다.</p>
+  
+  <p>이러한 관계의 본질에 주목하여, 스스로의 마음을 가볍고 즐겁게 들여다볼 수 있는 <strong>'나의 연애 스타일 테스트'</strong>를 준비했습니다.</p>
+
+  <h3>🔍 '관계'를 통해 '나'를 들여다보는 시간</h3>
+  <p>이 테스트는 단순히 어떤 사람을 좋아하는지 취향을 묻는 것을 넘어, 관계 속에서 나타나는 나의 성격과 소통 방식을 돌아볼 수 있도록 기획되었습니다.</p>
+  <p>연락의 빈도를 중요하게 생각하는지, 서운한 점이 있을 때 바로 말하는 편인지 아니면 혼자 생각을 정리할 시간이 필요한지 등의 질문들을 통해, 내가 타인과 어떤 방식으로 에너지를 주고받는 사람인지 객관적으로 파악할 수 있는 훌륭한 자기 이해의 도구가 되어 줍니다.</p>
+
+  <h3>💡 누구나 공감할 수 있는 10가지 일상 질문</h3>
+  <p>'나의 연애 스타일 테스트'는 초등학생부터 성인까지 누구나 쉽게 이해하고 몰입할 수 있도록 만들어졌습니다. 무겁고 복잡한 연애사 대신, 호감을 느끼고, 다투고, 화해하는 10가지의 자연스럽고 일상적인 상황들을 제시합니다.</p>
+  <p>머리 아프게 고민할 필요 없이, 상황이 주어졌을 때 내 마음이 가장 먼저 끌리는 선택지를 직관적으로 골라보세요.</p>
+  
+  <h3>🤝 서로를 이해하는 대화의 창구로 활용해 보세요</h3>
+  <p>이 프로그램은 혼자서 결과를 보고 넘기기보다, 주변 사람들과 함께 나눌 때 그 진가가 발휘됩니다.</p>
+  
+  <ul>
+    <li><strong>나침반이 되어주는 자기 객관화:</strong> "아, 나는 서운함을 느낄 때 이런 식으로 반응하는 성향이구나!"라며 스스로의 감정 표현 방식을 이해하고, 더 성숙한 소통 방식을 고민해 볼 수 있습니다.</li>
+    <li><strong>서로의 다름을 존중하는 대화:</strong> 친구들, 혹은 현재 소중한 인연을 맺고 있는 사람과 결과를 공유해 보세요. "너는 이런 성향이라서 그때 그렇게 행동했구나!"라며 서로의 차이를 인정하고 존중하는 건강하고 유쾌한 대화의 시작점이 될 것입니다.</li>
+  </ul>
+
+  <div class="highlight-box">
+    <p>건강하고 행복한 관계의 출발점은 언제나 <strong>'나 자신을 바르게 아는 것'</strong>에서 시작합니다.<br>지금 바로 마음의 모양을 살펴보는 테스트를 시작해 볼까요?</p>
+  </div>
+</div>
+
+<div style="width:100%;max-width:640px;margin:0 auto;padding:0 16px;">
+  <div class="global-footer">© 2026 3분 놀이터. 콘텐츠는 재미로 즐겨주세요.</div>
 </div>
 
 <script>
