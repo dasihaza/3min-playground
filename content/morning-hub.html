@@ -53,7 +53,7 @@
   .topbar .back{font-size:12.5px;font-weight:700;color:var(--ink-soft);
                 border:2px solid #fff;background:#fff;padding:6px 12px;border-radius:999px;box-shadow:var(--shadow);}
 
-  .shell{position:relative;z-index:2;max-width:880px;margin:0 auto;padding:26px 18px 70px;}
+  .shell{position:relative;z-index:2;max-width:880px;margin:0 auto;padding:26px 18px 40px;}
 
   .hero{text-align:center;margin-bottom:26px;}
   .hero .emoji{font-size:44px;line-height:1;margin-bottom:8px;}
@@ -96,7 +96,91 @@
     text-align:center;font-family:'Gaegu',cursive;font-weight:700;font-size:16px;
     color:#9C8F84;margin-top:30px;
   }
-  @media (max-width:520px){ .sun{width:110px;height:110px;right:6%;} }
+
+  /* --- 추가된 아티클 영역 스타일 (반응형 및 테마 반영) --- */
+  .article-section {
+    position: relative;
+    z-index: 2;
+    max-width: 640px;
+    width: 100%;
+    margin: 60px auto 40px;
+    padding: 36px 32px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(63, 58, 66, 0.08);
+    color: var(--ink);
+    line-height: 1.7;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .article-section .article-eyebrow {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--g5d);
+    letter-spacing: 0.1em;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .article-section h2.article-title {
+    font-family: 'Jua', sans-serif;
+    font-size: 24px;
+    color: var(--pink-d);
+    text-align: center;
+    margin-bottom: 24px;
+    line-height: 1.4;
+  }
+  .article-section h3 {
+    font-family: 'Jua', sans-serif;
+    font-size: 19px;
+    color: var(--g3d);
+    margin: 32px 0 12px;
+  }
+  .article-section h4 {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 20px 0 8px;
+    color: var(--ink);
+  }
+  .article-section p {
+    font-size: 15px;
+    color: var(--ink-soft);
+    margin-bottom: 16px;
+  }
+  .article-section strong {
+    color: var(--ink);
+    font-weight: 700;
+  }
+  .article-section ul {
+    padding-left: 20px;
+    margin-bottom: 24px;
+    color: var(--ink-soft);
+    font-size: 15px;
+  }
+  .article-section li {
+    margin-bottom: 8px;
+  }
+  .article-section .highlight-box {
+    background: #FFF3E4;
+    padding: 20px;
+    border-radius: 12px;
+    margin: 32px 0 12px;
+    border-left: 4px solid var(--g5d);
+  }
+  .article-section .highlight-box p {
+    margin: 0;
+    color: var(--ink);
+    font-weight: 500;
+    text-align: center;
+  }
+
+  @media (max-width:520px){ 
+    .sun{width:110px;height:110px;right:6%;} 
+    .article-section {
+      padding: 28px 22px;
+      margin: 40px 16px 30px;
+      width: auto;
+    }
+  }
 </style>
 </head>
 <body>
@@ -187,6 +271,40 @@
   </div>
 
   <div class="foot">좋은 아침이에요! 오늘도 힘차게 시작해요 ☀️</div>
+</div>
+
+<!-- 추가된 아티클(설명글) 영역 -->
+<div class="article-section">
+  <div class="article-eyebrow">초등 학급 경영 노하우</div>
+  <h2 class="article-title">하루 10분의 기적, 알찬 아침을 여는<br>'매일 아침 활동지' 활용 가이드</h2>
+  
+  <p>초등학교 교실의 아침 시간은 늘 분주합니다. 아이들이 등교하여 가방을 정리하고 1교시 수업이 시작되기 전까지 주어지는 10~15분의 짧은 시간. 이 자투리 시간을 어떻게 보내느냐에 따라 그날 하루 학급의 전체적인 분위기와 아이들의 집중력이 크게 좌우됩니다.</p>
+
+  <p>차분하고 안정적인 하루를 열기 위해 많은 교실에서 아침 독서나 연산 학습을 진행하지만, 매일 새로운 학습지를 찾고 학년 수준에 맞게 재구성하여 인쇄하는 과정은 결코 쉬운 일이 아닙니다. 바쁜 아침 업무 시간에 쫓기다 보면 활동지 준비가 부담으로 다가오기도 합니다.</p>
+  
+  <p>이러한 교실 현장의 실질적인 고민을 덜어주고, 아이들에게는 매일 의미 있는 배움의 루틴을 만들어주기 위해 <strong>'3~6학년 매일 아침 활동지'</strong> 프로그램이 탄생했습니다.</p>
+
+  <h3>📚 '매일 아침 활동지'의 3가지 핵심 장점</h3>
+  
+  <h4>1. 수학 중심의 탄탄한 기초 학력 다지기</h4>
+  <p>수학은 벼락치기가 통하지 않는, 매일 꾸준히 감각을 유지하는 것이 가장 중요한 과목입니다. 학년별 필수 연산과 기초 개념을 중심으로 구성된 활동지를 매일 해결하며, 아이들은 수학에 대한 두려움을 없애고 탄탄한 기초 학력과 자신감을 키울 수 있습니다.</p>
+
+  <h4>2. 다양한 주제로 채우는 지루할 틈 없는 시간</h4>
+  <p>수학 문제만 빼곡한 학습지는 자칫 아이들을 지치게 할 수 있습니다. 이 프로그램은 수학을 뼈대로 하되, 어휘력, 맞춤법, 속담, 간단한 일반 상식 등 초등학생이 꼭 알아야 할 다양한 기초 학습 내용을 적절히 섞어 제공합니다. 덕분에 매일 아침 새로운 퀴즈를 푸는 듯한 즐거움을 선사합니다.</p>
+
+  <h4>3. 선생님의 아침을 여유롭게 (준비 시간 제로)</h4>
+  <p>3학년부터 6학년까지, 중·고학년 수준에 맞춘 활동지가 매일 자동으로 새롭게 구성되어 제공됩니다. 클릭 몇 번이면 오늘의 활동지가 완성되므로, 더 이상 아침마다 자료를 검색하고 편집하느라 귀중한 시간을 쏟을 필요가 없습니다.</p>
+
+  <h3>💡 교실 속 200% 활용 팁</h3>
+  <ul>
+    <li><strong>자기주도적 루틴 형성:</strong> 등교하자마자 책상 위에 놓인 활동지를 스스로 풀어보는 습관을 길러주세요. 교실이 한결 차분해집니다.</li>
+    <li><strong>짝꿍 멘토링:</strong> 다 푼 후에는 짝꿍과 서로 채점해 주거나, 모르는 문제를 서로 가르쳐주는 시간을 가지면 또래 학습 효과를 거둘 수 있습니다.</li>
+    <li><strong>가정 학습 연계:</strong> 방학이나 주말, 혹은 복습이 필요한 학생들에게 링크를 제공하여 가정에서도 꾸준히 기초 학력을 다지는 용도로 활용하기 좋습니다.</li>
+  </ul>
+
+  <div class="highlight-box">
+    <p>작은 물방울이 바위를 뚫듯, 매일 아침 쌓아가는 10분의 시간은 한 학기가 끝날 무렵 아이들의 놀라운 성장으로 돌아올 것입니다.<br>오늘부터 <strong>'매일 아침 활동지'</strong>와 함께 평화롭고 유익한 교실의 아침을 맞이해 보세요!</p>
+  </div>
 </div>
 
 </body>
