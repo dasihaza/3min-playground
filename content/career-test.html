@@ -30,14 +30,15 @@
     font-family: 'Noto Sans KR', sans-serif;
     min-height:100vh;
     display:flex;
+    flex-direction: column; /* 세로 정렬 추가 */
     align-items:center;
-    justify-content:center;
     padding:32px 16px;
   }
   .stage{
     width:100%;
     max-width:640px;
     position:relative;
+    margin-bottom: 40px; /* 아티클과의 간격 확보 */
   }
   .card{
     background: var(--paper-light);
@@ -221,15 +222,75 @@
   }
   .hidden{ display:none !important; }
 
+  /* --- 추가된 아티클 영역 스타일 --- */
+  .article-section {
+    max-width: 640px;
+    width: 100%;
+    margin: 20px auto 40px;
+    padding: 32px 36px;
+    background: var(--paper-light);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+    color: var(--ink);
+    line-height: 1.7;
+  }
+  .article-section h2.article-title {
+    font-family: 'Gowun Batang', serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--rust);
+    text-align: center;
+    margin-bottom: 24px;
+    line-height: 1.4;
+  }
+  .article-section h3 {
+    font-family: 'Gowun Batang', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--pine);
+    margin: 28px 0 12px;
+  }
+  .article-section h4 {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 20px 0 8px;
+    color: var(--ink);
+  }
+  .article-section p {
+    font-size: 15px;
+    color: var(--ink-soft);
+    margin-bottom: 16px;
+  }
+  .article-section strong {
+    color: var(--ink);
+    font-weight: 700;
+  }
+  .article-section .highlight-box {
+    background: var(--paper);
+    padding: 20px;
+    border-radius: 4px;
+    margin: 24px 0;
+    border-left: 4px solid var(--brass);
+  }
+  .article-section .highlight-box p {
+    margin: 0;
+    color: var(--ink);
+    font-weight: 500;
+    text-align: center;
+  }
+
   @media (max-width:480px){
     .card{ padding:30px 22px; }
     h1{ font-size:27px; }
     h2.q{ font-size:19px; }
+    .article-section { padding: 24px 20px; margin-top: 10px; }
+    .article-section h2.article-title { font-size: 21px; }
   }
 </style>
 </head>
 <body>
-<div style="max-width:640px;margin:0 auto;padding:18px 16px 0;display:flex;align-items:center;justify-content:space-between;font-family:'Noto Sans KR',sans-serif;">
+<div style="width:100%;max-width:640px;margin:0 auto;padding:18px 16px 24px;display:flex;align-items:center;justify-content:space-between;font-family:'Noto Sans KR',sans-serif;">
   <a href="../index.html" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:#2b2a24;">
     <svg width="28" height="28" viewBox="0 0 34 34" fill="none">
       <circle cx="17" cy="18" r="14" fill="#faf6ec" stroke="#2b2a24" stroke-width="2"/>
@@ -240,8 +301,8 @@
   </a>
   <a href="../index.html" style="font-size:12.5px;font-weight:700;color:#57544a;border:1px solid rgba(43,42,36,0.18);padding:7px 12px;border-radius:999px;text-decoration:none;">← 다른 콘텐츠 보기</a>
 </div>
-<div class="stage">
 
+<div class="stage">
   <!-- INTRO -->
   <div class="card" id="screen-intro">
     <div class="mark">
@@ -300,11 +361,46 @@
     </div>
     <div class="footer-note">가볍게 즐기는 자기 이해 도구입니다. 진로는 결국 당신이 정합니다.</div>
   </div>
-
 </div>
 
-<div style="max-width:640px;margin:22px auto 0;padding:0 16px;">
-<footer style="text-align:center;color:#57544a;font-size:12px;padding:22px 0 46px;">© 2026 3분 놀이터. 콘텐츠는 재미로 즐겨주세요.</footer>
+<!-- 추가된 아티클(설명글) 영역 -->
+<div class="article-section">
+  <div style="font-size: 13px; font-weight: 700; color: var(--brass); letter-spacing: 0.1em; text-align: center; margin-bottom: 8px;">진로 탐색 첫걸음</div>
+  <h2 class="article-title">10가지 질문으로 찾아보는 나의 미래,<br>'커리어 나침반' 활용 가이드</h2>
+  
+  <p>학생들에게 "커서 어떤 사람이 되고 싶나요?"라고 물어보면 쉽게 대답하지 못하고 막연해하는 경우가 많습니다. 아직 세상에 어떤 직업들이 있는지 잘 알지 못할뿐더러, 자기 자신이 무엇을 좋아하고 어떤 일에 흥미를 느끼는지 깊게 생각해 볼 기회가 부족했기 때문입니다.</p>
+
+  <p>올바른 진로 교육의 시작은 거창한 직업 백과사전을 뒤적이는 것이 아니라, 가장 먼저 <strong>'나 자신을 이해하는 것'</strong>에서 출발해야 합니다. 내가 혼자서 집중하는 것을 좋아하는지, 친구들과 협동하며 무언가를 만들어내는 것을 좋아하는지 파악하는 과정이 진로 설계의 가장 튼튼한 기초 공사가 됩니다.</p>
+  
+  <p>학생들이 스스로의 성향을 즐겁게 발견하고 진로에 대한 흥미를 느낄 수 있도록 돕기 위해 <strong>'나의 커리어 나침반'</strong> 테스트를 개발했습니다.</p>
+
+  <h3>🧭 '나의 커리어 나침반'은 어떤 프로그램인가요?</h3>
+  <p>'나의 커리어 나침반'은 길고 지루한 문항들로 이루어진 딱딱한 적성 검사에서 벗어나, 학생들이 딱 <strong>10가지의 흥미로운 질문</strong>을 통해 자신의 성향을 빠르고 재미있게 알아볼 수 있는 진로 교육용 웹 프로그램입니다.</p>
+  <p>단순히 "수학을 좋아하나요?"와 같은 일차원적인 질문 대신, 학교생활이나 일상에서 흔히 겪을 수 있는 구체적인 상황을 제시합니다. 이를 통해 학생들은 깊게 고민하지 않고 직관적으로 자신의 평소 행동과 생각을 선택하며 테스트에 몰입할 수 있습니다.</p>
+
+  <h3>💡 교실과 가정에서 이렇게 활용해 보세요</h3>
+  <p>이 프로그램은 거창한 준비 없이도 학생들의 진로 교육 자료로 간편하게 활용할 수 있도록 설계되었습니다.</p>
+  
+  <h4>1. 집중력을 잃지 않는 '10문항'의 마법</h4>
+  <p>수십 개의 질문이 이어지는 검사는 자칫 아이들을 지치게 만들 수 있습니다. 10가지 핵심 문항으로 구성된 이 테스트는 아침 자습 시간, 창의적 체험활동(진로) 시간, 혹은 자투리 시간 등 언제 어디서나 부담 없이 참여할 수 있는 최적의 분량을 제공합니다.</p>
+  
+  <h4>2. 결과보다 중요한 '자기 이해'의 시간</h4>
+  <p>테스트 결과로 제시되는 직업은 하나의 예시일 뿐입니다. 가장 중요한 것은 결과에 담긴 <strong>'성향에 대한 설명'</strong>입니다. 학생들은 "내가 꼼꼼하고 규칙을 잘 지키는 성향이구나", "나는 새로운 아이디어를 내는 걸 즐기는구나"라며 스스로를 객관적으로 바라보는 힘을 기르게 됩니다.</p>
+
+  <h4>3. 소통과 확장의 도구</h4>
+  <p>테스트가 끝난 후, 결과 화면을 바탕으로 짝꿍이나 모둠원과 이야기를 나누는 시간을 가져보세요. "너는 이런 성향이라서 이런 직업이 어울린다고 나왔구나!", "나는 네가 이 직업이랑 정말 잘 맞는다고 생각해"라며 서로의 장점을 찾아주고 격려하는 긍정적인 학급 분위기를 형성할 수 있습니다.</p>
+
+  <h3>👨‍🏫 선생님과 학부모님을 위한 지도 팁</h3>
+  <p>학생들과 함께 이 테스트를 진행하실 때는 결과로 나온 직업이 무조건 정답이라고 결론지어 주기보다는, <strong>대화의 물꼬를 트는 가벼운 도구</strong>로 활용해 주시기를 권장합니다.</p>
+  <p>"네가 평소에 친구들 이야기를 잘 들어주더니, 누군가를 돕는 일에 어울린다고 나왔네. 선생님도 그렇게 생각해!"처럼 학생의 평소 긍정적인 모습과 테스트 결과를 연결해 칭찬해 주시면 좋습니다.</p>
+  
+  <div class="highlight-box">
+    <p>오늘 아이들과 함께 '나의 커리어 나침반'을 돌려보며, 숨겨져 있던 반짝이는 재능과 성향을 발견하는 즐거운 시간을 가져보시길 바랍니다!</p>
+  </div>
+</div>
+
+<div style="width:100%;max-width:640px;margin:0 auto;padding:0 16px;">
+<footer style="text-align:center;color:#57544a;font-size:12px;padding:12px 0 46px;">© 2026 3분 놀이터. 콘텐츠는 재미로 즐겨주세요.</footer>
 </div>
 
 <script>
