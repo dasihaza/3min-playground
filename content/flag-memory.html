@@ -6,6 +6,11 @@
 <title>세계 국기 짝 맞추기 | 3분 놀이터</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+
+<!-- 파이어베이스 라이브러리 추가 -->
+<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
+
 <style>
   :root{
     --sky:#DFF3FF; --sky2:#C9E9FB;
@@ -48,7 +53,7 @@
     box-shadow:0 3px 0 var(--sky2);
   }
 
-  /* 점수판 (맞춘 짝, 뒤집은 횟수, 걸린 시간 3개로 축소) */
+  /* 점수판 */
   .board{
     display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin:10px 0 12px;
   }
@@ -74,6 +79,7 @@
   .sb-score { font-family: monospace; font-size: 13.5px; color: #A9D1F4; text-align: right; }
   .sb-empty { text-align: center; color: #8494A6; font-size: 13px; padding: 8px 0; }
 
+  /* 버튼 설정 */
   .btn{
     font-family:'Jua',sans-serif;border:none;cursor:pointer;font-size:15px;
     padding:11px 20px;border-radius:13px;background:var(--pink);color:#fff;
@@ -84,6 +90,7 @@
   .btn.ghost{background:#fff;color:var(--ink);box-shadow:0 4px 0 var(--line);}
   .btn.ghost:hover{box-shadow:0 3px 0 var(--line);}
   .btn.sm{font-size:13px;padding:9px 15px;border-radius:11px;}
+  .btn:disabled {opacity: 0.5; pointer-events: none; cursor: not-allowed;} 
   .tools{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;}
 
   /* 카드판 */
@@ -93,11 +100,11 @@
   }
   
   /* 난이도별 카드 크기 조절 */
-  .grid[data-diff="8"] .card  { width:23.2%; margin:0.9%; }  /* 4칸씩 */
-  .grid[data-diff="15"] .card { width:15.6%; margin:0.53%; } /* 6칸씩 */
-  .grid[data-diff="25"] .card { width:9.2%;  margin:0.4%; }  /* 10칸씩 */
+  .grid[data-diff="8"] .card  { width:23.2%; margin:0.9%; }  
+  .grid[data-diff="15"] .card { width:15.6%; margin:0.53%; } 
+  .grid[data-diff="25"] .card { width:9.2%;  margin:0.4%; }  
 
-  .card::before{ content:""; display:block; padding-top:132%; }   /* 세로 비율 */
+  .card::before{ content:""; display:block; padding-top:132%; }   
   .inner{ position:absolute; top:0; left:0; right:0; bottom:0; }
 
   .face{
@@ -114,12 +121,10 @@
     box-shadow:0 3px 0 var(--line), inset 0 0 0 3px #fff;
   }
   
-  /* 뒤집힌 상태 */
   .card.open .back, .card.done .back{ display:none; }
   .card.open .front, .card.done .front{ display:flex; animation:flipIn .3s ease; }
   @keyframes flipIn{ 0%{transform:scaleX(.15);} 60%{transform:scaleX(1.06);} 100%{transform:scaleX(1);} }
 
-  /* 국기 영역 (위쪽 65%)과 이름 영역 (아래쪽 35%) 분리 */
   .front img{ 
     width:100%; flex:1; min-height:0; object-fit:contain; 
     border-radius:4px; background:#F4F8FB; margin-bottom:2px;
@@ -130,7 +135,6 @@
     color:var(--ink); word-break:keep-all;
   }
 
-  /* 난이도별 폰트 크기 조정 */
   .grid[data-diff="8"] .front .nm { font-size: clamp(13px, 2.5vw, 17px); }
   .grid[data-diff="15"] .front .nm { font-size: clamp(11px, 1.8vw, 14px); }
   .grid[data-diff="25"] .front .nm { font-size: clamp(8px, 1.1vw, 12px); }
@@ -157,17 +161,17 @@
 
   /* 모바일 최적화 반응형 레이아웃 */
   @media (max-width:900px){ 
-    .grid[data-diff="25"] .card { width:11.7%; margin:0.4%; } /* 어려움 8칸씩 */
+    .grid[data-diff="25"] .card { width:11.7%; margin:0.4%; } 
   }
   @media (max-width:680px){ 
-    .grid[data-diff="25"] .card { width:18.2%; margin:0.9%; } /* 어려움 5칸씩 */
-    .grid[data-diff="15"] .card { width:18.2%; margin:0.9%; } /* 보통 5칸씩 */
+    .grid[data-diff="25"] .card { width:18.2%; margin:0.9%; } 
+    .grid[data-diff="15"] .card { width:18.2%; margin:0.9%; } 
     .grid[data-diff="25"] .front .nm { font-size: clamp(10px, 2.5vw, 13px); }
     .grid[data-diff="15"] .front .nm { font-size: clamp(11px, 2.8vw, 14px); }
   }
   @media (max-width:420px){ 
-    .grid[data-diff="25"] .card { width:23.2%; margin:0.9%; } /* 어려움 4칸씩 */
-    .grid[data-diff="15"] .card { width:23.2%; margin:0.9%; } /* 보통 4칸씩 */
+    .grid[data-diff="25"] .card { width:23.2%; margin:0.9%; } 
+    .grid[data-diff="15"] .card { width:23.2%; margin:0.9%; } 
     .grid[data-diff="25"] .front .nm { font-size: 11px; }
     .grid[data-diff="15"] .front .nm { font-size: 12px; }
   }
@@ -207,15 +211,15 @@
 
   <!-- 랭킹 전광판 -->
   <div class="scoreboard" id="scoreboard">
-    <div class="sb-head">🏆 명예의 전당 (TOP 3)</div>
+    <div class="sb-head">🏆 글로벌 명예의 전당 (TOP 3)</div>
     <div id="sb-list">
-      <!-- 자바스크립트로 랭킹이 표시됩니다 -->
+      <div class="sb-empty">서버에서 기록을 불러오는 중...</div>
     </div>
   </div>
 
   <div class="tools">
     <button class="btn" onclick="newGame()">🔄 새 게임</button>
-    <button class="btn ghost sm" onclick="peek()">👀 잠깐 보기</button>
+    <button class="btn ghost sm" onclick="peek()" id="peek-btn">👀 잠깐 보기 (1회)</button>
     <button class="btn ghost sm" onclick="toggleSound()" id="snd-btn">🔊 소리 켜짐</button>
   </div>
 
@@ -235,6 +239,20 @@
 <canvas id="confetti"></canvas>
 
 <script>
+/* ===== 파이어베이스 설정 및 초기화 ===== */
+const firebaseConfig = {
+  apiKey: "AIzaSyAqXsG8npxettrCRH3MbZwFZGLg5aehxdw",
+  authDomain: "min-playground.firebaseapp.com",
+  projectId: "min-playground",
+  storageBucket: "min-playground.firebasestorage.app",
+  messagingSenderId: "472071492052",
+  appId: "1:472071492052:web:00263046925133e55a4641"
+};
+
+// 파이어베이스 초기화
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
 /* 보안용 특수문자 치환 함수 */
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
 
@@ -263,6 +281,70 @@ const COUNTRIES = [
 ];
 
 let PAIRS = 15; /* 기본 난이도: 보통(15쌍) */
+
+/* ===== 실시간 데이터베이스 (글로벌 TOP 3) ===== */
+let currentTop3 = [];
+let unsubscribeTop3 = null;
+
+// 파이어베이스에서 실시간으로 기록 불러오기 (다른 사람이 깨면 즉시 반영)
+function listenTop3() {
+  if (unsubscribeTop3) unsubscribeTop3(); // 기존 연결 끊기
+  
+  unsubscribeTop3 = db.collection('flag_rankings').doc('diff_' + PAIRS)
+    .onSnapshot((doc) => {
+      if (doc.exists) {
+        currentTop3 = doc.data().top3 || [];
+      } else {
+        currentTop3 = [];
+      }
+      renderTop3();
+    });
+}
+
+// 화면에 전광판 그리기
+function renderTop3() {
+  const sbList = document.getElementById('sb-list');
+  if (currentTop3.length === 0) {
+      sbList.innerHTML = '<div class="sb-empty">아직 기록이 없어요. 첫 도전자가 되어보세요!</div>';
+      return;
+  }
+  
+  let html = '';
+  const medals = ['🥇', '🥈', '🥉'];
+  for(let i=0; i<3; i++) {
+      if(currentTop3[i]) {
+          html += '<div class="sb-item">' +
+                    '<div><span class="sb-rank">' + medals[i] + '</span> <span class="sb-name">' + esc(currentTop3[i].name) + '</span></div>' +
+                    '<span class="sb-score">' + fmt(currentTop3[i].sec) + ' (' + currentTop3[i].tries + '회)</span>' +
+                  '</div>';
+      }
+  }
+  sbList.innerHTML = html;
+}
+
+// 새 기록 파이어베이스에 저장하기
+async function saveNewRecord(nick, sec, tries) {
+  const docRef = db.collection('flag_rankings').doc('diff_' + PAIRS);
+  try {
+    const docSnap = await docRef.get();
+    let arr = [];
+    if (docSnap.exists) {
+        arr = docSnap.data().top3 || [];
+    }
+    arr.push({name: nick, sec: sec, tries: tries});
+    
+    // 시간 오름차순, 횟수 오름차순으로 정렬
+    arr.sort(function(a, b){
+        if(a.sec !== b.sec) return a.sec - b.sec;
+        return a.tries - b.tries;
+    });
+    
+    arr = arr.slice(0, 3); // 3등까지만 자르기
+    await docRef.set({ top3: arr }); // 데이터베이스에 덮어쓰기
+  } catch(e) {
+    console.error("기록 저장 중 오류 발생: ", e);
+  }
+}
 
 /* ===== 소리 ===== */
 let audioCtx=null, soundOn=true;
@@ -296,7 +378,7 @@ function toggleSound(){
 }
 
 /* ===== 게임 ===== */
-let deck=[], first=null, lock=false, matched=0, tries=0, startAt=0, timer=null, peeking=false;
+let deck=[], first=null, lock=false, matched=0, tries=0, startAt=0, timer=null, peeking=false, peekUsed=false;
 
 function shuffle(a){
   a=a.slice();
@@ -318,17 +400,27 @@ function setDiff(p, btn) {
   document.querySelectorAll('.diff-btn').forEach(function(b){ b.classList.remove('active'); });
   btn.classList.add('active');
   document.getElementById('grid').dataset.diff = p;
+  
+  // 난이도가 바뀌면 해당 난이도의 랭킹을 실시간으로 가져옴
+  listenTop3();
   newGame();
 }
 
 function newGame(){
   if(timer){ clearInterval(timer); timer=null; }
-  first=null; lock=false; matched=0; tries=0; peeking=false;
+  
+  // 상태 초기화
+  first=null; lock=false; matched=0; tries=0; peeking=false; peekUsed=false;
+  
+  // 잠깐 보기 버튼 초기화
+  const peekBtn = document.getElementById('peek-btn');
+  peekBtn.disabled = false;
+  peekBtn.textContent = '👀 잠깐 보기 (1회)';
+
   document.getElementById('s-match').textContent='0';
   document.getElementById('s-try').textContent='0';
   document.getElementById('s-time').textContent='00:00';
   document.getElementById('done-box').classList.add('hidden');
-  showTop3();
 
   const picked = shuffle(COUNTRIES).slice(0, PAIRS);
   deck = shuffle(picked.concat(picked));
@@ -393,8 +485,14 @@ function flip(el){
 }
 
 function peek(){
-  if(peeking || lock) return;
+  if(peeking || lock || peekUsed) return; 
   peeking=true;
+  peekUsed=true; 
+  
+  const peekBtn = document.getElementById('peek-btn');
+  peekBtn.disabled = true;
+  peekBtn.textContent = '👀 사용 완료';
+
   const cards=Array.prototype.slice.call(document.querySelectorAll('.card:not(.done)'));
   cards.forEach(function(c){ c.classList.add('open'); });
   setTimeout(function(){
@@ -408,74 +506,33 @@ function finish(){
   const sec=Math.floor((Date.now()-startAt)/1000);
   sWin(); popConfetti();
 
-  let top3 = getTop3();
   let isNewRecord = false;
   
-  /* TOP 3 기록 진입 조건 확인 (기록이 3개 미만이거나, 3등보다 시간이 짧거나, 시간이 같지만 횟수가 적은 경우) */
-  if (top3.length < 3 || sec < top3[top3.length - 1].sec) {
+  /* 글로벌 TOP 3 진입 조건 확인 */
+  if (currentTop3.length < 3 || sec < currentTop3[currentTop3.length - 1].sec) {
       isNewRecord = true;
-  } else if (sec === top3[top3.length - 1].sec && tries < top3[top3.length - 1].tries) {
+  } else if (sec === currentTop3[currentTop3.length - 1].sec && tries < currentTop3[currentTop3.length - 1].tries) {
       isNewRecord = true;
   }
 
   let msg = '뒤집은 횟수 '+tries+'번 · 걸린 시간 '+fmt(sec);
 
   if (isNewRecord) {
-      msg += '<br>🏆 <b>명예의 전당 TOP 3 기록 달성!</b>';
+      msg += '<br>🏆 <b>글로벌 명예의 전당 TOP 3 달성!</b>';
       
-      // 렌더링이 먼저 될 수 있도록 약간의 지연 후 prompt 띄움
       setTimeout(function() {
-          let nick = prompt("🎉 축하합니다! 명예의 전당(TOP 3)에 올랐습니다!\n전광판에 등록할 닉네임을 입력해주세요 (최대 8글자):", "익명");
+          let nick = prompt("🎉 축하합니다! 글로벌 명예의 전당(TOP 3)에 올랐습니다!\n전광판에 등록할 닉네임을 입력해주세요 (최대 8글자):", "익명");
           if (nick === null || nick.trim() === '') nick = "익명";
           nick = nick.substring(0, 8); 
-
-          top3.push({name: nick, sec: sec, tries: tries});
           
-          // 시간 오름차순, 시간이 같으면 횟수 오름차순 정렬
-          top3.sort(function(a, b){
-              if(a.sec !== b.sec) return a.sec - b.sec;
-              return a.tries - b.tries;
-          });
-          top3 = top3.slice(0, 3); // 3등까지만 유지
-          setTop3(top3);
-          showTop3();
+          // 파이어베이스에 새 기록 저장
+          saveNewRecord(nick, sec, tries);
       }, 100);
   }
 
   document.getElementById('done-msg').innerHTML=msg;
   document.getElementById('done-box').classList.remove('hidden');
   document.getElementById('done-box').scrollIntoView({behavior:'smooth',block:'center'});
-}
-
-/* 최고 기록 전광판 (난이도별 저장) */
-function getTop3Key(){ return 'sambun-flag-memory-top3-' + PAIRS; }
-function getTop3(){ 
-    try { return JSON.parse(localStorage.getItem(getTop3Key()) || '[]'); } 
-    catch(e) { return []; } 
-}
-function setTop3(arr){ 
-    try { localStorage.setItem(getTop3Key(), JSON.stringify(arr)); } catch(e){} 
-}
-function showTop3(){
-  const arr = getTop3();
-  const sbList = document.getElementById('sb-list');
-  
-  if (arr.length === 0) {
-      sbList.innerHTML = '<div class="sb-empty">아직 기록이 없어요. 첫 도전자가 되어보세요!</div>';
-      return;
-  }
-  
-  let html = '';
-  const medals = ['🥇', '🥈', '🥉'];
-  for(let i=0; i<3; i++) {
-      if(arr[i]) {
-          html += '<div class="sb-item">' +
-                    '<div><span class="sb-rank">' + medals[i] + '</span> <span class="sb-name">' + esc(arr[i].name) + '</span></div>' +
-                    '<span class="sb-score">' + fmt(arr[i].sec) + ' (' + arr[i].tries + '회)</span>' +
-                  '</div>';
-      }
-  }
-  sbList.innerHTML = html;
 }
 
 /* 색종이 */
@@ -507,6 +564,9 @@ function drawConfetti(){
 
 document.addEventListener('pointerdown', function(){ withAudio(function(){}); }, {once:true});
 document.getElementById('grid').dataset.diff = PAIRS;
+
+// 최초 실행 시 글로벌 랭킹 연동 및 새 게임 시작
+listenTop3();
 newGame();
 </script>
 </body>
