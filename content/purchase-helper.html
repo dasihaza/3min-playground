@@ -239,9 +239,19 @@ function isNoise(t){
   var flat = t.replace(/\s+/g,'');
   if(/간편결제|결제수단|결제설정|스마일페이|스마일캐시|SSG페이|엘페이|카카오페이|네이버페이|페이코|토스페이|신용카드|체크카드|계좌이체|무통장|가상계좌|할부|현금영수증/.test(flat)) return true;
 
+  /* 결제·요약 영역 — 줄 어디에 있어도 걸러낸다
+     ('일반 결제 혜택더보기', '최종 결제금액', '적립 혜택' 등) */
+  if(/결제|혜택|더보기|적립|쿠폰|배송지|개인정보|전자상거래|구매안전|공지|고지/.test(flat)) return true;
+
   /* 배송·구매 안내 문구 */
   if(/원\s*이상.*(무료|배송|구매)/.test(t)) return true;
   if(/(배송비|무료배송|도착보장|배송예정|출고)/.test(t) && t.length <= 30) return true;
+
+  /* 광고·안내 문장 — 상품명은 '~있어요!' 처럼 끝나지 않는다
+     예) '전환하면 바로 사용할 수 있어요!', '쿠폰을 적용해보세요!' */
+  if(/(어요|아요|해요|예요|에요|세요|구요|네요|군요|겠어요|됩니다|입니다|습니다|합니다|십시오)\s*[!?.~]*$/.test(t)) return true;
+  if(/!/.test(t) && t.length >= 8 && !/[\d]/.test(t.replace(/[^\d]/g,'').slice(0,0))) { if(/(할인|특가|최저|무료|증정|혜택|쿠폰|인하|저렴|추천|필수|인기)/.test(t)) return true; }
+  if(/^(전환|적립|혜택|응모|참여|가입|이벤트|알림|안내|공지|추천)/.test(t)) return true;
 
   /* '원' 처럼 단위 글자만 남은 줄 */
   if(/^(원|개|건|명|점|팩|매|장|권|박스|세트)$/.test(t)) return true;
@@ -255,6 +265,44 @@ function isQtyLine(t){
 }
 /* 옵션으로 보이는 줄 */
 function isOptLine(t){ return /^옵션/.test(t); }
+
+
+/* ===== 결제 요약 영역 미리 지우기 =====
+   '최종 결제금액 / 300,480원' 같은 요약 금액이 앞줄 글자에 달라붙어
+   품목처럼 잡히는 것을 막기 위해, 읽기 전에 아예 없애 버린다. */
+/* 주의 : G마켓 장바구니의 '상품 금액 :' 은 품목의 금액이므로 요약에서 제외한다.
+   요약의 '상품금액' 은 콜론이 없다. */
+var SUMMARY_LABEL = /최종\s*결제\s*금액|총\s*결제\s*금액|결제\s*예정|주문\s*금액|할인\s*금액|쿠폰\s*할인|즉시\s*할인|배송비\s*합계|적립\s*혜택|적립\s*예정|결제하기|총\s*주문|소계/;
+var CARD_LINE = /현대카드|삼성카드|신한카드|국민카드|롯데카드|비씨카드|BC카드|하나카드|우리카드|농협카드|카드사|무이자|할부|혜택받기|추가\s*적립/;
+
+function stripSummary(lines){
+  var out = lines.slice();
+  for(var i=0;i<out.length;i++){
+    var t = out[i].trim();
+    if(!t) continue;
+    var flat = t.replace(/\s+/g,'');
+
+    /* G마켓 장바구니의 '상품 금액 :' 은 품목 금액이므로 건드리지 않는다 */
+    if(/상품\s*금액\s*[:：]/.test(t)) continue;
+
+    var isSummary = SUMMARY_LABEL.test(t)
+                 || CARD_LINE.test(flat)
+                 || /결제|혜택|더보기|적립/.test(flat)
+                 || (/상품\s*금액/.test(t));
+
+    if(!isSummary) continue;
+
+    out[i]='';
+    /* 요약 표시 하나에는 값이 하나뿐이므로, 뒤따르는 금액은 한 줄만 지운다 */
+    for(var k=i+1;k<out.length;k++){
+      var n = out[k].trim();
+      if(!n) continue;
+      if(/^[\-\u2212+]?\s*[\d,]{2,}\s*원?$/.test(n)) out[k]='';
+      break;
+    }
+  }
+  return out;
+}
 
 /* 방법 ① 상품 링크 */
 function startsByLink(lines){
@@ -365,16 +413,25 @@ function getQty(block){
 /* ---------- ② 금액 : '상품 금액 :' 뒤 첫 번째 값 ---------- */
 function getAmount(block){
   /* 위에서부터 훑어 가장 먼저 나오는 금액을 쓴다.
-     '상품 금액' 표시가 있으면 그 뒤 값을, 없으면 그냥 첫 금액을 쓴다.
-     (아래쪽 결제 요약의 '상품금액 392,200원' 을 잘못 집지 않도록) */
+     요약 영역은 미리 지워지지만, 혹시 남아 있어도 건너뛴다. */
   for(var i=0;i<block.length;i++){
     var L = block[i].trim();
+    if(!L) continue;
 
-    if(/상품\s*금액/.test(L)){
-      var same = L.match(/상품\s*금액\s*[:：]?\s*([\d,]{3,})\s*원?/);
+    /* 요약·카드·결제 안내 줄은 그 뒤 금액까지 건너뛴다 */
+    if(SUMMARY_LABEL.test(L) || CARD_LINE.test(L.replace(/\s+/g,'')) ||
+       (/상품\s*금액/.test(L) && !/상품\s*금액\s*[:：]/.test(L))){
+      for(var j=i+1;j<block.length && j<=i+2;j++){
+        if(/^[\-\u2212+]?\s*[\d,]{2,}\s*원?$/.test(block[j].trim())) i=j; else break;
+      }
+      continue;
+    }
+
+    if(/상품\s*금액\s*[:：]/.test(L)){
+      var same = L.match(/상품\s*금액\s*[:：]\s*([\d,]{3,})\s*원?/);
       if(same) return num(same[1]);
       for(var k=i+1;k<block.length && k<=i+4;k++){
-        var n1 = block[k].trim().match(/^([\d,]{3,})\s*원?/);
+        var n1 = block[k].trim().match(/^([\d,]{3,})\s*원?$/);
         if(n1){ var v1=num(n1[1]); if(v1>=100) return v1; }
       }
       continue;
@@ -489,7 +546,7 @@ function buildItems(lines, starts){
 
 /* 네 가지 방법을 모두 시도해 품목을 가장 많이 찾은 것을 쓴다 */
 function parseCart(text){
-  var lines = text.split(/\r?\n/);
+  var lines = stripSummary(text.split(/\r?\n/));
   var tries = [ startsByLink(lines), startsByLabel(lines),
                 startsByAmount(lines), findStartsLoose(lines) ];
   var best = [];
