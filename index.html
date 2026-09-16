@@ -8,36 +8,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
-<style>
-  /* 소개글 영역 전용 스타일 (기존 style.css를 해치지 않게 인라인 추가) */
-  .intro-box {
-    background-color: #FFF6E9;
-    border: 2px dashed #FFC288;
-    border-radius: 16px;
-    padding: 24px 28px;
-    margin: 0 auto 32px;
-    max-width: 680px;
-    text-align: center;
-    box-shadow: 0 4px 12px rgba(255, 194, 136, 0.15);
-  }
-  .intro-box h2 {
-    font-family: 'Jua', sans-serif;
-    color: #FF785A;
-    font-size: 22px;
-    margin: 0 0 12px;
-  }
-  .intro-box p {
-    font-family: 'Noto Sans KR', sans-serif;
-    color: #554A42;
-    font-size: 15px;
-    line-height: 1.7;
-    margin: 0;
-    word-break: keep-all;
-  }
-  .intro-box strong {
-    color: #E8483C;
-  }
-</style>
 </head>
 <body>
 
@@ -59,14 +29,6 @@
     <h1>3분이면 충분해요,<br>지금 하나 골라볼까요?</h1>
     <p>성향 테스트, 밸런스 게임, 미니 퀴즈까지 — 짧고 굵게 즐기는 콘텐츠를 매일 새로 올려요. 부담 없이 하나만 골라보세요.</p>
   </section>
-
-  <!-- 새로 추가된 귀여운 소개글 영역 -->
-  <div class="intro-box">
-    <h2>🎈 놀이와 학습이 만나는 에듀테크 놀이터!</h2>
-    <p>
-      '3분 놀이터'는 교실에서 꼭 필요하지만 <strong>번거로웠던 기능들을 쏙쏙 뽑아 만든 에듀테크 도구 모음</strong>입니다. 기존 도구들을 쓰며 아쉬웠던 2%를 채우고, 복잡한 <strong>로그인 없이 누구나 1초 만에 바로 쓸 수 있도록</strong> 만들었어요! 선생님은 업무를 줄이고, 아이들은 재미있게 배울 수 있는 알찬 공간이 되길 바랍니다. 틈새 시간, 부담 없이 즐겨보세요! 😊
-    </p>
-  </div>
 
 <div class="chip-row" id="filters">
     <button class="chip" data-filter="all" data-active="true">전체</button>
@@ -151,6 +113,10 @@
       <span class="play">학년 고르러 가기 →</span>
     </a>
 
+
+
+
+
     <a class="card" href="content/manmul-quiz.html" data-cat="quiz">
       <div class="badge-row">
         <span class="badge quiz">미니퀴즈</span>
@@ -159,6 +125,16 @@
       <h3>초등 상식 퀴즈(만물박사)</h3>
       <p>충북 동양일보 만물박사 선발대회 대비 예상문제. 매일 새로운 50문제가 출제돼요.</p>
       <span class="play">오늘의 문제 풀기 →</span>
+    </a>
+
+    <a class="card" href="content/flag-memory.html" data-cat="game">
+      <div class="badge-row">
+        <span class="badge game">웹게임</span>
+        <span class="time-pill">3분</span>
+      </div>
+      <h3>세계 국기 짝 맞추기</h3>
+      <p>나라 100개 중 25개를 뽑아 카드 50장! 같은 국기를 찾아 짝을 맞춰요.</p>
+      <span class="play">게임하러 가기 →</span>
     </a>
 
     <a class="card" href="content/core-mixmaster.html" data-cat="game">
@@ -241,7 +217,7 @@
 
   </div>
 
-  <div class="grid">
+<div class="grid">
     <a class="card" href="content/board.html" data-cat="board">
       <div class="badge-row">
         <span class="badge board">게시판</span>
@@ -255,7 +231,7 @@
 
   <footer class="site-footer">
     <div>© 2026 3분 놀이터. 콘텐츠는 재미로 즐겨주세요.</div>
-    <div><a href="privacy.html">개인정보처리방침</a> · 문의: dasihaza@gmail.com</div>
+    <div><a href="privacy.html">개인정보처리방침</a> · 문의: hello@example.com</div>
   </footer>
 
 </div>
