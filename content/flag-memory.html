@@ -48,17 +48,31 @@
     box-shadow:0 3px 0 var(--sky2);
   }
 
-  /* 점수판 */
+  /* 점수판 (맞춘 짝, 뒤집은 횟수, 걸린 시간 3개로 축소) */
   .board{
     display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin:10px 0 12px;
   }
   .stat{
     background:#fff;border-radius:14px;padding:9px 16px;box-shadow:var(--shadow);
-    text-align:center;min-width:88px;
+    text-align:center;min-width:96px;
   }
   .stat b{display:block;font-family:'Jua',sans-serif;font-size:20px;line-height:1.2;}
   .stat span{font-size:11px;color:var(--ink-soft);}
   .stat.m b{color:var(--mint-d);} .stat.t b{color:var(--grape);} .stat.c b{color:var(--pink-d);}
+
+  /* TOP3 랭킹 전광판 */
+  .scoreboard {
+    background: #1D2B36; border-radius: 14px; padding: 12px 18px;
+    margin: 0 auto 16px; max-width: 330px; box-shadow: 0 4px 0 #111A22;
+    color: #fff; text-align: left;
+  }
+  .sb-head { text-align: center; font-family: 'Jua', sans-serif; color: var(--lemon); font-size: 16px; margin-bottom: 8px; letter-spacing: 1px;}
+  .sb-item { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px dashed #3A4B5C; }
+  .sb-item:last-child { border-bottom: none; }
+  .sb-rank { width: 24px; font-size: 16px; text-align: center; }
+  .sb-name { flex: 1; font-weight: 500; font-size: 14px; margin-left: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sb-score { font-family: monospace; font-size: 13.5px; color: #A9D1F4; text-align: right; }
+  .sb-empty { text-align: center; color: #8494A6; font-size: 13px; padding: 8px 0; }
 
   .btn{
     font-family:'Jua',sans-serif;border:none;cursor:pointer;font-size:15px;
@@ -189,7 +203,14 @@
     <div class="stat m"><b id="s-match">0</b><span>맞춘 짝</span></div>
     <div class="stat c"><b id="s-try">0</b><span>뒤집은 횟수</span></div>
     <div class="stat t"><b id="s-time">00:00</b><span>걸린 시간</span></div>
-    <div class="stat"><b id="s-best">–</b><span>최고 기록</span></div>
+  </div>
+
+  <!-- 랭킹 전광판 -->
+  <div class="scoreboard" id="scoreboard">
+    <div class="sb-head">🏆 명예의 전당 (TOP 3)</div>
+    <div id="sb-list">
+      <!-- 자바스크립트로 랭킹이 표시됩니다 -->
+    </div>
   </div>
 
   <div class="tools">
@@ -214,6 +235,9 @@
 <canvas id="confetti"></canvas>
 
 <script>
+/* 보안용 특수문자 치환 함수 */
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
 /* ===== 나라 100개 (국가코드 · 이름) ===== */
 const COUNTRIES = [
  ["kr","대한민국"],["jp","일본"],["cn","중국"],["us","미국"],["gb","영국"],
@@ -289,7 +313,7 @@ function tick(){
 }
 
 function setDiff(p, btn) {
-  if (lock || peeking) return; // 카드 뒤집는 중에는 변경 방지
+  if (lock || peeking) return;
   PAIRS = p;
   document.querySelectorAll('.diff-btn').forEach(function(b){ b.classList.remove('active'); });
   btn.classList.add('active');
@@ -304,7 +328,7 @@ function newGame(){
   document.getElementById('s-try').textContent='0';
   document.getElementById('s-time').textContent='00:00';
   document.getElementById('done-box').classList.add('hidden');
-  showBest();
+  showTop3();
 
   const picked = shuffle(COUNTRIES).slice(0, PAIRS);
   deck = shuffle(picked.concat(picked));
@@ -317,7 +341,6 @@ function newGame(){
     el.dataset.code=c[0];
     el.dataset.idx=i;
     
-    // 국기가 엑박으로 사라지는 현상 방지: onerror 핸들러에서 display='none'을 삭제하고 안전한 백업 이미지 경로로 대체
     el.innerHTML =
       '<div class="inner">'
     +   '<div class="face back">🌍</div>'
@@ -385,25 +408,74 @@ function finish(){
   const sec=Math.floor((Date.now()-startAt)/1000);
   sWin(); popConfetti();
 
-  let msg='뒤집은 횟수 '+tries+'번 · 걸린 시간 '+fmt(sec);
-  const best=getBest();
-  if(!best || sec<best.sec){
-    setBest({sec:sec, tries:tries});
-    msg += '<br>🏆 새로운 최고 기록이에요!';
+  let top3 = getTop3();
+  let isNewRecord = false;
+  
+  /* TOP 3 기록 진입 조건 확인 (기록이 3개 미만이거나, 3등보다 시간이 짧거나, 시간이 같지만 횟수가 적은 경우) */
+  if (top3.length < 3 || sec < top3[top3.length - 1].sec) {
+      isNewRecord = true;
+  } else if (sec === top3[top3.length - 1].sec && tries < top3[top3.length - 1].tries) {
+      isNewRecord = true;
   }
+
+  let msg = '뒤집은 횟수 '+tries+'번 · 걸린 시간 '+fmt(sec);
+
+  if (isNewRecord) {
+      msg += '<br>🏆 <b>명예의 전당 TOP 3 기록 달성!</b>';
+      
+      // 렌더링이 먼저 될 수 있도록 약간의 지연 후 prompt 띄움
+      setTimeout(function() {
+          let nick = prompt("🎉 축하합니다! 명예의 전당(TOP 3)에 올랐습니다!\n전광판에 등록할 닉네임을 입력해주세요 (최대 8글자):", "익명");
+          if (nick === null || nick.trim() === '') nick = "익명";
+          nick = nick.substring(0, 8); 
+
+          top3.push({name: nick, sec: sec, tries: tries});
+          
+          // 시간 오름차순, 시간이 같으면 횟수 오름차순 정렬
+          top3.sort(function(a, b){
+              if(a.sec !== b.sec) return a.sec - b.sec;
+              return a.tries - b.tries;
+          });
+          top3 = top3.slice(0, 3); // 3등까지만 유지
+          setTop3(top3);
+          showTop3();
+      }, 100);
+  }
+
   document.getElementById('done-msg').innerHTML=msg;
   document.getElementById('done-box').classList.remove('hidden');
   document.getElementById('done-box').scrollIntoView({behavior:'smooth',block:'center'});
-  showBest();
 }
 
-/* 최고 기록 (난이도별 저장) */
-function getBestKey(){ return 'sambun-flag-memory-best-' + PAIRS; }
-function getBest(){ try{ return JSON.parse(localStorage.getItem(getBestKey())||'null'); }catch(e){ return null; } }
-function setBest(v){ try{ localStorage.setItem(getBestKey(), JSON.stringify(v)); }catch(e){} }
-function showBest(){
-  const b=getBest();
-  document.getElementById('s-best').textContent = b ? fmt(b.sec) : '–';
+/* 최고 기록 전광판 (난이도별 저장) */
+function getTop3Key(){ return 'sambun-flag-memory-top3-' + PAIRS; }
+function getTop3(){ 
+    try { return JSON.parse(localStorage.getItem(getTop3Key()) || '[]'); } 
+    catch(e) { return []; } 
+}
+function setTop3(arr){ 
+    try { localStorage.setItem(getTop3Key(), JSON.stringify(arr)); } catch(e){} 
+}
+function showTop3(){
+  const arr = getTop3();
+  const sbList = document.getElementById('sb-list');
+  
+  if (arr.length === 0) {
+      sbList.innerHTML = '<div class="sb-empty">아직 기록이 없어요. 첫 도전자가 되어보세요!</div>';
+      return;
+  }
+  
+  let html = '';
+  const medals = ['🥇', '🥈', '🥉'];
+  for(let i=0; i<3; i++) {
+      if(arr[i]) {
+          html += '<div class="sb-item">' +
+                    '<div><span class="sb-rank">' + medals[i] + '</span> <span class="sb-name">' + esc(arr[i].name) + '</span></div>' +
+                    '<span class="sb-score">' + fmt(arr[i].sec) + ' (' + arr[i].tries + '회)</span>' +
+                  '</div>';
+      }
+  }
+  sbList.innerHTML = html;
 }
 
 /* 색종이 */
