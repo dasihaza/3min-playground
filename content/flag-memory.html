@@ -35,9 +35,22 @@
   .hero h1{font-family:'Jua',sans-serif;font-size:clamp(24px,5vw,33px);margin:0 0 3px;color:#3C7FB1;}
   .hero p{font-family:'Gaegu',cursive;font-weight:700;font-size:17px;color:var(--ink-soft);margin:0;}
 
+  /* 난이도 선택 버튼 */
+  .diff-wrap { display:flex; justify-content:center; gap:8px; margin: 16px 0 6px; }
+  .diff-btn {
+    font-family:'Jua',sans-serif; font-size:14px; padding:7px 16px;
+    border-radius:20px; border:2px solid var(--line); background:#fff; color:var(--ink-soft);
+    cursor:pointer; transition:all .2s; box-shadow:0 3px 0 var(--line);
+  }
+  .diff-btn:hover { transform:translateY(1px); box-shadow:0 2px 0 var(--line); }
+  .diff-btn.active {
+    border-color:var(--sky2); background:#fff; color:#3C7FB1; 
+    box-shadow:0 3px 0 var(--sky2);
+  }
+
   /* 점수판 */
   .board{
-    display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin:14px 0 12px;
+    display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin:10px 0 12px;
   }
   .stat{
     background:#fff;border-radius:14px;padding:9px 16px;box-shadow:var(--shadow);
@@ -59,12 +72,17 @@
   .btn.sm{font-size:13px;padding:9px 15px;border-radius:11px;}
   .tools{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;}
 
-  /* 카드판 — 오래된 브라우저에서도 보이도록 flex + 비율 상자 방식 */
+  /* 카드판 */
   .grid{ font-size:0; text-align:center; }
   .card{
-    display:inline-block; position:relative;
-    width:9.2%; margin:0.4%; cursor:pointer; vertical-align:top;
+    display:inline-block; position:relative; cursor:pointer; vertical-align:top;
   }
+  
+  /* 난이도별 카드 크기 조절 */
+  .grid[data-diff="8"] .card  { width:23.2%; margin:0.9%; }  /* 4칸씩 */
+  .grid[data-diff="15"] .card { width:15.6%; margin:0.53%; } /* 6칸씩 */
+  .grid[data-diff="25"] .card { width:9.2%;  margin:0.4%; }  /* 10칸씩 */
+
   .card::before{ content:""; display:block; padding-top:132%; }   /* 세로 비율 */
   .inner{ position:absolute; top:0; left:0; right:0; bottom:0; }
 
@@ -81,22 +99,28 @@
     background:#fff; flex-direction:column; padding:5px; display:none;
     box-shadow:0 3px 0 var(--line), inset 0 0 0 3px #fff;
   }
+  
   /* 뒤집힌 상태 */
   .card.open .back, .card.done .back{ display:none; }
   .card.open .front, .card.done .front{ display:flex; animation:flipIn .3s ease; }
   @keyframes flipIn{ 0%{transform:scaleX(.15);} 60%{transform:scaleX(1.06);} 100%{transform:scaleX(1);} }
 
-  .front img{ width:100%; flex:1; object-fit:contain; border-radius:5px; background:#F4F8FB; }
+  /* 국기 영역 (위쪽 65%)과 이름 영역 (아래쪽 35%) 분리 */
+  .front img{ 
+    width:100%; flex:1; min-height:0; object-fit:contain; 
+    border-radius:4px; background:#F4F8FB; margin-bottom:2px;
+  }
   .front .nm{
-    font-family:'Jua',sans-serif;
-    font-size:11px; font-size:clamp(8px,1.05vw,12px);
-    margin-top:3px; text-align:center; line-height:1.2; word-break:keep-all; color:var(--ink);
+    flex: 0 0 30%; display:flex; align-items:center; justify-content:center;
+    font-family:'Jua',sans-serif; text-align:center; line-height:1.1; 
+    color:var(--ink); word-break:keep-all;
   }
-  .front .alt{
-    font-family:'Jua',sans-serif;
-    font-size:13px; font-size:clamp(10px,1.4vw,15px);
-    text-align:center; padding:4px; line-height:1.3; color:#3C7FB1;
-  }
+
+  /* 난이도별 폰트 크기 조정 */
+  .grid[data-diff="8"] .front .nm { font-size: clamp(13px, 2.5vw, 17px); }
+  .grid[data-diff="15"] .front .nm { font-size: clamp(11px, 1.8vw, 14px); }
+  .grid[data-diff="25"] .front .nm { font-size: clamp(8px, 1.1vw, 12px); }
+
   .card.done{ cursor:default; }
   .card.done .front{ box-shadow:0 3px 0 var(--mint-d), inset 0 0 0 3px var(--mint); }
   .card.miss .front{ box-shadow:0 3px 0 #E08A8A, inset 0 0 0 3px #FFB3B3; }
@@ -117,9 +141,22 @@
     text-align:center;margin-top:16px;word-break:keep-all;
   }
 
-  @media (max-width:900px){ .card{width:11.7%;} }   /* 8장씩 */
-  @media (max-width:680px){ .card{width:18.2%;} }   /* 5장씩 */
-  @media (max-width:420px){ .card{width:23.2%;} }   /* 4장씩 */
+  /* 모바일 최적화 반응형 레이아웃 */
+  @media (max-width:900px){ 
+    .grid[data-diff="25"] .card { width:11.7%; margin:0.4%; } /* 어려움 8칸씩 */
+  }
+  @media (max-width:680px){ 
+    .grid[data-diff="25"] .card { width:18.2%; margin:0.9%; } /* 어려움 5칸씩 */
+    .grid[data-diff="15"] .card { width:18.2%; margin:0.9%; } /* 보통 5칸씩 */
+    .grid[data-diff="25"] .front .nm { font-size: clamp(10px, 2.5vw, 13px); }
+    .grid[data-diff="15"] .front .nm { font-size: clamp(11px, 2.8vw, 14px); }
+  }
+  @media (max-width:420px){ 
+    .grid[data-diff="25"] .card { width:23.2%; margin:0.9%; } /* 어려움 4칸씩 */
+    .grid[data-diff="15"] .card { width:23.2%; margin:0.9%; } /* 보통 4칸씩 */
+    .grid[data-diff="25"] .front .nm { font-size: 11px; }
+    .grid[data-diff="15"] .front .nm { font-size: 12px; }
+  }
 </style>
 </head>
 <body>
@@ -142,6 +179,12 @@
     <p>같은 국기 두 장을 찾아보세요!</p>
   </div>
 
+  <div class="diff-wrap">
+    <button class="diff-btn" onclick="setDiff(8, this)">쉬움 (8쌍)</button>
+    <button class="diff-btn active" onclick="setDiff(15, this)">보통 (15쌍)</button>
+    <button class="diff-btn" onclick="setDiff(25, this)">어려움 (25쌍)</button>
+  </div>
+
   <div class="board">
     <div class="stat m"><b id="s-match">0</b><span>맞춘 짝</span></div>
     <div class="stat c"><b id="s-try">0</b><span>뒤집은 횟수</span></div>
@@ -155,7 +198,7 @@
     <button class="btn ghost sm" onclick="toggleSound()" id="snd-btn">🔊 소리 켜짐</button>
   </div>
 
-  <div class="grid" id="grid"></div>
+  <div class="grid" id="grid" data-diff="15"></div>
 
   <div class="done-box hidden" id="done-box">
     <h2 id="done-title">🎉 다 맞췄어요!</h2>
@@ -164,8 +207,7 @@
   </div>
 
   <div class="tip">
-    나라 100개 중에서 <b>25개를 뽑아</b> 카드 50장을 만들어요. 새 게임을 누를 때마다 나라가 바뀝니다.<br>
-    국기 그림이 안 보이면 나라 이름으로 짝을 맞춰도 괜찮아요.
+    세계 100개국 중에서 난이도에 따라 국기가 무작위로 뽑혀요. 새 게임을 누를 때마다 나라가 바뀝니다.
   </div>
 </div>
 
@@ -195,7 +237,8 @@ const COUNTRIES = [
  ["jm","자메이카"],["do","도미니카공화국"],["cr","코스타리카"],["pa","파나마"],["gt","과테말라"],
  ["ec","에콰도르"],["uy","우루과이"],["py","파라과이"],["bo","볼리비아"],["ve","베네수엘라"]
 ];
-const PAIRS = 25;                 /* 뽑을 나라 수 → 카드 50장 */
+
+let PAIRS = 15; /* 기본 난이도: 보통(15쌍) */
 
 /* ===== 소리 ===== */
 let audioCtx=null, soundOn=true;
@@ -245,6 +288,15 @@ function tick(){
   document.getElementById('s-time').textContent=fmt(sec);
 }
 
+function setDiff(p, btn) {
+  if (lock || peeking) return; // 카드 뒤집는 중에는 변경 방지
+  PAIRS = p;
+  document.querySelectorAll('.diff-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  document.getElementById('grid').dataset.diff = p;
+  newGame();
+}
+
 function newGame(){
   if(timer){ clearInterval(timer); timer=null; }
   first=null; lock=false; matched=0; tries=0; peeking=false;
@@ -254,7 +306,6 @@ function newGame(){
   document.getElementById('done-box').classList.add('hidden');
   showBest();
 
-  /* 100개 중 25개 뽑기 → 두 장씩 → 섞기 */
   const picked = shuffle(COUNTRIES).slice(0, PAIRS);
   deck = shuffle(picked.concat(picked));
 
@@ -265,12 +316,14 @@ function newGame(){
     el.className='card';
     el.dataset.code=c[0];
     el.dataset.idx=i;
+    
+    // 국기가 엑박으로 사라지는 현상 방지: onerror 핸들러에서 display='none'을 삭제하고 안전한 백업 이미지 경로로 대체
     el.innerHTML =
       '<div class="inner">'
     +   '<div class="face back">🌍</div>'
     +   '<div class="face front">'
     +     '<img src="https://flagcdn.com/w160/'+c[0]+'.png" alt="'+c[1]+' 국기" '
-    +          'onerror="this.style.display=\'none\'; this.nextSibling.className=\'alt\';">'
+    +          'onerror="this.onerror=null; this.src=\'https://cdn.jsdelivr.net/gh/lipis/flag-icons/flags/4x3/'+c[0]+'.svg\';">'
     +     '<div class="nm">'+c[1]+'</div>'
     +   '</div>'
     + '</div>';
@@ -344,10 +397,10 @@ function finish(){
   showBest();
 }
 
-/* 최고 기록 */
-const BEST_KEY='sambun-flag-memory-best';
-function getBest(){ try{ return JSON.parse(localStorage.getItem(BEST_KEY)||'null'); }catch(e){ return null; } }
-function setBest(v){ try{ localStorage.setItem(BEST_KEY, JSON.stringify(v)); }catch(e){} }
+/* 최고 기록 (난이도별 저장) */
+function getBestKey(){ return 'sambun-flag-memory-best-' + PAIRS; }
+function getBest(){ try{ return JSON.parse(localStorage.getItem(getBestKey())||'null'); }catch(e){ return null; } }
+function setBest(v){ try{ localStorage.setItem(getBestKey(), JSON.stringify(v)); }catch(e){} }
 function showBest(){
   const b=getBest();
   document.getElementById('s-best').textContent = b ? fmt(b.sec) : '–';
@@ -381,6 +434,7 @@ function drawConfetti(){
 }
 
 document.addEventListener('pointerdown', function(){ withAudio(function(){}); }, {once:true});
+document.getElementById('grid').dataset.diff = PAIRS;
 newGame();
 </script>
 </body>
