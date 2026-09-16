@@ -233,9 +233,19 @@ var NAME_NOISE = new RegExp('^('
 function isMoneyLine(t){ return /^[\-\u2212+]?\s*[\d,]+\s*원?$/.test(t); }
 function isNoise(t){
   if(NAME_NOISE.test(t) || isMoneyLine(t)) return true;
-  /* 배송·구매 안내 문구 ('15,000원 이상 구매시 배송비 무료' 등) */
+
+  /* 결제수단 안내 — 줄 어디에 있어도 걸러낸다
+     예) '스마일페이간편결제스마일페이 간편결제설정' */
+  var flat = t.replace(/\s+/g,'');
+  if(/간편결제|결제수단|결제설정|스마일페이|스마일캐시|SSG페이|엘페이|카카오페이|네이버페이|페이코|토스페이|신용카드|체크카드|계좌이체|무통장|가상계좌|할부|현금영수증/.test(flat)) return true;
+
+  /* 배송·구매 안내 문구 */
   if(/원\s*이상.*(무료|배송|구매)/.test(t)) return true;
   if(/(배송비|무료배송|도착보장|배송예정|출고)/.test(t) && t.length <= 30) return true;
+
+  /* '원' 처럼 단위 글자만 남은 줄 */
+  if(/^(원|개|건|명|점|팩|매|장|권|박스|세트)$/.test(t)) return true;
+
   return false;
 }
 
@@ -464,6 +474,7 @@ function buildItems(lines, starts){
     var qty    = getQty(block);
     var amount = getAmount(block);
     if(!name || !amount) continue;
+    if(name.replace(/\s/g,'').length < 2) continue;   /* '원' 같은 조각 제외 */
 
     if(PROMO.test(name)){
       var real = nameFromOption(opt);
