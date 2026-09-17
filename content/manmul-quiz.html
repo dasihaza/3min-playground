@@ -46,6 +46,32 @@
   .review-mine{ color:var(--coral); }
   .actions{ display:flex; justify-content:center; gap:10px; margin-top:20px; flex-wrap:wrap; }
   .hidden{ display:none !important; }
+
+  /* 응원 메시지 영역 디자인 */
+  .cheer-box {
+    background: #F4F8FB;
+    border: 2px dashed #B8D4E3;
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-top: 30px;
+    text-align: left;
+    box-shadow: 0 4px 10px rgba(184, 212, 227, 0.2);
+  }
+  .cheer-box b {
+    display: block;
+    font-family: 'Jua', sans-serif;
+    font-size: 18px;
+    color: #3B6EA8;
+    margin-bottom: 8px;
+    letter-spacing: 0.02em;
+  }
+  .cheer-box p {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--ink);
+    margin: 0;
+    word-break: keep-all;
+  }
 </style>
 </head>
 <body>
@@ -80,6 +106,14 @@
         📅 <strong>매일 새로운 50문제</strong>가 출제돼요. 날짜가 바뀌면 자동으로 다른 문제 세트로 바뀝니다.
       </p>
       <button class="btn" onclick="startQuiz()">오늘의 문제 풀기</button>
+
+      <!-- 응원 메시지 영역 추가 -->
+      <div class="cheer-box">
+        <b>💡 매일 하루 한 번, 가볍게 도전해 보세요!</b>
+        <p>
+          범위가 너무 넓어 만물박사대회 준비가 막막했던 친구들, 혹은 '내 상식 수준은 어느 정도일까?' 궁금했던 모든 분을 위해 만들었어요. 부담 갖지 말고 하루 한 번씩 가벼운 마음으로 퀴즈를 풀다 보면, 어느새 지식과 상식이 쑥쑥 자라있는 자신을 발견하게 될 거예요. 여러분의 힘찬 도전을 응원합니다! 🚀
+        </p>
+      </div>
     </div>
 
     <!-- QUIZ -->
