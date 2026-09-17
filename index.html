@@ -10,6 +10,34 @@
 <link rel="stylesheet" href="assets/style.css">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7592272420796389"
      crossorigin="anonymous"></script>
+<style>
+  /* 상단 귀여운 소개글 디자인 */
+  .cute-intro {
+    background-color: #FFF8E8;
+    border: 2px dashed #FFD467;
+    border-radius: 18px;
+    padding: 22px 24px;
+    margin: 0 auto 30px;
+    max-width: 680px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(255, 212, 103, 0.15);
+  }
+  .cute-intro p {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 15px;
+    line-height: 1.75;
+    color: #5A4A35;
+    margin: 0;
+    word-break: keep-all;
+  }
+  .cute-intro b {
+    color: #E8483C;
+    font-weight: 700;
+  }
+  .cute-intro .emoji {
+    font-size: 18px;
+  }
+</style>
 </head>
 <body>
 
@@ -32,7 +60,17 @@
     <p>성향 테스트, 밸런스 게임, 미니 퀴즈까지 — 짧고 굵게 즐기는 콘텐츠를 매일 새로 올려요. 부담 없이 하나만 골라보세요.</p>
   </section>
 
-<div class="chip-row" id="filters">
+  <!-- 추가된 귀여운 소개글 영역 -->
+  <div class="cute-intro">
+    <p>
+      <span class="emoji">🎈</span> <b>놀이와 학습이 찰떡처럼 만난 에듀테크 놀이터!</b><br>
+      세상에 좋은 도구들은 많지만, <i>'아.. 요 기능 하나만 딱 더 있으면 좋을 텐데!'</i> 했던 선생님의 아쉬움을 꾹꾹 담아 귀엽게 채웠어요. <span class="emoji">🧸</span><br>
+      복잡한 <b>회원가입이나 로그인 없이</b> 누구나 클릭 한 번으로 쉽고 빠르게!<br>
+      우리 반 교실에 작은 웃음과 여유를 선물해 보세요. <span class="emoji">💖</span>
+    </p>
+  </div>
+
+  <div class="chip-row" id="filters">
     <button class="chip" data-filter="all" data-active="true">전체</button>
     <button class="chip" data-filter="test">성향테스트</button>
     <button class="chip" data-filter="balance">밸런스게임</button>
@@ -114,10 +152,6 @@
       <p>학년별 90일치 아침활동지. 수학 10문제에 영어·한자·속담까지 하루 한 장으로.</p>
       <span class="play">학년 고르러 가기 →</span>
     </a>
-
-
-
-
 
     <a class="card" href="content/manmul-quiz.html" data-cat="quiz">
       <div class="badge-row">
@@ -206,7 +240,7 @@
 
   </div>
 
-<div class="grid">
+  <div class="grid">
     <a class="card" href="content/board.html" data-cat="board">
       <div class="badge-row">
         <span class="badge board">게시판</span>
