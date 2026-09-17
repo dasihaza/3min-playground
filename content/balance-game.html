@@ -1,295 +1,227 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7592272420796389"
-     crossorigin="anonymous"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>인생 최고의 딜레마 8선 | 3분 놀이터</title>
+<title>알쏭달쏭 밸런스 게임 | 3분 놀이터</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/style.css">
-<script src="../assets/stats.js" defer></script>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-  .vs-wrap{ display:flex; flex-direction:column; gap:12px; }
-  .vs-option{
-    background: var(--bg-soft); border:1.5px solid var(--line); border-radius:12px;
-    padding:22px 20px; text-align:center; cursor:pointer;
-    font-family:'Jua', sans-serif; font-size:18px; line-height:1.5;
-    transition: all .15s ease;
+  :root{
+    --bg:#F4F6FA; --card:#FFFFFF; --ink:#2E3440; --ink-soft:#7B8794;
+    --line:#E2E8F0; --navy:#3B5BA5; --navy-d:#2C457E;
+    --mint:#3FA88C; --mint-d:#2E8570; --pink:#FF90B3; --pink-d:#E06D91;
+    --shadow:0 4px 12px rgba(46,52,64,.08);
   }
-  .vs-option:hover{ border-color: var(--coral); background:#fff; transform: translateY(-2px); }
-  .vs-divider{
-    text-align:center; font-family:'Jua', sans-serif; color: var(--coral);
-    font-size:13px; margin: -2px 0;
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);font-family:'Noto Sans KR',sans-serif;min-height:100vh;}
+  
+  .topbar{max-width:700px;margin:0 auto;padding:14px 18px 0;display:flex;align-items:center;justify-content:space-between;}
+  .topbar a{text-decoration:none;color:var(--ink);}
+  .topbar .brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;}
+  .topbar .back{font-size:12.5px;font-weight:700;color:var(--ink-soft);border:2px solid #fff;background:#fff;padding:6px 12px;border-radius:999px;box-shadow:var(--shadow);}
+  
+  .shell{max-width:700px;margin:0 auto;padding:16px 18px 60px;}
+
+  .hero{text-align:center;margin-bottom:24px;}
+  .hero h1{font-family:'Jua',sans-serif;font-size:28px;margin:0 0 5px;color:var(--navy);}
+  .hero p{font-size:14px;color:var(--ink-soft);margin:0;word-break:keep-all;}
+
+  /* 게임 영역 카드 */
+  .game-card{
+    background:var(--card);border-radius:20px;padding:30px 20px;
+    box-shadow:var(--shadow);text-align:center;margin-bottom:32px;
   }
-  .q-num{ font-size:13px; font-weight:700; color: var(--ink-soft); letter-spacing:.06em; margin-bottom:8px; }
-  .result-title{ font-family:'Jua', sans-serif; font-size:24px; text-align:center; margin: 6px 0 10px; }
-  .result-blurb{ text-align:center; color: var(--ink-soft); font-size:14.5px; line-height:1.75; margin-bottom:22px; }
-  .bar-row{ display:flex; align-items:center; gap:10px; margin-bottom:10px; font-size:13px; }
-  .bar-track{ flex:1; height:10px; border-radius:6px; background: var(--bg-soft); overflow:hidden; }
-  .bar-fill{ height:100%; background: var(--coral); }
-  .actions{ display:flex; justify-content:center; gap:10px; margin-top:24px; }
-  .result-icon-wrap{ display:flex; justify-content:center; margin: 2px 0 14px; }
-  .pros-cons{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin: 4px 0 20px; }
-  .pc-col{ background:var(--bg-soft); border:1px solid var(--line); border-radius:10px; padding:14px 14px; }
-  .pc-title{ font-family:'Jua',sans-serif; font-size:13.5px; margin-bottom:8px; }
-  .pc-item{ font-size:12.5px; line-height:1.6; color:var(--ink-soft); margin-bottom:6px; padding-left:13px; position:relative; }
-  .pc-item::before{ content:"·"; position:absolute; left:0; }
-  @media (max-width:420px){ .pros-cons{ grid-template-columns:1fr; } }
-  .hidden{ display:none !important; }
+  
+  /* 진행 상태 바 */
+  .progress-wrap{width:100%;background:var(--line);border-radius:10px;height:12px;margin-bottom:24px;overflow:hidden;}
+  .progress-bar{height:100%;background:var(--mint);width:0%;transition:width 0.3s ease;}
+  .progress-text{font-family:'Jua',sans-serif;font-size:14px;color:var(--ink-soft);margin-bottom:12px;}
+
+  .question{font-family:'Jua',sans-serif;font-size:22px;color:var(--ink);margin:0 0 24px;word-break:keep-all;}
+  
+  .btn-choice{
+    display:block;width:100%;font-family:'Jua',sans-serif;font-size:16px;
+    padding:16px;margin-bottom:12px;border-radius:14px;border:2px solid var(--line);
+    background:#fff;color:var(--ink);cursor:pointer;transition:all 0.2s;
+    word-break:keep-all;line-height:1.4;
+  }
+  .btn-choice:hover{border-color:var(--navy);background:#F7FAFF;transform:translateY(-2px);}
+  .btn-choice:active{transform:translateY(1px);}
+  .vs{font-family:'Jua',sans-serif;font-size:18px;color:var(--pink);margin:8px 0 20px;}
+
+  /* 결과 영역 */
+  .result-icon{font-size:60px;margin-bottom:10px;}
+  .result-title{font-family:'Jua',sans-serif;font-size:26px;color:var(--pink-d);margin:0 0 12px;}
+  .result-desc{font-size:15px;color:var(--ink);line-height:1.7;word-break:keep-all;margin-bottom:24px;background:#FFF6E9;padding:20px;border-radius:14px;}
+  
+  .btn-restart{
+    font-family:'Jua',sans-serif;border:none;cursor:pointer;font-size:16px;
+    padding:12px 24px;border-radius:12px;background:var(--navy);color:#fff;
+    box-shadow:0 4px 0 var(--navy-d);
+  }
+  .btn-restart:hover{transform:translateY(1px);box-shadow:0 3px 0 var(--navy-d);}
+
+  /* 하단 귀여운 안내글 영역 */
+  .cute-article {
+    background-color: #EAF7F1;
+    border: 2px dashed #AEDCC4;
+    border-radius: 16px;
+    padding: 24px 28px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(66, 174, 144, 0.1);
+  }
+  .cute-article h3 {
+    font-family: 'Jua', sans-serif;
+    color: #2E8570;
+    font-size: 20px;
+    margin: 0 0 12px;
+  }
+  .cute-article p {
+    font-family: 'Noto Sans KR', sans-serif;
+    color: #333;
+    font-size: 15px;
+    line-height: 1.7;
+    margin: 0;
+    word-break: keep-all;
+  }
+  .cute-article b { color: #E8483C; }
+
+  .hidden{display:none !important;}
 </style>
 </head>
 <body>
 
-<div class="wrap">
-  <header class="site-header">
-    <a class="brand" href="../index.html">
-      <svg class="brand-mark" viewBox="0 0 34 34" fill="none">
-        <circle cx="17" cy="18" r="14" fill="#FAF7F0" stroke="#1D1B16" stroke-width="2"/>
-        <path d="M17 9 L17 18 L23 21" stroke="#E8483C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-        <rect x="13" y="2" width="8" height="4" rx="1.5" fill="#1D1B16"/>
-      </svg>
-      <span class="brand-word">3분 놀이터</span>
-    </a>
-    <a class="back-link" href="../index.html">← 다른 콘텐츠 보기</a>
-  </header>
+<div class="topbar">
+  <a class="brand" href="../index.html">
+    <svg width="26" height="26" viewBox="0 0 34 34" fill="none">
+      <circle cx="17" cy="18" r="14" fill="#fff" stroke="#2E3440" stroke-width="2"/>
+      <path d="M17 9 L17 18 L23 21" stroke="#3B5BA5" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="13" y="2" width="8" height="4" rx="1.5" fill="#2E3440"/>
+    </svg>
+    <span>3분 놀이터</span>
+  </a>
+  <a class="back" href="../index.html">← 다른 콘텐츠 보기</a>
 </div>
 
-<div class="content-shell">
-  <div class="content-card">
+<div class="shell">
+  <div class="hero">
+    <h1>⚖️ 알쏭달쏭 밸런스 게임</h1>
+    <p>8가지 상황, 나의 진짜 속마음은 어느 쪽일까?</p>
+  </div>
 
-    <!-- INTRO -->
-    <div id="screen-intro">
-      <span class="badge balance" style="margin-bottom:14px; display:inline-block;">밸런스게임</span>
-      <h1 style="font-family:'Jua',sans-serif; font-size:26px; margin:0 0 12px;">인생 최고의 딜레마 8선</h1>
-      <p style="color:var(--ink-soft); font-size:14.5px; line-height:1.7; margin:0 0 22px;">
-        고민할 필요 없어요, 3초 안에 더 끌리는 쪽을 고르면 됩니다. 8라운드 끝나면 당신의 선택 성향을 보여드릴게요.
-      </p>
-      <button class="btn" onclick="startGame()">게임 시작</button>
-    </div>
+  <!-- 게임 진행 영역 -->
+  <div class="game-card" id="game-box">
+    <div class="progress-text">질문 <span id="q-num">1</span> / 8</div>
+    <div class="progress-wrap"><div class="progress-bar" id="p-bar"></div></div>
+    
+    <div class="question" id="q-text">질문이 여기에 나옵니다.</div>
+    
+    <button class="btn-choice" id="btn-a" onclick="selectChoice('A')">A 선택지</button>
+    <div class="vs">VS</div>
+    <button class="btn-choice" id="btn-b" onclick="selectChoice('B')">B 선택지</button>
+  </div>
 
-    <!-- QUIZ -->
-    <div id="screen-game" class="hidden">
-      <div class="progress-row" id="progress"></div>
-      <div class="q-num" id="q-num"></div>
-      <div class="vs-wrap">
-        <div class="vs-option" id="opt-left" onclick="pick('left')"></div>
-        <div class="vs-divider">VS</div>
-        <div class="vs-option" id="opt-right" onclick="pick('right')"></div>
-      </div>
-    </div>
+  <!-- 결과 확인 영역 -->
+  <div class="game-card hidden" id="result-box">
+    <div class="result-icon" id="r-icon">✨</div>
+    <h2 class="result-title" id="r-title">결과 타이틀</h2>
+    <div class="result-desc" id="r-desc">결과 설명이 여기에 나옵니다.</div>
+    <button class="btn-restart" onclick="startGame()">새로 하기 🔄</button>
+  </div>
 
-    <!-- RESULT -->
-    <div id="screen-result" class="hidden">
-      <div class="result-icon-wrap" id="result-icon"></div>
-      <div class="result-title" id="result-title"></div>
-      <div class="result-blurb" id="result-blurb"></div>
-
-      <div class="pros-cons">
-        <div class="pc-col">
-          <div class="pc-title">👍 장점</div>
-          <div id="pros-list"></div>
-        </div>
-        <div class="pc-col">
-          <div class="pc-title">👎 단점</div>
-          <div id="cons-list"></div>
-        </div>
-      </div>
-
-      <div id="bars"></div>
-
-      <hr style="border:none; border-top:1px dashed var(--line); margin:22px 0;">
-      <div style="text-align:center; font-size:13px; font-weight:700; color:var(--ink-soft); margin-bottom:4px;">다른 사람들은 어떤 결과가 나왔을까요?</div>
-      <div id="pie-note" style="text-align:center; font-size:11.5px; color:var(--ink-soft); margin-bottom:14px;">통계를 불러오는 중...</div>
-      <div style="display:flex; justify-content:center; margin-bottom:10px;">
-        <svg id="pie-chart" width="180" height="180" viewBox="0 0 180 180"></svg>
-      </div>
-      <div id="pie-legend" style="max-width:260px; margin:0 auto;"></div>
-
-      <div class="actions">
-        <button class="btn" onclick="shareResult()">결과 공유하기</button>
-        <button class="btn ghost" onclick="restart()">다시 하기</button>
-        <a class="btn" href="../index.html">다른 콘텐츠 보기</a>
-      </div>
-    </div>
-
+  <!-- 하단 선생님의 귀여운 안내글 -->
+  <div class="cute-article">
+    <h3>🎈 선생님이 들려주는 밸런스 게임 이야기</h3>
+    <p>
+      친구들! 두 가지 재미있는 상황 중에서 고르기만 하면, 내 마음속 깊은 곳에 숨어있는 <b>'진짜 내 성향'</b>을 알 수 있어요! 정답은 없으니 너무 깊게 고민하지 말고 마음이 끌리는 대로 1초 만에 골라보세요. 이 테스트로 짝꿍과 내가 얼마나 비슷하고 다른지 비교해 보면 훨씬 더 재미있을 거예요. 자, 그럼 나의 진짜 모습은 어떤 요정일지 지금 바로 확인해 볼까요? 😊
+    </p>
   </div>
 
 </div>
-<footer class="site-footer wrap">
-  <div>© 2026 3분 놀이터. 콘텐츠는 재미로 즐겨주세요.</div>
-</footer>
 
 <script>
-const ROUNDS = [
-  { left:"평생 여름", right:"평생 겨울" },
-  { left:"돈은 많지만 시간이 없다", right:"시간은 많지만 돈이 없다" },
-  { left:"하늘을 나는 능력", right:"순간이동 능력" },
-  { left:"인기 많은 삶", right:"존경받는 삶" },
-  { left:"매일 똑같은 하루 반복", right:"매일 완전히 다른 하루" },
-  { left:"과거로 돌아가 후회를 고친다", right:"미래를 미리 본다" },
-  { left:"최고의 요리 실력", right:"최고의 노래 실력" },
-  { left:"평생 혼자 여행", right:"평생 단체 여행" }
-];
+  /* 질문 데이터 (A: 감성/모험/자유형, B: 이성/현실/계획형) */
+  const questions = [
+    { q: "초능력이 딱 하나 생긴다면?", a: "하늘을 자유롭게 훨훨 날기 🕊️", b: "안 들키는 투명인간 되기 👻" },
+    { q: "친구들과 신나는 주말! 어디로 갈까?", a: "소리 질러! 신나는 놀이공원 🎢", b: "조용하고 예쁜 숲속 캠핑장 ⛺" },
+    { q: "평생 단 하나의 음식만 먹어야 한다면?", a: "매일매일 달콤 짭짤한 피자 🍕", b: "매일매일 든든한 쌀밥과 고기 🍚" },
+    { q: "타임머신을 탈 수 있다면?", a: "공룡이 살던 신비한 과거로 🦕", b: "우주선이 날아다니는 미래로 🚀" },
+    { q: "친구가 약속 장소에 1시간이나 늦었다면?", a: "'무슨 일 있었어?' 걱정부터 한다 🥺", b: "'왜 늦었어?' 늦은 이유부터 묻는다 🤔" },
+    { q: "길에서 만 원을 주웠다! 나의 행동은?", a: "'앗싸!' 바로 맛있는 간식 사 먹기 🍦", b: "'오예!' 일단 내 돼지저금통에 넣기 🐷" },
+    { q: "동물로 변신할 수 있다면?", a: "넓은 세상을 탐험하는 길고양이 🐈", b: "가족들의 사랑을 듬뿍 받는 강아지 🐕" },
+    { q: "여름방학 숙제를 할 때 나는?", a: "방학 끝나기 며칠 전에 몰아서 후다닥! ⚡", b: "매일매일 정해진 분량을 꾸준히! 📅" }
+  ];
 
-function shareContent(title, text){
-  const url = window.location.href;
-  if(navigator.share){
-    navigator.share({ title, text, url }).catch(()=>{});
-  } else if(navigator.clipboard){
-    navigator.clipboard.writeText(url).then(()=>{
-      alert("링크가 복사됐어요! 친구에게 붙여넣어 공유해보세요 🙂");
-    });
+  let currentQ = 0;
+  let scoreA = 0;
+
+  const gameBox = document.getElementById('game-box');
+  const resultBox = document.getElementById('result-box');
+  const qNum = document.getElementById('q-num');
+  const pBar = document.getElementById('p-bar');
+  const qText = document.getElementById('q-text');
+  const btnA = document.getElementById('btn-a');
+  const btnB = document.getElementById('btn-b');
+
+  function startGame() {
+    currentQ = 0;
+    scoreA = 0;
+    gameBox.classList.remove('hidden');
+    resultBox.classList.add('hidden');
+    renderQuestion();
   }
-}
-function shareResult(){
-  const title = document.getElementById("result-title").textContent;
-  shareContent(
-    "인생 최고의 딜레마 8선 결과: " + title,
-    "나는 '" + title + "' 유형이었어요! 너라면 뭘 고를래? 👉"
-  );
-}
 
-let current = 0;
-let leftCount = 0;
-
-function show(id){
-  ["screen-intro","screen-game","screen-result"].forEach(s=>{
-    document.getElementById(s).classList.toggle("hidden", s!==id);
-  });
-}
-
-function startGame(){
-  current = 0; leftCount = 0;
-  buildProgress();
-  show("screen-game");
-  renderRound();
-}
-
-function buildProgress(){
-  const p = document.getElementById("progress");
-  p.innerHTML = "";
-  ROUNDS.forEach((_,i)=>{
-    const seg = document.createElement("div");
-    seg.className = "seg"; seg.id = "seg-"+i;
-    seg.innerHTML = "<i></i>";
-    p.appendChild(seg);
-  });
-}
-function updateProgress(){
-  ROUNDS.forEach((_,i)=>{
-    document.getElementById("seg-"+i).classList.toggle("done", i < current);
-  });
-}
-
-function renderRound(){
-  updateProgress();
-  const r = ROUNDS[current];
-  document.getElementById("q-num").textContent = (current+1)+" / "+ROUNDS.length;
-  document.getElementById("opt-left").textContent = r.left;
-  document.getElementById("opt-right").textContent = r.right;
-}
-
-function pick(side){
-  if(side==="left") leftCount++;
-  current++;
-  if(current < ROUNDS.length){
-    renderRound();
-  } else {
-    renderResult();
+  function renderQuestion() {
+    qNum.textContent = currentQ + 1;
+    pBar.style.width = ((currentQ) / questions.length * 100) + '%';
+    
+    qText.textContent = questions[currentQ].q;
+    btnA.textContent = questions[currentQ].a;
+    btnB.textContent = questions[currentQ].b;
   }
-}
 
-function typeIconSvg(kind, color){
-  if(kind === "anchor"){
-    return '<svg width="72" height="72" viewBox="0 0 72 72" fill="none">' +
-      '<circle cx="36" cy="16" r="7" stroke="'+color+'" stroke-width="4"/>' +
-      '<line x1="36" y1="23" x2="36" y2="58" stroke="'+color+'" stroke-width="4"/>' +
-      '<line x1="20" y1="30" x2="52" y2="30" stroke="'+color+'" stroke-width="4"/>' +
-      '<path d="M14 42 A22 22 0 0 0 36 60" stroke="'+color+'" stroke-width="4" stroke-linecap="round"/>' +
-      '<path d="M58 42 A22 22 0 0 1 36 60" stroke="'+color+'" stroke-width="4" stroke-linecap="round"/>' +
-      '</svg>';
+  function selectChoice(choice) {
+    if (choice === 'A') scoreA++;
+    currentQ++;
+    
+    if (currentQ < questions.length) {
+      renderQuestion();
+    } else {
+      pBar.style.width = '100%';
+      setTimeout(showResult, 300); // 0.3초 대기 후 결과 보여주기
+    }
   }
-  if(kind === "bolt"){
-    return '<svg width="72" height="72" viewBox="0 0 72 72" fill="none">' +
-      '<path d="M40 8 L20 40 H34 L28 64 L54 30 H40 Z" fill="'+color+'"/>' +
-      '</svg>';
+
+  function showResult() {
+    gameBox.classList.add('hidden');
+    resultBox.classList.remove('hidden');
+
+    let icon, title, desc;
+
+    if (scoreA >= 6) {
+      icon = "✨";
+      title = "톡톡 튀는 스파클링 요정!";
+      desc = "상상력이 풍부하고 자유로운 영혼을 가졌어요! 호기심이 많아서 새로운 것을 도전하는 걸 좋아하고, 친구들의 마음을 잘 공감해주는 따뜻한 마음씨를 가졌답니다. 틀에 갇히는 것보다는 나만의 방식으로 빛나는 멋진 친구예요!";
+    } else if (scoreA >= 3) {
+      icon = "🧸";
+      title = "다정다감 포근한 곰돌이!";
+      desc = "차분한 생각과 따뜻한 마음이 완벽하게 조화를 이루고 있어요! 상황에 맞게 융통성을 잘 발휘하며, 친구들과 싸우지 않고 사이좋게 지내는 평화주의자랍니다. 너무 튀지도, 너무 뒤처지지도 않게 중심을 잘 잡는 든든한 친구예요!";
+    } else {
+      icon = "🤓";
+      title = "꼼꼼하고 똑부러지는 척척박사!";
+      desc = "어떤 일이든 계획을 세우고 논리적으로 생각하는 능력이 뛰어나요! 즉흥적으로 행동하기보다는 미리 생각하고 꼼꼼하게 준비하는 것을 좋아해요. 책임감이 강해서 선생님이나 친구들에게 '믿음직스럽다'는 칭찬을 자주 받는 똑똑한 친구예요!";
+    }
+
+    document.getElementById('r-icon').textContent = icon;
+    document.getElementById('r-title').textContent = title;
+    document.getElementById('r-desc').textContent = desc;
   }
-  if(kind === "scale"){
-    return '<svg width="72" height="72" viewBox="0 0 72 72" fill="none">' +
-      '<line x1="36" y1="10" x2="36" y2="56" stroke="'+color+'" stroke-width="4"/>' +
-      '<line x1="14" y1="20" x2="58" y2="20" stroke="'+color+'" stroke-width="4"/>' +
-      '<path d="M14 20 L6 38 A10 10 0 0 0 22 38 Z" stroke="'+color+'" stroke-width="3.5" stroke-linejoin="round"/>' +
-      '<path d="M58 20 L50 38 A10 10 0 0 0 66 38 Z" stroke="'+color+'" stroke-width="3.5" stroke-linejoin="round"/>' +
-      '<line x1="24" y1="60" x2="48" y2="60" stroke="'+color+'" stroke-width="4" stroke-linecap="round"/>' +
-      '<line x1="36" y1="56" x2="36" y2="60" stroke="'+color+'" stroke-width="4"/>' +
-      '</svg>';
-  }
-  return "";
-}
 
-const RESULT_TYPES = {
-  left: {
-    key:"left", title:"안정적인 익숙함파", color:"#E8483C", icon:"anchor",
-    blurb:"새로운 것보다 검증된 확실함이 좋은 편이에요. 익숙한 루틴 안에서 마음의 안정을 찾는 타입이죠. 계획대로 흘러갈 때 비로소 편안함을 느껴요. 변화가 필요한 순간에도 신중하게 따져보고 움직이는 편이에요. 그래서 주변 사람들에게 믿음직스럽다는 말을 자주 들어요.",
-    pros:["한번 신뢰를 쌓으면 오래 유지해요","위기 상황에서도 잘 흔들리지 않아요","꾸준함으로 목표를 이뤄내는 힘이 있어요"],
-    cons:["변화가 필요한 순간에 결단이 늦을 수 있어요","익숙한 것에 안주하다 기회를 놓치기도 해요","가끔은 고집스럽게 보일 수 있어요"]
-  },
-  right: {
-    key:"right", title:"즉흥적인 변화파", color:"#F5A623", icon:"bolt",
-    blurb:"예측 가능한 것보다 새로운 자극에 더 끌리는 편이에요. 매번 다른 선택을 하는 걸 두려워하지 않는 타입이죠. 낯선 상황에서도 금방 적응하고 오히려 즐기는 편이에요. 반복되는 루틴보다는 변화가 있는 하루하루를 선호해요. 그 덕분에 주변 사람들에게 활력을 불어넣는 존재가 되곤 해요.",
-    pros:["새로운 기회를 빠르게 포착해요","변화하는 상황에 유연하게 적응해요","주변에 활기와 재미를 불어넣어요"],
-    cons:["꾸준함이 필요한 일에서 금방 지루해할 수 있어요","즉흥적인 선택이 후회로 이어지기도 해요","안정성을 중시하는 사람과는 부딪힐 수 있어요"]
-  },
-  balanced: {
-    key:"balanced", title:"균형 잡힌 상황판단파", color:"#1F6F63", icon:"scale",
-    blurb:"그때그때 상황에 따라 유연하게 선택하는 편이에요. 극단적으로 한쪽에 치우치지 않는 게 오히려 당신의 강점이죠. 안정이 필요할 땐 신중하게, 변화가 필요할 땐 과감하게 움직여요. 그래서 다양한 상황에서 두루 잘 대처한다는 평가를 받아요. 다만 스스로는 뚜렷한 정체성이 없다고 느낄 때도 있어요.",
-    pros:["상황에 맞는 최선의 선택을 잘 찾아내요","다양한 성향의 사람들과 두루 잘 지내요","극단적인 리스크를 피하는 균형 감각이 있어요"],
-    cons:["결정을 내리기까지 시간이 걸릴 수 있어요","뚜렷한 색깔이 없다는 인상을 줄 수도 있어요","가끔은 우유부단하다는 오해를 받기도 해요"]
-  }
-};
-
-function renderResult(){
-  const rightCount = ROUNDS.length - leftCount;
-  const leftPct = Math.round((leftCount/ROUNDS.length)*100);
-  const rightPct = 100 - leftPct;
-
-  let myType;
-  if(leftPct >= 70) myType = "left";
-  else if(rightPct >= 70) myType = "right";
-  else myType = "balanced";
-
-  const t = RESULT_TYPES[myType];
-
-  document.getElementById("result-icon").innerHTML = typeIconSvg(t.icon, t.color);
-  document.getElementById("result-title").textContent = t.title;
-  document.getElementById("result-title").style.color = t.color;
-  document.getElementById("result-blurb").textContent = t.blurb;
-
-  document.getElementById("pros-list").innerHTML = t.pros.map(p=> '<div class="pc-item">'+p+'</div>').join("");
-  document.getElementById("cons-list").innerHTML = t.cons.map(c=> '<div class="pc-item">'+c+'</div>').join("");
-
-  document.getElementById("bars").innerHTML =
-    '<div class="bar-row"><span style="width:70px;">왼쪽</span><div class="bar-track"><div class="bar-fill" style="width:'+leftPct+'%;"></div></div><span>'+leftPct+'%</span></div>' +
-    '<div class="bar-row"><span style="width:70px;">오른쪽</span><div class="bar-track"><div class="bar-fill" style="width:'+rightPct+'%; background:var(--marigold);"></div></div><span>'+rightPct+'%</span></div>';
-
-  show("screen-result");
-
-  if(typeof renderPlaygroundStats === "function"){
-    renderPlaygroundStats({
-      gameKey: "dilemma8",
-      types: [
-        { key:"left",     label:"안정적인 익숙함파",   color:"#E8483C" },
-        { key:"right",    label:"즉흥적인 변화파",     color:"#F5A623" },
-        { key:"balanced", label:"균형 잡힌 상황판단파", color:"#1F6F63" }
-      ],
-      myType: myType
-    });
-  }
-}
-
-function restart(){ startGame(); }
+  // 페이지 로드 시 게임 시작
+  startGame();
 </script>
+
 </body>
 </html>
