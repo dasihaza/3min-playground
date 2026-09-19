@@ -10,7 +10,46 @@
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
+<style>
+  /* 소개글 영역 전용 스타일 (기존 style.css를 해치지 않게 인라인 추가) */
+  .intro-box {
+    background-color: #FFF6E9;
+    border: 2px dashed #FFC288;
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin: 0 auto 32px;
+    max-width: 680px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(255, 194, 136, 0.15);
+  }
+  .intro-box h2 {
+    font-family: 'Jua', sans-serif;
+    color: #FF785A;
+    font-size: 22px;
+    margin: 0 0 12px;
+  }
+  .intro-box p {
+    font-family: 'Noto Sans KR', sans-serif;
+    color: #554A42;
+    font-size: 15px;
+    line-height: 1.7;
+    margin: 0;
+    word-break: keep-all;
+  }
+  .intro-box strong {
+    color: #E8483C;
+  }
+</style>
+</head>
+<body>
 
+  <!-- 새로 추가된 귀여운 소개글 영역 -->
+  <div class="intro-box">
+    <h2>🎈 놀이와 학습이 만나는 에듀테크 놀이터!</h2>
+    <p>
+      '3분 놀이터'는 교실에서 꼭 필요하지만 <strong>번거로웠던 기능들을 쏙쏙 뽑아 만든 에듀테크 도구 모음</strong>입니다. 기존 도구들을 쓰며 아쉬웠던 2%를 채우고, 복잡한 <strong>로그인 없이 누구나 1초 만에 바로 쓸 수 있도록</strong> 만들었어요! 선생님은 업무를 줄이고, 아이들은 재미있게 배울 수 있는 알찬 공간이 되길 바랍니다. 틈새 시간, 부담 없이 즐겨보세요! 😊
+    </p>
+  </div>
 <div class="wrap">
 
   <header class="site-header">
@@ -173,18 +212,6 @@
       <span class="play">지금 골라보기 →</span>
     </a>
 
-    <a class="card" href="content/best-husband-balance.html" data-cat="balance">
-      <div class="badge-row">
-        <span class="badge balance">밸런스게임</span>
-        <span class="time-pill">
-          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="13" r="8" stroke="currentColor" stroke-width="2"/><path d="M12 9v4l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          3분
-        </span>
-      </div>
-      <h3>최고의 남편 고르기 8선</h3>
-      <p>능력자 남편 vs 다정한 남편, 8가지 상황으로 알아보는 나의 신랑감 취향.</p>
-      <span class="play">지금 골라보기 →</span>
-    </a>
 
     <a class="card" href="content/mini-quiz.html" data-cat="quiz">
       <div class="badge-row">
