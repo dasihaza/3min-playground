@@ -106,6 +106,24 @@
   .extra{background:#FFF;border:2px dashed #DBD2F5;border-radius:14px;padding:12px 14px;
          font-size:13.5px;line-height:1.8;margin-top:12px;word-break:keep-all;color:#5B4F87;}
 
+  .daybtns{display:flex;gap:6px;margin-left:auto;}
+  .daybtn{
+    font-family:'Jua',sans-serif;font-size:12.5px;border:2px solid var(--line);background:#fff;
+    color:var(--ink-soft);border-radius:999px;padding:6px 13px;cursor:pointer;
+  }
+  .daybtn.on{background:var(--sky);border-color:var(--sky);color:#fff;}
+  .card h2.rowhead{display:flex;align-items:center;gap:7px;}
+  .sick-none{background:#EAF8F2;border:3px solid #BEE7D6;}
+  .sick-none .big{color:#2E8570;}
+  .sick-on{background:#FFF0F3;border:3px solid #FBD3DD;}
+  .sick-on .big{color:#C7455F;}
+  .sick-item{background:#fff;border:2px solid #FBD3DD;border-radius:14px;padding:13px 15px;margin-top:10px;text-align:left;}
+  .sick-item .nm{font-family:'Jua',sans-serif;font-size:16px;color:#C7455F;margin-bottom:5px;}
+  .sick-item .ds{font-size:13.5px;line-height:1.8;margin-bottom:9px;word-break:keep-all;}
+  .sick-item ul{margin:0;padding:0;list-style:none;}
+  .sick-item li{font-size:13px;line-height:1.8;display:flex;gap:7px;margin-bottom:5px;word-break:keep-all;}
+  .sick-item li i{font-style:normal;}
+  .updated{font-size:11.5px;color:var(--ink-soft);margin-top:9px;}
   .msg{text-align:center;padding:26px 16px;color:var(--ink-soft);font-size:14px;line-height:1.9;word-break:keep-all;}
   .msg b{color:var(--ink);}
   .loading{font-family:'Gaegu',cursive;font-weight:700;font-size:18px;}
@@ -135,7 +153,7 @@
 
   <div class="search-card">
     <div class="search-row">
-      <input id="q" type="text" placeholder="우리 지역을 찾아보세요 (예: 김천, 수원, 제주)" autocomplete="off">
+      <input id="q" type="text" placeholder="우리 지역을 찾아보세요 (예: 청주, 수원, 제주)" autocomplete="off">
       <button class="btn" onclick="goSearch()">찾기</button>
     </div>
     <div class="chips" id="chips"></div>
@@ -198,7 +216,7 @@ var REGIONS = [
 ["합천",35.57,128.17],
 ["제주",33.50,126.53],["서귀포",33.25,126.56]
 ];
-var HOT = ["서울","부산","대구","인천","광주","대전","김천","제주"];
+var HOT = ["서울","부산","대구","인천","광주","대전","울산","청주","춘천","제주"];
 
 /* ===== 하늘 상태 ===== */
 function sky(code){
@@ -216,6 +234,56 @@ function sky(code){
   return ["흐림","☁️"];
 }
 
+
+/* ===== 유행 중인 감염병 =====
+   ① assets/outbreaks.json 이 있으면 그 내용을 씁니다.
+      (GitHub이 하루 한 번 질병관리청 자료를 받아 이 파일을 갱신해요)
+   ② 파일이 없거나 비어 있으면 아래 직접 적은 목록을 씁니다.
+   ③ 둘 다 비면 "공식적으로 유행하는 전염병(감염병)은 현재 없습니다."가 나옵니다. */
+var OUTBREAK_UPDATED = "직접 입력";
+var OUTBREAKS = [
+  /* 직접 적고 싶을 때 쓰는 자리 — 앞의 // 를 지우면 나타나요
+  { name:"인플루엔자(독감)", level:2, from:"2025-11-01", to:"2026-03-31", emoji:"🤒",
+    desc:"열이 갑자기 오르고 몸이 쑤시며 기침이 나요. 사람이 많은 곳에서 잘 퍼져요.",
+    prevent:["비누로 30초 이상 손 씻기","기침할 땐 옷소매로 입 가리기",
+             "사람 많은 곳에서는 마스크 쓰기","물 자주 마시고 잠 푹 자기"] },
+  */
+];
+
+/* 자동 갱신 파일 읽기 (같은 사이트 안의 파일이라 차단되지 않아요) */
+function loadOutbreakFile(){
+  return fetch('../assets/outbreaks.json?t=' + Date.now())
+    .then(function(x){ return x.ok ? x.json() : null; })
+    .then(function(j){
+      if(j && j.list && j.list.length){
+        OUTBREAKS = j.list;
+        OUTBREAK_UPDATED = j.updated || OUTBREAK_UPDATED;
+      } else if(j){
+        OUTBREAK_UPDATED = j.updated || OUTBREAK_UPDATED;
+      }
+    })
+    .catch(function(){ /* 파일이 없으면 직접 적은 목록을 그대로 씁니다 */ });
+}
+
+/* 오늘 기준으로 유행 중인 것만 고르기 */
+function activeOutbreaks(){
+  var today=new Date(), out=[], i;
+  for(i=0;i<OUTBREAKS.length;i++){
+    var o=OUTBREAKS[i];
+    var s1=o.from?new Date(o.from+"T00:00:00"):null;
+    var e1=o.to?new Date(o.to+"T23:59:59"):null;
+    if(s1 && today<s1) continue;
+    if(e1 && today>e1) continue;
+    out.push(o);
+  }
+  return out;
+}
+function outbreakLevel(list){
+  var m=0,i;
+  for(i=0;i<list.length;i++) if((list[i].level||1)>m) m=list[i].level||1;
+  return m;
+}
+
 /* ===== 미세먼지 등급 (우리나라 기준) ===== */
 function gradePM10(v){
   if(v<=30) return {n:0,t:"좋음",c:"#3FA8E0",bg:"#EAF6FD",e:"😀"};
@@ -230,20 +298,28 @@ function gradePM25(v){
   return {n:3,t:"매우 나쁨",c:"#C7453F",bg:"#FFEFEF",e:"🤢"};
 }
 
-/* ===== 마스크 추천 ===== */
-function maskAdvice(worst){
-  if(worst===0) return {cls:"mask-ok", icon:"😀",
+/* ===== 마스크 추천 (미세먼지 + 감염병 함께 고려) ===== */
+function maskAdvice(dust, sick){
+  /* dust : 0좋음 1보통 2나쁨 3매우나쁨 / sick : 0없음 1주의 2유행 3크게유행 */
+  var lvl = Math.max(dust, sick);
+  var reason = "";
+  if(dust>=2 && sick>=2) reason = "미세먼지도 많고 감염병도 돌고 있어요. ";
+  else if(dust>=2) reason = "미세먼지가 많은 날이에요. ";
+  else if(sick>=2) reason = "감염병이 돌고 있어요. ";
+  else if(sick===1) reason = "감염병을 조심해야 하는 때예요. ";
+
+  if(lvl<=0) return {cls:"mask-ok", icon:"😀",
     big:"마스크 없이 신나게 놀아도 좋아요!",
-    why:"공기가 아주 깨끗한 날이에요. 운동장에서 뛰어놀기 딱 좋아요. 창문을 열어 환기도 해 보세요!"};
-  if(worst===1) return {cls:"mask-ok", icon:"🙂",
+    why:"공기가 깨끗하고 걱정할 감염병도 없어요. 운동장에서 뛰어놀기 딱 좋아요. 창문을 열어 환기도 해 보세요!"};
+  if(lvl===1) return {cls:"mask-ok", icon:"🙂",
     big:"마스크 안 써도 괜찮아요",
-    why:"공기가 보통이에요. 바깥에서 놀아도 괜찮지만, 목이 칼칼하거나 기침이 나는 친구는 마스크를 쓰면 더 좋아요."};
-  if(worst===2) return {cls:"mask-warn", icon:"😷",
+    why:reason+"바깥에서 놀아도 괜찮지만, 기침이 나거나 목이 칼칼한 친구는 마스크를 쓰면 더 좋아요. 손 씻기는 꼭 기억해요!"};
+  if(lvl===2) return {cls:"mask-warn", icon:"😷",
     big:"마스크를 쓰는 게 좋아요",
-    why:"먼지가 많은 날이에요. 밖에 나갈 때는 마스크를 꼭 챙기고, 오래 뛰어노는 건 조금 줄여 주세요. 집에 오면 손을 깨끗이 씻어요!"};
+    why:reason+"밖에 나갈 때는 마스크를 챙기고, 사람이 많은 곳에서는 꼭 써요. 집에 오면 손부터 깨끗이 씻어요!"};
   return {cls:"mask-bad", icon:"🤢",
-    big:"마스크 꼭! 바깥 활동은 줄여요",
-    why:"먼지가 아주 많은 날이에요. 밖에서는 꼭 마스크를 쓰고, 운동장에서 오래 노는 건 다음으로 미뤄요. 물을 자주 마시고 창문은 닫아 두세요."};
+    big:"마스크 꼭! 사람 많은 곳은 피해요",
+    why:reason+"밖에서는 꼭 마스크를 쓰고, 사람이 많이 모이는 곳은 되도록 가지 않아요. 물을 자주 마시고 손을 자주 씻어요."};
 }
 
 /* ===== 옷차림 추천 ===== */
@@ -338,42 +414,74 @@ function load(r){
 
   var wUrl='https://api.open-meteo.com/v1/forecast?latitude='+r[1]+'&longitude='+r[2]
     +'&current=temperature_2m,weather_code,wind_speed_10m'
-    +'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max'
-    +'&timezone=Asia%2FSeoul&forecast_days=1';
+    +'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max'
+    +'&timezone=Asia%2FSeoul&forecast_days=2';
   var aUrl='https://air-quality-api.open-meteo.com/v1/air-quality?latitude='+r[1]+'&longitude='+r[2]
-    +'&current=pm10,pm2_5&timezone=Asia%2FSeoul';
+    +'&current=pm10,pm2_5&hourly=pm10,pm2_5&timezone=Asia%2FSeoul&forecast_days=2';
 
   var w=fetch(wUrl).then(function(x){ return x.json(); });
   var a=fetch(aUrl).then(function(x){ return x.json(); }).catch(function(){ return null; });
 
   Promise.all([w,a]).then(function(res){
-    draw(r, res[0], res[1]);
+    LAST = { r:r, wd:res[0], ad:res[1] };
+    draw(0);
   }).catch(function(){
     panel.innerHTML='<div class="card"><div class="msg">😢 <b>날씨 정보를 가져오지 못했어요.</b><br>'
       + '인터넷 연결을 확인하고 잠시 뒤 다시 눌러 주세요.</div></div>';
   });
 }
 
-function draw(r, wd, ad){
-  var cur=wd.current, day=wd.daily;
-  var nowT=Math.round(cur.temperature_2m);
-  var hi=Math.round(day.temperature_2m_max[0]), lo=Math.round(day.temperature_2m_min[0]);
-  var rainP=day.precipitation_probability_max ? (day.precipitation_probability_max[0]||0) : 0;
-  var wind=Math.round(cur.wind_speed_10m||0);
-  var sk=sky(day.weather_code[0]);
+var LAST = null;
 
+/* 내일 미세먼지 = 내일 24시간 평균 */
+function avgHourly(ad, key, dayIdx){
+  if(!ad || !ad.hourly || !ad.hourly[key] || !ad.hourly.time) return null;
+  var arr=ad.hourly[key], tm=ad.hourly.time, sum=0, n=0, i;
+  var base=new Date(); base.setHours(0,0,0,0);
+  var s0=new Date(base.getTime() + dayIdx*86400000);
+  var e0=new Date(s0.getTime() + 86400000);
+  for(i=0;i<tm.length;i++){
+    var t=new Date(tm[i]);
+    if(t>=s0 && t<e0 && arr[i]!==null && arr[i]!==undefined){ sum+=arr[i]; n++; }
+  }
+  return n ? Math.round(sum/n) : null;
+}
+
+function showDay(i){ draw(i); }
+
+function draw(dayIdx){
+  if(!LAST) return;
+  var r=LAST.r, wd=LAST.wd, ad=LAST.ad;
+  var day=wd.daily, isToday = (dayIdx===0);
+
+  var hi=Math.round(day.temperature_2m_max[dayIdx]);
+  var lo=Math.round(day.temperature_2m_min[dayIdx]);
+  var rainP=day.precipitation_probability_max ? (day.precipitation_probability_max[dayIdx]||0) : 0;
+  var wind=Math.round(isToday ? (wd.current.wind_speed_10m||0)
+                              : (day.wind_speed_10m_max ? day.wind_speed_10m_max[dayIdx] : 0));
+  var sk=sky(day.weather_code[dayIdx]);
+  var bigT = isToday ? Math.round(wd.current.temperature_2m) : hi;
+  var bigL = isToday ? '지금 기온' : '내일 낮 기온';
+
+  /* 미세먼지 */
   var pm10=null, pm25=null;
-  if(ad && ad.current){
+  if(isToday && ad && ad.current){
     if(ad.current.pm10!==undefined && ad.current.pm10!==null) pm10=Math.round(ad.current.pm10);
     if(ad.current.pm2_5!==undefined && ad.current.pm2_5!==null) pm25=Math.round(ad.current.pm2_5);
   }
+  if(!isToday){ pm10=avgHourly(ad,'pm10',1); pm25=avgHourly(ad,'pm2_5',1); }
 
   var h='';
 
   /* 날씨 */
-  h+='<div class="card"><h2>📍 '+r[0]+'의 오늘 날씨</h2>'
+  h+='<div class="card"><h2 class="rowhead">📍 '+r[0]+'의 '+(isToday?'오늘':'내일')+' 날씨'
+   + '<span class="daybtns">'
+   +   '<span class="daybtn'+(isToday?' on':'')+'" onclick="showDay(0)">오늘</span>'
+   +   '<span class="daybtn'+(isToday?'':' on')+'" onclick="showDay(1)">내일</span>'
+   + '</span></h2>'
    + '<div class="wnow"><div class="wicon">'+sk[1]+'</div>'
-   + '<div><div class="wtemp">'+nowT+'°</div><div class="wdesc">'+sk[0]+'</div></div></div>'
+   + '<div><div class="wtemp">'+bigT+'°</div><div class="wdesc">'+sk[0]+'</div>'
+   + '<div style="font-size:12px;color:var(--ink-soft);margin-top:2px;">'+bigL+'</div></div></div>'
    + '<div class="wsub">'
    +   '<span class="pill">최고 <b class="hi">'+hi+'°</b></span>'
    +   '<span class="pill">최저 <b class="lo">'+lo+'°</b></span>'
@@ -382,30 +490,50 @@ function draw(r, wd, ad){
    + '</div></div>';
 
   /* 미세먼지 */
-  var worst=1, g10=null, g25=null;
+  var dust=0, g10=null, g25=null;
   if(pm10!==null || pm25!==null){
-    h+='<div class="card"><h2>🌫️ 미세먼지</h2><div class="dust">';
+    h+='<div class="card"><h2>🌫️ 미세먼지'+(isToday?'':' (내일 하루 평균)')+'</h2><div class="dust">';
     if(pm10!==null){ g10=gradePM10(pm10);
       h+='<div class="dust-item" style="border-color:'+g10.c+';background:'+g10.bg+'">'
-       + '<div class="lbl">미세먼지 (PM10)</div>'
-       + '<div class="val" style="color:'+g10.c+'">'+pm10+'</div>'
+       + '<div class="lbl">미세먼지 (PM10)</div><div class="val" style="color:'+g10.c+'">'+pm10+'</div>'
        + '<div class="st" style="color:'+g10.c+'">'+g10.e+' '+g10.t+'</div></div>'; }
     if(pm25!==null){ g25=gradePM25(pm25);
       h+='<div class="dust-item" style="border-color:'+g25.c+';background:'+g25.bg+'">'
-       + '<div class="lbl">초미세먼지 (PM2.5)</div>'
-       + '<div class="val" style="color:'+g25.c+'">'+pm25+'</div>'
+       + '<div class="lbl">초미세먼지 (PM2.5)</div><div class="val" style="color:'+g25.c+'">'+pm25+'</div>'
        + '<div class="st" style="color:'+g25.c+'">'+g25.e+' '+g25.t+'</div></div>'; }
     h+='</div></div>';
-    worst=Math.max(g10?g10.n:0, g25?g25.n:0);
+    dust=Math.max(g10?g10.n:0, g25?g25.n:0);
+  }
+
+  /* 유행하는 감염병 */
+  var sick=activeOutbreaks();
+  var sickLv=outbreakLevel(sick);
+  if(sick.length===0){
+    h+='<div class="rec sick-none"><h2>🦠 요즘 유행하는 병이 있을까?</h2>'
+     + '<div class="big">😌 공식적으로 유행하는 전염병(감염병)은 현재 없습니다.</div>'
+     + '<div class="why">그래도 손 씻기와 기침 예절은 늘 기억해요. 건강한 습관이 가장 좋은 예방법이에요!</div>'
+     + '<div class="updated">자료 기준일 : '+OUTBREAK_UPDATED+'</div></div>';
+  } else {
+    h+='<div class="rec sick-on"><h2>🦠 요즘 유행하는 병이 있을까?</h2>'
+     + '<div class="big">⚠️ 지금 <b>'+sick.length+'가지</b> 감염병이 돌고 있어요</div>'
+     + '<div class="why">아래 내용을 읽고 예방 방법을 꼭 지켜 주세요.</div>';
+    for(var k=0;k<sick.length;k++){
+      var o=sick[k];
+      h+='<div class="sick-item"><div class="nm">'+(o.emoji||'🦠')+' '+o.name+'</div>'
+       + '<div class="ds">'+o.desc+'</div><ul>';
+      for(var j=0;j<o.prevent.length;j++) h+='<li><i>✅</i><span>'+o.prevent[j]+'</span></li>';
+      h+='</ul></div>';
+    }
+    h+='<div class="updated">자료 기준일 : '+OUTBREAK_UPDATED+'</div></div>';
   }
 
   /* 마스크 */
-  if(pm10===null && pm25===null){
+  if(pm10===null && pm25===null && sickLv===0){
     h+='<div class="rec mask-ok"><h2>😷 마스크, 써야 할까?</h2>'
      + '<div class="big">미세먼지 정보를 가져오지 못했어요</div>'
-     + '<div class="why">오늘은 창밖을 한번 살펴보고, 하늘이 뿌옇게 보이면 마스크를 챙기는 게 안전해요.</div></div>';
+     + '<div class="why">하늘이 뿌옇게 보이면 마스크를 챙기는 게 안전해요.</div></div>';
   } else {
-    var m=maskAdvice(worst);
+    var m=maskAdvice(dust, sickLv);
     h+='<div class="rec '+m.cls+'"><h2>😷 마스크, 써야 할까?</h2>'
      + '<div class="big">'+m.icon+' '+m.big+'</div>'
      + '<div class="why">'+m.why+'</div></div>';
@@ -413,10 +541,8 @@ function draw(r, wd, ad){
 
   /* 옷차림 */
   var c=clothAdvice(hi, lo, rainP, wind);
-  h+='<div class="rec cloth"><h2>👕 오늘의 옷차림</h2>'
-   + '<div class="big">'+c.big+'</div>'
-   + '<div class="why">'+c.why+'</div>'
-   + '<div class="items">';
+  h+='<div class="rec cloth"><h2>👕 '+(isToday?'오늘':'내일')+'의 옷차림</h2>'
+   + '<div class="big">'+c.big+'</div><div class="why">'+c.why+'</div><div class="items">';
   for(var i=0;i<c.items.length;i++) h+='<span class="item"><i>'+c.items[i][0]+'</i>'+c.items[i][1]+'</span>';
   h+='</div>';
   for(i=0;i<c.notes.length;i++) h+='<div class="extra">'+c.notes[i]+'</div>';
@@ -426,14 +552,16 @@ function draw(r, wd, ad){
 }
 
 /* 시작 */
-(function(){
+loadOutbreakFile().then(function(){ boot(); });
+
+function boot(){
   var last=null;
   try{ last=localStorage.getItem('sambun-weather-last'); }catch(e){}
   if(last) pick(last);
   else document.getElementById('panel').innerHTML =
     '<div class="card"><div class="msg">👆 위에서 <b>우리 지역</b>을 찾아보세요!<br>'
     + '오늘 날씨와 미세먼지를 보고 <b>옷차림</b>과 <b>마스크</b>를 알려줄게요.</div></div>';
-})();
+}
 </script>
 </body>
 </html>
