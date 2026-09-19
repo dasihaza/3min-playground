@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3분 놀이터 — 쉬는 시간, 3분이면 충분해요</title>
+<meta name="description" content="성향 테스트, 밸런스 게임, 미니 퀴즈까지. 3분이면 끝나는 재미있는 콘텐츠가 매일 올라오는 놀이터.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="site-header">
+    <a class="brand" href="index.html">
+      <svg class="brand-mark" viewBox="0 0 34 34" fill="none">
+        <circle cx="17" cy="18" r="14" fill="#FAF7F0" stroke="#1D1B16" stroke-width="2"/>
+        <path d="M17 9 L17 18 L23 21" stroke="#E8483C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="13" y="2" width="8" height="4" rx="1.5" fill="#1D1B16"/>
+      </svg>
+      <span class="brand-word">3분 놀이터</span>
+    </a>
+  </header>
+
+  <section class="hero">
+    <div class="hero-eyebrow">쉬는 시간 전용 콘텐츠</div>
+    <h1>3분이면 충분해요,<br>지금 하나 골라볼까요?</h1>
+    <p>성향 테스트, 밸런스 게임, 미니 퀴즈까지 — 짧고 굵게 즐기는 콘텐츠를 매일 새로 올려요. 부담 없이 하나만 골라보세요.</p>
+  </section>
+
+<div class="chip-row" id="filters">
+    <button class="chip" data-filter="all" data-active="true">전체</button>
+    <button class="chip" data-filter="test">성향테스트</button>
+    <button class="chip" data-filter="balance">밸런스게임</button>
+    <button class="chip" data-filter="quiz">미니퀴즈</button>
+    <button class="chip" data-filter="game">웹게임</button>
+    <button class="chip" data-filter="board">게시판</button>
+    <button class="chip" data-filter="teacher">디지털 교구</button>
+    <button class="chip" data-filter="work">업무 꾸러미</button>
+  </div>
+
+  <div class="grid" id="grid">
+    <a class="card" href="content/today-weather.html" data-cat="teacher">
+      <div class="badge-row">
+        <span class="badge teacher">디지털 교구</span>
+        <span class="time-pill">1분</span>
+      </div>
+      <h3>오늘 뭐 입지?</h3>
+      <p>우리 지역 날씨와 미세먼지를 보고 옷차림과 마스크를 알려줘요. 아침 활동으로 딱!</p>
+      <span class="play">날씨 보러 가기 →</span>
+    </a>
+
+
+    <a class="card" href="content/purchase-helper.html" data-cat="work">
+      <div class="badge-row">
+        <span class="badge work">업무 꾸러미</span>
+        <span class="time-pill">1분</span>
+      </div>
+      <h3>품의 자동완성기</h3>
+      <p>장바구니를 붙여넣으면 품목내역 표가 뚝딱. 확인하고 엑셀로 내려받으세요.</p>
+      <span class="play">품의 만들러 가기 →</span>
+    </a>
+
+    <a class="card" href="content/seat-shuffle.html" data-cat="teacher">
+      <div class="badge-row">
+        <span class="badge teacher">디지털 교구</span>
+        <span class="time-pill">1분</span>
+      </div>
+      <h3>두근두근 자리바꾸기</h3>
+      <p>학생 명단만 넣으면 분단·모둠 자리를 남녀 골고루 섞어 뽑아줘요.</p>
+      <span class="play">자리 뽑으러 가기 →</span>
+    </a>
+
+    <a class="card" href="content/timer.html" data-cat="teacher">
+      <div class="badge-row">
+        <span class="badge teacher">디지털 교구</span>
+        <span class="time-pill">수업용</span>
+      </div>
+      <h3>똑딱똑딱 교실 타이머</h3>
+      <p>책상 위 디지털 시계로 시간 재기. 1분마다·10초 전·종료 알림을 골라 켤 수 있어요.</p>
+      <span class="play">타이머 열기 →</span>
+    </a>
+
+    <a class="card" href="content/ladder.html" data-cat="teacher">
+      <div class="badge-row">
+        <span class="badge teacher">디지털 교구</span>
+        <span class="time-pill">1분</span>
+      </div>
+      <h3>두근두근 사다리타기</h3>
+      <p>사람 수와 당첨 개수만 정하면 끝. 하나씩 눌러 타거나 한 번에 결과를 볼 수 있어요.</p>
+      <span class="play">사다리 타러 가기 →</span>
+    </a>
+
+    <a class="card" href="content/writing-tool.html" data-cat="teacher">
+      <div class="badge-row">
+        <span class="badge teacher">디지털 교구</span>
+        <span class="time-pill">수업용</span>
+      </div>
+      <h3>슥삭슥삭 필기도구</h3>
+      <p>화면을 캡처해 붙여넣고 그 위에 밑줄·별표·글자를 쓸 수 있어요. 빈 화이트보드로도 써요.</p>
+      <span class="play">필기하러 가기 →</span>
+    </a>
+
+    <a class="card" href="content/recorder-helper.html" data-cat="teacher">
+      <div class="badge-row">
+        <span class="badge teacher">디지털 교구</span>
+        <span class="time-pill">음악시간</span>
+      </div>
+      <h3>도레미 리코더 도우미</h3>
+      <p>계이름을 넣으면 운지법 그림이 나와요. 악보 위에 계이름을 적어 인쇄할 수도 있어요.</p>
+      <span class="play">리코더 도우미 열기 →</span>
+    </a>
+
+    <a class="card" href="content/morning-hub.html" data-cat="teacher">
+      <div class="badge-row">
+        <span class="badge teacher">디지털 교구</span>
+        <span class="time-pill">3~6학년</span>
+      </div>
+      <h3>2학기 아침활동지</h3>
+      <p>학년별 90일치 아침활동지. 수학 10문제에 영어·한자·속담까지 하루 한 장으로.</p>
+      <span class="play">학년 고르러 가기 →</span>
+    </a>
+
+
+
+
+
+    <a class="card" href="content/manmul-quiz.html" data-cat="quiz">
+      <div class="badge-row">
+        <span class="badge quiz">미니퀴즈</span>
+        <span class="time-pill">매일 50문제</span>
+      </div>
+      <h3>초등 상식 퀴즈(만물박사)</h3>
+      <p>충북 동양일보 만물박사 선발대회 대비 예상문제. 매일 새로운 50문제가 출제돼요.</p>
+      <span class="play">오늘의 문제 풀기 →</span>
+    </a>
+
+    <a class="card" href="content/flag-memory.html" data-cat="game">
+      <div class="badge-row">
+        <span class="badge game">웹게임</span>
+        <span class="time-pill">3분</span>
+      </div>
+      <h3>세계 국기 짝 맞추기</h3>
+      <p>나라 100개 중 25개를 뽑아 카드 50장! 같은 국기를 찾아 짝을 맞춰요.</p>
+      <span class="play">게임하러 가기 →</span>
+    </a>
+
+    <a class="card" href="content/core-mixmaster.html" data-cat="game">
+      <div class="badge-row">
+        <span class="badge game">웹게임</span>
+        <span class="time-pill">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="13" r="8" stroke="currentColor" stroke-width="2"/><path d="M12 9v4l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          3분+
+        </span>
+      </div>
+      <h3>몬조운</h3>
+      <p>몬스터를 조합해 오늘의 운세를 알아보세요. 코어를 모아 믹스해서 더 강한 몬스터로 키워보세요.</p>
+      <span class="play">게임 시작 →</span>
+    </a>
+
+    <a class="card" href="content/balance-game.html" data-cat="balance">
+      <div class="badge-row">
+        <span class="badge balance">밸런스게임</span>
+        <span class="time-pill">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="13" r="8" stroke="currentColor" stroke-width="2"/><path d="M12 9v4l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          3분
+        </span>
+      </div>
+      <h3>인생 최고의 딜레마 8선</h3>
+      <p>평생 여름 vs 평생 겨울, 순간이동 vs 하늘 날기... 고민되는 8가지 밸런스 게임.</p>
+      <span class="play">지금 골라보기 →</span>
+    </a>
+
+    <a class="card" href="content/best-husband-balance.html" data-cat="balance">
+      <div class="badge-row">
+        <span class="badge balance">밸런스게임</span>
+        <span class="time-pill">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="13" r="8" stroke="currentColor" stroke-width="2"/><path d="M12 9v4l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          3분
+        </span>
+      </div>
+      <h3>최고의 남편 고르기 8선</h3>
+      <p>능력자 남편 vs 다정한 남편, 8가지 상황으로 알아보는 나의 신랑감 취향.</p>
+      <span class="play">지금 골라보기 →</span>
+    </a>
+
+    <a class="card" href="content/mini-quiz.html" data-cat="quiz">
+      <div class="badge-row">
+        <span class="badge quiz">미니퀴즈</span>
+        <span class="time-pill">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="13" r="8" stroke="currentColor" stroke-width="2"/><path d="M12 9v4l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          3분
+        </span>
+      </div>
+      <h3>오늘의 상식 퀴즈 5문제</h3>
+      <p>알쏭달쏭 상식 다섯 고개. 다 맞히면 상식왕 인증!</p>
+      <span class="play">퀴즈 풀기 →</span>
+    </a>
+
+    <a class="card" href="content/career-test.html" data-cat="test">
+      <div class="badge-row">
+        <span class="badge test">성향테스트</span>
+        <span class="time-pill">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="13" r="8" stroke="currentColor" stroke-width="2"/><path d="M12 9v4l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          3분
+        </span>
+      </div>
+      <h3>나의 커리어 나침반</h3>
+      <p>10가지 학교생활 질문으로 알아보는 나에게 어울리는 직업.</p>
+      <span class="play">테스트 시작 →</span>
+    </a>
+
+    <a class="card" href="content/love-style-test.html" data-cat="test">
+      <div class="badge-row">
+        <span class="badge test">성향테스트</span>
+        <span class="time-pill">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="13" r="8" stroke="currentColor" stroke-width="2"/><path d="M12 9v4l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          3분
+        </span>
+      </div>
+      <h3>나의 연애 스타일 테스트</h3>
+      <p>썸·다툼·화해의 순간들로 알아보는 나만의 연애 스타일.</p>
+      <span class="play">테스트 시작 →</span>
+    </a>
+
+  </div>
+
+<div class="grid">
+    <a class="card" href="content/board.html" data-cat="board">
+      <div class="badge-row">
+        <span class="badge board">게시판</span>
+        <span class="time-pill">자유 주제</span>
+      </div>
+      <h3>코딩 교육 게시판</h3>
+      <p>코딩 공부 질문, 후기, 팁을 자유롭게 나누는 공간이에요.</p>
+      <span class="play">게시판 가기 →</span>
+    </a>
+  </div>
+
+  <footer class="site-footer">
+    <div>© 2026 3분 놀이터. 콘텐츠는 재미로 즐겨주세요.</div>
+    <div><a href="privacy.html">개인정보처리방침</a> · 문의: hello@example.com</div>
+  </footer>
+
+</div>
+
+<script>
+  const chips = document.querySelectorAll('.chip');
+  const cards = document.querySelectorAll('.card');
+  chips.forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      chips.forEach(c=>c.setAttribute('data-active','false'));
+      chip.setAttribute('data-active','true');
+      const f = chip.dataset.filter;
+      cards.forEach(card=>{
+        card.style.display = (f==='all' || card.dataset.cat===f) ? '' : 'none';
+      });
+    });
+  });
+</script>
+
+</body>
+</html>
