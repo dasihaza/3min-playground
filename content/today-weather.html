@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>오늘 뭐 입지? | 3분 놀이터</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EAF6FF; --card:#FFFFFF; --ink:#41474F; --ink-soft:#8C97A3;
+    --line:#E3EEF7;
+    --pink:#FF9DB6; --pink-d:#E97694;
+    --mint:#5FD0B0; --mint-d:#43AE90;
+    --lemon:#FFD36E; --grape:#B49BE8; --sky:#7FC2F0; --sky-d:#559FD4;
+    --shadow:0 3px 0 rgba(65,71,79,.09);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 12% 6%, rgba(255,211,110,.30) 0 110px, transparent 111px),
+      radial-gradient(circle at 88% 12%, rgba(255,157,182,.22) 0 90px, transparent 91px),
+      linear-gradient(180deg,var(--bg),#F6FBFF);
+    background-attachment:fixed;
+    color:var(--ink);font-family:'Noto Sans KR',sans-serif;min-height:100vh;
+  }
+  .topbar{max-width:760px;margin:0 auto;padding:14px 18px 0;display:flex;align-items:center;justify-content:space-between;}
+  .topbar a{text-decoration:none;color:var(--ink);}
+  .topbar .brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;}
+  .topbar .back{font-size:12.5px;font-weight:700;color:var(--ink-soft);border:2px solid #fff;background:#fff;padding:6px 12px;border-radius:999px;box-shadow:var(--shadow);}
+  .shell{max-width:760px;margin:0 auto;padding:14px 18px 60px;}
+
+  .hero{text-align:center;margin-bottom:16px;}
+  .hero h1{font-family:'Jua',sans-serif;font-size:clamp(25px,5vw,32px);margin:0 0 4px;color:var(--sky-d);}
+  .hero p{font-family:'Gaegu',cursive;font-weight:700;font-size:17px;color:var(--ink-soft);margin:0;}
+
+  /* 검색 */
+  .search-card{background:var(--card);border-radius:22px;padding:16px;box-shadow:var(--shadow),0 8px 20px rgba(65,71,79,.08);margin-bottom:14px;position:relative;}
+  .search-row{display:flex;gap:8px;}
+  #q{
+    flex:1;border:3px solid var(--line);border-radius:14px;padding:13px 14px;
+    font-family:'Noto Sans KR',sans-serif;font-size:15px;
+  }
+  #q:focus{outline:none;border-color:var(--sky);}
+  .btn{
+    font-family:'Jua',sans-serif;border:none;cursor:pointer;font-size:15px;
+    padding:13px 20px;border-radius:14px;background:var(--sky);color:#fff;
+    box-shadow:0 4px 0 var(--sky-d);white-space:nowrap;
+  }
+  .btn:hover{transform:translateY(1px);box-shadow:0 3px 0 var(--sky-d);}
+  .btn:active{transform:translateY(4px);box-shadow:none;}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
+  .chip{
+    font-family:'Jua',sans-serif;font-size:12.5px;border:2px solid var(--line);background:#fff;
+    color:var(--ink-soft);border-radius:999px;padding:6px 12px;cursor:pointer;
+  }
+  .chip:hover{border-color:var(--sky);color:var(--sky-d);}
+  .sug{
+    position:absolute;left:16px;right:16px;top:64px;background:#fff;border:2px solid var(--line);
+    border-radius:14px;box-shadow:0 8px 18px rgba(65,71,79,.14);z-index:20;overflow:hidden;
+  }
+  .sug div{padding:11px 14px;font-size:14px;cursor:pointer;}
+  .sug div:hover,.sug div.on{background:#EFF8FF;}
+
+  /* 공통 카드 */
+  .card{background:var(--card);border-radius:22px;padding:20px;box-shadow:var(--shadow),0 8px 20px rgba(65,71,79,.08);margin-bottom:14px;}
+  .card h2{font-family:'Jua',sans-serif;font-size:16.5px;margin:0 0 12px;display:flex;align-items:center;gap:7px;}
+
+  /* 날씨 */
+  .wnow{display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:center;text-align:center;}
+  .wicon{font-size:64px;line-height:1;}
+  .wtemp{font-family:'Jua',sans-serif;font-size:46px;line-height:1;color:var(--sky-d);}
+  .wdesc{font-family:'Gaegu',cursive;font-weight:700;font-size:19px;color:var(--ink-soft);margin-top:2px;}
+  .wsub{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+  .pill{background:#F2F9FF;border:2px solid var(--line);border-radius:999px;padding:7px 14px;font-size:13px;}
+  .pill b{font-family:'Jua',sans-serif;font-size:14.5px;}
+  .hi{color:#E8724C;} .lo{color:#4C8FE8;}
+
+  /* 미세먼지 */
+  .dust{display:flex;gap:10px;flex-wrap:wrap;}
+  .dust-item{flex:1 1 150px;border-radius:16px;padding:14px;text-align:center;border:2px solid;}
+  .dust-item .lbl{font-size:12.5px;color:var(--ink-soft);}
+  .dust-item .val{font-family:'Jua',sans-serif;font-size:27px;line-height:1.2;}
+  .dust-item .st{font-family:'Jua',sans-serif;font-size:15px;}
+
+  /* 추천 큰 카드 */
+  .rec{border-radius:22px;padding:20px;margin-bottom:14px;box-shadow:var(--shadow),0 8px 20px rgba(65,71,79,.08);}
+  .rec h2{font-family:'Jua',sans-serif;font-size:16.5px;margin:0 0 10px;display:flex;align-items:center;gap:7px;}
+  .rec .big{font-family:'Jua',sans-serif;font-size:clamp(19px,4vw,24px);line-height:1.45;margin-bottom:8px;word-break:keep-all;}
+  .rec .why{font-size:14px;line-height:1.85;word-break:keep-all;}
+  .mask-ok{background:#EAF8F2;border:3px solid #BEE7D6;}
+  .mask-ok .big{color:#2E8570;}
+  .mask-warn{background:#FFF6E6;border:3px solid #F6DCA8;}
+  .mask-warn .big{color:#B5822A;}
+  .mask-bad{background:#FFEFEF;border:3px solid #F8C9C9;}
+  .mask-bad .big{color:#C7453F;}
+  .cloth{background:#F3F0FF;border:3px solid #DBD2F5;}
+  .cloth .big{color:#6B58A8;}
+
+  .items{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+  .item{background:#fff;border:2px solid #DBD2F5;border-radius:14px;padding:9px 13px;font-size:13.5px;
+        display:flex;align-items:center;gap:6px;}
+  .item i{font-style:normal;font-size:17px;}
+
+  .extra{background:#FFF;border:2px dashed #DBD2F5;border-radius:14px;padding:12px 14px;
+         font-size:13.5px;line-height:1.8;margin-top:12px;word-break:keep-all;color:#5B4F87;}
+
+  .msg{text-align:center;padding:26px 16px;color:var(--ink-soft);font-size:14px;line-height:1.9;word-break:keep-all;}
+  .msg b{color:var(--ink);}
+  .loading{font-family:'Gaegu',cursive;font-weight:700;font-size:18px;}
+  .hidden{display:none !important;}
+  .foot{text-align:center;font-size:12px;color:var(--ink-soft);margin-top:18px;line-height:1.8;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="../index.html">
+    <svg width="26" height="26" viewBox="0 0 34 34" fill="none">
+      <circle cx="17" cy="18" r="14" fill="#fff" stroke="#41474F" stroke-width="2"/>
+      <path d="M17 9 L17 18 L23 21" stroke="#7FC2F0" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="13" y="2" width="8" height="4" rx="1.5" fill="#41474F"/>
+    </svg>
+    <span>3분 놀이터</span>
+  </a>
+  <a class="back" href="../index.html">← 다른 콘텐츠 보기</a>
+</div>
+
+<div class="shell">
+  <div class="hero">
+    <h1>🌤️ 오늘 뭐 입지?</h1>
+    <p>우리 동네 날씨 보고, 옷차림과 마스크를 정해요!</p>
+  </div>
+
+  <div class="search-card">
+    <div class="search-row">
+      <input id="q" type="text" placeholder="우리 지역을 찾아보세요 (예: 김천, 수원, 제주)" autocomplete="off">
+      <button class="btn" onclick="goSearch()">찾기</button>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="sug hidden" id="sug"></div>
+  </div>
+
+  <div id="panel"></div>
+
+  <div class="foot">
+    날씨·미세먼지 자료 : Open-Meteo<br>
+    옷차림은 참고용이에요. 몸이 느끼는 추위는 사람마다 달라요!
+  </div>
+</div>
+
+<script>
+/* ===== 우리나라 시·군 좌표 ===== */
+var REGIONS = [
+["서울",37.57,126.98],["부산",35.18,129.08],["대구",35.87,128.60],["인천",37.46,126.71],
+["광주",35.16,126.85],["대전",36.35,127.38],["울산",35.54,129.31],["세종",36.48,127.29],
+["수원",37.26,127.03],["성남",37.42,127.13],["고양",37.66,126.83],["용인",37.24,127.18],
+["부천",37.50,126.77],["안산",37.32,126.83],["안양",37.39,126.93],["남양주",37.64,127.22],
+["화성",37.20,126.83],["평택",36.99,127.11],["의정부",37.74,127.03],["시흥",37.38,126.80],
+["파주",37.76,126.78],["광명",37.48,126.86],["김포",37.62,126.72],["군포",37.36,126.94],
+["이천",37.27,127.44],["양주",37.79,127.05],["오산",37.15,127.07],["구리",37.59,127.13],
+["안성",37.01,127.27],["포천",37.89,127.20],["의왕",37.34,126.97],["하남",37.54,127.21],
+["여주",37.30,127.64],["동두천",37.90,127.06],["과천",37.43,126.99],["가평",37.83,127.51],
+["양평",37.49,127.49],["연천",38.10,127.07],
+["춘천",37.88,127.73],["원주",37.34,127.92],["강릉",37.75,128.88],["동해",37.52,129.11],
+["태백",37.16,128.99],["속초",38.21,128.59],["삼척",37.45,129.17],["홍천",37.70,127.89],
+["횡성",37.49,127.99],["영월",37.18,128.46],["평창",37.37,128.39],["정선",37.38,128.66],
+["철원",38.15,127.31],["화천",38.11,127.71],["양구",38.11,127.99],["인제",38.07,128.17],
+["양양",38.08,128.62],
+["청주",36.64,127.49],["충주",36.99,127.93],["제천",37.13,128.19],["보은",36.49,127.73],
+["옥천",36.31,127.57],["영동",36.17,127.78],["증평",36.79,127.58],["진천",36.86,127.44],
+["괴산",36.81,127.79],["음성",36.94,127.69],["단양",36.98,128.37],
+["천안",36.81,127.11],["공주",36.45,127.12],["보령",36.33,126.61],["아산",36.79,127.00],
+["서산",36.78,126.45],["논산",36.19,127.10],["계룡",36.27,127.25],["당진",36.89,126.63],
+["금산",36.11,127.49],["부여",36.28,126.91],["서천",36.08,126.69],["청양",36.46,126.80],
+["홍성",36.60,126.66],["예산",36.68,126.84],["태안",36.75,126.30],
+["전주",35.82,127.15],["군산",35.97,126.74],["익산",35.95,126.96],["정읍",35.57,126.86],
+["남원",35.42,127.39],["김제",35.80,126.88],["완주",35.90,127.16],["진안",35.79,127.42],
+["무주",36.01,127.66],["장수",35.65,127.52],["임실",35.62,127.29],["순창",35.37,127.14],
+["고창",35.43,126.70],["부안",35.73,126.73],
+["목포",34.81,126.39],["여수",34.76,127.66],["순천",34.95,127.49],["나주",35.02,126.71],
+["광양",34.94,127.70],["담양",35.32,126.99],["곡성",35.28,127.29],["구례",35.20,127.46],
+["고흥",34.61,127.28],["보성",34.77,127.08],["화순",35.06,126.99],["장흥",34.68,126.91],
+["강진",34.64,126.77],["해남",34.57,126.60],["영암",34.80,126.70],["무안",34.99,126.48],
+["함평",35.07,126.52],["영광",35.28,126.51],["장성",35.30,126.79],["완도",34.31,126.75],
+["진도",34.49,126.26],["신안",34.83,126.35],
+["포항",36.02,129.37],["경주",35.86,129.22],["김천",36.14,128.11],["안동",36.57,128.73],
+["구미",36.12,128.34],["영주",36.81,128.62],["영천",35.97,128.94],["상주",36.41,128.16],
+["문경",36.59,128.19],["경산",35.83,128.74],["군위",36.24,128.57],["의성",36.35,128.70],
+["청송",36.44,129.06],["영양",36.67,129.11],["영덕",36.42,129.37],["청도",35.65,128.73],
+["고령",35.73,128.26],["성주",35.92,128.28],["칠곡",35.99,128.40],["예천",36.66,128.45],
+["봉화",36.89,128.73],["울진",36.99,129.40],["울릉",37.48,130.91],
+["창원",35.23,128.68],["진주",35.18,128.11],["통영",34.85,128.43],["사천",35.00,128.06],
+["김해",35.23,128.89],["밀양",35.50,128.75],["거제",34.88,128.62],["양산",35.34,129.04],
+["의령",35.32,128.26],["함안",35.27,128.41],["창녕",35.54,128.49],["남해",34.84,127.89],
+["하동",35.07,127.75],["산청",35.42,127.87],["함양",35.52,127.73],["거창",35.69,127.91],
+["합천",35.57,128.17],
+["제주",33.50,126.53],["서귀포",33.25,126.56]
+];
+var HOT = ["서울","부산","대구","인천","광주","대전","김천","제주"];
+
+/* ===== 하늘 상태 ===== */
+function sky(code){
+  if(code===0) return ["맑음","☀️"];
+  if(code===1) return ["대체로 맑음","🌤️"];
+  if(code===2) return ["구름 조금","⛅"];
+  if(code===3) return ["흐림","☁️"];
+  if(code===45||code===48) return ["안개","🌫️"];
+  if(code>=51&&code<=57) return ["이슬비","🌦️"];
+  if(code>=61&&code<=67) return ["비","🌧️"];
+  if(code>=71&&code<=77) return ["눈","❄️"];
+  if(code>=80&&code<=82) return ["소나기","🌦️"];
+  if(code>=85&&code<=86) return ["눈 소나기","🌨️"];
+  if(code>=95) return ["천둥번개","⛈️"];
+  return ["흐림","☁️"];
+}
+
+/* ===== 미세먼지 등급 (우리나라 기준) ===== */
+function gradePM10(v){
+  if(v<=30) return {n:0,t:"좋음",c:"#3FA8E0",bg:"#EAF6FD",e:"😀"};
+  if(v<=80) return {n:1,t:"보통",c:"#43AE90",bg:"#EAF8F2",e:"🙂"};
+  if(v<=150) return {n:2,t:"나쁨",c:"#D9902B",bg:"#FFF6E6",e:"😷"};
+  return {n:3,t:"매우 나쁨",c:"#C7453F",bg:"#FFEFEF",e:"🤢"};
+}
+function gradePM25(v){
+  if(v<=15) return {n:0,t:"좋음",c:"#3FA8E0",bg:"#EAF6FD",e:"😀"};
+  if(v<=35) return {n:1,t:"보통",c:"#43AE90",bg:"#EAF8F2",e:"🙂"};
+  if(v<=75) return {n:2,t:"나쁨",c:"#D9902B",bg:"#FFF6E6",e:"😷"};
+  return {n:3,t:"매우 나쁨",c:"#C7453F",bg:"#FFEFEF",e:"🤢"};
+}
+
+/* ===== 마스크 추천 ===== */
+function maskAdvice(worst){
+  if(worst===0) return {cls:"mask-ok", icon:"😀",
+    big:"마스크 없이 신나게 놀아도 좋아요!",
+    why:"공기가 아주 깨끗한 날이에요. 운동장에서 뛰어놀기 딱 좋아요. 창문을 열어 환기도 해 보세요!"};
+  if(worst===1) return {cls:"mask-ok", icon:"🙂",
+    big:"마스크 안 써도 괜찮아요",
+    why:"공기가 보통이에요. 바깥에서 놀아도 괜찮지만, 목이 칼칼하거나 기침이 나는 친구는 마스크를 쓰면 더 좋아요."};
+  if(worst===2) return {cls:"mask-warn", icon:"😷",
+    big:"마스크를 쓰는 게 좋아요",
+    why:"먼지가 많은 날이에요. 밖에 나갈 때는 마스크를 꼭 챙기고, 오래 뛰어노는 건 조금 줄여 주세요. 집에 오면 손을 깨끗이 씻어요!"};
+  return {cls:"mask-bad", icon:"🤢",
+    big:"마스크 꼭! 바깥 활동은 줄여요",
+    why:"먼지가 아주 많은 날이에요. 밖에서는 꼭 마스크를 쓰고, 운동장에서 오래 노는 건 다음으로 미뤄요. 물을 자주 마시고 창문은 닫아 두세요."};
+}
+
+/* ===== 옷차림 추천 ===== */
+function clothAdvice(hi, lo, rainP, wind){
+  var gap = hi - lo, set;
+  if(hi>=28) set={big:"아주 더워요! 시원하게 입어요",
+    items:[["👕","반팔 티셔츠"],["🩳","반바지"],["🧢","모자"],["💧","물통"]],
+    why:"햇볕이 뜨거운 날이에요. 얇고 바람이 잘 통하는 옷이 좋아요."};
+  else if(hi>=23) set={big:"따뜻해요! 반팔이 딱 좋아요",
+    items:[["👕","반팔 티셔츠"],["🩳","반바지나 얇은 바지"]],
+    why:"움직이면 살짝 더울 수 있는 날씨예요."};
+  else if(hi>=20) set={big:"포근해요! 얇은 긴팔이 좋아요",
+    items:[["👚","얇은 긴팔 티셔츠"],["👖","긴바지"]],
+    why:"반팔은 살짝 서늘할 수 있어요. 얇은 긴팔이 알맞아요."};
+  else if(hi>=17) set={big:"선선해요! 긴팔에 겉옷 하나",
+    items:[["👚","긴팔 티셔츠"],["🧥","얇은 겉옷"],["👖","긴바지"]],
+    why:"아침저녁으로 쌀쌀해서 걸칠 옷이 있으면 좋아요."};
+  else if(hi>=12) set={big:"쌀쌀해요! 자켓이나 가디건을 입어요",
+    items:[["🧥","자켓·가디건"],["👚","긴팔 티셔츠"],["👖","긴바지"]],
+    why:"바람이 불면 꽤 춥게 느껴지는 날씨예요."};
+  else if(hi>=9) set={big:"추워요! 두꺼운 겉옷을 입어요",
+    items:[["🧥","두꺼운 점퍼"],["🧶","기모 옷"],["👖","긴바지"]],
+    why:"겉옷 없이 나가면 감기 걸리기 쉬워요."};
+  else if(hi>=5) set={big:"많이 추워요! 코트나 패딩을 입어요",
+    items:[["🧥","코트·패딩"],["🧣","목도리"],["🧶","내복이나 기모 옷"]],
+    why:"손이 시릴 만큼 추운 날이에요."};
+  else set={big:"꽁꽁 얼어요! 아주 따뜻하게 입어요",
+    items:[["🧥","두꺼운 패딩"],["🧣","목도리"],["🧤","장갑"],["👒","귀마개·모자"]],
+    why:"오래 밖에 있으면 위험할 만큼 추워요."};
+
+  var notes=[];
+  if(gap>=10) notes.push("🌡️ <b>일교차가 " + Math.round(gap) + "도나 돼요!</b> 낮에는 덥지만 아침저녁은 쌀쌀해요. "
+    + "<b>바람막이나 가벼운 겉옷</b>을 꼭 챙겨서, 더우면 벗고 추우면 입어요.");
+  else if(gap>=8) notes.push("🌡️ 아침저녁이 낮보다 " + Math.round(gap) + "도쯤 쌀쌀해요. <b>얇은 겉옷</b>을 하나 챙기면 좋아요.");
+  if(rainP>=60) notes.push("☔ 비가 올 가능성이 높아요(" + rainP + "%). <b>우산</b>을 꼭 챙겨요!");
+  else if(rainP>=30) notes.push("🌂 비가 올 수도 있어요(" + rainP + "%). 접이식 우산이 있으면 안심이에요.");
+  if(wind>=25) notes.push("💨 바람이 세요. 모자가 날아갈 수 있으니 조심해요!");
+  return {big:set.big, items:set.items, why:set.why, notes:notes};
+}
+
+/* ===== 검색 ===== */
+var qEl=document.getElementById('q'), sugEl=document.getElementById('sug');
+(function(){
+  var h='',i;
+  for(i=0;i<HOT.length;i++) h+='<span class="chip" onclick="pick(\''+HOT[i]+'\')">'+HOT[i]+'</span>';
+  document.getElementById('chips').innerHTML=h;
+})();
+
+function findRegions(s){
+  s=s.replace(/\s/g,'');
+  if(!s) return [];
+  var out=[],i;
+  for(i=0;i<REGIONS.length;i++) if(REGIONS[i][0].indexOf(s)===0) out.push(REGIONS[i]);
+  for(i=0;i<REGIONS.length;i++) if(REGIONS[i][0].indexOf(s)>0 && out.indexOf(REGIONS[i])<0) out.push(REGIONS[i]);
+  return out.slice(0,8);
+}
+qEl.addEventListener('input', function(){
+  var list=findRegions(qEl.value);
+  if(!list.length){ sugEl.classList.add('hidden'); return; }
+  var h='',i;
+  for(i=0;i<list.length;i++) h+='<div onclick="pick(\''+list[i][0]+'\')">📍 '+list[i][0]+'</div>';
+  sugEl.innerHTML=h; sugEl.classList.remove('hidden');
+});
+qEl.addEventListener('keydown', function(e){ if(e.key==='Enter') goSearch(); });
+document.addEventListener('click', function(e){
+  if(e.target!==qEl && !sugEl.contains(e.target)) sugEl.classList.add('hidden');
+});
+
+function goSearch(){
+  var list=findRegions(qEl.value);
+  if(!list.length){
+    document.getElementById('panel').innerHTML =
+      '<div class="card"><div class="msg">🔎 <b>그 지역을 찾지 못했어요.</b><br>'
+      + '시·군 이름으로 찾아 주세요. (예: 김천, 수원, 청주, 제주)</div></div>';
+    return;
+  }
+  pick(list[0][0]);
+}
+function pick(name){
+  var i,r=null;
+  for(i=0;i<REGIONS.length;i++) if(REGIONS[i][0]===name) r=REGIONS[i];
+  if(!r) return;
+  qEl.value=name; sugEl.classList.add('hidden');
+  try{ localStorage.setItem('sambun-weather-last', name); }catch(e){}
+  load(r);
+}
+
+/* ===== 불러오기 ===== */
+function load(r){
+  var panel=document.getElementById('panel');
+  panel.innerHTML='<div class="card"><div class="msg loading">☁️ '+r[0]+'의 날씨를 알아보는 중이에요…</div></div>';
+
+  var wUrl='https://api.open-meteo.com/v1/forecast?latitude='+r[1]+'&longitude='+r[2]
+    +'&current=temperature_2m,weather_code,wind_speed_10m'
+    +'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max'
+    +'&timezone=Asia%2FSeoul&forecast_days=1';
+  var aUrl='https://air-quality-api.open-meteo.com/v1/air-quality?latitude='+r[1]+'&longitude='+r[2]
+    +'&current=pm10,pm2_5&timezone=Asia%2FSeoul';
+
+  var w=fetch(wUrl).then(function(x){ return x.json(); });
+  var a=fetch(aUrl).then(function(x){ return x.json(); }).catch(function(){ return null; });
+
+  Promise.all([w,a]).then(function(res){
+    draw(r, res[0], res[1]);
+  }).catch(function(){
+    panel.innerHTML='<div class="card"><div class="msg">😢 <b>날씨 정보를 가져오지 못했어요.</b><br>'
+      + '인터넷 연결을 확인하고 잠시 뒤 다시 눌러 주세요.</div></div>';
+  });
+}
+
+function draw(r, wd, ad){
+  var cur=wd.current, day=wd.daily;
+  var nowT=Math.round(cur.temperature_2m);
+  var hi=Math.round(day.temperature_2m_max[0]), lo=Math.round(day.temperature_2m_min[0]);
+  var rainP=day.precipitation_probability_max ? (day.precipitation_probability_max[0]||0) : 0;
+  var wind=Math.round(cur.wind_speed_10m||0);
+  var sk=sky(day.weather_code[0]);
+
+  var pm10=null, pm25=null;
+  if(ad && ad.current){
+    if(ad.current.pm10!==undefined && ad.current.pm10!==null) pm10=Math.round(ad.current.pm10);
+    if(ad.current.pm2_5!==undefined && ad.current.pm2_5!==null) pm25=Math.round(ad.current.pm2_5);
+  }
+
+  var h='';
+
+  /* 날씨 */
+  h+='<div class="card"><h2>📍 '+r[0]+'의 오늘 날씨</h2>'
+   + '<div class="wnow"><div class="wicon">'+sk[1]+'</div>'
+   + '<div><div class="wtemp">'+nowT+'°</div><div class="wdesc">'+sk[0]+'</div></div></div>'
+   + '<div class="wsub">'
+   +   '<span class="pill">최고 <b class="hi">'+hi+'°</b></span>'
+   +   '<span class="pill">최저 <b class="lo">'+lo+'°</b></span>'
+   +   '<span class="pill">일교차 <b>'+(hi-lo)+'°</b></span>'
+   +   '<span class="pill">비 올 확률 <b>'+rainP+'%</b></span>'
+   + '</div></div>';
+
+  /* 미세먼지 */
+  var worst=1, g10=null, g25=null;
+  if(pm10!==null || pm25!==null){
+    h+='<div class="card"><h2>🌫️ 미세먼지</h2><div class="dust">';
+    if(pm10!==null){ g10=gradePM10(pm10);
+      h+='<div class="dust-item" style="border-color:'+g10.c+';background:'+g10.bg+'">'
+       + '<div class="lbl">미세먼지 (PM10)</div>'
+       + '<div class="val" style="color:'+g10.c+'">'+pm10+'</div>'
+       + '<div class="st" style="color:'+g10.c+'">'+g10.e+' '+g10.t+'</div></div>'; }
+    if(pm25!==null){ g25=gradePM25(pm25);
+      h+='<div class="dust-item" style="border-color:'+g25.c+';background:'+g25.bg+'">'
+       + '<div class="lbl">초미세먼지 (PM2.5)</div>'
+       + '<div class="val" style="color:'+g25.c+'">'+pm25+'</div>'
+       + '<div class="st" style="color:'+g25.c+'">'+g25.e+' '+g25.t+'</div></div>'; }
+    h+='</div></div>';
+    worst=Math.max(g10?g10.n:0, g25?g25.n:0);
+  }
+
+  /* 마스크 */
+  if(pm10===null && pm25===null){
+    h+='<div class="rec mask-ok"><h2>😷 마스크, 써야 할까?</h2>'
+     + '<div class="big">미세먼지 정보를 가져오지 못했어요</div>'
+     + '<div class="why">오늘은 창밖을 한번 살펴보고, 하늘이 뿌옇게 보이면 마스크를 챙기는 게 안전해요.</div></div>';
+  } else {
+    var m=maskAdvice(worst);
+    h+='<div class="rec '+m.cls+'"><h2>😷 마스크, 써야 할까?</h2>'
+     + '<div class="big">'+m.icon+' '+m.big+'</div>'
+     + '<div class="why">'+m.why+'</div></div>';
+  }
+
+  /* 옷차림 */
+  var c=clothAdvice(hi, lo, rainP, wind);
+  h+='<div class="rec cloth"><h2>👕 오늘의 옷차림</h2>'
+   + '<div class="big">'+c.big+'</div>'
+   + '<div class="why">'+c.why+'</div>'
+   + '<div class="items">';
+  for(var i=0;i<c.items.length;i++) h+='<span class="item"><i>'+c.items[i][0]+'</i>'+c.items[i][1]+'</span>';
+  h+='</div>';
+  for(i=0;i<c.notes.length;i++) h+='<div class="extra">'+c.notes[i]+'</div>';
+  h+='</div>';
+
+  document.getElementById('panel').innerHTML=h;
+}
+
+/* 시작 */
+(function(){
+  var last=null;
+  try{ last=localStorage.getItem('sambun-weather-last'); }catch(e){}
+  if(last) pick(last);
+  else document.getElementById('panel').innerHTML =
+    '<div class="card"><div class="msg">👆 위에서 <b>우리 지역</b>을 찾아보세요!<br>'
+    + '오늘 날씨와 미세먼지를 보고 <b>옷차림</b>과 <b>마스크</b>를 알려줄게요.</div></div>';
+})();
+</script>
+</body>
+</html>
