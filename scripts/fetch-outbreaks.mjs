@@ -133,6 +133,35 @@ function save(list, note){
   console.log("저장 완료 :", OUT, "/ 유행 중", list.length, "건");
 }
 
+/* 주소 다듬기 : 앞뒤 공백·줄바꿈 제거, 이미 붙어 있는 serviceKey 제거 */
+function cleanUrl(u){
+  /* 줄바꿈·일반공백·한글공백(ㅤ)·무형공백 등 모두 제거 */
+  let v = String(u).replace(/[\s\u00A0\u1160\u3164\u200B-\u200D\uFEFF]/g, "");
+  v = v.split("?")[0];        /* 물음표 뒤 옵션은 스크립트가 직접 붙입니다 */
+  v = v.replace(/\/+$/, "");   /* 끝의 빗금 제거 */
+  return v;
+}
+
+/* 한 번 호출해 보기 */
+async function tryFetch(url, label){
+  console.log("  [" + label + "] 시도 : " + url.replace(/serviceKey=[^&]*/, "serviceKey=***"));
+  try{
+    const res = await fetch(url, {
+      headers: { "Accept": "application/json", "User-Agent": "Mozilla/5.0" },
+      signal: AbortSignal.timeout(20000)
+    });
+    const text = await res.text();
+    console.log("  [" + label + "] 응답 코드 " + res.status + " / 길이 " + text.length);
+    return { ok: res.ok, text };
+  }catch(e){
+    const c = e.cause || {};
+    console.log("  [" + label + "] 실패 : " + e.message
+      + (c.code ? " (" + c.code + ")" : "")
+      + (c.message && c.message !== e.message ? " - " + c.message : ""));
+    return null;
+  }
+}
+
 async function main(){
   if (!KEY || !URL_BASE) {
     console.log("KDCA_SERVICE_KEY 또는 KDCA_API_URL 이 없어 빈 목록으로 저장합니다.");
@@ -140,33 +169,55 @@ async function main(){
     return;
   }
 
-  /* 최근 2주 */
+  const base = cleanUrl(URL_BASE);
+
+  /* 주소 점검 — 비밀키가 아니라면 그대로 보입니다 */
+  let host = "";
+  try { host = new URL(base).host; }
+  catch(e){
+    console.log("주소 모양이 올바르지 않습니다 :", base);
+    console.log("→ https:// 로 시작하는 '요청주소'를 넣었는지 확인해 주세요.");
+    save([], "요청주소를 확인해 주세요");
+    return;
+  }
+  console.log("접속할 서버 :", host);
+
   const end = new Date(Date.now() + 9 * 3600 * 1000);
   const start = new Date(end.getTime() - 14 * 86400000);
   const ymd = d => d.toISOString().slice(0, 10).replace(/-/g, "");
 
-  const url = URL_BASE
-    + (URL_BASE.includes("?") ? "&" : "?")
-    + "serviceKey=" + encodeURIComponent(KEY)
+  const qs = "serviceKey=" + encodeURIComponent(KEY)
     + "&pageNo=1&numOfRows=200&_type=json"
     + "&stdDay=" + ymd(end)
     + "&startCreateDt=" + ymd(start) + "&endCreateDt=" + ymd(end);
 
-  console.log("요청 :", url.replace(encodeURIComponent(KEY), "***"));
+  const httpsUrl = base + (base.includes("?") ? "&" : "?") + qs;
+  const httpUrl  = httpsUrl.replace(/^https:/, "http:");
 
-  let text = "";
-  try {
-    const res = await fetch(url, { headers: { "Accept": "application/json" } });
-    text = await res.text();
-    console.log("응답 길이 :", text.length);
-  } catch (e) {
-    console.log("요청 실패 :", e.message);
-    save([], "자료를 받지 못했습니다");
+  /* ① https → ② http → ③ 인증서 검사 완화 순으로 시도 */
+  let got = await tryFetch(httpsUrl, "https");
+  if (!got) got = await tryFetch(httpUrl, "http");
+  if (!got) {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+    got = await tryFetch(httpsUrl, "https(인증서 검사 완화)");
+  }
+
+  if (!got) {
+    console.log("");
+    console.log("세 가지 방법 모두 연결하지 못했습니다.");
+    console.log("확인해 주세요 :");
+    console.log("  1) 요청주소가 공공데이터포털 상세화면의 '요청주소'와 같은지");
+    console.log("  2) 주소 끝에 물음표(?) 뒤 내용이 붙어 있지 않은지");
+    console.log("  3) 활용신청이 승인되었는지 (신청 직후엔 1시간쯤 걸립니다)");
+    save([], "서버에 연결하지 못했습니다");
     return;
   }
 
-  if (/SERVICE_KEY_IS_NOT_REGISTERED|SERVICE ERROR|등록되지 않은/i.test(text)) {
-    console.log("인증키 오류로 보입니다. 앞부분:", text.slice(0, 300));
+  const text = got.text;
+
+  if (/SERVICE_KEY_IS_NOT_REGISTERED|등록되지 않은|SERVICE ERROR|INVALID_REQUEST/i.test(text)) {
+    console.log("인증키 문제로 보입니다. 응답 앞부분:");
+    console.log(text.slice(0, 400));
     save([], "인증키를 확인해 주세요");
     return;
   }
@@ -174,26 +225,24 @@ async function main(){
   const pairs = extractPairs(text);
   console.log("찾은 항목 수 :", pairs.length);
   if (!pairs.length) {
-    console.log("응답 앞부분 :", text.slice(0, 500));
+    console.log("응답 앞부분 (이 내용을 알려주시면 맞춰 드릴 수 있어요) :");
+    console.log(text.slice(0, 800));
     save([], "자료 모양이 달라 읽지 못했습니다");
     return;
   }
 
-  /* 질병별 합계 → 유행 등급 매기기 */
   const sum = {};
   for (const [n, c] of pairs) sum[n] = (sum[n] || 0) + c;
+  console.log("질병별 합계 :", JSON.stringify(sum).slice(0, 400));
 
   const list = [];
   for (const name of Object.keys(sum)) {
     const lv = levelOf(sum[name]);
     if (lv === 0) continue;
     const info = pickInfo(name);
-    if (list.some(x => x.name === info.key)) continue;   /* 중복 제거 */
-    list.push({
-      name: info.key, level: lv, emoji: info.emoji,
-      desc: info.desc, prevent: info.prevent,
-      count: sum[name]
-    });
+    if (list.some(x => x.name === info.key)) continue;
+    list.push({ name: info.key, level: lv, emoji: info.emoji,
+                desc: info.desc, prevent: info.prevent, count: sum[name] });
   }
   list.sort((a, b) => b.level - a.level || b.count - a.count);
   save(list.slice(0, 5), "질병관리청 자료 기준");
