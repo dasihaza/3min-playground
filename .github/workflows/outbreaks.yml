@@ -16,12 +16,14 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: 질병관리청 자료 받아오기
         env:
+          # 인증키는 비밀로 (Secrets 에 보관)
           KDCA_SERVICE_KEY: ${{ secrets.KDCA_SERVICE_KEY }}
-          KDCA_API_URL: ${{ secrets.KDCA_API_URL }}
+          # 요청주소는 비밀이 아니므로 Variables 로 — 로그에 보여야 문제를 찾을 수 있어요
+          KDCA_API_URL: ${{ vars.KDCA_API_URL }}
         run: node scripts/fetch-outbreaks.mjs
 
       - name: 바뀐 내용 저장
