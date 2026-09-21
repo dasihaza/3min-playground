@@ -2,16 +2,13 @@
    질병관리청 감염병 통계 → assets/outbreaks.json 만들기
    GitHub Actions 안에서 하루 한 번 자동으로 실행됩니다.
    (브라우저가 아니라 GitHub 서버에서 도니까 차단 문제가 없어요)
-
    필요한 값 (GitHub 저장소 Secrets 에 넣습니다)
      KDCA_SERVICE_KEY : 공공데이터포털에서 받은 일반 인증키(Decoding)
      KDCA_API_URL     : 활용신청한 오퍼레이션의 요청주소
                         (예: https://apis.data.go.kr/.../getInfectiousDisease )
    =========================================================== */
-
 import fs from "node:fs";
 import path from "node:path";
-
 const KEY = process.env.KDCA_SERVICE_KEY || "";
 const URL_BASE = process.env.KDCA_API_URL || "";
 const OUT = path.join(process.cwd(), "assets", "outbreaks.json");
@@ -71,7 +68,6 @@ function levelOf(count){
 /* 응답에서 (질병명, 건수) 짝을 최대한 찾아냅니다 — JSON·XML 둘 다 대응 */
 function extractPairs(text){
   const pairs = [];
-
   /* JSON 시도 */
   try {
     const j = JSON.parse(text);
@@ -83,9 +79,10 @@ function extractPairs(text){
         for (const k of keys) {
           const lk = k.toLowerCase();
           const v = node[k];
+          // 수정: sidoNm(지역명), icdGroupNm(등급)을 피하고 icdNm(질병명)만 정확히 찾기
           if (name === null && typeof v === "string" &&
-              /(nm|name|kor|dis|term)/.test(lk) && v.trim()) name = v.trim();
-          if (cnt === null && /(cnt|count|num|case|occrrnc|tot)/.test(lk)) {
+              /(icdnm|disease)/.test(lk) && v.trim()) name = v.trim();
+          if (cnt === null && /(cnt|count|num|case|occrrnc|tot|val)/.test(lk)) {
             const n = parseInt(String(v).replace(/[^\d]/g, ""), 10);
             if (!isNaN(n)) cnt = n;
           }
@@ -97,7 +94,6 @@ function extractPairs(text){
     walk(j);
     if (pairs.length) return pairs;
   } catch (e) { /* JSON 이 아니면 XML 로 */ }
-
   /* XML 시도 : <item> 안에서 이름/숫자 태그 찾기 */
   const items = text.match(/<item>[\s\S]*?<\/item>/g) || [];
   for (const it of items) {
@@ -107,8 +103,9 @@ function extractPairs(text){
       const m = t.match(/<([^\/>\s]+)>([^<]*)<\/\1>/);
       if (!m) continue;
       const tag = m[1].toLowerCase(), val = m[2].trim();
-      if (name === null && /(nm|name|kor|dis|term)/.test(tag) && val && !/^\d+$/.test(val)) name = val;
-      if (cnt === null && /(cnt|count|num|case|occrrnc|tot)/.test(tag)) {
+      // 수정: XML에서도 icdNm만 정확히 찾기
+      if (name === null && /(icdnm|disease)/.test(tag) && val && !/^\d+$/.test(val)) name = val;
+      if (cnt === null && /(cnt|count|num|case|occrrnc|tot|val)/.test(tag)) {
         const n = parseInt(val.replace(/[^\d]/g, ""), 10);
         if (!isNaN(n)) cnt = n;
       }
@@ -131,6 +128,16 @@ function save(list, note){
     list
   }, null, 2), "utf8");
   console.log("저장 완료 :", OUT, "/ 유행 중", list.length, "건");
+}
+
+/* 주소 끝의 '기능 이름'이 빠졌을 때 흔한 이름들을 대신 찾아봅니다 */
+const OP_CANDIDATES = [
+  "getEIDInfo","getEIDList","getEIDStatus","getEIDStatistics","getEIDCondition",
+  "getInfectiousDisease","getInfectiousDiseaseList","getInfectiousDiseaseStat",
+  "getDissStatus","getDissList","getDisease","getList","getInfo","getItem"
+];
+function isNoService(text){
+  return /NO_OPENAPI_SERVICE_ERROR|서비스가\s*없거나|"12"/.test(text);
 }
 
 /* 주소 다듬기 : 앞뒤 공백·줄바꿈 제거, 이미 붙어 있는 serviceKey 제거 */
@@ -168,9 +175,7 @@ async function main(){
     save([], "인증키가 설정되지 않았습니다");
     return;
   }
-
   const base = cleanUrl(URL_BASE);
-
   /* 주소 점검 — 비밀키가 아니라면 그대로 보입니다 */
   let host = "";
   try { host = new URL(base).host; }
@@ -181,19 +186,16 @@ async function main(){
     return;
   }
   console.log("접속할 서버 :", host);
-
   const end = new Date(Date.now() + 9 * 3600 * 1000);
-  const start = new Date(end.getTime() - 14 * 86400000);
-  const ymd = d => d.toISOString().slice(0, 10).replace(/-/g, "");
-
+  
+  // 수정된 파라미터 (지역별 감염병 통계 API 규격에 맞춤)
   const qs = "serviceKey=" + encodeURIComponent(KEY)
-    + "&pageNo=1&numOfRows=200&_type=json"
-    + "&stdDay=" + ymd(end)
-    + "&startCreateDt=" + ymd(start) + "&endCreateDt=" + ymd(end);
-
+    + "&pageNo=1&numOfRows=200&resType=2&searchType=1"
+    + "&searchYear=" + end.getFullYear() + "&searchSidoCd=00";
+    
   const httpsUrl = base + (base.includes("?") ? "&" : "?") + qs;
   const httpUrl  = httpsUrl.replace(/^https:/, "http:");
-
+  
   /* ① https → ② http → ③ 인증서 검사 완화 순으로 시도 */
   let got = await tryFetch(httpsUrl, "https");
   if (!got) got = await tryFetch(httpUrl, "http");
@@ -201,7 +203,6 @@ async function main(){
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
     got = await tryFetch(httpsUrl, "https(인증서 검사 완화)");
   }
-
   if (!got) {
     console.log("");
     console.log("세 가지 방법 모두 연결하지 못했습니다.");
@@ -212,16 +213,44 @@ async function main(){
     save([], "서버에 연결하지 못했습니다");
     return;
   }
-
-  const text = got.text;
-
+  let text = got.text;
+  
+  /* 기능 이름이 빠진 경우 — 후보를 하나씩 붙여 찾아봅니다 */
+  if (isNoService(text)) {
+    console.log("");
+    console.log("주소 끝에 '기능 이름'이 빠진 것 같아 후보를 찾아봅니다…");
+    let found = null;
+    for (const op of OP_CANDIDATES) {
+      const u = base + "/" + op + "?" + qs;
+      const r = await tryFetch(u, op);
+      if (r && r.text && !isNoService(r.text)) {
+        console.log("  ✅ 찾았습니다 → " + op);
+        found = { op, text: r.text };
+        break;
+      }
+    }
+    if (!found) {
+      console.log("");
+      console.log("후보 중에는 없었습니다. 정확한 주소를 확인해 주세요.");
+      console.log("  공공데이터포털 → 마이페이지 → 개발계정 → 신청한 API 클릭");
+      console.log("  → '활용신청 상세기능정보' 표에서 기능을 고르고");
+      console.log("  → 그 아래 '요청주소'를 통째로 복사 (끝에 get... 이 붙어 있어요)");
+      save([], "요청주소에 기능 이름이 빠졌습니다");
+      return;
+    }
+    console.log("");
+    console.log("※ Variables 의 KDCA_API_URL 을 아래 주소로 바꿔 두시면 더 빨라져요:");
+    console.log("   " + base + "/" + found.op);
+    text = found.text;
+  }
+  
   if (/SERVICE_KEY_IS_NOT_REGISTERED|등록되지 않은|SERVICE ERROR|INVALID_REQUEST/i.test(text)) {
     console.log("인증키 문제로 보입니다. 응답 앞부분:");
     console.log(text.slice(0, 400));
     save([], "인증키를 확인해 주세요");
     return;
   }
-
+  
   const pairs = extractPairs(text);
   console.log("찾은 항목 수 :", pairs.length);
   if (!pairs.length) {
@@ -230,11 +259,11 @@ async function main(){
     save([], "자료 모양이 달라 읽지 못했습니다");
     return;
   }
-
+  
   const sum = {};
   for (const [n, c] of pairs) sum[n] = (sum[n] || 0) + c;
   console.log("질병별 합계 :", JSON.stringify(sum).slice(0, 400));
-
+  
   const list = [];
   for (const name of Object.keys(sum)) {
     const lv = levelOf(sum[name]);
