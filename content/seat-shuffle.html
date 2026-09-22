@@ -260,6 +260,68 @@
     body{background:#fff;}
     .step{border:none;box-shadow:none;padding:0;}
   }
+
+  /* ===== 선생님을 위한 이야기 (화면 맨 아래) ===== */
+  .teacher-note{
+    margin:30px 0 10px; background:#fff; border-radius:26px; padding:26px 22px 24px;
+    border:3px dashed #BFE3D2; box-shadow:var(--shadow),0 10px 24px rgba(51,64,60,.08);
+    position:relative;
+  }
+  .tn-ribbon{
+    display:inline-block; background:var(--board); color:#fff; font-family:'Jua',sans-serif;
+    font-size:13px; padding:6px 14px; border-radius:999px; box-shadow:0 3px 0 #2C5040;
+    margin-bottom:12px;
+  }
+  .teacher-note h2{
+    font-family:'Jua',sans-serif; font-size:22px; line-height:1.45; margin:0 0 12px;
+    color:var(--board); word-break:keep-all;
+  }
+  .tn-intro{
+    font-size:14.5px; line-height:1.95; margin:0 0 20px; word-break:keep-all;
+    background:#F6FBF8; border-radius:16px; padding:15px 17px;
+  }
+  .tn-intro b{ color:#E0708E; }
+  .tn-sub{
+    font-family:'Jua',sans-serif; font-size:17px; margin:4px 0 12px; color:var(--ink);
+  }
+  .scene-list{ font-size:0; }
+  .scene{
+    display:inline-block; vertical-align:top; width:48.5%; margin:0 3% 12px 0;
+    border-radius:18px; padding:15px 16px; font-size:14px; border:2px solid;
+  }
+  .scene:nth-child(2n){ margin-right:0; }
+  .scene .emo{
+    display:inline-block; width:40px; height:40px; line-height:40px; text-align:center;
+    border-radius:50%; background:#fff; font-size:21px; margin-bottom:7px;
+    box-shadow:0 2px 0 rgba(0,0,0,.06);
+  }
+  .scene h3{ font-family:'Jua',sans-serif; font-size:16px; margin:0 0 6px; }
+  .scene p{ margin:0; line-height:1.85; font-size:13.5px; word-break:keep-all; }
+  .sc-a{ background:var(--boy-soft);  border-color:#C3E1F2; } .sc-a h3{ color:#3C86B3; }
+  .sc-b{ background:var(--girl-soft); border-color:#F7CFDB; } .sc-b h3{ color:#D0607F; }
+  .sc-c{ background:#FFF7DD;          border-color:#F6E2A1; } .sc-c h3{ color:#B98A14; }
+  .sc-d{ background:#E8F7F0;          border-color:#BFE3D2; } .sc-d h3{ color:#3E8C6C; }
+  .tn-tips{
+    background:#FFFBEF; border:2px solid #F6E2A1; border-radius:18px; padding:16px 18px; margin-top:8px;
+  }
+  .tn-tips ul{ list-style:none; margin:0; padding:0; }
+  .tn-tips li{ font-size:13.8px; line-height:1.85; margin-bottom:8px; word-break:keep-all; padding-left:26px; position:relative; }
+  .tn-tips li:last-child{ margin-bottom:0; }
+  .tn-tips li i{ font-style:normal; position:absolute; left:0; top:0; }
+  .tn-safe{
+    margin-top:14px; background:#EEF6FB; border-radius:14px; padding:12px 15px;
+    font-size:13.3px; line-height:1.8; color:#3F6E8C; word-break:keep-all;
+  }
+  .tn-end{
+    text-align:center; margin:20px 0 0; font-family:'Gaegu',cursive; font-weight:700;
+    font-size:18px; color:var(--ink-soft); line-height:1.6; word-break:keep-all;
+  }
+  @media (max-width:620px){
+    .scene{ width:100%; margin-right:0; }
+    .teacher-note{ padding:22px 16px 20px; }
+    .teacher-note h2{ font-size:19.5px; }
+  }
+  @media print{ .teacher-note{ display:none !important; } }
 </style>
 </head>
 <body>
@@ -371,6 +433,80 @@
     </div>
   </div>
 
+
+  <!-- ===== 선생님을 위한 이야기 ===== -->
+  <section class="teacher-note no-print">
+    <span class="tn-ribbon">🍎 선생님을 위한 이야기</span>
+    <h2>🪑 자리바꾸기, 짝꿍만 바꾸는 게 아니에요!</h2>
+
+    <p class="tn-intro">
+      ‘두근두근 자리바꾸기’는 처음에 짝꿍을 바꾸려고 만들었어요. 그런데 교실에서 직접 써 보니,
+      짝을 정하는 날은 한 학기에 몇 번뿐이지만 <b>아이들을 모둠으로 나눌 일은 거의 매주</b> 생기더라고요.
+      프로젝트 학습을 시작할 때, 현장체험학습 조를 짤 때, 체육 시간에 팀을 나눌 때마다
+      선생님은 명렬표를 펼쳐 놓고 남녀 수를 세고, 친한 친구끼리만 몰리지 않았는지 살피느라
+      쉬는 시간을 통째로 쓰곤 하지요. 이 도구는 바로 그 시간을 <b>3분으로 줄여 드리려고</b> 만들었습니다.
+      명단만 넣으면 <b>남녀를 골고루 섞고</b>, 인원이 딱 나누어떨어지지 않아도
+      <b>모둠끼리 한 명 넘게 차이 나지 않도록</b> 알아서 나눠 드려요.
+    </p>
+
+    <div class="tn-sub">🌟 이럴 때 써 보세요</div>
+    <div class="scene-list">
+      <div class="scene sc-a">
+        <span class="emo">🪑</span>
+        <h3>한 달에 한 번, 새 짝꿍</h3>
+        <p>‘2명씩 3분단’을 고르면 교실 자리 모양 그대로 짝꿍이 정해져요. 남학생과 여학생이 골고루 섞이고,
+           뽑는 과정을 모두 함께 화면으로 보니 ‘왜 또 저 친구랑 앉아요?’ 같은 볼멘소리가 훨씬 줄어요.</p>
+      </div>
+      <div class="scene sc-b">
+        <span class="emo">🔬</span>
+        <h3>프로젝트 학습 모둠</h3>
+        <p>4명 모둠은 역할을 나누기에 가장 알맞은 크기예요. 기록·발표·자료 찾기·시간 지킴이를 한 명씩 맡으면
+           딱 맞지요. 큰 과제라면 5~6명, 짧은 활동이라면 3명 모둠으로 바꿔 뽑을 수 있어요.</p>
+      </div>
+      <div class="scene sc-c">
+        <span class="emo">🚌</span>
+        <h3>현장체험학습 조 편성</h3>
+        <p>체험학습 날에는 조마다 인원이 고르고 남녀가 섞여 있어야 인솔이 편해요. 뽑은 뒤
+           ‘인쇄하기’를 누르면 조별 명단이 바로 나오니, 인솔 선생님께 나눠 드리거나 교실에 붙여 두세요.</p>
+      </div>
+      <div class="scene sc-d">
+        <span class="emo">⚽</span>
+        <h3>체육·놀이 팀 나누기</h3>
+        <p>피구나 이어달리기처럼 팀을 나눌 때도 좋아요. 선생님이 정해 주면 ‘일부러 그러셨죠?’라는 말이
+           나오기 쉽지만, 커튼이 열리며 모두 함께 뽑은 결과는 아이들이 훨씬 흔쾌히 받아들여요.</p>
+      </div>
+      <div class="scene sc-b">
+        <span class="emo">📚</span>
+        <h3>독서·토론 모임</h3>
+        <p>짧은 토론이나 책 이야기 나누기는 3명 모둠일 때 말할 기회가 가장 많아요. 활동할 때마다 새로 뽑으면
+           평소 말을 잘 섞지 않던 친구와도 자연스럽게 이야기해 볼 수 있어요.</p>
+      </div>
+      <div class="scene sc-a">
+        <span class="emo">🎨</span>
+        <h3>학급 행사·1인 1역</h3>
+        <p>학예회 준비 모둠, 청소 구역, 협동 미술 작품처럼 반 친구들을 여러 무리로 나눠야 하는 일이라면
+           무엇이든 쓸 수 있어요. 인원에 맞춰 모둠 크기만 골라 주세요.</p>
+      </div>
+    </div>
+
+    <div class="tn-sub" style="margin-top:10px;">💡 이렇게 쓰면 더 편해요</div>
+    <div class="tn-tips">
+      <ul>
+        <li><i>📋</i>명단은 <b>처음 한 번만</b> 넣으면 돼요. 다음에 열어도 그대로 남아 있어요.</li>
+        <li><i>✂️</i>명렬표에서 이름을 복사해 <b>‘여러 명 한꺼번에’</b>에 붙여넣고, 이름 뒤에 ‘남’이나 ‘여’를 적으면 성별까지 한 번에 들어가요.</li>
+        <li><i>🔁</i>결과가 마음에 들지 않으면 <b>‘다시 뽑기’</b>, 정해졌으면 <b>‘인쇄하기’</b>로 게시판에 붙여 두세요.</li>
+        <li><i>🔊</i>두구두구 효과음이 부담스러운 시간에는 <b>소리 단추</b>로 끌 수 있어요.</li>
+      </ul>
+    </div>
+
+    <div class="tn-safe">
+      🔒 <b>학생 이름은 안전해요.</b> 입력한 명단은 선생님 컴퓨터의 브라우저에만 저장되고,
+      어떤 서버로도 보내지지 않아요. 여러 사람이 함께 쓰는 컴퓨터라면 사용한 뒤 ‘전체 지우기’를 눌러 주세요.
+    </div>
+
+    <p class="tn-end">자리 하나, 모둠 하나가 아이들에게는 한 학기의 추억이 되기도 해요.<br>
+      뽑는 순간까지 두근두근 즐거운 교실이 되길 바랄게요! 💛</p>
+  </section>
 </div>
 
 <button class="sound-toggle no-print" id="sound-toggle" onclick="toggleSound()">🔊 소리 켜짐</button>
