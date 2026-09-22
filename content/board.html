@@ -1,37 +1,64 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7592272420796389"
-     crossorigin="anonymous"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>코딩 교육 게시판 | 3분 놀이터</title>
+<title>정보교육과 AI | 3분 놀이터</title>
+<meta name="description" content="최신 정보교육과 AI 소식에 대하여 교육자로서 느끼는 점과 관점을 나누는 게시판. 수업 사례, 도구 소개, 질문을 자유롭게 남겨 주세요.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/style.css">
 <style>
-  .notice{
-    background: rgba(59,110,168,0.10); border:1px solid rgba(59,110,168,0.3);
-    border-radius:8px; padding:12px 16px; font-size:12.5px; color: var(--ink-soft);
-    line-height:1.7; margin: 18px 0 6px;
+  :root{ --ai:#3B6EA8; --ai-soft:#EAF2FB; --ai-line:#CFE0F3; }
+
+  .board-shell{ max-width:680px; margin:0 auto; padding:6px 20px 60px; }
+
+  /* 소개 */
+  .board-hero{
+    background:linear-gradient(135deg,#EAF2FB 0%,#F4EFFF 100%);
+    border:1px solid var(--ai-line); border-radius:18px; padding:20px 20px 18px; margin:18px 0 14px;
   }
-  .board-shell{ max-width: 640px; margin: 0 auto; padding: 6px 20px 60px; }
-  .board-top{ display:flex; align-items:center; justify-content:space-between; margin: 18px 0 10px; flex-wrap:wrap; gap:10px; }
-  .board-top h1{ font-family:'Jua',sans-serif; font-size:24px; margin:0; }
+  .board-hero h1{ font-family:'Jua',sans-serif; font-size:25px; margin:0 0 6px; color:var(--ai); }
+  .board-hero p{ margin:0; font-size:13.8px; line-height:1.8; color:var(--ink); word-break:keep-all; }
+
+  /* 이용 약속 */
+  .rules{ margin:0 0 14px; }
+  .rules summary{
+    cursor:pointer; font-size:13px; font-weight:700; color:var(--ink-soft);
+    list-style:none; padding:6px 2px;
+  }
+  .rules summary::-webkit-details-marker{ display:none; }
+  .rules ul{
+    margin:6px 0 0; padding:12px 16px 12px 32px; background:var(--card-bg);
+    border:1px solid var(--line); border-radius:12px; font-size:13px; line-height:1.85; color:var(--ink);
+  }
+  .rules li{ word-break:keep-all; }
+
+  /* 위쪽 도구줄 */
+  .board-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin:4px 0 6px; }
+  .cat-chips{ display:flex; gap:6px; flex-wrap:wrap; }
+  .cat-chip{
+    font-size:12.5px; font-weight:700; padding:7px 12px; border-radius:999px; cursor:pointer;
+    border:1px solid var(--line); background:var(--card-bg); color:var(--ink-soft);
+  }
+  .cat-chip.on{ background:var(--ai); border-color:var(--ai); color:#fff; }
+
   .new-post-menu{ position:relative; }
   .new-post-dropdown{
     display:none; position:absolute; right:0; top:calc(100% + 6px);
-    background:var(--card-bg); border:1px solid var(--line); border-radius:10px;
-    box-shadow:var(--shadow); min-width:200px; overflow:hidden; z-index:10;
+    background:var(--card-bg); border:1px solid var(--line); border-radius:12px;
+    box-shadow:var(--shadow); min-width:220px; overflow:hidden; z-index:10;
   }
   .new-post-dropdown.open{ display:block; }
   .new-post-dropdown a{
     display:flex; align-items:center; gap:8px; padding:11px 14px; font-size:13px;
-    color:var(--ink); border-bottom:1px solid var(--line);
+    color:var(--ink); border-bottom:1px solid var(--line); text-decoration:none;
   }
   .new-post-dropdown a:last-child{ border-bottom:none; }
   .new-post-dropdown a:hover{ background:var(--bg-soft); }
+  .new-post-dropdown small{ display:block; font-size:11px; color:var(--ink-soft); font-weight:400; }
 
+  /* 목록 */
   .post-list{ display:flex; flex-direction:column; margin-top:8px; }
   .post-row{
     display:flex; align-items:center; gap:10px;
@@ -40,29 +67,62 @@
   .post-row:hover .post-title{ text-decoration:underline; }
   .post-icon{ font-size:17px; flex:0 0 auto; width:22px; text-align:center; }
   .post-main{ flex:1; min-width:0; }
+  .post-line{ display:flex; align-items:center; gap:6px; min-width:0; }
   .post-title{
     font-size:14.5px; font-weight:500; color:var(--ink);
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;
   }
-  .post-title.owner{ color:#3B6EA8; font-weight:700; }
+  .post-title.owner{ color:var(--ai); font-weight:700; }
   .owner-tag{
-    font-size:10.5px; font-weight:700; color:#3B6EA8; border:1px solid #3B6EA8;
-    border-radius:999px; padding:1px 7px; margin-left:6px; vertical-align:middle;
+    font-size:10.5px; font-weight:700; color:var(--ai); border:1px solid var(--ai);
+    border-radius:999px; padding:1px 7px; flex:0 0 auto;
   }
-  .post-meta{ font-size:11.5px; color:var(--ink-soft); margin-top:2px; }
+  .cat-tag{
+    font-size:10.5px; font-weight:700; color:var(--ai); background:var(--ai-soft);
+    border-radius:6px; padding:2px 6px; flex:0 0 auto;
+  }
+  .post-meta{ font-size:11.5px; color:var(--ink-soft); margin-top:3px; }
   .post-comments{ font-size:11.5px; color:var(--ink-soft); flex:0 0 auto; }
+
+  /* 공지(고정) 글 */
+  .post-row.pinned{
+    background:linear-gradient(90deg,#FFF6D6,#FFFBEC); border-left:5px solid #FFB400;
+    border-radius:12px; padding:14px 12px; margin-bottom:6px; border-bottom:none;
+    box-shadow:0 2px 0 rgba(255,180,0,.18);
+  }
+  .post-row.pinned .post-title{ color:#C2410C; font-weight:800; font-size:15px; }
+  .post-row.pinned .post-icon{ font-size:19px; }
+  .pin-tag{
+    display:inline-block; font-size:11px; font-weight:800; color:#fff; background:#FF8A00;
+    border-radius:999px; padding:2px 8px; box-shadow:0 2px 0 #D96F00; flex:0 0 auto;
+  }
+
   .empty-state, .loading-state, .error-state{ text-align:center; color:var(--ink-soft); font-size:13.5px; padding:40px 10px; line-height:1.7; }
   .error-state a{ text-decoration:underline; }
 
-  .detail-body{ font-size:14.5px; line-height:1.8; white-space:pre-wrap; margin: 18px 0 24px; word-break:break-word; }
-  .detail-title{ font-family:'Jua',sans-serif; font-size:20px; margin:6px 0 8px; }
-  .comment-item{ border-top:1px solid var(--line); padding:12px 0; }
-  .comment-meta{ font-size:12px; color: var(--ink-soft); margin-bottom:4px; }
-  .comment-text{ font-size:13.5px; line-height:1.6; white-space:pre-wrap; }
+  /* 글 보기 */
+  .detail-tags{ display:flex; gap:6px; flex-wrap:wrap; margin-top:4px; }
+  .detail-title{ font-family:'Jua',sans-serif; font-size:21px; margin:8px 0 6px; line-height:1.4; word-break:keep-all; }
+  .detail-body{ font-size:14.5px; line-height:1.85; margin:18px 0 22px; word-break:break-word; }
+  .detail-actions{ display:flex; gap:8px; flex-wrap:wrap; }
   .gh-link-btn{
-    display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:700;
-    border:1px solid var(--line); border-radius:999px; padding:9px 16px; margin-top:14px;
+    display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:700; cursor:pointer;
+    border:1px solid var(--line); border-radius:999px; padding:9px 16px; background:var(--card-bg);
+    color:var(--ink); text-decoration:none; font-family:inherit;
   }
+  .gh-link-btn.primary{ background:var(--ai); border-color:var(--ai); color:#fff; }
+  .comment-item{ border-top:1px solid var(--line); padding:12px 0; }
+  .comment-meta{ font-size:12px; color:var(--ink-soft); margin-bottom:4px; }
+  .comment-text{ font-size:13.5px; line-height:1.7; word-break:break-word; }
+
+  /* 본문 서식 */
+  .md-h{ font-weight:800; font-size:15.5px; margin:14px 0 4px; color:var(--ai); }
+  .md-li{ padding-left:14px; text-indent:-10px; }
+  .md-q{ border-left:3px solid var(--ai-line); padding:2px 0 2px 10px; color:var(--ink-soft); margin:4px 0; }
+  .md-hr{ border:none; border-top:1px dashed var(--line); margin:12px 0; }
+  .md-code{ background:var(--bg-soft); border-radius:4px; padding:1px 5px; font-size:.92em; }
+
+  .notice{ font-size:12px; color:var(--ink-soft); line-height:1.7; margin-top:26px; text-align:center; word-break:keep-all; }
   .hidden{ display:none !important; }
 </style>
 </head>
@@ -80,133 +140,137 @@
     </a>
     <a class="back-link" href="../index.html">← 다른 콘텐츠 보기</a>
   </header>
-
-  <div class="notice" id="notice-banner">
-    💬 이 게시판은 GitHub 저장소의 <strong>Issues</strong>를 목록으로 보여줘요. 글 작성·댓글 달기는 GitHub 로그인이 필요해요. 방문자가 많을 땐 GitHub의 무료 API 한도 때문에 목록이 잠시 안 불러와질 수 있어요.
-  </div>
 </div>
 
 <div class="board-shell">
 
-  <!-- LIST VIEW -->
+  <!-- 목록 -->
   <div id="view-list">
+    <div class="board-hero">
+      <h1>🤖 정보교육과 AI</h1>
+      <p>최신 정보교육과 AI 소식에 대하여 <b>교육자로서 느끼는 점과 관점</b>을 나누는 공간이에요.
+         교실에서 해 본 수업 이야기, 써 보니 좋았던 도구, 함께 고민하고 싶은 질문을 편하게 남겨 주세요.</p>
+    </div>
+
+    <details class="rules">
+      <summary>📌 함께 지켜요 — 게시판 이용 약속 (눌러서 보기)</summary>
+      <ul>
+        <li>소식이나 자료를 소개할 때는 <b>출처 링크</b>를 함께 남겨 주세요.</li>
+        <li><b>학생 이름·얼굴·학교명</b> 등 개인정보가 드러나는 내용은 올리지 않아요.</li>
+        <li>생각이 달라도 괜찮아요. 서로의 관점을 <b>존중하는 말</b>로 나눠요.</li>
+        <li>광고나 주제와 관계없는 글은 운영자가 내릴 수 있어요.</li>
+      </ul>
+    </details>
+
     <div class="board-top">
-      <h1>코딩 교육 게시판</h1>
+      <div class="cat-chips" id="cat-chips"></div>
       <div class="new-post-menu">
-        <button class="btn" onclick="toggleNewPostMenu()">글쓰기</button>
-        <div class="new-post-dropdown" id="new-post-dropdown">
-          <a href="#" data-label="입문" target="_blank" rel="noopener">🐣 입문/시작 시기</a>
-          <a href="#" data-label="제작후기" target="_blank" rel="noopener">🛠️ 코딩 프로그램 제작 후기</a>
-          <a href="#" data-label="코딩테스트" target="_blank" rel="noopener">🧩 코딩테스트 준비</a>
-          <a href="#" data-label="자녀교육" target="_blank" rel="noopener">👶 자녀 코딩 교육</a>
-        </div>
+        <button class="btn" onclick="toggleNewPostMenu()">✏️ 글쓰기</button>
+        <div class="new-post-dropdown" id="new-post-dropdown"></div>
       </div>
     </div>
+
     <div class="post-list" id="post-list">
       <div class="loading-state">글 목록을 불러오는 중...</div>
     </div>
+
+    <div class="notice">
+      💬 이 게시판은 GitHub 저장소의 Issues를 보여 줘요. 글쓰기와 댓글에는 GitHub 로그인이 필요해요.<br>
+      방문자가 많을 때는 GitHub 무료 사용량 때문에 목록이 잠시 안 보일 수 있어요.
+    </div>
   </div>
 
-  <!-- DETAIL VIEW -->
+  <!-- 글 보기 -->
   <div id="view-detail" class="hidden">
-    <button class="back-link" style="display:inline-block; margin:16px 0;" onclick="showList()">← 목록으로</button>
+    <button class="back-link" style="display:inline-block; margin:16px 0 8px;" onclick="showList()">← 목록으로</button>
+    <div class="detail-tags" id="detail-tags"></div>
     <div class="detail-title" id="detail-title"></div>
     <div class="post-meta" id="detail-meta"></div>
     <div class="detail-body" id="detail-body"></div>
-    <a class="gh-link-btn" id="detail-gh-link" href="#" target="_blank" rel="noopener">GitHub에서 댓글 달기 →</a>
+    <div class="detail-actions">
+      <a class="gh-link-btn primary" id="detail-gh-link" href="#" target="_blank" rel="noopener">💬 GitHub에서 댓글 달기</a>
+      <button class="gh-link-btn" onclick="shareCurrent()">🔗 이 글 링크 복사</button>
+    </div>
 
     <h3 style="font-size:14px; margin-top:26px;">댓글 <span id="comment-count"></span></h3>
     <div id="comment-list"></div>
   </div>
 
 </div>
+
 <footer class="site-footer wrap">
   <div>© 2026 3분 놀이터. 콘텐츠는 재미로 즐겨주세요.</div>
 </footer>
 
 <script>
-function shareContent(title, text){
-  const url = window.location.href;
-  if(navigator.share){
-    navigator.share({ title, text, url }).catch(()=>{});
-  } else if(navigator.clipboard){
-    navigator.clipboard.writeText(url).then(()=>{
-      alert("링크가 복사됐어요! 친구에게 붙여넣어 공유해보세요 🙂");
-    });
-  }
-}
-
-// ▼ 본인 저장소 값으로 이미 채워져 있어요 ▼
+/* ▼ 저장소 정보 ▼ */
 const REPO_OWNER = "dasihaza";
-const REPO_NAME = "3min-playground";
-// ▲ 여기까지 ▲
+const REPO_NAME  = "3min-playground";
+/* ▲ 여기까지 ▲ */
 
-const API_BASE = "https://api.github.com/repos/" + REPO_OWNER + "/" + REPO_NAME;
+const API_BASE  = "https://api.github.com/repos/" + REPO_OWNER + "/" + REPO_NAME;
+const REPO_URL  = "https://github.com/" + REPO_OWNER + "/" + REPO_NAME;
 
-const CATEGORY_MAP = [
-  { keywords:["입문","시작"], icon:"🐣" },
-  { keywords:["제작","후기"], icon:"🛠️" },
-  { keywords:["테스트"],      icon:"🧩" },
-  { keywords:["자녀"],        icon:"👶" }
+/* ===== 글 분류 =====
+   글쓰기 단추를 누르면 제목 앞에 [말머리]가 자동으로 들어가요.
+   (GitHub 라벨은 저장소 주인만 붙일 수 있어서, 방문자 글은 말머리로 분류해요) */
+const CATEGORIES = [
+  { key:"news",  name:"AI 소식",   tag:"소식",    icon:"📰", hint:"뉴스·정책·연구 소개",
+    body:"**어떤 소식인가요?**\n\n\n**출처(링크):**\n\n\n**교육자로서 드는 생각:**\n\n" },
+  { key:"class", name:"수업 사례", tag:"수업사례", icon:"🏫", hint:"정보·AI 수업 이야기",
+    body:"**학년·과목:**\n\n\n**활용한 도구·방법:**\n\n\n**수업 흐름:**\n\n\n**아이들 반응과 느낀 점:**\n\n" },
+  { key:"view",  name:"생각 나누기", tag:"생각",   icon:"💭", hint:"나의 관점과 고민",
+    body:"**이야기하고 싶은 주제:**\n\n\n**나의 관점:**\n\n\n**함께 나누고 싶은 질문:**\n\n" },
+  { key:"tool",  name:"도구 소개", tag:"도구",    icon:"🧰", hint:"AI·에듀테크 도구 추천",
+    body:"**도구 이름·링크:**\n\n\n**교실에서 쓸 만한 점:**\n\n\n**주의할 점 (개인정보·연령 제한 등):**\n\n" },
+  { key:"ask",   name:"질문",     tag:"질문",    icon:"❓", hint:"궁금한 점 묻기",
+    body:"**궁금한 점:**\n\n\n**지금까지 해 본 것:**\n\n" }
 ];
+const FOOTNOTE = "\n---\n※ 학생 이름·얼굴·학교명 등 개인정보는 올리지 말아 주세요.";
 
-function iconForLabels(labels){
-  for(const l of labels){
-    const name = l.name || "";
-    for(const cat of CATEGORY_MAP){
-      if(cat.keywords.some(k => name.includes(k))) return cat.icon;
-    }
-  }
-  return "💬";
-}
+/* 이 낱말이 들어간 라벨이 붙은 글은 맨 위에 고정돼요 */
+const PIN_WORDS = ["공지", "중요", "고정", "notice", "pinned"];
 
+let cachedIssues = [];
+let currentFilter = "all";
+let currentIssue = null;
+
+/* ---------- 도움 함수 ---------- */
+/* 글자를 안전하게 바꾸기 — 따옴표까지 바꿔야 링크 속성을 빠져나가는 공격을 막을 수 있어요 */
 function escapeHtml(str){
-  const div = document.createElement("div");
-  div.textContent = str || "";
-  return div.innerHTML;
+  return String(str || "")
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
-function renderMarkdown(text){
-  text = text || "";
-  const imgPlaceholders = [];
-
-  // GitHub이 드래그 업로드 시 삽입하는 원본 <img> 태그를 안전하게 추출 (https src만 허용)
-  text = text.replace(/<img\b[^>]*>/gi, function(tag){
-    const srcMatch = tag.match(/src\s*=\s*"([^"]+)"/i) || tag.match(/src\s*=\s*'([^']+)'/i);
-    if(!srcMatch || !/^https:\/\//i.test(srcMatch[1])) return "";
-    const altMatch = tag.match(/alt\s*=\s*"([^"]*)"/i) || tag.match(/alt\s*=\s*'([^']*)'/i);
-    const alt = altMatch ? altMatch[1].replace(/"/g,"&quot;") : "";
-    const safeSrc = srcMatch[1].replace(/"/g,"&quot;");
-    const safeImg = '<img src="'+safeSrc+'" alt="'+alt+'" style="max-width:100%; border-radius:8px; margin:10px 0; display:block;">';
-    const token = "@@IMG"+imgPlaceholders.length+"@@";
-    imgPlaceholders.push(safeImg);
-    return token;
+function isPinned(issue){
+  return (issue.labels || []).some(function(l){
+    const n = (l.name || "").toLowerCase();
+    return PIN_WORDS.some(function(w){ return n.indexOf(w) >= 0; });
   });
+}
 
-  let html = escapeHtml(text);
+/* 제목 앞 [말머리] 떼어 내기 */
+function splitTitle(title){
+  const m = (title || "").match(/^\s*\[([^\]]{1,12})\]\s*/);
+  return m ? { prefix:m[1], rest:title.slice(m[0].length) } : { prefix:"", rest:title || "" };
+}
 
-  // 마크다운 이미지: ![설명](주소)
-  html = html.replace(/!\[([^\]]*)\]\((https:\/\/[^\s)]+)\)/g,
-    '<img src="$2" alt="$1" style="max-width:100%; border-radius:8px; margin:10px 0; display:block;">');
-  // 링크: [텍스트](주소)
-  html = html.replace(/\[([^\]]+)\]\((https:\/\/[^\s)]+)\)/g,
-    '<a href="$2" target="_blank" rel="noopener" style="color:var(--ink); text-decoration:underline;">$1</a>');
-  // 굵게: **텍스트**
-  html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-  // 줄바꿈
-  html = html.replace(/\n/g, '<br>');
-
-  // 안전 검증된 이미지 태그 복원
-  imgPlaceholders.forEach(function(imgHtml, i){
-    html = html.replace("@@IMG"+i+"@@", imgHtml);
-  });
-
-  return html;
+/* 글의 분류 찾기 : 라벨 → 말머리 순서 */
+function categoryOf(issue){
+  const words = (issue.labels || []).map(function(l){ return l.name || ""; });
+  words.push(splitTitle(issue.title).prefix);
+  for(let i=0;i<CATEGORIES.length;i++){
+    const c = CATEGORIES[i];
+    if(words.some(function(w){ return w && (w.indexOf(c.tag) >= 0 || w.indexOf(c.name.replace(/\s/g,"")) >= 0); })) return c;
+  }
+  return null;
 }
 
 function timeAgo(dateStr){
   const diffMs = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diffMs/60000);
+  if(mins < 1) return "방금 전";
   if(mins < 60) return mins+"분 전";
   const hrs = Math.floor(mins/60);
   if(hrs < 24) return hrs+"시간 전";
@@ -216,116 +280,264 @@ function timeAgo(dateStr){
   return d.getFullYear()+"."+String(d.getMonth()+1).padStart(2,"0")+"."+String(d.getDate()).padStart(2,"0");
 }
 
-// 새 글쓰기 드롭다운
+/* ---------- 본문 서식 (제목·목록·인용·링크·굵게·코드·이미지) ---------- */
+function renderMarkdown(text){
+  text = text || "";
+  const tokens = [];
+  function keep(html){ tokens.push(html); return "@@T" + (tokens.length-1) + "@@"; }
+
+  /* GitHub가 넣는 <img> 태그 (https 주소만 허용) */
+  text = text.replace(/<img\b[^>]*>/gi, function(tag){
+    const s = tag.match(/src\s*=\s*"([^"]+)"/i) || tag.match(/src\s*=\s*'([^']+)'/i);
+    if(!s || !/^https:\/\//i.test(s[1])) return "";
+    const a = tag.match(/alt\s*=\s*"([^"]*)"/i) || tag.match(/alt\s*=\s*'([^']*)'/i);
+    return keep('<img src="'+s[1].replace(/"/g,"&quot;")+'" alt="'+(a?a[1].replace(/"/g,"&quot;"):"")+
+                '" style="max-width:100%; border-radius:8px; margin:10px 0; display:block;">');
+  });
+
+  let html = escapeHtml(text);
+
+  /* 이미지 ![설명](주소) */
+  html = html.replace(/!\[([^\]]*)\]\((https:\/\/(?:(?!&quot;|&#39;|&lt;|&gt;)[^\s)])+)\)/g, function(_, alt, src){
+    return keep('<img src="'+src+'" alt="'+alt+'" style="max-width:100%; border-radius:8px; margin:10px 0; display:block;">');
+  });
+  /* 링크 [글자](주소) */
+  html = html.replace(/\[([^\]]+)\]\((https?:\/\/(?:(?!&quot;|&#39;|&lt;|&gt;)[^\s)])+)\)/g, function(_, label, href){
+    return keep('<a href="'+href+'" target="_blank" rel="noopener" style="color:var(--ai); text-decoration:underline;">'+label+'</a>');
+  });
+  /* 그냥 적은 주소도 링크로 */
+  html = html.replace(/https?:\/\/(?:(?!&quot;|&#39;|&lt;|&gt;)[^\s<])+/g, function(url){
+    let tail = "";
+    while(/[.,)!?]$/.test(url)){ tail = url.slice(-1) + tail; url = url.slice(0,-1); }
+    return keep('<a href="'+url+'" target="_blank" rel="noopener" style="color:var(--ai); text-decoration:underline; word-break:break-all;">'+url+'</a>') + tail;
+  });
+  /* 코드 `글자` */
+  html = html.replace(/`([^`\n]+)`/g, function(_, c){ return keep('<code class="md-code">'+c+'</code>'); });
+
+  /* 줄 단위 서식 */
+  const lines = html.split(/\r?\n/);
+  const out = [];
+  lines.forEach(function(line, i){
+    let m;
+    if((m = line.match(/^#{1,4}\s+(.*)$/)))        out.push('<div class="md-h">'+m[1]+'</div>');
+    else if((m = line.match(/^\s*[-*]\s+(.*)$/)))  out.push('<div class="md-li">• '+m[1]+'</div>');
+    else if((m = line.match(/^\s*\d+\.\s+(.*)$/))) out.push('<div class="md-li">'+line.trim()+'</div>');
+    else if((m = line.match(/^&gt;\s?(.*)$/)))     out.push('<div class="md-q">'+m[1]+'</div>');
+    else if(/^\s*-{3,}\s*$/.test(line))            out.push('<hr class="md-hr">');
+    else out.push(line + (i < lines.length-1 ? "<br>" : ""));
+  });
+  html = out.join("");
+
+  /* 굵게 **글자** */
+  html = html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+
+  /* 보관한 조각 되돌리기 */
+  html = html.replace(/@@T(\d+)@@/g, function(_, n){ return tokens[+n]; });
+  return html;
+}
+
+/* ---------- 글쓰기 메뉴 ---------- */
+function buildNewPostMenu(){
+  const box = document.getElementById("new-post-dropdown");
+  box.innerHTML = CATEGORIES.map(function(c){
+    const url = REPO_URL + "/issues/new"
+      + "?title=" + encodeURIComponent("[" + c.tag + "] ")
+      + "&body=" + encodeURIComponent(c.body + FOOTNOTE)
+      + "&labels=" + encodeURIComponent(c.tag);
+    return '<a href="'+url+'" target="_blank" rel="noopener"><span>'+c.icon+'</span>'
+         + '<span>'+c.name+'<small>'+c.hint+'</small></span></a>';
+  }).join("");
+}
 function toggleNewPostMenu(){
   document.getElementById("new-post-dropdown").classList.toggle("open");
 }
-document.addEventListener("click", (e)=>{
+document.addEventListener("click", function(e){
   const menu = document.querySelector(".new-post-menu");
-  if(menu && !menu.contains(e.target)){
-    document.getElementById("new-post-dropdown").classList.remove("open");
-  }
-});
-document.querySelectorAll(".new-post-dropdown a").forEach(a=>{
-  a.href = "https://github.com/" + REPO_OWNER + "/" + REPO_NAME + "/issues/new?labels=" + encodeURIComponent(a.dataset.label);
+  if(menu && !menu.contains(e.target)) document.getElementById("new-post-dropdown").classList.remove("open");
 });
 
-function showView(id){
-  ["view-list","view-detail"].forEach(v=>{
-    document.getElementById(v).classList.toggle("hidden", v!==id);
-  });
+/* ---------- 분류 단추 ---------- */
+function buildChips(){
+  const list = [{ key:"all", name:"전체", icon:"" }].concat(CATEGORIES);
+  document.getElementById("cat-chips").innerHTML = list.map(function(c){
+    return '<span class="cat-chip'+(c.key===currentFilter?' on':'')+'" onclick="setFilter(\''+c.key+'\')">'
+         + (c.icon ? c.icon+' ' : '') + c.name + '</span>';
+  }).join("");
+}
+function setFilter(key){
+  currentFilter = key;
+  buildChips();
+  renderList();
 }
 
-function showList(){
-  showView("view-list");
-}
-
-let cachedIssues = null;
-
+/* ---------- 목록 ---------- */
 async function loadPosts(){
   const listEl = document.getElementById("post-list");
   try{
-    const res = await fetch(API_BASE + "/issues?state=all&sort=created&direction=desc&per_page=30");
+    /* 열린 글만 보여 줘요 — GitHub에서 글을 Close 하면 게시판에서 내려가요 */
+    const res = await fetch(API_BASE + "/issues?state=open&sort=created&direction=desc&per_page=50");
     if(!res.ok){
-      if(res.status === 403){
-        listEl.innerHTML = '<div class="error-state">지금 방문자가 많아 목록을 잠시 못 불러와요.<br>잠깐 후 새로고침해보세요.</div>';
-      } else {
-        listEl.innerHTML = '<div class="error-state">글 목록을 불러오지 못했어요.<br><a href="https://github.com/'+REPO_OWNER+'/'+REPO_NAME+'/issues" target="_blank" rel="noopener">GitHub에서 직접 보기 →</a></div>';
-      }
+      listEl.innerHTML = res.status === 403
+        ? '<div class="error-state">지금 방문자가 많아 목록을 잠시 못 불러와요.<br>잠깐 후 새로고침해 보세요.</div>'
+        : '<div class="error-state">글 목록을 불러오지 못했어요.<br><a href="'+REPO_URL+'/issues" target="_blank" rel="noopener">GitHub에서 직접 보기 →</a></div>';
       return;
     }
     const data = await res.json();
-    const issues = data.filter(item => !item.pull_request);
-    cachedIssues = issues;
-
-    if(issues.length === 0){
-      listEl.innerHTML = '<div class="empty-state">아직 글이 없어요. 첫 글을 남겨보세요!</div>';
-      return;
-    }
-
-    issues.sort((a,b)=> new Date(b.created_at) - new Date(a.created_at));
-
-    listEl.innerHTML = "";
-    issues.forEach(issue=>{
-      const isOwner = issue.user && issue.user.login === REPO_OWNER;
-      const row = document.createElement("div");
-      row.className = "post-row";
-      row.onclick = ()=> openDetail(issue.number);
-      row.innerHTML =
-        '<span class="post-icon">'+iconForLabels(issue.labels||[])+'</span>' +
-        '<div class="post-main">' +
-          '<span class="post-title'+(isOwner?' owner':'')+'">'+escapeHtml(issue.title)+'</span>' +
-          (isOwner ? '<span class="owner-tag">운영자</span>' : '') +
-          '<div class="post-meta">'+escapeHtml(issue.user ? issue.user.login : "익명")+' · '+timeAgo(issue.created_at)+'</div>' +
-        '</div>' +
-        '<span class="post-comments">💬 '+issue.comments+'</span>';
-      listEl.appendChild(row);
-    });
+    cachedIssues = data.filter(function(item){ return !item.pull_request; });
+    renderList();
   }catch(e){
-    listEl.innerHTML = '<div class="error-state">글 목록을 불러오지 못했어요.<br><a href="https://github.com/'+REPO_OWNER+'/'+REPO_NAME+'/issues" target="_blank" rel="noopener">GitHub에서 직접 보기 →</a></div>';
+    listEl.innerHTML = '<div class="error-state">글 목록을 불러오지 못했어요.<br><a href="'+REPO_URL+'/issues" target="_blank" rel="noopener">GitHub에서 직접 보기 →</a></div>';
   }
 }
 
+function renderList(){
+  const listEl = document.getElementById("post-list");
+  let issues = cachedIssues.slice();
+
+  if(currentFilter !== "all"){
+    issues = issues.filter(function(i){ const c = categoryOf(i); return c && c.key === currentFilter; });
+  }
+  if(issues.length === 0){
+    listEl.innerHTML = cachedIssues.length === 0
+      ? '<div class="empty-state">아직 글이 없어요. 첫 글을 남겨 보세요! ✏️</div>'
+      : '<div class="empty-state">이 분류에는 아직 글이 없어요.</div>';
+    return;
+  }
+
+  /* 공지 먼저, 그다음 최신순 */
+  issues.sort(function(a,b){
+    return (isPinned(b) - isPinned(a)) || (new Date(b.created_at) - new Date(a.created_at));
+  });
+
+  listEl.innerHTML = "";
+  issues.forEach(function(issue){
+    const pinned  = isPinned(issue);
+    const isOwner = issue.user && issue.user.login === REPO_OWNER;
+    const cat     = categoryOf(issue);
+    const title   = splitTitle(issue.title).rest || issue.title;
+
+    const row = document.createElement("div");
+    row.className = "post-row" + (pinned ? " pinned" : "");
+    row.onclick = function(){ location.hash = "post-" + issue.number; };
+    row.innerHTML =
+      '<span class="post-icon">' + (pinned ? '📌' : (cat ? cat.icon : '💬')) + '</span>' +
+      '<div class="post-main">' +
+        '<div class="post-line">' +
+          (pinned ? '<span class="pin-tag">공지</span>' : '') +
+          (!pinned && cat ? '<span class="cat-tag">'+cat.name+'</span>' : '') +
+          '<span class="post-title'+(isOwner?' owner':'')+'">'+escapeHtml(title)+'</span>' +
+          (isOwner ? '<span class="owner-tag">운영자</span>' : '') +
+        '</div>' +
+        '<div class="post-meta">'+escapeHtml(issue.user ? issue.user.login : "익명")+' · '+timeAgo(issue.created_at)+'</div>' +
+      '</div>' +
+      '<span class="post-comments">💬 '+issue.comments+'</span>';
+    listEl.appendChild(row);
+  });
+}
+
+/* ---------- 화면 전환 (주소 #post-번호 로 글을 바로 열 수 있어요) ---------- */
+function showView(id){
+  ["view-list","view-detail"].forEach(function(v){
+    document.getElementById(v).classList.toggle("hidden", v !== id);
+  });
+}
+function showList(){
+  if(location.hash) history.pushState("", document.title, location.pathname + location.search);
+  document.title = "정보교육과 AI | 3분 놀이터";
+  showView("view-list");
+}
+function route(){
+  const m = location.hash.match(/^#post-(\d+)$/);
+  if(m) openDetail(parseInt(m[1],10));
+  else { document.title = "정보교육과 AI | 3분 놀이터"; showView("view-list"); }
+}
+window.addEventListener("hashchange", route);
+window.addEventListener("popstate", route);
+
+/* ---------- 글 보기 ---------- */
 async function openDetail(number){
-  const issue = cachedIssues.find(i => i.number === number);
-  if(!issue) return;
+  let issue = cachedIssues.find(function(i){ return i.number === number; });
+
+  /* 목록에 없는 글(오래된 글 등)은 따로 불러와요 */
+  if(!issue){
+    try{
+      const r = await fetch(API_BASE + "/issues/" + number);
+      if(r.ok) issue = await r.json();
+    }catch(e){}
+  }
+  if(!issue || issue.pull_request){ showList(); return; }
+  currentIssue = issue;
 
   const isOwner = issue.user && issue.user.login === REPO_OWNER;
-  document.getElementById("detail-title").textContent = issue.title;
-  document.getElementById("detail-title").style.color = isOwner ? "#3B6EA8" : "var(--ink)";
-  document.getElementById("detail-meta").textContent =
-    (issue.user ? issue.user.login : "익명") + (isOwner ? " · 운영자" : "") + " · " + timeAgo(issue.created_at);
+  const cat     = categoryOf(issue);
+  const title   = splitTitle(issue.title).rest || issue.title;
+
+  document.getElementById("detail-tags").innerHTML =
+    (isPinned(issue) ? '<span class="pin-tag">📌 공지</span>' : '') +
+    (cat ? '<span class="cat-tag">'+cat.icon+' '+cat.name+'</span>' : '');
+  document.getElementById("detail-title").textContent = title;
+  document.getElementById("detail-meta").innerHTML =
+    escapeHtml(issue.user ? issue.user.login : "익명") +
+    (isOwner ? ' <span class="owner-tag">운영자</span>' : '') + ' · ' + timeAgo(issue.created_at);
   document.getElementById("detail-body").innerHTML = renderMarkdown(issue.body || "(내용 없음)");
   document.getElementById("detail-gh-link").href = issue.html_url;
-  document.getElementById("comment-count").textContent = "("+issue.comments+")";
+  document.getElementById("comment-count").textContent = "(" + issue.comments + ")";
   document.getElementById("comment-list").innerHTML = '<div class="loading-state">댓글을 불러오는 중...</div>';
+  document.title = title + " | 정보교육과 AI";
 
   showView("view-detail");
+  window.scrollTo(0, 0);
 
+  if(!issue.comments){
+    document.getElementById("comment-list").innerHTML = '<div class="empty-state" style="padding:16px 0;">아직 댓글이 없어요. 첫 댓글을 남겨 보세요!</div>';
+    return;
+  }
   try{
     const res = await fetch(API_BASE + "/issues/" + number + "/comments");
     const comments = res.ok ? await res.json() : [];
-    const commentWrap = document.getElementById("comment-list");
+    const wrap = document.getElementById("comment-list");
     if(comments.length === 0){
-      commentWrap.innerHTML = '<div class="empty-state" style="padding:16px 0;">아직 댓글이 없어요.</div>';
+      wrap.innerHTML = '<div class="empty-state" style="padding:16px 0;">아직 댓글이 없어요.</div>';
       return;
     }
-    commentWrap.innerHTML = "";
-    comments.forEach(c=>{
+    wrap.innerHTML = "";
+    comments.forEach(function(c){
       const isCOwner = c.user && c.user.login === REPO_OWNER;
       const el = document.createElement("div");
       el.className = "comment-item";
       el.innerHTML =
-        '<div class="comment-meta">'+escapeHtml(c.user ? c.user.login : "익명")+(isCOwner?' <span class="owner-tag">운영자</span>':'')+' · '+timeAgo(c.created_at)+'</div>' +
+        '<div class="comment-meta">'+escapeHtml(c.user ? c.user.login : "익명")+
+        (isCOwner?' <span class="owner-tag">운영자</span>':'')+' · '+timeAgo(c.created_at)+'</div>' +
         '<div class="comment-text">'+renderMarkdown(c.body)+'</div>';
-      commentWrap.appendChild(el);
+      wrap.appendChild(el);
     });
   }catch(e){
     document.getElementById("comment-list").innerHTML = '<div class="empty-state">댓글을 불러오지 못했어요.</div>';
   }
 }
 
-loadPosts();
+/* ---------- 링크 공유 ---------- */
+function shareContent(title, text){
+  const url = window.location.href;
+  if(navigator.share){
+    navigator.share({ title:title, text:text, url:url }).catch(function(){});
+  } else if(navigator.clipboard){
+    navigator.clipboard.writeText(url).then(function(){
+      alert("링크가 복사됐어요! 선생님들께 붙여넣어 공유해 보세요 🙂");
+    });
+  } else {
+    prompt("아래 주소를 복사해 주세요", url);
+  }
+}
+function shareCurrent(){
+  if(!currentIssue) return;
+  shareContent(splitTitle(currentIssue.title).rest + " | 정보교육과 AI", "3분 놀이터 정보교육과 AI 게시판 글");
+}
+
+/* ---------- 시작 ---------- */
+buildNewPostMenu();
+buildChips();
+loadPosts().then(route);
 </script>
 </body>
 </html>
