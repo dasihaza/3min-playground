@@ -635,6 +635,7 @@ async function findVectorHeads(page, vp, SP){
   const stack = [];
   const found = [];
   const stems = [];
+  const arcs  = [];
 
   for(let i=0;i<ops.fnArray.length;i++){
     const fn = ops.fnArray[i], args = ops.argsArray[i];
@@ -666,6 +667,9 @@ async function findVectorHeads(page, vp, SP){
           // 음표 기둥(가는 세로줄) — 머리를 놓쳤을 때 되살리는 단서로 씁니다
           if(w < SP*0.45 && h > SP*2.0 && h < SP*4.6)
             stems.push({ x:(minX+maxX)/2, top:minY, bottom:maxY });
+          // 이음줄·붙임줄 — 넓고 납작한 곡선 (꼬리줄은 짧고 두꺼워서 걸러집니다)
+          if(w > SP*2.0 && h < SP*0.6)
+            arcs.push({ x0:minX, x1:maxX, y:(minY+maxY)/2 });
         }
         minX=1e9;minY=1e9;maxX=-1e9;maxY=-1e9;started=false;
       };
@@ -689,7 +693,12 @@ async function findVectorHeads(page, vp, SP){
   stems.forEach(t=>{
     if(!sUniq.some(u=> Math.abs(u.x-t.x) < SP*0.5 && Math.abs(u.top-t.top) < SP*0.5)) sUniq.push(t);
   });
-  return { heads: uniq, stems: sUniq };
+  const aUniq = [];
+  arcs.forEach(a=>{
+    if(!aUniq.some(u=> Math.abs(u.x0-a.x0) < SP*0.4 && Math.abs(u.x1-a.x1) < SP*0.4
+                    && Math.abs(u.y -a.y ) < SP*0.4)) aUniq.push(a);   /* 줄이 다르면 다른 이음줄 */
+  });
+  return { heads: uniq, stems: sUniq, arcs: aUniq };
 }
 
 async function readOnePage(pdf, pageNo){
@@ -928,6 +937,20 @@ async function readOnePage(pdf, pageNo){
     });
     const temps = as.filter(a=> a.x >= firstX - SP*0.4);
 
+    /* ★ 붙임줄(같은 음을 잇는 줄) 찾기
+       같은 높이의 두 음이 넓고 납작한 줄로 이어져 있으면
+       뒷음은 다시 부는 게 아니라 앞 음을 이어서 부는 거예요. */
+    const arcsHere = (vec.arcs||[]).filter(a=> Math.abs(a.y - sysMid(si)) < SP*7);
+    for(let i=0;i+1<ns.length;i++){
+      const a = ns[i], b = ns[i+1];
+      const pa = pitchOf(a), pb = pitchOf(b);
+      if(pa.step !== pb.step) continue;
+      const linked = arcsHere.some(arc=>
+        Math.abs(arc.x0 - a.x) < SP*2.8 && Math.abs(arc.x1 - b.x) < SP*2.8 &&
+        (Math.abs(arc.y - a.y) < SP*2.2 || Math.abs(arc.y - b.y) < SP*2.2));
+      if(linked) b.tied = true;
+    }
+
     ns.forEach(o=>{
       const p = pitchOf(o);
       let mark = keySig[p.letter] || "";
@@ -940,6 +963,7 @@ async function readOnePage(pdf, pageNo){
       }
       out.push({
         letter: p.letter, oct: p.oct, mark,
+        tied: !!o.tied,
         long: !o.solfa && HEAD_HOLLOW.has(o.c),
         sys: (pageNo-1)*100 + si
       });
@@ -969,11 +993,11 @@ function showPdfResult(title){
     const d = document.createElement("div");
     d.style.cssText = "border-bottom:1px solid var(--line);padding:9px 0;font-size:14px;line-height:1.9;";
     d.innerHTML = '<b style="font-family:Jua,sans-serif;font-size:13px;color:var(--wood-dark);">'+(i+1)+'째 줄</b><br>' +
-      groups[k].map(n=> (n.long?"[":"")+toKo(n)+(n.long?"]":"")).join("  ");
+      groups[k].map(n=> n.tied ? "－" : (n.long?"[":"")+toKo(n)+(n.long?"]":"")).join("  ");
     wrap.appendChild(d);
   });
 
-  const unknown = pdfSong.filter(n=> !NOTES.some(x=>x.ko===toKo(n)));
+  const unknown = pdfSong.filter(n=> !n.tied && !NOTES.some(x=>x.ko===toKo(n)));
   document.getElementById("pdf-meta").innerHTML =
     "총 <b>"+pdfSong.length+"음</b> · "+keys.length+"줄" +
     (unknown.length ? ' · <span style="color:#C0392B;">리코더 음역 밖 '+unknown.length+'음</span>' : "");
@@ -982,7 +1006,7 @@ function showPdfResult(title){
   setStatus("다 읽었어요! 아래에서 확인하고 운지표를 만들어보세요.<br>" +
             "<b>계이름이 실제 악보와 맞는지 꼭 한 번 확인해주세요.</b> " +
             "틀린 곳은 운지표의 <b>‘계이름 수정하기’</b>로 바로 고칠 수 있어요.<br>" +
-            "<small>길게 부는 음 표시([ ])는 악보에 따라 빠질 수 있으니 함께 봐주세요.</small>", "ok");
+            "<small>길게 부는 음 표시([ ])는 악보에 따라 빠질 수 있으니 함께 봐주세요.<br>－ 는 붙임줄로 이어지는 음이에요. 혀를 대지 말고 앞 음을 그대로 이어서 붑니다.</small>", "ok");
 }
 
 function pdfToTab1(){
@@ -990,7 +1014,7 @@ function pdfToTab1(){
   pdfSong.forEach(n=>{ (groups[n.sys] = groups[n.sys] || []).push(n); });
   const keys = Object.keys(groups).sort((a,b)=>a-b);
   document.getElementById("note-input").value =
-    keys.map(k=> groups[k].map(n=> n.long ? "["+toKo(n)+"]" : toKo(n)).join(" ")).join("\n");
+    keys.map(k=> groups[k].map(n=> n.tied ? "-" : (n.long ? "["+toKo(n)+"]" : toKo(n))).join(" ")).join("\n");
   showTab(1);
   document.getElementById("edit-notice").classList.remove("hidden");
   makeFingering();
@@ -1011,6 +1035,16 @@ function pdfToFingering(){
     const grid = document.createElement("div");
     grid.className = "fingering-grid";
     groups[k].forEach(n=>{
+      /* 붙임줄로 이어지는 음 — 다시 불지 않고 앞 음을 이어서 불어요 */
+      if(n.tied){
+        const t = document.createElement("div");
+        t.className = "fing";
+        t.style.cssText = "border-style:dashed;background:#FBFBFB;";
+        t.innerHTML = '<div class="nm" style="font-size:20px;color:var(--ink-soft);">－</div>' +
+          '<div style="font-size:10.5px;color:var(--ink-soft);padding:16px 4px;line-height:1.5;">앞 음을<br>이어서</div>';
+        grid.appendChild(t);
+        return;
+      }
       const ko = toKo(n);
       const info = NOTES.find(x=>x.ko===ko);
       const d = document.createElement("div");
