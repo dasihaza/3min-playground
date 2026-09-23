@@ -954,11 +954,18 @@ async function readOnePage(pdf, pageNo){
       const a = ns[i], b = ns[i+1];
       const pa = pitchOf(a), pb = pitchOf(b);
       if(pa.step !== pb.step) continue;
-      /* 줄이 두 음 사이를 덮고, 바깥으로 멀리 뻗지 않으면 붙임줄 */
-      const linked = arcsHere.some(arc=>
-        arc.x0 < a.x + SP*1.8 && arc.x1 > b.x - SP*1.8 &&
-        arc.x0 > a.x - SP*3.5 && arc.x1 < b.x + SP*3.5 &&
-        (Math.abs(arc.y - a.y) < SP*2.6 || Math.abs(arc.y - b.y) < SP*2.6));
+      /* 붙임줄 판정 — 줄의 '한가운데'와 '길이'로 견줍니다.
+         두 음 사이 한가운데를 지나고, 길이가 두 음 사이 간격과 비슷하면 붙임줄.
+         (오선처럼 아주 긴 줄은 길이 비율에서 걸러집니다) */
+      const gap = b.x - a.x;
+      const midX = (a.x + b.x) / 2;
+      const linked = gap > SP*1.2 && arcsHere.some(arc=>{
+        const wArc = arc.x1 - arc.x0;
+        if(!(arc.x0 <= midX && arc.x1 >= midX)) return false;      /* 가운데를 지나는가 */
+        if(!(wArc > gap*0.5 && wArc < gap*1.9)) return false;      /* 길이가 비슷한가 */
+        const near = Math.min(Math.abs(arc.y - a.y), Math.abs(arc.y - b.y));
+        return near < SP*3.0;                                       /* 음표 가까이 있는가 */
+      });
       if(linked){ b.tied = true; pdfStats.tie++; }
     }
 
@@ -1017,7 +1024,7 @@ function showPdfResult(title){
   setStatus("다 읽었어요! 아래에서 확인하고 운지표를 만들어보세요.<br>" +
             "<b>계이름이 실제 악보와 맞는지 꼭 한 번 확인해주세요.</b> " +
             "틀린 곳은 운지표의 <b>‘계이름 수정하기’</b>로 바로 고칠 수 있어요.<br>" +
-            "<small>길게 부는 음 표시([ ])는 악보에 따라 빠질 수 있으니 함께 봐주세요.<br>－ 는 붙임줄로 이어지는 음이에요. 혀를 대지 말고 앞 음을 그대로 이어서 붑니다.</small>" + (pdfStats ? '<br><small style="color:#8A8A8A;">읽은 내용 : 오선 '+pdfStats.sys+'줄 · ' + '음표 글자 '+pdfStats.text+' + 그림 '+pdfStats.vec+' + 기둥 '+pdfStats.stem + ' · 이음줄 후보 '+pdfStats.arc+'개 → 이어지는 음 '+pdfStats.tie+'개</small>' : ""), "ok");
+            "<small>길게 부는 음 표시([ ])는 악보에 따라 빠질 수 있으니 함께 봐주세요.<br>－ 는 붙임줄로 이어지는 음이에요. 혀를 대지 말고 앞 음을 그대로 이어서 붑니다.</small>" + (pdfStats ? '<br><small style="color:#8A8A8A;">읽은 내용 : 오선 '+pdfStats.sys+'줄 · ' + '음표 글자 '+pdfStats.text+' + 그림 '+pdfStats.vec+' + 기둥 '+pdfStats.stem + ' · 이음줄 선 '+pdfStats.arc+'개 발견 → 이어지는 음으로 처리 '+pdfStats.tie+'개</small>' : ""), "ok");
 }
 
 function pdfToTab1(){
