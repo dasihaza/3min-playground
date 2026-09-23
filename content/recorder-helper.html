@@ -647,8 +647,7 @@ async function findVectorHeads(page, vp, SP){
       const w = g.maxX-g.minX, h = g.maxY-g.minY;
       const ew0 = g.eMaxX-g.eMinX, eh0 = g.eMaxY-g.eMinY;
       const slurLike = (ew0 > SP*1.0 && eh0 < SP*0.9);   /* 양끝이 나란한 곡선 = 이음줄 */
-      /* ▼▼ 비율을 조여 꼬리선(Beam)이 음표로 인식되는 현상 차단 ▼▼ */
-      if(filled && !slurLike && w > SP*0.85 && w < SP*1.7 && h > SP*0.65 && h < SP*1.3 && (w/h) < 1.8 && (w/h) > 0.8)
+      if(filled && !slurLike && w > SP*0.85 && w < SP*2.3 && h > SP*0.7 && h < SP*1.6 && (w/h) < 2.4 && (w/h) > 0.7)
         found.push({ x:(g.minX+g.maxX)/2, y:(g.minY+g.maxY)/2, w });
       if(w < SP*0.45 && h > SP*2.0 && h < SP*4.6)
         stems.push({ x:(g.minX+g.maxX)/2, top:g.minY, bottom:g.maxY });
@@ -902,11 +901,6 @@ async function readOnePage(pdf, pageNo){
   const vecHeads = vec.heads;
   vecHeads.forEach(v=>{
     if(v.y < staffTop || v.y > staffBot) return;
-    
-    /* ▼▼ 추가된 안전장치: 같은 세로 위치(x)에 이미 진짜 음표가 있다면 꼬리 찌꺼기는 무시 ▼▼ */
-    const isDupX = notes.some(n => Math.abs(n.x - v.x) < SP * 1.5);
-    if(isDupX) return;
-
     const dup = notes.some(n=> Math.abs(n.x-v.x) < SP*1.3 && Math.abs(n.y-v.y) < SP*1.3);
     if(dup) return;
     let si=0, bd=1e9;
@@ -914,24 +908,18 @@ async function readOnePage(pdf, pageNo){
     notes.push({ c:"", x:v.x, y:v.y, s:si, vector:true });
   });
 
-    /* ★ 안전장치 — 음표 기둥은 있는데 머리를 못 찾은 자리를 되살려요. */
-    const sysMid = si => (systems[si][0]+systems[si][4])/2;
-    vec.stems.forEach(t=>{
+  /* ★ 안전장치 — 음표 기둥은 있는데 머리를 못 찾은 자리를 되살려요.
+     기둥만으로는 머리가 위인지 아래인지 알 수 없으니,
+     화면 그림에서 '먹이 묻은 쪽'을 직접 확인해 고릅니다. */
+  const sysMid = si => (systems[si][0]+systems[si][4])/2;
+  vec.stems.forEach(t=>{
     const cy = (t.top+t.bottom)/2;
     if(cy < staffTop || cy > staffBot) return;
     let si=0, bd=1e9;
     systems.forEach((st,i)=>{ const d=Math.abs(sysMid(i)-cy); if(d<bd){bd=d;si=i;} });
     const st = systems[si];
-    
     /* 마디선은 오선 위아래 끝에 딱 맞으므로 제외 */
     if(Math.abs(t.top-st[0]) < SP*0.25 && Math.abs(t.bottom-st[4]) < SP*0.25) return;
-
-    /* ==============================================================
-       ★ 수정된 부분: 이미 이 기둥 근처(위아래 전체)에 찾아둔 음표(머리)가 있다면,
-       기둥 반대편(꼬리/빔)을 음표 머리로 착각해 추가하는 것을 막습니다. 
-       ============================================================== */
-    const hasAny = notes.some(n => Math.abs(n.x - t.x) < SP*1.5 && n.y >= t.top - SP*1.5 && n.y <= t.bottom + SP*1.5);
-    if(hasAny) return;
 
     /* 기둥 아래쪽 끝 / 위쪽 끝 두 곳 중 먹이 더 묻은 쪽이 음표 머리 */
     const cands = [
@@ -946,10 +934,14 @@ async function readOnePage(pdf, pageNo){
     }
     if(bestInk < 0.30) return;          /* 실제로 음표가 없으면 넣지 않아요 */
 
-    /* 이미 그 자리에 음표가 있으면 통과
-       (글자 음표의 x는 머리 '왼쪽 끝'이라 넉넉하게 견줍니다) */
-    const has = notes.some(n=> (n.x - best.x) > -SP*1.6 && (n.x - best.x) < SP*1.6
-                            && Math.abs(n.y - best.y) < SP*2.2);
+    /* ★ 그 가로 자리에 이미 음표가 있으면 절대 새로 넣지 않아요.
+       (꼬리줄 쪽 끝을 음표로 착각해 없는 음을 만들던 문제를 막습니다.
+        높이는 따지지 않습니다 — 같은 x 에 음표가 둘일 수는 없으니까요.) */
+    const headX = best.x;
+    const has = notes.some(n=>{
+      const nx = n.x + (n.vector ? 0 : (n.solfa ? SP*0.45 : SP*0.7));
+      return Math.abs(nx - (headX + SP*0.65)) < SP*1.6 || Math.abs(nx - t.x) < SP*1.6;
+    });
     if(has) return;
     notes.push({ c:"", x:best.x, y:best.y, s:si, vector:true, fromStem:true });
   });
