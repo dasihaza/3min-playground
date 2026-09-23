@@ -908,16 +908,15 @@ async function readOnePage(pdf, pageNo){
     notes.push({ c:"", x:v.x, y:v.y, s:si, vector:true });
   });
 
-  /* ★ 안전장치 — 음표 기둥은 있는데 머리를 못 찾은 자리를 되살려요.
-     기둥만으로는 머리가 위인지 아래인지 알 수 없으니,
-     화면 그림에서 '먹이 묻은 쪽'을 직접 확인해 고릅니다. */
-  const sysMid = si => (systems[si][0]+systems[si][4])/2;
-  vec.stems.forEach(t=>{
+    /* ★ 안전장치 — 음표 기둥은 있는데 머리를 못 찾은 자리를 되살려요. */
+    const sysMid = si => (systems[si][0]+systems[si][4])/2;
+    vec.stems.forEach(t=>{
     const cy = (t.top+t.bottom)/2;
     if(cy < staffTop || cy > staffBot) return;
     let si=0, bd=1e9;
     systems.forEach((st,i)=>{ const d=Math.abs(sysMid(i)-cy); if(d<bd){bd=d;si=i;} });
     const st = systems[si];
+    
     /* 마디선은 오선 위아래 끝에 딱 맞으므로 제외 */
     if(Math.abs(t.top-st[0]) < SP*0.25 && Math.abs(t.bottom-st[4]) < SP*0.25) return;
 
