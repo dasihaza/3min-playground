@@ -921,6 +921,13 @@ async function readOnePage(pdf, pageNo){
     /* 마디선은 오선 위아래 끝에 딱 맞으므로 제외 */
     if(Math.abs(t.top-st[0]) < SP*0.25 && Math.abs(t.bottom-st[4]) < SP*0.25) return;
 
+    /* ==============================================================
+       ★ 수정된 부분: 이미 이 기둥 근처(위아래 전체)에 찾아둔 음표(머리)가 있다면,
+       기둥 반대편(꼬리/빔)을 음표 머리로 착각해 추가하는 것을 막습니다. 
+       ============================================================== */
+    const hasAny = notes.some(n => Math.abs(n.x - t.x) < SP*1.5 && n.y >= t.top - SP*1.5 && n.y <= t.bottom + SP*1.5);
+    if(hasAny) return;
+
     /* 기둥 아래쪽 끝 / 위쪽 끝 두 곳 중 먹이 더 묻은 쪽이 음표 머리 */
     const cands = [
       { x: t.x - SP*0.75, y: t.bottom + SP*0.2 },
