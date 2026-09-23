@@ -639,13 +639,33 @@ async function findVectorHeads(page, vp, SP){
   const stems = [];
   const arcs  = [];
 
+  /* 그려진 도형을 모아 두었다가, '칠하기'인지 '선긋기'인지 확인한 뒤 분류합니다.
+     음표 머리는 칠한 도형, 이음줄은 선으로 그은 것이라 이렇게 나누면 헷갈리지 않아요. */
+  const pend = [];
+  function classify(filled, stroked){
+    pend.forEach(g=>{
+      const w = g.maxX-g.minX, h = g.maxY-g.minY;
+      const ew0 = g.eMaxX-g.eMinX, eh0 = g.eMaxY-g.eMinY;
+      const slurLike = (ew0 > SP*1.0 && eh0 < SP*0.9);   /* 양끝이 나란한 곡선 = 이음줄 */
+      if(filled && !slurLike && w > SP*0.85 && w < SP*2.3 && h > SP*0.7 && h < SP*1.6 && (w/h) < 2.4 && (w/h) > 0.7)
+        found.push({ x:(g.minX+g.maxX)/2, y:(g.minY+g.maxY)/2, w });
+      if(w < SP*0.45 && h > SP*2.0 && h < SP*4.6)
+        stems.push({ x:(g.minX+g.maxX)/2, top:g.minY, bottom:g.maxY });
+      if(stroked){
+        const ew = g.eMaxX-g.eMinX, eh = g.eMaxY-g.eMinY;
+        if(ew > SP*1.4 && eh < SP*0.5)
+          arcs.push({ x0:g.eMinX, x1:g.eMaxX, y:(g.eMinY+g.eMaxY)/2 });
+      }
+    });
+    pend.length = 0;
+  }
+
   for(let i=0;i<ops.fnArray.length;i++){
     const fn = ops.fnArray[i], args = ops.argsArray[i];
     if(fn === OPS.save){ stack.push(ctm.slice()); }
     else if(fn === OPS.restore){ if(stack.length) ctm = stack.pop(); }
     else if(fn === OPS.transform){ ctm = pdfjsLib.Util.transform(ctm, args); }
-    /* ★ 악보를 다른 프로그램에서 변환하면 음표가 '폼'이라는 상자 안에 그려져요.
-       이때 상자의 좌표 변환을 함께 적용하지 않으면 음표 위치가 어긋납니다. */
+    /* 악보를 다른 프로그램에서 변환하면 음표가 '폼'이라는 상자 안에 그려져요. */
     else if(fn === OPS.paintFormXObjectBegin){
       stack.push(ctm.slice());
       if(args && args[0]) ctm = pdfjsLib.Util.transform(ctm, args[0]);
@@ -654,7 +674,7 @@ async function findVectorHeads(page, vp, SP){
     else if(fn === OPS.constructPath){
       const pathOps = args[0], co = args[1];
       let ci = 0, minX=1e9, minY=1e9, maxX=-1e9, maxY=-1e9, started=false;
-      /* ★ 곡선은 '조절점'이 실제 선보다 훨씬 위아래로 벌어져 있어요.
+      /* 곡선은 '조절점'이 실제 선보다 위아래로 벌어져 있어요.
          이음줄을 알아보려면 선이 실제로 지나는 '양끝점'만 따로 재야 합니다. */
       let eMinX=1e9, eMinY=1e9, eMaxX=-1e9, eMaxY=-1e9;
       const pt = (px,py)=>{
@@ -663,35 +683,22 @@ async function findVectorHeads(page, vp, SP){
         if(t[1]<minY)minY=t[1]; if(t[1]>maxY)maxY=t[1];
         started = true;
       };
-      const ptEnd = (px,py)=>{                  /* 끝점(선이 실제로 닿는 곳) */
+      const ptEnd = (px,py)=>{
         const t = pdfjsLib.Util.applyTransform([px,py], ctm);
         if(t[0]<eMinX)eMinX=t[0]; if(t[0]>eMaxX)eMaxX=t[0];
         if(t[1]<eMinY)eMinY=t[1]; if(t[1]>eMaxY)eMaxY=t[1];
       };
-      const flush = ()=>{
-        if(started){
-          const w = maxX-minX, h = maxY-minY;
-          // 음표 머리는 가로로 살짝 긴 타원. 납작하고 긴 이음줄(슬러)은 제외해요.
-          if(w > SP*0.85 && w < SP*2.3 && h > SP*0.7 && h < SP*1.6 && (w/h) < 2.4 && (w/h) > 0.7)
-            found.push({ x:(minX+maxX)/2, y:(minY+maxY)/2, w });
-          // 음표 기둥(가는 세로줄) — 머리를 놓쳤을 때 되살리는 단서로 씁니다
-          if(w < SP*0.45 && h > SP*2.0 && h < SP*4.6)
-            stems.push({ x:(minX+maxX)/2, top:minY, bottom:maxY });
-          /* 이음줄·붙임줄 — 양끝점이 넓게 벌어지고 거의 같은 높이인 선.
-             (꼬리줄은 끝점끼리 높이 차가 커서 걸러집니다) */
-          const ew = eMaxX-eMinX, eh = eMaxY-eMinY;
-          if(ew > SP*2.0 && eh < SP*0.5)      /* 꼬리줄은 끝점 높이차가 커서 제외 */
-            arcs.push({ x0:eMinX, x1:eMaxX, y:(eMinY+eMaxY)/2 });
-        }
+      const sub = ()=>{
+        if(started) pend.push({ minX, minY, maxX, maxY, eMinX, eMinY, eMaxX, eMaxY });
         minX=1e9;minY=1e9;maxX=-1e9;maxY=-1e9;started=false;
         eMinX=1e9;eMinY=1e9;eMaxX=-1e9;eMaxY=-1e9;
       };
       for(const op of pathOps){
-        if(op === OPS.moveTo){ flush(); pt(co[ci],co[ci+1]); ptEnd(co[ci],co[ci+1]); ci+=2; }
+        if(op === OPS.moveTo){ sub(); pt(co[ci],co[ci+1]); ptEnd(co[ci],co[ci+1]); ci+=2; }
         else if(op === OPS.lineTo){ pt(co[ci],co[ci+1]); ptEnd(co[ci],co[ci+1]); ci+=2; }
         else if(op === OPS.curveTo){
           pt(co[ci],co[ci+1]); pt(co[ci+2],co[ci+3]); pt(co[ci+4],co[ci+5]);
-          ptEnd(co[ci+4],co[ci+5]); ci+=6; }                 /* 마지막이 끝점 */
+          ptEnd(co[ci+4],co[ci+5]); ci+=6; }
         else if(op === OPS.curveTo2 || op === OPS.curveTo3){
           pt(co[ci],co[ci+1]); pt(co[ci+2],co[ci+3]);
           ptEnd(co[ci+2],co[ci+3]); ci+=4; }
@@ -699,9 +706,16 @@ async function findVectorHeads(page, vp, SP){
           pt(co[ci],co[ci+1]); pt(co[ci]+co[ci+2], co[ci+1]+co[ci+3]);
           ptEnd(co[ci],co[ci+1]); ptEnd(co[ci]+co[ci+2], co[ci+1]+co[ci+3]); ci+=4; }
       }
-      flush();
+      sub();
     }
+    else if(fn === OPS.fill || fn === OPS.eoFill) classify(true, false);
+    else if(fn === OPS.stroke || fn === OPS.closeStroke) classify(false, true);
+    else if(fn === OPS.fillStroke || fn === OPS.eoFillStroke ||
+            fn === OPS.closeFillStroke || fn === OPS.closeEOFillStroke) classify(true, true);
+    else if(fn === OPS.endPath) pend.length = 0;
   }
+  classify(true, true);      /* 칠하기·선긋기 표시가 없는 경우 대비 */
+
   /* 같은 자리에 겹쳐 그려진 것들 합치기 */
   const uniq = [];
   found.sort((a,b)=> b.w - a.w);
@@ -785,8 +799,28 @@ async function readOnePage(pdf, pageNo){
   const HALF = SP/2;
   if(!(SP > 1)) return [];
 
+  /* 화면 그림에서 어떤 자리에 먹이 묻어 있는지 재는 도구 */
+  function inkRatio(x, y){
+    const ax0 = Math.max(0, Math.round((x - SP*0.55) * SC));
+    const ax1 = Math.min(cv.width-1,  Math.round((x + SP*0.55) * SC));
+    const ay0 = Math.max(0, Math.round((y - SP*0.38) * SC));
+    const ay1 = Math.min(cv.height-1, Math.round((y + SP*0.38) * SC));
+    if(ax1 <= ax0 || ay1 <= ay0) return 0;
+    let dark = 0, tot = 0;
+    for(let yy=ay0; yy<=ay1; yy++){
+      for(let xx=ax0; xx<=ax1; xx++){
+        const i = (yy*cv.width + xx)*4;
+        tot++; if(img[i] < 170) dark++;
+      }
+    }
+    return tot ? dark/tot : 0;
+  }
+
   /* 2) 음표·임시표 글자 모으기 */
-  const tc = await page.getTextContent();
+  /* ★ pdf.js 는 나란히 붙은 글자들을 한 덩어리로 묶어서 돌려줘요.
+     그러면 덩어리 안의 음표들이 '첫 글자의 높이'를 함께 쓰게 되어
+     서로 다른 높이의 음이 같은 음으로 읽힙니다. 묶지 말라고 알려 줍니다. */
+  const tc = await page.getTextContent({ disableCombineTextItems: true });
   const items = [];
   tc.items.forEach(it=>{
     const str = it.str || "";
@@ -799,7 +833,7 @@ async function readOnePage(pdf, pageNo){
       if(!c.trim()) return;
       // 한 덩어리에 글자가 여러 개면 가로 위치를 나눠서 계산
       const x = chars.length > 1 ? x0 + (w * i / chars.length) : x0;
-      items.push({ c, x, y, h: it.height || 0, font: it.fontName, len: chars.length });
+      items.push({ c, x, y, h: it.height || 0, font: it.fontName, len: chars.length, idx: i });
     });
   });
 
@@ -845,6 +879,23 @@ async function readOnePage(pdf, pageNo){
   });
   if(solfaNotes.length) notes.push(...solfaNotes);
 
+  /* ★ 안전장치 — 한 덩어리로 묶여 들어온 음표는 앞 글자의 높이를 물려받아
+     엉뚱한 음이 될 수 있어요. 그런 음표는 화면 그림에서 진짜 머리 자리를 찾아 고칩니다. */
+  notes.forEach(o=>{
+    if(!(o.len > 1 && o.idx > 0)) return;          /* 묶여 들어온 뒤쪽 글자만 */
+    const cx = o.x + SP*0.65;
+    let si = 0, bd = 1e9;
+    systems.forEach((st,i)=>{ const d=Math.abs((st[0]+st[4])/2 - o.y); if(d<bd){bd=d;si=i;} });
+    const st = systems[si];
+    let bestY = o.y, bestInk = inkRatio(cx, o.y);
+    for(let k=-10; k<=10; k++){                    /* 오선 위아래 5칸까지 살펴봄 */
+      const y = st[4] - k*HALF;
+      const v = inkRatio(cx, y);
+      if(v > bestInk + 0.08){ bestInk = v; bestY = y; }
+    }
+    if(bestInk > 0.35) o.y = bestY;
+  });
+
   /* 그림으로 그려진 음표 머리 보태기 (이미 있는 음표와 겹치면 제외) */
   const vec = await findVectorHeads(page, vp, SP);
   const vecHeads = vec.heads;
@@ -860,22 +911,6 @@ async function readOnePage(pdf, pageNo){
   /* ★ 안전장치 — 음표 기둥은 있는데 머리를 못 찾은 자리를 되살려요.
      기둥만으로는 머리가 위인지 아래인지 알 수 없으니,
      화면 그림에서 '먹이 묻은 쪽'을 직접 확인해 고릅니다. */
-  function inkRatio(x, y){
-    const ax0 = Math.max(0, Math.round((x - SP*0.55) * SC));
-    const ax1 = Math.min(cv.width-1,  Math.round((x + SP*0.55) * SC));
-    const ay0 = Math.max(0, Math.round((y - SP*0.38) * SC));
-    const ay1 = Math.min(cv.height-1, Math.round((y + SP*0.38) * SC));
-    if(ax1 <= ax0 || ay1 <= ay0) return 0;
-    let dark = 0, tot = 0;
-    for(let yy=ay0; yy<=ay1; yy++){
-      for(let xx=ax0; xx<=ax1; xx++){
-        const i = (yy*cv.width + xx)*4;
-        tot++; if(img[i] < 170) dark++;
-      }
-    }
-    return tot ? dark/tot : 0;
-  }
-
   const sysMid = si => (systems[si][0]+systems[si][4])/2;
   vec.stems.forEach(t=>{
     const cy = (t.top+t.bottom)/2;
@@ -949,6 +984,24 @@ async function readOnePage(pdf, pageNo){
   pdfStats.stem += notes.filter(n=> n.fromStem).length;
   pdfStats.arc  += (vec.arcs||[]).length;
 
+  /* ★ 줄이 바뀌면서 이어지는 붙임줄
+     줄 끝 음에서 오른쪽으로 뻗은 줄이 있고, 다음 줄 첫 음이 같은 높이면
+     그 첫 음은 다시 부는 게 아니라 앞 줄 마지막 음을 이어서 부는 거예요. */
+  /* 글자 음표의 x 는 머리 '왼쪽 끝'이라, 이음줄과 견주려면 머리 중심으로 맞춰요 */
+  notes.forEach(o=>{ o.xc = o.x + (o.vector ? 0 : (o.solfa ? SP*0.45 : SP*0.7)); });
+  const bySys = systems.map((st, si)=> notes.filter(o=>o.s===si).sort((a,b)=>a.x-b.x));
+  for(let si=0; si+1<systems.length; si++){
+    const cur = bySys[si], nxt = bySys[si+1];
+    if(!cur.length || !nxt.length) continue;
+    const last = cur[cur.length-1], first = nxt[0];
+    if(pitchOf(last).step !== pitchOf(first).step) continue;
+    const over = (vec.arcs||[]).some(a=>
+      Math.abs(a.y - last.y) < SP*3.5 &&
+      a.x0 > last.xc - SP*3.0 && a.x0 < last.xc + SP*3.0 &&
+      a.x1 > last.xc + SP*2.0);
+    if(over){ first.tied = true; pdfStats.tie++; }
+  }
+
   const out = [];
   systems.forEach((st, si)=>{
     const ns = notes.filter(o=>o.s===si).sort((a,b)=>a.x-b.x);
@@ -975,10 +1028,11 @@ async function readOnePage(pdf, pageNo){
 
       /* 붙임줄 판정 — 두 음 사이를 절반 넘게 덮는 줄이 음표 가까이 있으면 붙임줄.
          오선처럼 아주 긴 줄은 길이로 걸러냅니다. */
-      const lo = Math.min(a.x, b.x), hi = Math.max(a.x, b.x);
+      const lo = Math.min(a.xc, b.xc), hi = Math.max(a.xc, b.xc);
       const span = hi - lo;
       const linked = span > SP*1.0 && arcsHere.some(arc=>{
-        if((arc.x1 - arc.x0) > SP*40) return false;
+        if((arc.x1 - arc.x0) > SP*40) return false;                 /* 오선처럼 긴 줄 제외 */
+        if(arc.x0 < lo - SP*1.2 || arc.x1 > hi + SP*1.2) return false; /* 두 음 밖으로 크게 벗어나면 제외 */
         const ov = Math.min(arc.x1, hi) - Math.max(arc.x0, lo);
         if(ov < span*0.55) return false;
         return Math.min(Math.abs(arc.y - a.y), Math.abs(arc.y - b.y)) < SP*3.5;
