@@ -654,11 +654,19 @@ async function findVectorHeads(page, vp, SP){
     else if(fn === OPS.constructPath){
       const pathOps = args[0], co = args[1];
       let ci = 0, minX=1e9, minY=1e9, maxX=-1e9, maxY=-1e9, started=false;
+      /* ★ 곡선은 '조절점'이 실제 선보다 훨씬 위아래로 벌어져 있어요.
+         이음줄을 알아보려면 선이 실제로 지나는 '양끝점'만 따로 재야 합니다. */
+      let eMinX=1e9, eMinY=1e9, eMaxX=-1e9, eMaxY=-1e9;
       const pt = (px,py)=>{
         const t = pdfjsLib.Util.applyTransform([px,py], ctm);
         if(t[0]<minX)minX=t[0]; if(t[0]>maxX)maxX=t[0];
         if(t[1]<minY)minY=t[1]; if(t[1]>maxY)maxY=t[1];
         started = true;
+      };
+      const ptEnd = (px,py)=>{                  /* 끝점(선이 실제로 닿는 곳) */
+        const t = pdfjsLib.Util.applyTransform([px,py], ctm);
+        if(t[0]<eMinX)eMinX=t[0]; if(t[0]>eMaxX)eMaxX=t[0];
+        if(t[1]<eMinY)eMinY=t[1]; if(t[1]>eMaxY)eMaxY=t[1];
       };
       const flush = ()=>{
         if(started){
@@ -669,18 +677,27 @@ async function findVectorHeads(page, vp, SP){
           // 음표 기둥(가는 세로줄) — 머리를 놓쳤을 때 되살리는 단서로 씁니다
           if(w < SP*0.45 && h > SP*2.0 && h < SP*4.6)
             stems.push({ x:(minX+maxX)/2, top:minY, bottom:maxY });
-          // 이음줄·붙임줄 — 넓고 납작한 곡선 (꼬리줄은 짧고 두꺼워서 걸러집니다)
-          if(w > SP*2.0 && h < SP*0.6)
-            arcs.push({ x0:minX, x1:maxX, y:(minY+maxY)/2 });
+          /* 이음줄·붙임줄 — 양끝점이 넓게 벌어지고 거의 같은 높이인 선.
+             (꼬리줄은 끝점끼리 높이 차가 커서 걸러집니다) */
+          const ew = eMaxX-eMinX, eh = eMaxY-eMinY;
+          if(ew > SP*2.0 && eh < SP*0.5)      /* 꼬리줄은 끝점 높이차가 커서 제외 */
+            arcs.push({ x0:eMinX, x1:eMaxX, y:(eMinY+eMaxY)/2 });
         }
         minX=1e9;minY=1e9;maxX=-1e9;maxY=-1e9;started=false;
+        eMinX=1e9;eMinY=1e9;eMaxX=-1e9;eMaxY=-1e9;
       };
       for(const op of pathOps){
-        if(op === OPS.moveTo){ flush(); pt(co[ci],co[ci+1]); ci+=2; }
-        else if(op === OPS.lineTo){ pt(co[ci],co[ci+1]); ci+=2; }
-        else if(op === OPS.curveTo){ pt(co[ci],co[ci+1]); pt(co[ci+2],co[ci+3]); pt(co[ci+4],co[ci+5]); ci+=6; }
-        else if(op === OPS.curveTo2 || op === OPS.curveTo3){ pt(co[ci],co[ci+1]); pt(co[ci+2],co[ci+3]); ci+=4; }
-        else if(op === OPS.rectangle){ pt(co[ci],co[ci+1]); pt(co[ci]+co[ci+2], co[ci+1]+co[ci+3]); ci+=4; }
+        if(op === OPS.moveTo){ flush(); pt(co[ci],co[ci+1]); ptEnd(co[ci],co[ci+1]); ci+=2; }
+        else if(op === OPS.lineTo){ pt(co[ci],co[ci+1]); ptEnd(co[ci],co[ci+1]); ci+=2; }
+        else if(op === OPS.curveTo){
+          pt(co[ci],co[ci+1]); pt(co[ci+2],co[ci+3]); pt(co[ci+4],co[ci+5]);
+          ptEnd(co[ci+4],co[ci+5]); ci+=6; }                 /* 마지막이 끝점 */
+        else if(op === OPS.curveTo2 || op === OPS.curveTo3){
+          pt(co[ci],co[ci+1]); pt(co[ci+2],co[ci+3]);
+          ptEnd(co[ci+2],co[ci+3]); ci+=4; }
+        else if(op === OPS.rectangle){
+          pt(co[ci],co[ci+1]); pt(co[ci]+co[ci+2], co[ci+1]+co[ci+3]);
+          ptEnd(co[ci],co[ci+1]); ptEnd(co[ci]+co[ci+2], co[ci+1]+co[ci+3]); ci+=4; }
       }
       flush();
     }
@@ -925,7 +942,7 @@ async function readOnePage(pdf, pageNo){
     return { letter: LETTER[idx], oct: OCTUP[idx] + Math.floor(step/7), step };
   }
 
-  pdfStats = pdfStats || { sys:0, text:0, vec:0, stem:0, arc:0, tie:0 };
+  pdfStats = pdfStats || { sys:0, text:0, vec:0, stem:0, arc:0, pair:0, tie:0 };
   pdfStats.sys  += systems.length;
   pdfStats.text += notes.filter(n=> !n.vector).length;
   pdfStats.vec  += notes.filter(n=> n.vector && !n.fromStem).length;
@@ -949,22 +966,22 @@ async function readOnePage(pdf, pageNo){
     /* ★ 붙임줄(같은 음을 잇는 줄) 찾기
        같은 높이의 두 음이 넓고 납작한 줄로 이어져 있으면
        뒷음은 다시 부는 게 아니라 앞 음을 이어서 부는 거예요. */
-    const arcsHere = (vec.arcs||[]).filter(a=> Math.abs(a.y - sysMid(si)) < SP*7);
+    const arcsHere = (vec.arcs||[]).filter(a=> Math.abs(a.y - sysMid(si)) < SP*9);
     for(let i=0;i+1<ns.length;i++){
       const a = ns[i], b = ns[i+1];
       const pa = pitchOf(a), pb = pitchOf(b);
       if(pa.step !== pb.step) continue;
-      /* 붙임줄 판정 — 줄의 '한가운데'와 '길이'로 견줍니다.
-         두 음 사이 한가운데를 지나고, 길이가 두 음 사이 간격과 비슷하면 붙임줄.
-         (오선처럼 아주 긴 줄은 길이 비율에서 걸러집니다) */
-      const gap = b.x - a.x;
-      const midX = (a.x + b.x) / 2;
-      const linked = gap > SP*1.2 && arcsHere.some(arc=>{
-        const wArc = arc.x1 - arc.x0;
-        if(!(arc.x0 <= midX && arc.x1 >= midX)) return false;      /* 가운데를 지나는가 */
-        if(!(wArc > gap*0.5 && wArc < gap*1.9)) return false;      /* 길이가 비슷한가 */
-        const near = Math.min(Math.abs(arc.y - a.y), Math.abs(arc.y - b.y));
-        return near < SP*3.0;                                       /* 음표 가까이 있는가 */
+      pdfStats.pair++;                      /* 같은 음이 이웃한 자리 (확인용) */
+
+      /* 붙임줄 판정 — 두 음 사이를 절반 넘게 덮는 줄이 음표 가까이 있으면 붙임줄.
+         오선처럼 아주 긴 줄은 길이로 걸러냅니다. */
+      const lo = Math.min(a.x, b.x), hi = Math.max(a.x, b.x);
+      const span = hi - lo;
+      const linked = span > SP*1.0 && arcsHere.some(arc=>{
+        if((arc.x1 - arc.x0) > SP*40) return false;
+        const ov = Math.min(arc.x1, hi) - Math.max(arc.x0, lo);
+        if(ov < span*0.55) return false;
+        return Math.min(Math.abs(arc.y - a.y), Math.abs(arc.y - b.y)) < SP*3.5;
       });
       if(linked){ b.tied = true; pdfStats.tie++; }
     }
@@ -1024,7 +1041,7 @@ function showPdfResult(title){
   setStatus("다 읽었어요! 아래에서 확인하고 운지표를 만들어보세요.<br>" +
             "<b>계이름이 실제 악보와 맞는지 꼭 한 번 확인해주세요.</b> " +
             "틀린 곳은 운지표의 <b>‘계이름 수정하기’</b>로 바로 고칠 수 있어요.<br>" +
-            "<small>길게 부는 음 표시([ ])는 악보에 따라 빠질 수 있으니 함께 봐주세요.<br>－ 는 붙임줄로 이어지는 음이에요. 혀를 대지 말고 앞 음을 그대로 이어서 붑니다.</small>" + (pdfStats ? '<br><small style="color:#8A8A8A;">읽은 내용 : 오선 '+pdfStats.sys+'줄 · ' + '음표 글자 '+pdfStats.text+' + 그림 '+pdfStats.vec+' + 기둥 '+pdfStats.stem + ' · 이음줄 선 '+pdfStats.arc+'개 발견 → 이어지는 음으로 처리 '+pdfStats.tie+'개</small>' : ""), "ok");
+            "<small>길게 부는 음 표시([ ])는 악보에 따라 빠질 수 있으니 함께 봐주세요.<br>－ 는 붙임줄로 이어지는 음이에요. 혀를 대지 말고 앞 음을 그대로 이어서 붑니다.</small>" + (pdfStats ? '<br><small style="color:#8A8A8A;">읽은 내용 : 오선 '+pdfStats.sys+'줄 · ' + '음표 글자 '+pdfStats.text+' + 그림 '+pdfStats.vec+' + 기둥 '+pdfStats.stem + ' · 이음줄 선 '+pdfStats.arc+'개 · 같은 음 이웃 '+pdfStats.pair+'쌍 → 이어지는 음 '+pdfStats.tie+'개</small>' : ""), "ok");
 }
 
 function pdfToTab1(){
