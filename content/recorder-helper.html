@@ -647,7 +647,8 @@ async function findVectorHeads(page, vp, SP){
       const w = g.maxX-g.minX, h = g.maxY-g.minY;
       const ew0 = g.eMaxX-g.eMinX, eh0 = g.eMaxY-g.eMinY;
       const slurLike = (ew0 > SP*1.0 && eh0 < SP*0.9);   /* 양끝이 나란한 곡선 = 이음줄 */
-      if(filled && !slurLike && w > SP*0.85 && w < SP*2.3 && h > SP*0.7 && h < SP*1.6 && (w/h) < 2.4 && (w/h) > 0.7)
+      /* ▼▼ 비율을 조여 꼬리선(Beam)이 음표로 인식되는 현상 차단 ▼▼ */
+      if(filled && !slurLike && w > SP*0.85 && w < SP*1.7 && h > SP*0.65 && h < SP*1.3 && (w/h) < 1.8 && (w/h) > 0.8)
         found.push({ x:(g.minX+g.maxX)/2, y:(g.minY+g.maxY)/2, w });
       if(w < SP*0.45 && h > SP*2.0 && h < SP*4.6)
         stems.push({ x:(g.minX+g.maxX)/2, top:g.minY, bottom:g.maxY });
@@ -901,6 +902,11 @@ async function readOnePage(pdf, pageNo){
   const vecHeads = vec.heads;
   vecHeads.forEach(v=>{
     if(v.y < staffTop || v.y > staffBot) return;
+    
+    /* ▼▼ 추가된 안전장치: 같은 세로 위치(x)에 이미 진짜 음표가 있다면 꼬리 찌꺼기는 무시 ▼▼ */
+    const isDupX = notes.some(n => Math.abs(n.x - v.x) < SP * 1.5);
+    if(isDupX) return;
+
     const dup = notes.some(n=> Math.abs(n.x-v.x) < SP*1.3 && Math.abs(n.y-v.y) < SP*1.3);
     if(dup) return;
     let si=0, bd=1e9;
