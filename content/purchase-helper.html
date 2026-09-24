@@ -86,6 +86,59 @@
   .shot img{display:block;width:100%;height:auto;}
   .shot-empty{padding:34px 16px;text-align:center;color:#AFB8C4;font-size:12.5px;line-height:1.9;}
   .hidden{display:none !important;}
+
+  /* 프로그램 소개 안내글 디자인 */
+  .intro-box {
+    background-color: #EEF2F8;
+    border: 2px dashed #3B5BA5;
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin-top: 32px;
+    text-align: left;
+    box-shadow: 0 4px 12px rgba(59, 91, 165, 0.15);
+  }
+  .intro-box h3 {
+    font-family: 'Jua', sans-serif;
+    color: #2C457E;
+    font-size: 21px;
+    margin: 0 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .intro-box p {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 15px;
+    line-height: 1.75;
+    color: #2E3440;
+    margin: 0 0 14px;
+    word-break: keep-all;
+  }
+  .intro-box p:last-child {
+    margin-bottom: 0;
+  }
+  .intro-box b {
+    color: #E05A5A;
+  }
+  .intro-box ul {
+    margin: 0 0 16px;
+    padding-left: 0;
+    list-style: none;
+  }
+  .intro-box li {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 14.5px;
+    line-height: 1.7;
+    color: #2E3440;
+    margin-bottom: 8px;
+    word-break: keep-all;
+    display: flex;
+    gap: 8px;
+  }
+  .intro-box li i {
+    font-style: normal;
+    flex-shrink: 0;
+  }
 </style>
 </head>
 <body>
@@ -206,6 +259,26 @@
     ⚠️ 자동으로 읽은 내용은 <b>눈으로 한 번 확인</b>해 주세요.
     특히 <b>수량</b>과 <b>할인 전/후 금액</b>이 맞는지 살펴봐 주시면 좋아요.
   </div>
+
+  <!-- 프로그램 소개 안내글 -->
+  <div class="intro-box">
+    <h3>📋 교직원들의 든든한 업무 파트너, '품의 자동완성기'</h3>
+    <p>
+      새 학기 준비, 학급 운영 물품 구입, 각종 행사 준비까지… 학교 현장에서 교직원분들이 감당해야 할 업무는 끝이 없습니다. 그중에서도 구매할 물품을 일일이 장바구니에 담고, 품의서 양식에 맞춰 상품명, 규격, 수량, 단가를 타이핑해 넣는 <b>'기안 및 품의 작성'</b> 과정은 엄청난 시간과 에너지를 소모하게 만드는 주요 원인 중 하나입니다. 구매할 품목이 10개, 20개를 넘어가면 엑셀과 쇼핑몰 창을 수없이 번갈아 가며 복사하고 붙여넣는 단순 반복 작업에 쉽게 지치기 마련이죠. 😅
+    </p>
+    <p>
+      이러한 현장의 어려움을 해결하기 위해 탄생한 것이 바로 <b>'품의 자동완성기'</b>입니다! 이 프로그램은 선생님들의 귀중한 시간을 아껴드리고 품의 업무의 효율성을 극대화하는 데 초점을 맞추었습니다. 복잡한 설치나 번거로운 엑셀 매크로 조작 없이, 오직 웹 브라우저에서 '복사'와 '붙여넣기' 단 두 번의 동작만으로 지루했던 품목 정리 작업이 눈 깜짝할 사이에 끝납니다. 🚀
+    </p>
+    <ul>
+      <li><i>⏱️</i><span><b>압도적인 시간 절약:</b> 쇼핑몰 장바구니 화면 전체를 그대로 복사하여 붙여넣기만 하면, 흩어져 있던 상품 정보(품명, 옵션, 수량, 단가)를 프로그램이 스스로 분석하여 완벽한 표 형태로 즉시 변환해 줍니다.</span></li>
+      <li><i>🎯</i><span><b>정확성 향상 및 실수 방지:</b> 수작업으로 단가와 수량을 입력하다 보면 발생하는 오타나 계산 실수를 원천 차단합니다. 할인된 가격까지 꼼꼼하게 추출해 주어 품의 금액이 틀어질 걱정을 덜어줍니다.</span></li>
+      <li><i>💾</i><span><b>즉시 사용 가능한 엑셀 다운로드:</b> 자동 완성된 표는 K-에듀파인 등 행정 시스템에서 바로 활용할 수 있는 깔끔한 엑셀 파일(.xlsx)로 1초 만에 내려받을 수 있습니다.</span></li>
+    </ul>
+    <p>
+      '품의 자동완성기'는 단순 반복 업무에 빼앗기던 선생님들의 에너지를 아이들과의 수업 연구, 더 가치 있는 교육 활동으로 되돌려 드리기 위한 작지만 강력한 도구입니다. 이제 구매 품목이 50개든 100개든 두려워하지 마세요. 클릭 몇 번이면 품의 준비가 끝나는 마법 같은 편리함을 교무실에서 직접 경험해 보시길 바랍니다! 🏫✨
+    </p>
+  </div>
+
 </div>
 
 <script>
