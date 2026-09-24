@@ -985,19 +985,39 @@ async function readOnePage(pdf, pageNo){
     const core = inkRatio(cx, y, 0.25, 0.18);
     return v - 0.9*side + 0.6*core;   /* 양옆이 비고(꼬리줄 아님) 가운데가 꽉 찬 곳 */
   }
+  /* 줄별로 가로 순서를 미리 구해 둡니다 (이웃 음표를 넘지 않도록) */
+  const orderBySys = {};
   notes.forEach(o=>{
-    if(!(o.len > 1 && o.idx > 0)) return;      /* 묶음 안의 뒤쪽 글자만 */
     let si = 0, bd = 1e9;
     systems.forEach((st,i)=>{ const d=Math.abs((st[0]+st[4])/2 - o.y); if(d<bd){bd=d;si=i;} });
-    const st = systems[si];
-    /* 묶인 글자는 가로 자리도 0.5칸쯤 어긋나므로 가로도 함께 살펴봅니다 */
+    o._si = si;
+    (orderBySys[si] = orderBySys[si] || []).push(o);
+  });
+  Object.keys(orderBySys).forEach(k=> orderBySys[k].sort((a,b)=> a.x-b.x));
+
+  notes.forEach(o=>{
+    if(!(o.len > 1 && o.idx > 0)) return;        /* 묶음 안의 뒤쪽 글자만 */
+    const st = systems[o._si];
     const cx0 = o.x + SP*0.65;
-    let bestY = o.y, bestScore = headScoreAt(cx0, o.y);
-    for(let i=-6; i<=6; i++){
-      const cx = cx0 + i*SP*0.1;
+    const orig = headScoreAt(cx0, o.y);
+    if(inkRatio(cx0, o.y) >= 0.35) return;       /* 원래 자리에 음표가 있으면 그대로 둠 */
+    if(orig >= 0.60) return;
+
+    /* 이웃 음표와의 한가운데를 넘지 않도록 찾는 범위를 정해요 */
+    const row = orderBySys[o._si] || [o];
+    const j = row.indexOf(o);
+    const prevX = (j > 0) ? row[j-1].x : o.x - SP*2;
+    const nextX = (j >= 0 && j < row.length-1) ? row[j+1].x : o.x + SP*2;
+    /* 이웃과의 한가운데에서 0.3칸 여유 — 음표가 경계에 딱 걸치는 일이 있어요 */
+    const loX = Math.max(cx0 - SP*1.5, (prevX + o.x)/2 + SP*0.65 - SP*0.3);
+    const hiX = Math.min(cx0 + SP*1.5, (o.x + nextX)/2 + SP*0.65 + SP*0.3);
+
+    let bestY = o.y, bestScore = orig;
+    for(let cx = loX; cx <= hiX; cx += SP*0.1){
+      const dx = Math.abs(cx - cx0)/SP;
       for(let k=-10; k<=10; k++){
         const y = st[4] - k*HALF;
-        const sc = headScoreAt(cx, y);
+        const sc = headScoreAt(cx, y) - 0.05*dx;   /* 멀리 갈수록 조금 불리하게 */
         if(sc > bestScore + 0.20){ bestScore = sc; bestY = y; }
       }
     }
