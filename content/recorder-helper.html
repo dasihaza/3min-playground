@@ -635,6 +635,67 @@ async function readPdf(input){
 /* ★ 그림(벡터)으로 그려진 음표 머리 찾기
    악보를 만들 때 음표가 글자가 아니라 도형으로 바뀌어 저장된 경우가 있어요.
    그런 음표는 글자로는 안 잡히므로 도형의 크기·위치로 찾아냅니다. */
+/* ===== 글자 위치를 직접 계산하기 =====
+   pdf.js 의 getTextContent 는 나란한 글자들을 한 덩어리로 묶어 주는데,
+   그러면 덩어리 안 글자들의 정확한 가로·세로 자리를 알 수 없어요.
+   그래서 PDF 의 글자 그리기 명령을 직접 따라가며 한 글자씩 자리를 구합니다. */
+async function readGlyphs(page, vp){
+  const OPS = pdfjsLib.OPS, T = pdfjsLib.Util.transform, AP = pdfjsLib.Util.applyTransform;
+  let ops;
+  try{ ops = await page.getOperatorList(); }catch(e){ return null; }
+  let ctm = vp.transform.slice(), stack = [];
+  let tm = [1,0,0,1,0,0], tlm = [1,0,0,1,0,0];
+  let fs = 0, hs = 1, rise = 0, cs = 0, ws = 0, leading = 0, fontName = "";
+  const out = [];
+
+  function draw(glyphs){
+    if(!glyphs) return;
+    for(let k=0;k<glyphs.length;k++){
+      const g = glyphs[k];
+      if(g === null || g === undefined) continue;
+      if(typeof g === "number"){                       /* 글자 사이 간격 조정 */
+        tm = T([1,0,0,1, -g/1000*fs*hs, 0], tm);
+        continue;
+      }
+      const trm = T(T([fs*hs, 0, 0, fs, 0, rise], tm), ctm);
+      const pos = AP([0,0], trm);
+      const ch = (g.unicode !== undefined && g.unicode !== null) ? g.unicode : "";
+      if(ch) out.push({ c: ch, x: pos[0], y: pos[1], font: fontName,
+                        h: Math.abs(fs * (ctm[3]||1)), len: 1, idx: 0 });
+      const adv = ((g.width||0)/1000*fs + cs + (g.isSpace ? ws : 0)) * hs;
+      tm = T([1,0,0,1, adv, 0], tm);
+    }
+  }
+
+  for(let i=0;i<ops.fnArray.length;i++){
+    const fn = ops.fnArray[i], a = ops.argsArray[i];
+    if(fn === OPS.save) stack.push(ctm.slice());
+    else if(fn === OPS.restore){ if(stack.length) ctm = stack.pop(); }
+    else if(fn === OPS.transform) ctm = T(ctm, a);
+    else if(fn === OPS.paintFormXObjectBegin){ stack.push(ctm.slice()); if(a && a[0]) ctm = T(ctm, a[0]); }
+    else if(fn === OPS.paintFormXObjectEnd){ if(stack.length) ctm = stack.pop(); }
+    else if(fn === OPS.beginText){ tm = [1,0,0,1,0,0]; tlm = tm.slice(); }
+    else if(fn === OPS.setTextMatrix){ tm = a.slice(0,6); tlm = tm.slice(); }
+    else if(fn === OPS.setFont){ fontName = a[0]; fs = a[1]; }
+    else if(fn === OPS.setLeading) leading = a[0];
+    else if(fn === OPS.setLeadingMoveText){ leading = -a[1]; tlm = T([1,0,0,1,a[0],a[1]], tlm); tm = tlm.slice(); }
+    else if(fn === OPS.moveText){ tlm = T([1,0,0,1,a[0],a[1]], tlm); tm = tlm.slice(); }
+    else if(fn === OPS.nextLine){ tlm = T([1,0,0,1,0,-leading], tlm); tm = tlm.slice(); }
+    else if(fn === OPS.setCharSpacing) cs = a[0];
+    else if(fn === OPS.setWordSpacing) ws = a[0];
+    else if(fn === OPS.setHScale) hs = (a[0]||100)/100;
+    else if(fn === OPS.setTextRise) rise = a[0];
+    else if(fn === OPS.showText) draw(a[0]);
+    else if(OPS.showSpacedText !== undefined && fn === OPS.showSpacedText) draw(a[0]);
+    else if(fn === OPS.nextLineShowText){ tlm = T([1,0,0,1,0,-leading], tlm); tm = tlm.slice(); draw(a[0]); }
+    else if(fn === OPS.nextLineSetSpacingShowText){
+      ws = a[0]; cs = a[1];
+      tlm = T([1,0,0,1,0,-leading], tlm); tm = tlm.slice(); draw(a[2]);
+    }
+  }
+  return out;
+}
+
 async function findVectorHeads(page, vp, SP){
   const OPS = pdfjsLib.OPS;
   let ops;
@@ -805,6 +866,8 @@ async function readOnePage(pdf, pageNo){
   const HALF = SP/2;
   if(!(SP > 1)) return [];
 
+  pdfStats = pdfStats || { sys:0, text:0, vec:0, stem:0, arc:0, pair:0, tie:0, way:'', scoreA:0, scoreB:0 };
+
   /* 화면 그림에서 어떤 자리에 먹이 묻어 있는지 재는 도구 */
   function inkRatio(x, y){
     const ax0 = Math.max(0, Math.round((x - SP*0.55) * SC));
@@ -827,7 +890,7 @@ async function readOnePage(pdf, pageNo){
      그러면 덩어리 안의 음표들이 '첫 글자의 높이'를 함께 쓰게 되어
      서로 다른 높이의 음이 같은 음으로 읽힙니다. 묶지 말라고 알려 줍니다. */
   const tc = await page.getTextContent({ disableCombineTextItems: true });
-  const items = [];
+  let items = [];
   tc.items.forEach(it=>{
     const str = it.str || "";
     if(!str.trim()) return;
@@ -851,6 +914,28 @@ async function readOnePage(pdf, pageNo){
     if(HEAD_FILLED.has(o.c) || HEAD_HOLLOW.has(o.c)) musicFonts.add(o.font);
   });
   const isMusic = o => musicFonts.size === 0 || musicFonts.has(o.font);
+
+  /* ★ 두 가지 방법으로 글자 자리를 구한 뒤, 악보 그림과 더 잘 맞는 쪽을 씁니다.
+     (묶여 나온 글자는 자리가 어긋나서 음표 머리를 벗어나요) */
+  function headScore(list){
+    const ns = list.filter(o=> isMusic(o) && !RESTS.has(o.c) && (HEAD_FILLED.has(o.c) || HEAD_HOLLOW.has(o.c)));
+    if(ns.length < 3) return { n:ns.length, score:-1 };
+    let sum = 0, cnt = 0;
+    for(let i=0;i<ns.length;i++){
+      if(cnt >= 40) break;                       /* 40개만 맛보기로 확인 */
+      sum += inkRatio(ns[i].x + SP*0.65, ns[i].y); cnt++;
+    }
+    return { n:ns.length, score: cnt ? sum/cnt : -1 };
+  }
+  let glyphItems = null;
+  try{ glyphItems = await readGlyphs(page, vp); }catch(e){ glyphItems = null; }
+  const sA = headScore(items);
+  const sB = glyphItems ? headScore(glyphItems) : { n:0, score:-1 };
+  if(sB.score > sA.score + 0.02 && sB.n >= sA.n*0.8){
+    items = glyphItems;
+    if(pdfStats) pdfStats.way = '글자 직접계산';
+  } else if(pdfStats) pdfStats.way = '묶음 나누기';
+  if(pdfStats){ pdfStats.scoreA = Math.round(sA.score*100)/100; pdfStats.scoreB = Math.round(sB.score*100)/100; }
 
   const notes = items.filter(o=> isMusic(o) && !RESTS.has(o.c) && (HEAD_FILLED.has(o.c) || HEAD_HOLLOW.has(o.c)));
   const staffTop = systems[0][0] - SP*5, staffBot = systems[systems.length-1][4] + SP*5;
@@ -997,7 +1082,6 @@ async function readOnePage(pdf, pageNo){
     return { letter: LETTER[idx], oct: OCTUP[idx] + Math.floor(step/7), step };
   }
 
-  pdfStats = pdfStats || { sys:0, text:0, vec:0, stem:0, arc:0, pair:0, tie:0 };
   pdfStats.sys  += systems.length;
   pdfStats.text += notes.filter(n=> !n.vector).length;
   pdfStats.vec  += notes.filter(n=> n.vector && !n.fromStem).length;
@@ -1132,7 +1216,7 @@ function showPdfResult(title){
   setStatus("다 읽었어요! 아래에서 확인하고 운지표를 만들어보세요.<br>" +
             "<b>계이름이 실제 악보와 맞는지 꼭 한 번 확인해주세요.</b> " +
             "틀린 곳은 운지표의 <b>‘계이름 수정하기’</b>로 바로 고칠 수 있어요.<br>" +
-            "<small>길게 부는 음 표시([ ])는 악보에 따라 빠질 수 있으니 함께 봐주세요.<br>－ 는 붙임줄로 이어지는 음이에요. 혀를 대지 말고 앞 음을 그대로 이어서 붑니다.</small>" + (pdfStats ? '<br><small style="color:#8A8A8A;">읽은 내용 : 오선 '+pdfStats.sys+'줄 · ' + '음표 글자 '+pdfStats.text+' + 그림 '+pdfStats.vec+' + 기둥 '+pdfStats.stem + ' · 이음줄 선 '+pdfStats.arc+'개 · 같은 음 이웃 '+pdfStats.pair+'쌍 → 이어지는 음 '+pdfStats.tie+'개</small>' : ""), "ok");
+            "<small>길게 부는 음 표시([ ])는 악보에 따라 빠질 수 있으니 함께 봐주세요.<br>－ 는 붙임줄로 이어지는 음이에요. 혀를 대지 말고 앞 음을 그대로 이어서 붑니다.</small>" + (pdfStats ? '<br><small style="color:#8A8A8A;">읽은 내용 : 오선 '+pdfStats.sys+'줄 · ' + '음표 글자 '+pdfStats.text+' + 그림 '+pdfStats.vec+' + 기둥 '+pdfStats.stem + ' · 이음줄 선 '+pdfStats.arc+'개 · 이어지는 음 '+pdfStats.tie+'개' + '<br>읽기 방법 : '+(pdfStats.way||'-')+' (맞음 정도 묶음 '+pdfStats.scoreA+' / 직접 '+pdfStats.scoreB+')</small>' : ""), "ok");
 }
 
 function pdfToTab1(){
