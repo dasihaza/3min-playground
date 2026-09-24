@@ -189,6 +189,7 @@
   body.maxed{overflow:hidden;}
   body.maxed .topbar,
   body.maxed .panel{display:none;}
+  body.maxed .intro-box{display:none;}
   body.maxed .shell{
     max-width:none;padding:0;
     height:100vh;display:flex;align-items:center;justify-content:center;
@@ -216,6 +217,59 @@
 
   @media (max-width:420px){
     .presets{grid-template-columns:repeat(2,1fr);}
+  }
+
+  /* 프로그램 소개 안내글 디자인 */
+  .intro-box {
+    background-color: #F0FAF5;
+    border: 2px dashed #6BC5A0;
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin-top: 32px;
+    text-align: left;
+    box-shadow: 0 4px 12px rgba(107, 197, 160, 0.15);
+  }
+  .intro-box h3 {
+    font-family: 'Jua', sans-serif;
+    color: #4FA382;
+    font-size: 21px;
+    margin: 0 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .intro-box p {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 15px;
+    line-height: 1.75;
+    color: #33403C;
+    margin: 0 0 14px;
+    word-break: keep-all;
+  }
+  .intro-box p:last-child {
+    margin-bottom: 0;
+  }
+  .intro-box b {
+    color: #EE6C5A;
+  }
+  .intro-box ul {
+    margin: 0 0 16px;
+    padding-left: 0;
+    list-style: none;
+  }
+  .intro-box li {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 14.5px;
+    line-height: 1.7;
+    color: #33403C;
+    margin-bottom: 8px;
+    word-break: keep-all;
+    display: flex;
+    gap: 8px;
+  }
+  .intro-box li i {
+    font-style: normal;
+    flex-shrink: 0;
   }
 </style>
 </head>
@@ -310,6 +364,25 @@
     </label>
 
     <div id="next-alert" class="next-alert"></div>
+  </div>
+
+  <!-- 프로그램 소개 안내글 -->
+  <div class="intro-box">
+    <h3>⏱️ 교실의 집중력을 책임지는 마법의 시계, '교실 타이머'</h3>
+    <p>
+      미술 작품 만들기, 모둠 토의, 단원 평가, 심지어 아침 청소 시간까지… 교실에서 시계나 타이머가 필요한 순간은 하루에도 몇 번씩 찾아옵니다. 선생님들은 활동 전에 "자, 15분 줄 테니 시작하세요!"라고 외치지만, 막상 활동이 시작되면 초등학생 아이들은 금세 집중력을 잃고 멍을 때리거나 엉뚱한 장난을 치며 시간을 흘려보내곤 합니다. 그렇다고 선생님이 일일이 "5분 지났어!", "이제 10분 남았다!"라고 외치는 것도 여간 번거로운 일이 아니죠. 😅
+    </p>
+    <p>
+      '똑딱똑딱 교실 타이머'는 바로 이런 교실 현장의 생생한 고민을 해결하기 위해 기획되었습니다! 칠판 대형 모니터에 꽉 차게 띄울 수 있는 이 직관적인 타이머는 단순한 시간 측정 도구를 넘어, 아이들의 <b>'자기 주도적 시간 관리'</b>를 돕는 똑똑한 보조 교사 역할을 톡톡히 해냅니다. ⏳
+    </p>
+    <ul>
+      <li><i>🔔</i><span><b>1분마다 띵동! 집중력 환기:</b> 이 타이머의 가장 큰 특징은 시간이 흐르는 동안 1분마다 경쾌한 알림음을 내어준다는 것입니다. 멍때리던 아이도 이 소리를 듣는 순간 퍼뜩 정신을 차리고 다시 활동에 몰입하게 됩니다.</span></li>
+      <li><i>⚡</i><span><b>긴장감을 높이는 10초 카운트다운:</b> 활동 종료 10초 전부터 울리는 '똑.. 똑..' 소리는 아이들이 막바지 정리를 서두르고 유종의 미를 거둘 수 있도록 쫄깃한 긴장감을 부여합니다.</span></li>
+      <li><i>🖥️</i><span><b>교실 뒷자리에서도 선명한 최대화 모드:</b> 복잡한 설정창을 숨기고 시계 본체만 칠판 가득 띄우는 최대화 기능을 제공하여, 교실 맨 뒷자리에 앉은 아이들도 남은 시간을 한눈에 파악할 수 있습니다.</span></li>
+    </ul>
+    <p>
+      시간의 소중함을 아는 것은 건강한 학습 태도의 기본입니다. 복잡한 설치 없이 브라우저에서 바로 실행되는 '똑딱똑딱 교실 타이머'를 활용하여, 아이들이 스스로 남은 시간을 계산하고 계획적으로 과제를 끝마치는 뿌듯함을 선물해 주세요! 🏫✨
+    </p>
   </div>
 
 </div>
