@@ -869,11 +869,12 @@ async function readOnePage(pdf, pageNo){
   pdfStats = pdfStats || { sys:0, text:0, vec:0, stem:0, arc:0, pair:0, tie:0, way:'', scoreA:0, scoreB:0 };
 
   /* 화면 그림에서 어떤 자리에 먹이 묻어 있는지 재는 도구 */
-  function inkRatio(x, y){
-    const ax0 = Math.max(0, Math.round((x - SP*0.55) * SC));
-    const ax1 = Math.min(cv.width-1,  Math.round((x + SP*0.55) * SC));
-    const ay0 = Math.max(0, Math.round((y - SP*0.38) * SC));
-    const ay1 = Math.min(cv.height-1, Math.round((y + SP*0.38) * SC));
+  function inkRatio(x, y, rx, ry){
+    rx = rx || 0.55; ry = ry || 0.38;
+    const ax0 = Math.max(0, Math.round((x - SP*rx) * SC));
+    const ax1 = Math.min(cv.width-1,  Math.round((x + SP*rx) * SC));
+    const ay0 = Math.max(0, Math.round((y - SP*ry) * SC));
+    const ay1 = Math.min(cv.height-1, Math.round((y + SP*ry) * SC));
     if(ax1 <= ax0 || ay1 <= ay0) return 0;
     let dark = 0, tot = 0;
     for(let yy=ay0; yy<=ay1; yy++){
@@ -931,7 +932,7 @@ async function readOnePage(pdf, pageNo){
   try{ glyphItems = await readGlyphs(page, vp); }catch(e){ glyphItems = null; }
   const sA = headScore(items);
   const sB = glyphItems ? headScore(glyphItems) : { n:0, score:-1 };
-  if(sB.score > sA.score + 0.02 && sB.n >= sA.n*0.8){
+  if(sB.score > 0.5 && sB.score > sA.score + 0.05 && sB.n >= sA.n*0.8){
     items = glyphItems;
     if(pdfStats) pdfStats.way = '글자 직접계산';
   } else if(pdfStats) pdfStats.way = '묶음 나누기';
@@ -970,31 +971,37 @@ async function readOnePage(pdf, pageNo){
   });
   if(solfaNotes.length) notes.push(...solfaNotes);
 
-  /* ★ 안전장치 — 한 덩어리로 묶여 들어온 음표는 앞 글자의 높이·가로자리를
-     물려받아 엉뚱한 음이 됩니다. 그런 음표는 악보 그림에서 진짜 머리를 찾아 고쳐요.
+  /* ★ 묶여 들어온 음표의 세로 자리 바로잡기
+     pdf.js 가 나란한 글자를 한 덩어리로 묶어 주면, 덩어리 안 글자들은
+     '첫 글자의 높이'를 그대로 물려받아 엉뚱한 음이 됩니다.
+     가로 자리는 맞으니, 그 자리에서 세로로만 진짜 음표 머리를 찾습니다.
 
-     꼬리줄(빔)도 진하기 때문에, '양옆이 비어 있는 곳'을 음표 머리로 봅니다.
-     (빔은 가로로 길어서 양옆도 똑같이 진해요) */
+     꼬리줄(빔)은 가로로 길어 양옆도 진하고, 이음줄은 가운데가 비어 있어요.
+     그래서 '양옆이 비고 가운데가 꽉 찬 곳'을 음표 머리로 봅니다. */
+  function headScoreAt(cx, y){
+    const v = inkRatio(cx, y);
+    if(v < 0.55) return -9;                                  /* 음표 머리는 꽤 진해요 */
+    const side = Math.max(inkRatio(cx - SP*1.5, y), inkRatio(cx + SP*1.5, y));
+    const core = inkRatio(cx, y, 0.25, 0.18);
+    return v - 0.9*side + 0.6*core;   /* 양옆이 비고(꼬리줄 아님) 가운데가 꽉 찬 곳 */
+  }
   notes.forEach(o=>{
-    if(!(o.len > 1 && o.idx > 0)) return;
-    if(inkRatio(o.x + SP*0.65, o.y) > 0.45) return;   /* 원래 자리에 음표가 있으면 그대로 둠 */
+    if(!(o.len > 1 && o.idx > 0)) return;      /* 묶음 안의 뒤쪽 글자만 */
     let si = 0, bd = 1e9;
     systems.forEach((st,i)=>{ const d=Math.abs((st[0]+st[4])/2 - o.y); if(d<bd){bd=d;si=i;} });
     const st = systems[si];
+    /* 묶인 글자는 가로 자리도 0.5칸쯤 어긋나므로 가로도 함께 살펴봅니다 */
     const cx0 = o.x + SP*0.65;
-    let bestX = cx0, bestY = o.y, bestScore = -9;
-    for(let dxi=-4; dxi<=4; dxi++){                 /* 가로로 ±1칸 살펴봄 */
-      const cx = cx0 + dxi*SP*0.25;
-      for(let k=-10; k<=10; k++){                   /* 오선 위아래 5칸까지 */
+    let bestY = o.y, bestScore = headScoreAt(cx0, o.y);
+    for(let i=-6; i<=6; i++){
+      const cx = cx0 + i*SP*0.1;
+      for(let k=-10; k<=10; k++){
         const y = st[4] - k*HALF;
-        const v = inkRatio(cx, y);
-        if(v < 0.45) continue;                      /* 음표 머리는 꽤 진해요 */
-        const side = Math.max(inkRatio(cx - SP*1.5, y), inkRatio(cx + SP*1.5, y));
-        const sc = v - 0.8*side;                    /* 양옆이 비었을수록 높은 점수 */
-        if(sc > bestScore){ bestScore = sc; bestX = cx; bestY = y; }
+        const sc = headScoreAt(cx, y);
+        if(sc > bestScore + 0.20){ bestScore = sc; bestY = y; }
       }
     }
-    if(bestScore > -9){ o.y = bestY; o.x = bestX - SP*0.65; }
+    if(bestY !== o.y){ o.y = bestY; if(pdfStats) pdfStats.fixY = (pdfStats.fixY||0) + 1; }
   });
 
   /* 그림으로 그려진 음표 머리 보태기 (이미 있는 음표와 겹치면 제외) */
@@ -1216,7 +1223,7 @@ function showPdfResult(title){
   setStatus("다 읽었어요! 아래에서 확인하고 운지표를 만들어보세요.<br>" +
             "<b>계이름이 실제 악보와 맞는지 꼭 한 번 확인해주세요.</b> " +
             "틀린 곳은 운지표의 <b>‘계이름 수정하기’</b>로 바로 고칠 수 있어요.<br>" +
-            "<small>길게 부는 음 표시([ ])는 악보에 따라 빠질 수 있으니 함께 봐주세요.<br>－ 는 붙임줄로 이어지는 음이에요. 혀를 대지 말고 앞 음을 그대로 이어서 붑니다.</small>" + (pdfStats ? '<br><small style="color:#8A8A8A;">읽은 내용 : 오선 '+pdfStats.sys+'줄 · ' + '음표 글자 '+pdfStats.text+' + 그림 '+pdfStats.vec+' + 기둥 '+pdfStats.stem + ' · 이음줄 선 '+pdfStats.arc+'개 · 이어지는 음 '+pdfStats.tie+'개' + '<br>읽기 방법 : '+(pdfStats.way||'-')+' (맞음 정도 묶음 '+pdfStats.scoreA+' / 직접 '+pdfStats.scoreB+')</small>' : ""), "ok");
+            "<small>길게 부는 음 표시([ ])는 악보에 따라 빠질 수 있으니 함께 봐주세요.<br>－ 는 붙임줄로 이어지는 음이에요. 혀를 대지 말고 앞 음을 그대로 이어서 붑니다.</small>" + (pdfStats ? '<br><small style="color:#8A8A8A;">읽은 내용 : 오선 '+pdfStats.sys+'줄 · ' + '음표 글자 '+pdfStats.text+' + 그림 '+pdfStats.vec+' + 기둥 '+pdfStats.stem + ' · 이음줄 선 '+pdfStats.arc+'개 · 이어지는 음 '+pdfStats.tie+'개' + '<br>읽기 방법 : '+(pdfStats.way||'-')+' · 세로자리 바로잡음 '+(pdfStats.fixY||0)+'개'+' (맞음 정도 묶음 '+pdfStats.scoreA+' / 직접 '+pdfStats.scoreB+')</small>' : ""), "ok");
 }
 
 function pdfToTab1(){
