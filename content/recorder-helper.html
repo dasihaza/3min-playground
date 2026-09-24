@@ -538,6 +538,12 @@
         <h2 style="margin-top:16px;">읽어낸 계이름</h2>
         <p class="desc" id="pdf-meta"></p>
         <div id="pdf-lines"></div>
+        <details style="margin-top:14px;">
+          <summary style="cursor:pointer;font-size:12.5px;color:var(--ink-soft);">🔍 자세히 보기 (문제를 찾을 때 사용)</summary>
+          <pre id="pdf-detail" style="font-size:11.5px;line-height:1.6;white-space:pre-wrap;
+               background:#FAFAFA;border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:8px;
+               max-height:320px;overflow:auto;"></pre>
+        </details>
         <div class="row-tools" style="margin-top:12px;">
           <button class="btn" onclick="pdfToFingering()">운지표 만들기</button>
           <button class="btn ghost small" onclick="pdfToTab1()">계이름만 1번 탭으로 보내기</button>
@@ -879,21 +885,31 @@ async function readOnePage(pdf, pageNo){
   });
   if(solfaNotes.length) notes.push(...solfaNotes);
 
-  /* ★ 안전장치 — 한 덩어리로 묶여 들어온 음표는 앞 글자의 높이를 물려받아
-     엉뚱한 음이 될 수 있어요. 그런 음표는 화면 그림에서 진짜 머리 자리를 찾아 고칩니다. */
+  /* ★ 안전장치 — 한 덩어리로 묶여 들어온 음표는 앞 글자의 높이·가로자리를
+     물려받아 엉뚱한 음이 됩니다. 그런 음표는 악보 그림에서 진짜 머리를 찾아 고쳐요.
+
+     꼬리줄(빔)도 진하기 때문에, '양옆이 비어 있는 곳'을 음표 머리로 봅니다.
+     (빔은 가로로 길어서 양옆도 똑같이 진해요) */
   notes.forEach(o=>{
-    if(!(o.len > 1 && o.idx > 0)) return;          /* 묶여 들어온 뒤쪽 글자만 */
-    const cx = o.x + SP*0.65;
+    if(!(o.len > 1 && o.idx > 0)) return;
+    if(inkRatio(o.x + SP*0.65, o.y) > 0.45) return;   /* 원래 자리에 음표가 있으면 그대로 둠 */
     let si = 0, bd = 1e9;
     systems.forEach((st,i)=>{ const d=Math.abs((st[0]+st[4])/2 - o.y); if(d<bd){bd=d;si=i;} });
     const st = systems[si];
-    let bestY = o.y, bestInk = inkRatio(cx, o.y);
-    for(let k=-10; k<=10; k++){                    /* 오선 위아래 5칸까지 살펴봄 */
-      const y = st[4] - k*HALF;
-      const v = inkRatio(cx, y);
-      if(v > bestInk + 0.08){ bestInk = v; bestY = y; }
+    const cx0 = o.x + SP*0.65;
+    let bestX = cx0, bestY = o.y, bestScore = -9;
+    for(let dxi=-4; dxi<=4; dxi++){                 /* 가로로 ±1칸 살펴봄 */
+      const cx = cx0 + dxi*SP*0.25;
+      for(let k=-10; k<=10; k++){                   /* 오선 위아래 5칸까지 */
+        const y = st[4] - k*HALF;
+        const v = inkRatio(cx, y);
+        if(v < 0.45) continue;                      /* 음표 머리는 꽤 진해요 */
+        const side = Math.max(inkRatio(cx - SP*1.5, y), inkRatio(cx + SP*1.5, y));
+        const sc = v - 0.8*side;                    /* 양옆이 비었을수록 높은 점수 */
+        if(sc > bestScore){ bestScore = sc; bestX = cx; bestY = y; }
+      }
     }
-    if(bestInk > 0.35) o.y = bestY;
+    if(bestScore > -9){ o.y = bestY; o.x = bestX - SP*0.65; }
   });
 
   /* 그림으로 그려진 음표 머리 보태기 (이미 있는 음표와 겹치면 제외) */
@@ -1054,6 +1070,12 @@ async function readOnePage(pdf, pageNo){
         const a = hit[hit.length-1];
         mark = ACC_NAT.has(a.c) ? "" : (ACC_FLAT.has(a.c) ? "♭" : "#");
       }
+      if(pdfStats){
+        pdfStats.rows = pdfStats.rows || [];
+        pdfStats.rows.push({ sys:si+1, x:Math.round(o.x), y:Math.round(o.y),
+          src: o.fromStem ? '기둥' : (o.vector ? '그림' : (o.solfa ? '계이름' : '글자')),
+          len: o.len||1, idx: o.idx||0, ko: p.letter + (p.oct>0 ? "'".repeat(p.oct) : '') });
+      }
       out.push({
         letter: p.letter, oct: p.oct, mark,
         tied: !!o.tied,
@@ -1076,6 +1098,17 @@ function toKo(n){
 }
 
 function showPdfResult(title){
+  /* 문제를 찾기 위한 '자세히 보기' 채우기 */
+  (function(){
+    const box = document.getElementById("pdf-detail");
+    if(!box) return;
+    if(!pdfStats || !pdfStats.rows){ box.textContent = "(기록 없음)"; return; }
+    box.textContent = pdfStats.rows.map(function(r){
+      return r.sys + "줄  " + r.ko + "\t x=" + r.x + " y=" + r.y + "\t" + r.src +
+             (r.len>1 ? "  (묶음 " + r.len + "글자 중 " + (r.idx+1) + "번째)" : "");
+    }).join("\n");
+  })();
+
   const groups = {};
   pdfSong.forEach(n=>{ (groups[n.sys] = groups[n.sys] || []).push(n); });
   const keys = Object.keys(groups).sort((a,b)=>a-b);
