@@ -1000,8 +1000,9 @@ async function readOnePage(pdf, pageNo){
     const st = systems[o._si];
     const cx0 = o.x + SP*0.65;
     const orig = headScoreAt(cx0, o.y);
-    if(inkRatio(cx0, o.y) >= 0.35) return;       /* 원래 자리에 음표가 있으면 그대로 둠 */
-    if(orig >= 0.60) return;
+    /* 원래 자리가 그럴듯해 보여도 한 칸 위·아래 음표와 겹쳐 보일 수 있어서,
+       미리 걸러내지 않고 '가장 음표다운 자리'를 끝까지 찾습니다.
+       진짜 자리가 가장 높은 점수를 받으므로, 맞는 음은 그대로 남습니다. */
 
     /* 이웃 음표와의 한가운데를 넘지 않도록 찾는 범위를 정해요 */
     const row = orderBySys[o._si] || [o];
