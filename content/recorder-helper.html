@@ -1018,7 +1018,9 @@ async function readOnePage(pdf, pageNo){
       const dx = Math.abs(cx - cx0)/SP;
       for(let k=-10; k<=10; k++){
         const y = st[4] - k*HALF;
-        const sc = headScoreAt(cx, y) - 0.05*dx;   /* 멀리 갈수록 조금 불리하게 */
+        /* 가까운 자리를 강하게 선호합니다.
+           옆 음표가 측정 상자에 살짝 걸쳐 점수가 뒤집히는 일을 막아 줘요. */
+        const sc = headScoreAt(cx, y) - 0.35*dx;
         if(sc > bestScore + 0.20){ bestScore = sc; bestY = y; }
       }
     }
