@@ -245,15 +245,15 @@
   </div>
 
   <div class="tabs">
-    <button class="tab" id="tab-0" onclick="showTab(0)">📖 도레미 리코더 도우미 가이드</button>
-    <button class="tab on" id="tab-1" onclick="showTab(1)">🎵 계이름 → 운지법</button>
+    <button class="tab on" id="tab-0" onclick="showTab(0)">📖 도레미 리코더 도우미 가이드</button>
+    <button class="tab" id="tab-1" onclick="showTab(1)">🎵 계이름 → 운지법</button>
     <button class="tab" id="tab-2" onclick="showTab(2)">🖍️ 악보에 계이름 적기</button>
     <button class="tab" id="tab-3" onclick="showTab(3)">📄 악보 PDF 자동 읽기</button>
   </div>
 
 
   <!-- ===== 탭 0 : 가이드 ===== -->
-  <div id="panel-0" class="hidden">
+  <div id="panel-0">
 
     <div class="card guide">
       <div class="g-kicker">초등 음악 수업 길잡이</div>
@@ -427,7 +427,7 @@
   </div>
 
   <!-- ===== 탭 1 : 운지법 ===== -->
-  <div id="panel-1">
+  <div id="panel-1" class="hidden">
     <div class="card">
       <h2>계이름 넣기</h2>
       <p class="desc">아래 건반을 눌러도 되고, 칸에 직접 써도 돼요. (예: 도 레 미 파 솔)<br>
@@ -1000,9 +1000,8 @@ async function readOnePage(pdf, pageNo){
     const st = systems[o._si];
     const cx0 = o.x + SP*0.65;
     const orig = headScoreAt(cx0, o.y);
-    /* 원래 자리가 그럴듯해 보여도 한 칸 위·아래 음표와 겹쳐 보일 수 있어서,
-       미리 걸러내지 않고 '가장 음표다운 자리'를 끝까지 찾습니다.
-       진짜 자리가 가장 높은 점수를 받으므로, 맞는 음은 그대로 남습니다. */
+    if(inkRatio(cx0, o.y) >= 0.35) return;       /* 원래 자리에 음표가 있으면 그대로 둠 */
+    if(orig >= 0.60) return;
 
     /* 이웃 음표와의 한가운데를 넘지 않도록 찾는 범위를 정해요 */
     const row = orderBySys[o._si] || [o];
@@ -1018,9 +1017,7 @@ async function readOnePage(pdf, pageNo){
       const dx = Math.abs(cx - cx0)/SP;
       for(let k=-10; k<=10; k++){
         const y = st[4] - k*HALF;
-        /* 가까운 자리를 강하게 선호합니다.
-           옆 음표가 측정 상자에 살짝 걸쳐 점수가 뒤집히는 일을 막아 줘요. */
-        const sc = headScoreAt(cx, y) - 0.35*dx;
+        const sc = headScoreAt(cx, y) - 0.05*dx;   /* 멀리 갈수록 조금 불리하게 */
         if(sc > bestScore + 0.20){ bestScore = sc; bestY = y; }
       }
     }
