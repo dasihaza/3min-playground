@@ -654,16 +654,21 @@ async function readGlyphs(page, vp){
       const g = glyphs[k];
       if(g === null || g === undefined) continue;
       if(typeof g === "number"){                       /* 글자 사이 간격 조정 */
-        tm = T([1,0,0,1, -g/1000*fs*hs, 0], tm);
+        tm = T(tm, [1,0,0,1, -g/1000*fs*hs, 0]);      /* 글자 사이 간격 */
         continue;
       }
-      const trm = T(T([fs*hs, 0, 0, fs, 0, rise], tm), ctm);
+      /* 글자 자리 = 화면변환 ∘ 글자행렬 ∘ 글자크기  (순서가 중요해요) */
+      const trm = T(ctm, T(tm, [fs*hs, 0, 0, fs, 0, rise]));
       const pos = AP([0,0], trm);
-      const ch = (g.unicode !== undefined && g.unicode !== null) ? g.unicode : "";
+      /* 악보 글꼴은 unicode 가 비어 있는 경우가 있어 대체 경로를 둡니다 */
+      let ch = "";
+      if(g.unicode !== undefined && g.unicode !== null && g.unicode !== "") ch = g.unicode;
+      else if(g.fontChar) ch = g.fontChar;
+      else if(typeof g.originalCharCode === "number") ch = String.fromCharCode(g.originalCharCode);
       if(ch) out.push({ c: ch, x: pos[0], y: pos[1], font: fontName,
                         h: Math.abs(fs * (ctm[3]||1)), len: 1, idx: 0 });
       const adv = ((g.width||0)/1000*fs + cs + (g.isSpace ? ws : 0)) * hs;
-      tm = T([1,0,0,1, adv, 0], tm);
+      tm = T(tm, [1,0,0,1, adv, 0]);                  /* 다음 글자로 이동 */
     }
   }
 
@@ -678,19 +683,19 @@ async function readGlyphs(page, vp){
     else if(fn === OPS.setTextMatrix){ tm = a.slice(0,6); tlm = tm.slice(); }
     else if(fn === OPS.setFont){ fontName = a[0]; fs = a[1]; }
     else if(fn === OPS.setLeading) leading = a[0];
-    else if(fn === OPS.setLeadingMoveText){ leading = -a[1]; tlm = T([1,0,0,1,a[0],a[1]], tlm); tm = tlm.slice(); }
-    else if(fn === OPS.moveText){ tlm = T([1,0,0,1,a[0],a[1]], tlm); tm = tlm.slice(); }
-    else if(fn === OPS.nextLine){ tlm = T([1,0,0,1,0,-leading], tlm); tm = tlm.slice(); }
+    else if(fn === OPS.setLeadingMoveText){ leading = -a[1]; tlm = T(tlm, [1,0,0,1,a[0],a[1]]); tm = tlm.slice(); }
+    else if(fn === OPS.moveText){ tlm = T(tlm, [1,0,0,1,a[0],a[1]]); tm = tlm.slice(); }
+    else if(fn === OPS.nextLine){ tlm = T(tlm, [1,0,0,1,0,-leading]); tm = tlm.slice(); }
     else if(fn === OPS.setCharSpacing) cs = a[0];
     else if(fn === OPS.setWordSpacing) ws = a[0];
     else if(fn === OPS.setHScale) hs = (a[0]||100)/100;
     else if(fn === OPS.setTextRise) rise = a[0];
     else if(fn === OPS.showText) draw(a[0]);
     else if(OPS.showSpacedText !== undefined && fn === OPS.showSpacedText) draw(a[0]);
-    else if(fn === OPS.nextLineShowText){ tlm = T([1,0,0,1,0,-leading], tlm); tm = tlm.slice(); draw(a[0]); }
+    else if(fn === OPS.nextLineShowText){ tlm = T(tlm, [1,0,0,1,0,-leading]); tm = tlm.slice(); draw(a[0]); }
     else if(fn === OPS.nextLineSetSpacingShowText){
       ws = a[0]; cs = a[1];
-      tlm = T([1,0,0,1,0,-leading], tlm); tm = tlm.slice(); draw(a[2]);
+      tlm = T(tlm, [1,0,0,1,0,-leading]); tm = tlm.slice(); draw(a[2]);
     }
   }
   return out;
@@ -936,7 +941,8 @@ async function readOnePage(pdf, pageNo){
     items = glyphItems;
     if(pdfStats) pdfStats.way = '글자 직접계산';
   } else if(pdfStats) pdfStats.way = '묶음 나누기';
-  if(pdfStats){ pdfStats.scoreA = Math.round(sA.score*100)/100; pdfStats.scoreB = Math.round(sB.score*100)/100; }
+  if(pdfStats){ pdfStats.scoreA = Math.round(sA.score*100)/100; pdfStats.scoreB = Math.round(sB.score*100)/100;
+                 pdfStats.nA = sA.n; pdfStats.nB = sB.n; }
 
   const notes = items.filter(o=> isMusic(o) && !RESTS.has(o.c) && (HEAD_FILLED.has(o.c) || HEAD_HOLLOW.has(o.c)));
   const staffTop = systems[0][0] - SP*5, staffBot = systems[systems.length-1][4] + SP*5;
@@ -1133,6 +1139,7 @@ async function readOnePage(pdf, pageNo){
     if(over){ first.tied = true; pdfStats.tie++; }
   }
 
+  let sigCountAll = 0, sigKindAll = "";
   const out = [];
   systems.forEach((st, si)=>{
     const ns = notes.filter(o=>o.s===si).sort((a,b)=>a.x-b.x);
@@ -1141,9 +1148,12 @@ async function readOnePage(pdf, pageNo){
     const firstX = ns[0].x;
     /* 조표 = 첫 음표보다 왼쪽에 있는 임시표 */
     const keySig = {};
+    let sigCount = 0, sigKind = "";
     as.filter(a=> a.x < firstX - SP*0.4).forEach(a=>{
       const p = pitchOf(a);
       keySig[p.letter] = ACC_FLAT.has(a.c) ? "♭" : (ACC_SHARP.has(a.c) ? "#" : "");
+      if(si === 0 && keySig[p.letter]){ sigCount++; sigKind = keySig[p.letter];
+        sigCountAll = sigCount; sigKindAll = sigKind; }
     });
     const temps = as.filter(a=> a.x >= firstX - SP*0.4);
 
@@ -1195,6 +1205,9 @@ async function readOnePage(pdf, pageNo){
       });
     });
   });
+  if(pdfStats && pdfStats.sigCount === undefined){
+    pdfStats.sigCount = sigCountAll; pdfStats.sigKind = sigKindAll;
+  }
   return out;
 }
 
@@ -1235,15 +1248,41 @@ function showPdfResult(title){
   });
 
   const unknown = pdfSong.filter(n=> !n.tied && !NOTES.some(x=>x.ko===toKo(n)));
+  /* ===== 조성(장조·단조) 판정 =====
+     조표의 개수로 '어떤 조인지'가 정해지고, 장조인지 단조인지는
+     곡의 마지막 음(으뜸음)으로 가려냅니다. */
+  function guessKey(){
+    const n = (pdfStats && pdfStats.sigCount) || 0;
+    const kind = (pdfStats && pdfStats.sigKind) || "";
+    const FLAT  = [["다","가","도","라"],["바","라","파","레"],["내림나","사","시♭","솔"],
+                   ["내림마","다","미♭","도"],["내림가","바","라♭","파"]];
+    const SHARP = [["다","가","도","라"],["사","마","솔","미"],["라","나","레","시"],
+                   ["가","올림바","라","파#"],["마","올림다","미","도#"]];
+    const tb = (kind === "#") ? SHARP : FLAT;
+    const row = tb[Math.min(n, tb.length-1)];
+    if(!row) return null;
+    /* 마지막 음 (이어지는 음은 앞 음과 같으니 그대로) */
+    let last = null;
+    for(let i=pdfSong.length-1;i>=0;i--){ if(pdfSong[i].letter){ last = pdfSong[i]; break; } }
+    const lastKo = last ? (last.letter + (last.mark||"")) : "";
+    const isMinor = lastKo && lastKo === row[3];
+    return {
+      name: (isMinor ? row[1]+"단조" : row[0]+"장조"),
+      sig: n ? (kind==="#" ? "♯ "+n+"개" : "♭ "+n+"개") : "조표 없음",
+      tonic: isMinor ? row[3] : row[2]
+    };
+  }
+  const K = guessKey();
   document.getElementById("pdf-meta").innerHTML =
     "총 <b>"+pdfSong.length+"음</b> · "+keys.length+"줄" +
+    (K ? ' · 조성 <b>'+K.name+'</b> <span style="color:var(--ink-soft);">('+K.sig+' · 으뜸음 '+K.tonic+')</span>' : "") +
     (unknown.length ? ' · <span style="color:#C0392B;">리코더 음역 밖 '+unknown.length+'음</span>' : "");
   document.getElementById("pdf-result").classList.remove("hidden");
   document.getElementById("pdf-chart-title").textContent = title + " — 리코더 운지표";
   setStatus("다 읽었어요! 아래에서 확인하고 운지표를 만들어보세요.<br>" +
             "<b>계이름이 실제 악보와 맞는지 꼭 한 번 확인해주세요.</b> " +
             "틀린 곳은 운지표의 <b>‘계이름 수정하기’</b>로 바로 고칠 수 있어요.<br>" +
-            "<small>길게 부는 음 표시([ ])는 악보에 따라 빠질 수 있으니 함께 봐주세요.<br>－ 는 붙임줄로 이어지는 음이에요. 혀를 대지 말고 앞 음을 그대로 이어서 붑니다.</small>" + (pdfStats ? '<br><small style="color:#8A8A8A;">읽은 내용 : 오선 '+pdfStats.sys+'줄 · ' + '음표 글자 '+pdfStats.text+' + 그림 '+pdfStats.vec+' + 기둥 '+pdfStats.stem + ' · 이음줄 선 '+pdfStats.arc+'개 · 이어지는 음 '+pdfStats.tie+'개' + '<br>읽기 방법 : '+(pdfStats.way||'-')+' · 세로자리 바로잡음 '+(pdfStats.fixY||0)+'개'+' (맞음 정도 묶음 '+pdfStats.scoreA+' / 직접 '+pdfStats.scoreB+')</small>' : ""), "ok");
+            "<small>길게 부는 음 표시([ ])는 악보에 따라 빠질 수 있으니 함께 봐주세요.<br>－ 는 붙임줄로 이어지는 음이에요. 혀를 대지 말고 앞 음을 그대로 이어서 붑니다.</small>" + (pdfStats ? '<br><small style="color:#8A8A8A;">읽은 내용 : 오선 '+pdfStats.sys+'줄 · ' + '음표 글자 '+pdfStats.text+' + 그림 '+pdfStats.vec+' + 기둥 '+pdfStats.stem + ' · 이음줄 선 '+pdfStats.arc+'개 · 이어지는 음 '+pdfStats.tie+'개' + '<br>읽기 방법 : '+(pdfStats.way||'-')+' · 세로자리 바로잡음 '+(pdfStats.fixY||0)+'개'+' (묶음 '+pdfStats.nA+'음 정확도 '+pdfStats.scoreA+' / 직접계산 '+pdfStats.nB+'음 정확도 '+pdfStats.scoreB+')</small>' : ""), "ok");
 }
 
 function pdfToTab1(){
