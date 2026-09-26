@@ -161,6 +161,65 @@
     text-align:center;margin-top:16px;word-break:keep-all;
   }
 
+  /* 국기 짝 맞추기 전용 큐트 디자인 */
+  .intro-box-flag {
+    background-color: #F3F9FF;
+    border: 3px dashed #A5D8FF;
+    border-radius: 22px;
+    padding: 26px 30px;
+    margin-top: 32px;
+    text-align: left;
+    box-shadow: 0 8px 20px rgba(165, 216, 255, 0.2);
+  }
+  .intro-box-flag h3 {
+    font-family: 'Jua', sans-serif;
+    color: #339AF0;
+    font-size: 22px;
+    margin: 0 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .intro-box-flag p {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 15px;
+    line-height: 1.8;
+    color: #495057;
+    margin: 0 0 16px;
+    word-break: keep-all;
+  }
+  .intro-box-flag p:last-child {
+    margin-bottom: 0;
+  }
+  .intro-box-flag b {
+    color: #FF922B;
+  }
+  .intro-box-flag ul {
+    margin: 0 0 18px;
+    padding-left: 0;
+    list-style: none;
+  }
+  .intro-box-flag li {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 14.5px;
+    line-height: 1.75;
+    color: #495057;
+    margin-bottom: 10px;
+    word-break: keep-all;
+    display: flex;
+    gap: 12px;
+    background: #FFFFFF;
+    padding: 14px 18px;
+    border-radius: 14px;
+    border: 2px solid #D0EBFF;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+  }
+  .intro-box-flag li i {
+    font-style: normal;
+    flex-shrink: 0;
+    font-size: 20px;
+  }
+
   /* 모바일 최적화 반응형 레이아웃 */
   @media (max-width:900px){ 
     .grid[data-diff="25"] .card { width:11.7%; margin:0.4%; } 
@@ -236,6 +295,23 @@
   <div class="tip">
     세계 100개국 중에서 난이도에 따라 국기가 무작위로 뽑혀요. 새 게임을 누를 때마다 나라가 바뀝니다.
   </div>
+
+  <!-- 프로그램 소개 안내글 -->
+  <div class="intro-box-flag">
+    <h3>🌍 뾰로롱! 국기 짝 맞추기로 떠나는 즐거운 세계 여행 ✈️💖</h3>
+    <p>
+      선생님들! 사회 시간이나 다문화 교육 주간에 낯선 세계 여러 나라의 국기를 어떻게 가르칠지 고민하신 적 있으신가요? 😅 그럴 땐 딱딱한 교과서나 암기용 프린트물 대신 <b>'국기 짝 맞추기'</b> 메모리 게임을 교실 모니터에 크게 띄워보세요! 놀이처럼 신나게 카드를 뒤집다 보면 어느새 아이들의 머릿속에 넓은 세계가 쏙쏙 그려진답니다. 교육적으로도 정말 알찬 이 게임의 세 가지 마법 같은 효과를 소개할게요! 👇
+    </p>
+    <ul>
+      <li><i>🧠</i><span><b>반짝반짝! 두뇌를 깨우는 기억력과 집중력 향상:</b> 뒤집힌 카드의 위치를 기억하고 같은 짝을 찾아내는 과정은 아이들의 시각적 단기 기억력을 말랑말랑하게 자극해요. "어? 아까 그 별 모양 국기 어디 있었지?" 하며 화면을 뚫어지게 쳐다보는 엄청난 집중력을 발견하실 수 있을 거예요.</span></li>
+      <li><i>🌏</i><span><b>몽글몽글! 세계를 향한 호기심과 다문화 감수성 쑥쑥:</b> "선생님, 이 단풍잎 국기는 캐나다 맞죠?", "우와, 저 나라는 색깔이 예뻐요!" 게임을 하다 보면 억지로 외우게 하지 않아도 낯선 국기에 자연스럽게 호기심을 갖게 돼요. 자연스러운 세계 시민 교육의 훌륭한 출발점이 된답니다.</span></li>
+      <li><i>😆</i><span><b>하하호호! 놀이 기반 학습으로 교실에 넘치는 활력:</b> 어수선한 아침 조회 시간이나 나른한 오후 짜투리 시간에 짝꿍과 협동하거나 모둠 대항전으로 활용해 보세요! 짝을 맞췄을 때의 짜릿한 성취감은 아이들의 스트레스를 날려주고 교실에 긍정적인 에너지를 팡팡 채워줍니다.</span></li>
+    </ul>
+    <p>
+      단순한 카드 뒤집기 게임 같지만, 그 안에는 우리 아이들의 인지 능력과 세상을 향한 넓은 시야가 가득 담겨 있어요. 오늘 자투리 시간엔 알록달록 예쁜 국기들과 함께 다 같이 즐거운 세계 여행을 떠나보는 건 어떨까요? 🌈🎈
+    </p>
+  </div>
+
 </div>
 
 <canvas id="confetti"></canvas>
