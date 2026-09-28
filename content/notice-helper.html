@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>알림장 자동완성기 | 3분 놀이터</title>
+<meta name="description" content="체크리스트에 답하면 우리 반 알림장이 뚝딱 완성돼요. 가정통신문, 학교 행사, 준비물, 안전수칙까지 한 번에.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFF8F0; --card:#FFFFFF; --ink:#4A4149; --ink-soft:#948C94; --line:#F0E6DC;
+    --pink:#FF9DB6; --pink-d:#E97694;
+    --mint:#5FD0B0; --mint-d:#43AE90;
+    --lemon:#FFD36E; --grape:#B49BE8; --sky:#7FC2F0; --sky-d:#559FD4;
+    --shadow:0 3px 0 rgba(74,65,73,.09);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 8% 4%, rgba(255,211,110,.28) 0 110px, transparent 111px),
+      radial-gradient(circle at 92% 9%, rgba(255,157,182,.24) 0 95px, transparent 96px),
+      radial-gradient(circle at 88% 88%, rgba(180,155,232,.20) 0 105px, transparent 106px),
+      var(--bg);
+    background-attachment:fixed;
+    color:var(--ink); font-family:'Noto Sans KR',sans-serif; min-height:100vh;
+  }
+  .topbar{max-width:720px;margin:0 auto;padding:14px 18px 0;display:flex;align-items:center;justify-content:space-between;}
+  .topbar a{text-decoration:none;color:var(--ink);}
+  .topbar .brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;}
+  .topbar .back{font-size:12.5px;font-weight:700;color:var(--ink-soft);border:2px solid #fff;background:#fff;padding:6px 12px;border-radius:999px;box-shadow:var(--shadow);}
+  .shell{max-width:720px;margin:0 auto;padding:14px 18px 60px;}
+
+  .hero{text-align:center;margin-bottom:16px;}
+  .hero h1{font-family:'Jua',sans-serif;font-size:clamp(25px,5vw,32px);margin:0 0 4px;color:var(--pink-d);}
+  .hero p{font-family:'Gaegu',cursive;font-weight:700;font-size:17px;color:var(--ink-soft);margin:0;word-break:keep-all;}
+
+  .tip-top{
+    background:#FFF3E0;border:2px dashed #F6D3A1;border-radius:16px;
+    padding:13px 16px;margin:14px 0 16px;font-size:13.5px;line-height:1.85;
+    color:#8A6B3A;word-break:keep-all;text-align:center;
+  }
+  .tip-top b{color:#E07A3A;}
+
+  .datebar{
+    background:var(--card);border-radius:18px;padding:14px 16px;box-shadow:var(--shadow);
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;
+  }
+  .datebar label{font-family:'Jua',sans-serif;font-size:15px;}
+  .datebar .dow{font-family:'Jua',sans-serif;color:var(--pink-d);font-size:15px;}
+
+  /* 문항 카드 */
+  .q{
+    background:var(--card);border-radius:20px;padding:18px 18px 16px;margin-bottom:14px;
+    box-shadow:var(--shadow),0 8px 20px rgba(74,65,73,.07);border:3px solid transparent;
+    transition:border-color .15s;
+  }
+  .q.on{border-color:#FFE0AA;}
+  .q-head{display:flex;align-items:flex-start;gap:10px;}
+  .q-no{
+    flex:0 0 auto;width:30px;height:30px;border-radius:50%;background:var(--lemon);
+    font-family:'Jua',sans-serif;font-size:15px;color:#7A5A12;
+    display:flex;align-items:center;justify-content:center;box-shadow:0 2px 0 rgba(0,0,0,.08);
+  }
+  .q-text{flex:1;font-family:'Jua',sans-serif;font-size:16.5px;line-height:1.5;word-break:keep-all;padding-top:3px;}
+  .yn{display:flex;gap:8px;margin:12px 0 0;padding-left:40px;}
+  .yn button{
+    font-family:'Jua',sans-serif;font-size:14.5px;cursor:pointer;
+    border:3px solid var(--line);background:#fff;color:var(--ink-soft);
+    border-radius:14px;padding:9px 22px;
+  }
+  .yn button.yes.on{background:var(--mint);border-color:var(--mint);color:#fff;box-shadow:0 3px 0 var(--mint-d);}
+  .yn button.no.on{background:#CFCAD4;border-color:#CFCAD4;color:#fff;box-shadow:0 3px 0 #ABA5B2;}
+
+  .fields{padding-left:40px;margin-top:14px;display:none;}
+  .fields.show{display:block;}
+  .f-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:9px;}
+  .f-row label{font-size:13px;color:var(--ink-soft);min-width:78px;font-weight:700;}
+  input[type="text"], input[type="date"], textarea{
+    flex:1;min-width:140px;border:2.5px solid var(--line);border-radius:12px;
+    padding:10px 12px;font-family:'Noto Sans KR',sans-serif;font-size:14.5px;color:var(--ink);
+    background:#FFFDFB;
+  }
+  input:focus, textarea:focus{outline:none;border-color:var(--lemon);}
+  textarea{min-height:82px;resize:vertical;line-height:1.7;}
+  .hint{font-size:11.5px;color:var(--ink-soft);margin-top:-3px;margin-bottom:8px;}
+
+  .rule-box{
+    background:#F2F7FF;border:2px solid #D3E4F8;border-radius:16px;padding:14px 16px;
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  }
+  .rule-text{flex:1;min-width:180px;font-size:14.5px;line-height:1.7;color:#3A5B7A;word-break:keep-all;}
+  .mini-btn{
+    font-family:'Jua',sans-serif;font-size:13px;cursor:pointer;border:none;
+    background:var(--sky);color:#fff;border-radius:12px;padding:9px 14px;box-shadow:0 3px 0 var(--sky-d);
+  }
+
+  .make{text-align:center;margin:22px 0 6px;}
+  .btn-make{
+    font-family:'Jua',sans-serif;font-size:18px;cursor:pointer;border:none;
+    background:var(--pink);color:#fff;border-radius:18px;padding:15px 34px;box-shadow:0 5px 0 var(--pink-d);
+  }
+  .btn-make:hover{transform:translateY(1px);box-shadow:0 4px 0 var(--pink-d);}
+  .btn-make:active{transform:translateY(5px);box-shadow:none;}
+
+  /* 결과 */
+  .result{
+    background:var(--card);border-radius:22px;padding:24px 22px;margin-top:20px;
+    box-shadow:var(--shadow),0 10px 26px rgba(74,65,73,.10);border:3px solid #FFE0AA;
+  }
+  .note-paper{
+    background:
+      repeating-linear-gradient(180deg, transparent 0 33px, #F3E9DE 33px 34px),
+      #FFFDF7;
+    border-radius:16px;padding:20px 22px;border:2px solid #F0E2CE;
+  }
+  .note-title{font-family:'Jua',sans-serif;font-size:21px;color:var(--pink-d);text-align:center;margin:0 0 4px;}
+  .note-date{font-family:'Gaegu',cursive;font-weight:700;font-size:16px;text-align:center;color:var(--ink-soft);margin-bottom:14px;}
+  .note-line{font-size:15px;line-height:34px;word-break:keep-all;display:flex;gap:8px;}
+  .note-line .num{flex:0 0 auto;color:var(--pink-d);font-weight:700;}
+  .note-empty{text-align:center;color:var(--ink-soft);font-size:14px;line-height:1.9;padding:14px 0;}
+  .acts{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:18px;}
+  .btn{
+    font-family:'Jua',sans-serif;font-size:14.5px;cursor:pointer;border:none;
+    background:var(--mint);color:#fff;border-radius:14px;padding:12px 20px;box-shadow:0 4px 0 var(--mint-d);
+  }
+  .btn.ghost{background:#fff;color:var(--ink);box-shadow:0 4px 0 var(--line);}
+  .btn:hover{transform:translateY(1px);}
+
+  .note-body.editing{
+    outline:none;border:2.5px dashed var(--lemon);border-radius:12px;
+    background:#FFFCF2;padding:10px 12px;margin-top:6px;
+  }
+  .note-body.editing .ed-line{ line-height:34px;font-size:15px;word-break:keep-all; }
+  .note-body.editing .ed-line:empty::before{ content:"여기에 적어 주세요"; color:#CFC7BE; }
+  .edit-hint{
+    margin-top:10px;background:#FFF6E0;border:2px dashed #F6D3A1;border-radius:12px;
+    padding:10px 13px;font-size:13px;line-height:1.8;color:#8A6B3A;word-break:keep-all;text-align:center;
+  }
+  .saved-msg{
+    margin-top:12px;text-align:center;font-family:'Gaegu',cursive;font-weight:700;
+    font-size:16px;color:var(--mint-d);background:#EAF8F2;border:2px dashed #BEE7D6;
+    border-radius:14px;padding:10px;
+  }
+  .history{
+    background:var(--card);border-radius:20px;padding:18px;margin-top:16px;
+    box-shadow:var(--shadow),0 8px 20px rgba(74,65,73,.07);border:3px solid #DDD3F0;
+  }
+  .h-head{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    font-family:'Jua',sans-serif;font-size:17px;color:var(--grape);margin-bottom:12px;
+  }
+  .mini-btn.ghost{background:#fff;color:var(--ink-soft);box-shadow:0 3px 0 var(--line);}
+  .h-item{
+    border:2px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:9px;
+    background:#FFFDFB;
+  }
+  .h-date{font-family:'Jua',sans-serif;font-size:15px;color:var(--pink-d);margin-bottom:4px;}
+  .h-prev{font-size:13px;color:var(--ink-soft);line-height:1.7;word-break:keep-all;margin-bottom:9px;}
+  .h-btns{display:flex;gap:6px;flex-wrap:wrap;}
+  .h-btns button{
+    font-family:'Jua',sans-serif;font-size:12.5px;cursor:pointer;border:none;border-radius:11px;
+    padding:8px 13px;background:var(--grape);color:#fff;box-shadow:0 3px 0 #8E76C4;
+  }
+  .h-btns button.sub{background:#fff;color:var(--ink-soft);box-shadow:0 3px 0 var(--line);}
+  .h-empty{text-align:center;color:var(--ink-soft);font-size:13.5px;padding:18px 0;line-height:1.9;}
+  .hidden{display:none !important;}
+  @media print{
+    .topbar,.hero,.tip-top,.datebar,.q,.make,.acts,.foot,.history,.saved-msg{display:none !important;}
+    .result{box-shadow:none;border:none;padding:0;}
+    .note-paper{border:none;}
+  }
+  .foot{text-align:center;font-size:12px;color:var(--ink-soft);margin-top:18px;line-height:1.8;}
+  @media (max-width:520px){
+    .yn,.fields{padding-left:0;}
+    .f-row label{min-width:100%;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="../index.html">
+    <svg width="26" height="26" viewBox="0 0 34 34" fill="none">
+      <circle cx="17" cy="18" r="14" fill="#fff" stroke="#4A4149" stroke-width="2"/>
+      <path d="M17 9 L17 18 L23 21" stroke="#FF9DB6" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="13" y="2" width="8" height="4" rx="1.5" fill="#4A4149"/>
+    </svg>
+    <span>3분 놀이터</span>
+  </a>
+  <a class="back" href="../index.html">← 다른 콘텐츠 보기</a>
+</div>
+
+<div class="shell">
+  <div class="hero">
+    <h1>📢 알림장 자동완성기</h1>
+    <p>다섯 가지만 체크하면 알림장이 뚝딱!</p>
+  </div>
+
+  <div class="tip-top">
+    ✏️ <b>4번을 뺀 나머지는 짧게 한마디로</b> 답해 주세요.<br>
+    (예: 현장체험학습 신청서 / 강당 / 학예회 / 색연필, 가위)
+  </div>
+
+  <div class="datebar">
+    <label for="d-date">📅 알림장 날짜</label>
+    <input type="date" id="d-date" onchange="updateDow()">
+    <span class="dow" id="d-dow"></span>
+  </div>
+
+  <!-- 1 -->
+  <div class="q" id="q1">
+    <div class="q-head">
+      <div class="q-no">1</div>
+      <div class="q-text">언제까지 수합해야 하는 가정통신문이 있습니까?</div>
+    </div>
+    <div class="yn">
+      <button class="yes" onclick="pick(1,true)">네</button>
+      <button class="no"  onclick="pick(1,false)">아니오</button>
+    </div>
+    <div class="fields" id="f1">
+      <div class="f-row"><label>언제까지</label><input type="date" id="i1-date"></div>
+      <div class="f-row"><label>무엇을</label><input type="text" id="i1-name" placeholder="예) 현장체험학습 신청서"></div>
+      <div class="hint">가정통신문 이름만 짧게 적어 주세요.</div>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="q" id="q2">
+    <div class="q-head">
+      <div class="q-no">2</div>
+      <div class="q-text">언제 어디서 실시하는 학교 행사가 있습니까?</div>
+    </div>
+    <div class="yn">
+      <button class="yes" onclick="pick(2,true)">네</button>
+      <button class="no"  onclick="pick(2,false)">아니오</button>
+    </div>
+    <div class="fields" id="f2">
+      <div class="f-row"><label>언제</label><input type="date" id="i2-date"></div>
+      <div class="f-row"><label>어디서</label><input type="text" id="i2-place" placeholder="예) 강당"></div>
+      <div class="f-row"><label>무슨 행사</label><input type="text" id="i2-name" placeholder="예) 학예회"></div>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="q" id="q3">
+    <div class="q-head">
+      <div class="q-no">3</div>
+      <div class="q-text">준비물이 있습니까?</div>
+    </div>
+    <div class="yn">
+      <button class="yes" onclick="pick(3,true)">네</button>
+      <button class="no"  onclick="pick(3,false)">아니오</button>
+    </div>
+    <div class="fields" id="f3">
+      <div class="f-row"><label>준비물</label><input type="text" id="i3-item" placeholder="예) 색연필, 가위"></div>
+      <div class="hint">여러 개면 쉼표(,)로 나눠 적어 주세요.</div>
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="q" id="q4">
+    <div class="q-head">
+      <div class="q-no">4</div>
+      <div class="q-text">내일 알려야 할 기타 사항이 있습니까?</div>
+    </div>
+    <div class="yn">
+      <button class="yes" onclick="pick(4,true)">네</button>
+      <button class="no"  onclick="pick(4,false)">아니오</button>
+    </div>
+    <div class="fields" id="f4">
+      <div class="f-row"><label style="min-width:100%;">알릴 내용 (자유롭게 적어 주세요)</label></div>
+      <textarea id="i4-text" placeholder="예) 내일은 급식이 없으니 점심 도시락을 챙겨 오세요. 오후 1시에 하교합니다."></textarea>
+    </div>
+  </div>
+
+  <!-- 5 -->
+  <div class="q" id="q5">
+    <div class="q-head">
+      <div class="q-no">5</div>
+      <div class="q-text">학생들이 지켜야 할 안전수칙이나 예절 문구를 넣겠습니까?</div>
+    </div>
+    <div class="yn">
+      <button class="yes" onclick="pick(5,true)">네</button>
+      <button class="no"  onclick="pick(5,false)">아니오</button>
+    </div>
+    <div class="fields" id="f5">
+      <div class="rule-box">
+        <div class="rule-text" id="rule-text">문구를 뽑는 중…</div>
+        <button class="mini-btn" onclick="rollRule()">🎲 다른 문구</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="make">
+    <button class="btn-make" onclick="makeNote()">✨ 알림장 만들기</button>
+  </div>
+
+  <div class="result hidden" id="result">
+    <div class="note-paper" id="note-paper"></div>
+    <div class="acts">
+      <button class="btn" onclick="saveNote()">💾 저장하기</button>
+      <button class="btn ghost" id="edit-btn" onclick="editNote()">✏️ 수정하기</button>
+      <button class="btn ghost" onclick="toggleHistory()">📚 지난 알림장</button>
+      <button class="btn ghost" onclick="copyNote()">📋 복사하기</button>
+      <button class="btn ghost" onclick="window.print()">🖨️ 인쇄하기</button>
+      <button class="btn ghost" onclick="resetAll()">🔄 처음부터</button>
+    </div>
+    <div id="edit-hint" class="edit-hint hidden">
+      ✏️ 알림장을 직접 고칠 수 있어요. 글자를 눌러 고치고, <b>Enter</b>를 누르면 줄이 늘어나요.<br>
+      다 고쳤으면 <b>✅ 다 고쳤어요</b>를 눌러 주세요.
+    </div>
+    <div id="saved-msg" class="saved-msg hidden"></div>
+  </div>
+
+  <div class="history hidden" id="history">
+    <div class="h-head">
+      <span>📚 지난 알림장</span>
+      <button class="mini-btn ghost" onclick="clearHistory()">전체 지우기</button>
+    </div>
+    <div id="h-list"></div>
+  </div>
+
+  <div class="foot">
+    적은 내용은 이 컴퓨터에만 있고 어디로도 보내지지 않아요.
+  </div>
+</div>
+
+<script>
+/* ===== 안전수칙·예절 문구 30개 ===== */
+const RULES = [
+  "복도에서는 뛰지 말고 오른쪽으로 걸어 다녀요.",
+  "계단은 한 칸씩, 난간을 잡고 천천히 내려가요.",
+  "친구와 부딪히지 않게 앞을 보고 걸어요.",
+  "교실 문은 두 손으로 살살 열고 닫아요.",
+  "가위와 칼은 날을 잡고 손잡이를 건네줘요.",
+  "책상 위에 올라가거나 의자에 서지 않아요.",
+  "창문 밖으로 몸을 내밀지 않아요.",
+  "화장실 바닥이 젖어 있으면 조심조심 걸어요.",
+  "길을 건널 때는 손을 들고 좌우를 살펴요.",
+  "신호등이 초록불이어도 차를 한 번 더 보고 건너요.",
+  "자전거나 킥보드를 탈 때는 꼭 헬멧을 써요.",
+  "모르는 사람이 따라오면 큰 소리로 도움을 청해요.",
+  "몸이 아프면 참지 말고 선생님께 바로 말해요.",
+  "밖에서 놀고 오면 손을 깨끗이 씻어요.",
+  "기침이 나올 땐 옷소매로 입을 가려요.",
+  "친구의 물건은 먼저 물어보고 빌려 써요.",
+  "친구가 말할 때는 끝까지 들어 줘요.",
+  "선생님과 친구를 만나면 먼저 인사해요.",
+  "고맙습니다, 미안합니다를 씩씩하게 말해요.",
+  "친구의 별명을 부르지 않고 이름을 불러요.",
+  "친구가 넘어지면 손을 내밀어 일으켜 줘요.",
+  "급식은 골고루 먹고 남기지 않도록 해요.",
+  "급식실에서는 차례를 지켜 줄을 서요.",
+  "쓰레기는 종류를 나누어 버려요.",
+  "자기 자리와 사물함은 스스로 정리해요.",
+  "수업 시간에는 자리에 바르게 앉아요.",
+  "발표할 때는 손을 들고 기다려요.",
+  "다른 반 교실 앞을 지날 때는 조용히 지나가요.",
+  "휴대전화는 수업 시간에 넣어 두어요.",
+  "운동장에서 놀 때는 넘어진 친구가 없는지 살펴요."
+];
+
+/* ===== 상태 ===== */
+const ans = {1:null, 2:null, 3:null, 4:null, 5:null};
+let ruleIdx = 0;
+
+function pick(n, yes){
+  ans[n] = yes;
+  const q = document.getElementById("q"+n);
+  q.classList.toggle("on", yes);
+  const btns = q.querySelectorAll(".yn button");
+  btns[0].classList.toggle("on", yes === true);
+  btns[1].classList.toggle("on", yes === false);
+  document.getElementById("f"+n).classList.toggle("show", yes === true);
+  if(n === 5 && yes) rollRule();
+}
+
+function rollRule(){
+  let i = Math.floor(Math.random()*RULES.length);
+  if(RULES.length > 1 && i === ruleIdx) i = (i+1) % RULES.length;
+  ruleIdx = i;
+  document.getElementById("rule-text").textContent = "🌟 " + RULES[i];
+}
+
+/* ===== 날짜 ===== */
+const DOW = ["일","월","화","수","목","금","토"];
+function todayPlus(days){
+  const d = new Date(); d.setDate(d.getDate()+days);
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const day = String(d.getDate()).padStart(2,"0");
+  return d.getFullYear()+"-"+m+"-"+day;
+}
+function fmtDate(v){
+  if(!v) return "";
+  const p = v.split("-");
+  if(p.length !== 3) return v;
+  const d = new Date(Number(p[0]), Number(p[1])-1, Number(p[2]));
+  return Number(p[1])+"월 "+Number(p[2])+"일("+DOW[d.getDay()]+")";
+}
+function updateDow(){
+  const v = document.getElementById("d-date").value;
+  document.getElementById("d-dow").textContent = v ? fmtDate(v) : "";
+}
+
+/* ===== 알림장 만들기 ===== */
+function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ""; }
+
+function buildLines(){
+  const lines = [];
+
+  if(ans[1]){
+    const d = fmtDate(val("i1-date")), n = val("i1-name");
+    if(d && n)      lines.push(d+"까지 '"+n+"'을(를) 내야 해요. 부모님께 보여 드리고 꼭 챙겨 오세요.");
+    else if(n)      lines.push("'"+n+"'을(를) 부모님께 보여 드리고 꼭 챙겨 오세요.");
+    else if(d)      lines.push(d+"까지 가정통신문을 내야 해요.");
+  }
+  if(ans[2]){
+    const d = fmtDate(val("i2-date")), p = val("i2-place"), n = val("i2-name");
+    let t = "";
+    if(d) t += d+" ";
+    if(p) t += p+"에서 ";
+    if(n) t += "'"+n+"'이(가) 있어요.";
+    else if(d || p) t += "학교 행사가 있어요.";
+    if(t) lines.push(t.trim());
+  }
+  if(ans[3]){
+    const it = val("i3-item");
+    if(it) lines.push("준비물: "+it+" — 잊지 말고 챙겨 오세요.");
+  }
+  if(ans[4]){
+    const t = val("i4-text");
+    if(t) t.split(/\n+/).forEach(function(s){ if(s.trim()) lines.push(s.trim()); });
+  }
+  if(ans[5]){
+    lines.push("오늘의 약속: "+RULES[ruleIdx]);
+  }
+  return lines;
+}
+
+/* 손으로 고친 알림장이 있으면 그걸 씁니다 */
+let manualLines = null;
+let editing = false;
+function currentLines(){ return manualLines ? manualLines.slice() : buildLines(); }
+
+function renderNote(lines, dateV){
+  let html = '<div class="note-title">📢 우리 반 알림장</div>'
+           + '<div class="note-date">'+(dateV ? esc(fmtDate(dateV)) : "")+'</div>'
+           + '<div class="note-body" id="note-body">';
+  if(!lines || lines.length === 0){
+    html += '<div class="note-empty">아직 적을 내용이 없어요. 🙂<br>'
+          + '위 문항에서 <b>네</b>를 고르거나, <b>✏️ 수정하기</b>로 직접 적어 보세요.</div>';
+  } else {
+    lines.forEach(function(sline, i){
+      html += '<div class="note-line"><span class="num">'+(i+1)+'.</span><span>'+esc(sline)+'</span></div>';
+    });
+  }
+  html += '</div>';
+  document.getElementById("note-paper").innerHTML = html;
+}
+
+function makeNote(){
+  manualLines = null; editing = false;
+  document.getElementById("edit-btn").textContent = "✏️ 수정하기";
+  const hint = document.getElementById("edit-hint");
+  if(hint) hint.classList.add("hidden");
+  const lines = buildLines();
+  const dateV = document.getElementById("d-date").value;
+  renderNote(lines, dateV);
+  const box = document.getElementById("result");
+  box.classList.remove("hidden");
+  box.scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+function esc(s){
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function noteText(){
+  const lines = currentLines();
+  const dateV = document.getElementById("d-date").value;
+  let t = "📢 우리 반 알림장\n";
+  if(dateV) t += fmtDate(dateV)+"\n";
+  t += "\n";
+  lines.forEach(function(s,i){ t += (i+1)+". "+s+"\n"; });
+  return t;
+}
+
+function copyNote(){
+  if(editing) editNote();
+  const t = noteText();
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(t).then(function(){
+      alert("알림장을 복사했어요! 학급 게시판이나 문자에 붙여넣어 보세요 🙂");
+    }).catch(function(){ prompt("아래 내용을 복사해 주세요", t); });
+  } else {
+    prompt("아래 내용을 복사해 주세요", t);
+  }
+}
+
+/* ===== 저장하기 / 지난 알림장 / 수정하기 =====
+   알림장은 선생님 컴퓨터(브라우저)에만 저장되고 어디로도 보내지 않아요. */
+const STORE = "sambun-notice-list";
+
+function loadAll(){
+  try{
+    const raw = localStorage.getItem(STORE);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  }catch(e){ return []; }
+}
+function saveAll(arr){
+  try{ localStorage.setItem(STORE, JSON.stringify(arr)); return true; }
+  catch(e){ return false; }
+}
+function flash(msg){
+  const el = document.getElementById("saved-msg");
+  el.textContent = msg;
+  el.classList.remove("hidden");
+  setTimeout(function(){ el.classList.add("hidden"); }, 2600);
+}
+
+/* 지금 적은 내용을 통째로 담아 둡니다 (나중에 그대로 불러오려고) */
+function snapshot(){
+  return {
+    date: document.getElementById("d-date").value,
+    ans: { 1:ans[1], 2:ans[2], 3:ans[3], 4:ans[4], 5:ans[5] },
+    v: {
+      "i1-date": val("i1-date"), "i1-name": val("i1-name"),
+      "i2-date": val("i2-date"), "i2-place": val("i2-place"), "i2-name": val("i2-name"),
+      "i3-item": val("i3-item"), "i4-text": val("i4-text")
+    },
+    rule: ruleIdx,
+    lines: currentLines(),
+    savedAt: Date.now()
+  };
+}
+
+function saveNote(){
+  if(editing) editNote();          /* 고치는 중이면 먼저 마무리 */
+  const item = snapshot();
+  if(item.lines.length === 0){ flash("적은 내용이 없어서 저장하지 않았어요."); return; }
+  const arr = loadAll();
+  const same = arr.findIndex(function(x){ return x.date === item.date; });
+  if(same >= 0){
+    if(!confirm(fmtDate(item.date)+" 알림장이 이미 저장돼 있어요.\n새 내용으로 바꿀까요?")) return;
+    arr[same] = item;
+  } else {
+    arr.push(item);
+  }
+  arr.sort(function(a,b){ return (b.date||"").localeCompare(a.date||""); });
+  if(arr.length > 60) arr.length = 60;          /* 너무 쌓이지 않게 */
+  if(saveAll(arr)){
+    flash("💾 저장했어요! '지난 알림장'에서 다시 볼 수 있어요.");
+    renderHistory();
+  } else {
+    flash("저장하지 못했어요. 브라우저 설정을 확인해 주세요.");
+  }
+}
+
+/* ✏️ 수정하기 — 알림장 위에서 직접 고쳐요 */
+function editNote(){
+  const body = document.getElementById("note-body");
+  const btn  = document.getElementById("edit-btn");
+  const hint = document.getElementById("edit-hint");
+  if(!body) return;
+
+  if(!editing){
+    /* 고치기 시작 — 번호를 떼고 글만 남겨 편하게 고치도록 */
+    const lines = currentLines();
+    body.innerHTML = (lines.length ? lines : [""])
+      .map(function(l){ return '<div class="ed-line">' + esc(l) + '</div>'; }).join("");
+    body.classList.add("editing");
+    body.setAttribute("contenteditable", "true");
+    editing = true;
+    btn.textContent = "✅ 다 고쳤어요";
+    hint.classList.remove("hidden");
+    body.focus();
+    /* 커서를 맨 끝으로 */
+    try{
+      const r = document.createRange(); r.selectNodeContents(body); r.collapse(false);
+      const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    }catch(e){}
+  } else {
+    /* 고치기 끝 — 적은 내용을 줄 단위로 거둬들여요 */
+    const out = [];
+    const kids = body.childNodes;
+    for(let i=0;i<kids.length;i++){
+      const n = kids[i];
+      const t = (n.textContent || "").replace(/\u00A0/g, " ").trim();
+      if(t) out.push(t);
+    }
+    manualLines = out;
+    body.removeAttribute("contenteditable");
+    body.classList.remove("editing");
+    editing = false;
+    btn.textContent = "✏️ 수정하기";
+    hint.classList.add("hidden");
+    renderNote(manualLines, document.getElementById("d-date").value);
+  }
+}
+
+function toggleHistory(){
+  const box = document.getElementById("history");
+  const willShow = box.classList.contains("hidden");
+  renderHistory();
+  box.classList.toggle("hidden", !willShow);
+  if(willShow) box.scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+function renderHistory(){
+  const arr = loadAll();
+  const wrap = document.getElementById("h-list");
+  if(arr.length === 0){
+    wrap.innerHTML = '<div class="h-empty">아직 저장한 알림장이 없어요.<br>알림장을 만든 뒤 <b>💾 저장하기</b>를 눌러 보세요.</div>';
+    return;
+  }
+  wrap.innerHTML = arr.map(function(it, i){
+    const prev = (it.lines || []).slice(0,2).join(" / ");
+    return '<div class="h-item">'
+      + '<div class="h-date">📅 ' + esc(fmtDate(it.date) || "날짜 없음") + '</div>'
+      + '<div class="h-prev">' + esc(prev.length > 70 ? prev.slice(0,70) + "…" : (prev || "(내용 없음)")) + '</div>'
+      + '<div class="h-btns">'
+      +   '<button onclick="openSaved(' + i + ')">열어 보기</button>'
+      +   '<button class="sub" onclick="loadSaved(' + i + ')">불러와 고치기</button>'
+      +   '<button class="sub" onclick="delSaved(' + i + ')">지우기</button>'
+      + '</div></div>';
+  }).join("");
+}
+
+/* 저장한 알림장을 결과 화면에 그대로 보여주기 */
+function openSaved(i){
+  const it = loadAll()[i];
+  if(!it) return;
+  manualLines = (it.lines || []).slice();     /* 이어서 고칠 수 있게 담아 둡니다 */
+  editing = false;
+  document.getElementById("edit-btn").textContent = "✏️ 수정하기";
+  document.getElementById("edit-hint").classList.add("hidden");
+  if(it.date){ document.getElementById("d-date").value = it.date; updateDow(); }
+  renderNote(manualLines, it.date);
+  const box = document.getElementById("result");
+  box.classList.remove("hidden");
+  box.scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+/* 저장한 내용을 문항에 되돌려 놓아 고칠 수 있게 하기 */
+function loadSaved(i){
+  const it = loadAll()[i];
+  if(!it) return;
+  document.getElementById("d-date").value = it.date || "";
+  updateDow();
+  [1,2,3,4,5].forEach(function(n){
+    const yes = it.ans && it.ans[n] === true;
+    const no  = it.ans && it.ans[n] === false;
+    if(yes) pick(n, true);
+    else if(no) pick(n, false);
+  });
+  if(it.v){
+    Object.keys(it.v).forEach(function(id){
+      const el = document.getElementById(id);
+      if(el) el.value = it.v[id];
+    });
+  }
+  if(typeof it.rule === "number"){
+    ruleIdx = it.rule;
+    document.getElementById("rule-text").textContent = "🌟 " + RULES[ruleIdx];
+  }
+  document.getElementById("history").classList.add("hidden");
+  document.getElementById("result").classList.add("hidden");
+  document.getElementById("q1").scrollIntoView({behavior:"smooth", block:"start"});
+  flash("✏️ 불러왔어요. 고친 뒤 '알림장 만들기'를 눌러 주세요.");
+}
+
+function delSaved(i){
+  const arr = loadAll();
+  const it = arr[i];
+  if(!it) return;
+  if(!confirm(fmtDate(it.date) + " 알림장을 지울까요?")) return;
+  arr.splice(i, 1);
+  saveAll(arr);
+  renderHistory();
+}
+
+function clearHistory(){
+  if(!confirm("저장한 알림장을 모두 지울까요?\n지우면 되돌릴 수 없어요.")) return;
+  saveAll([]);
+  renderHistory();
+}
+
+function resetAll(){
+  [1,2,3,4,5].forEach(function(n){
+    ans[n] = null;
+    const q = document.getElementById("q"+n);
+    q.classList.remove("on");
+    q.querySelectorAll(".yn button").forEach(function(b){ b.classList.remove("on"); });
+    document.getElementById("f"+n).classList.remove("show");
+  });
+  ["i1-date","i1-name","i2-date","i2-place","i2-name","i3-item","i4-text"].forEach(function(id){
+    const el = document.getElementById(id); if(el) el.value = "";
+  });
+  manualLines = null; editing = false;
+  document.getElementById("edit-btn").textContent = "✏️ 수정하기";
+  document.getElementById("edit-hint").classList.add("hidden");
+  document.getElementById("result").classList.add("hidden");
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+/* 시작 — 알림장은 보통 '내일' 것을 쓰니 내일 날짜로 맞춰 둬요 */
+document.getElementById("d-date").value = todayPlus(1);
+updateDow();
+rollRule();
+</script>
+</body>
+</html>
