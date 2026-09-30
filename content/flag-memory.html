@@ -236,6 +236,15 @@
     .grid[data-diff="25"] .front .nm { font-size: 11px; }
     .grid[data-diff="15"] .front .nm { font-size: 12px; }
   }
+
+  /* 관리자용 전구 버튼 (일반 사용자 눈에 잘 띄지 않게) */
+  .bulb-wrap{ text-align:center; padding:26px 0 34px; }
+  .bulb{
+    background:none; border:none; cursor:pointer; padding:6px; line-height:0;
+    color:#D8D2C6; opacity:.35; transition:all .2s;
+  }
+  .bulb:hover{ color:#F0B429; opacity:1; filter:drop-shadow(0 0 6px rgba(240,180,41,.6)); }
+  .bulb.on{ color:#F0B429; opacity:1; filter:drop-shadow(0 0 10px rgba(240,180,41,.85)); }
 </style>
 </head>
 <body>
@@ -646,6 +655,49 @@ document.getElementById('grid').dataset.diff = PAIRS;
 // 최초 실행 시 글로벌 랭킹 연동 및 새 게임 시작
 listenTop3();
 newGame();
+
+/* ===== 관리자용 랭킹 초기화 =====
+   ▼ 비밀번호는 이 줄만 고치면 바뀝니다. */
+const ADMIN_PW = "3min";
+
+async function adminReset(){
+  const bulb = document.getElementById('bulb');
+  const pw = prompt("관리자 비밀번호를 입력하세요.");
+  if(pw === null) return;
+  if(pw !== ADMIN_PW){ alert("비밀번호가 달라요."); return; }
+
+  const which = prompt(
+    "어떤 랭킹을 초기화할까요?\n\n" +
+    "1 = 쉬움(8쌍)\n2 = 보통(15쌍)\n3 = 어려움(25쌍)\n4 = 전체\n\n번호를 입력하세요.");
+  if(which === null) return;
+
+  const map = { "1":[8], "2":[15], "3":[25], "4":[8,15,25] };
+  const targets = map[String(which).trim()];
+  if(!targets){ alert("1~4 중에서 골라 주세요."); return; }
+
+  const label = targets.length > 1 ? "전체 난이도" : targets[0] + "쌍";
+  if(!confirm(label + " 랭킹을 모두 지울까요?\n지우면 되돌릴 수 없어요.")) return;
+
+  if(bulb) bulb.classList.add('on');
+  try{
+    for(let i=0;i<targets.length;i++){
+      await db.collection('flag_rankings').doc('diff_' + targets[i]).set({ top3: [] });
+    }
+    alert("\u2705 " + label + " 랭킹을 초기화했어요.");
+  }catch(e){
+    alert("초기화하지 못했어요.\n" + (e && e.message ? e.message : ""));
+  }
+  if(bulb) bulb.classList.remove('on');
+}
 </script>
+<div class="bulb-wrap">
+  <button class="bulb" id="bulb" onclick="adminReset()" aria-label=" ">
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true">
+      <path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.5.4.8 1 .8 1.6v.5h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0 0 12 3z"
+            stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+</div>
+
 </body>
 </html>
