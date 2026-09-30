@@ -439,6 +439,8 @@
         고친 뒤 <b>‘운지법 보기’</b>를 누르면 새 운지표가 만들어져요.
       </div>
 
+      <div id="edited-notice" class="note-tip hidden" style="background:#FFF3E0;border-color:#F6D3A1;color:#8A6B3A;margin:0 0 14px;"></div>
+
       <div class="keys" id="keys"></div>
 
       <textarea id="note-input" placeholder="도 레 미 파 솔 라 시 도'"></textarea>
@@ -1371,12 +1373,26 @@ const NOTES = [
 
 /* 선생님이 고친 운지법을 이 기기에 저장해요 */
 const FING_KEY = "sambun-recorder-fingering";
+let EDITED_LIST = [];
 (function loadCustom(){
   try{
     const saved = JSON.parse(localStorage.getItem(FING_KEY) || "{}");
-    NOTES.forEach(n=>{ if(saved[n.ko]){ n.holes = saved[n.ko]; n.chk = false; n.edited = true; } });
+    NOTES.forEach(n=>{
+      if(saved[n.ko]){ n.holes = saved[n.ko]; n.chk = false; n.edited = true; EDITED_LIST.push(n.ko); }
+    });
   }catch(e){}
 })();
+
+/* 고친 운지법이 남아 있으면 알려 줍니다 — 이것 때문에 엉뚱한 운지표가 나올 수 있어요 */
+function showEditedNotice(){
+  const box = document.getElementById("edited-notice");
+  if(!box) return;
+  if(EDITED_LIST.length === 0){ box.classList.add("hidden"); return; }
+  box.innerHTML = '✏️ 이 컴퓨터에서 고쳐 둔 운지법이 <b>' + EDITED_LIST.length + '개</b> 있어요 ('
+    + EDITED_LIST.join(", ") + ').<br>원래 운지법과 다르게 보인다면 '
+    + '<button class="btn ghost small" style="margin-top:6px;" onclick="resetFingering()">처음 상태로 되돌리기</button>';
+  box.classList.remove("hidden");
+}
 function saveCustom(){
   try{
     const o = {};
@@ -1409,6 +1425,7 @@ function buildKeys(wrapId, onPick){
   });
 }
 buildKeys("keys", n=> addToInput(n.ko + " "));
+showEditedNotice();
 
 /* ---------- 탭 1 : 운지법 ---------- */
 const input = document.getElementById("note-input");
@@ -1476,7 +1493,9 @@ function resetFingering(){
 function makeFingering(keepScroll){
   const raw = input.value.trim();
   if(!raw){ alert("계이름을 먼저 넣어주세요."); return; }
-  const tokens = raw.split(/\s+/).filter(Boolean);
+  /* 작은따옴표는 자판에 따라 모양이 달라요 (' ' ` ´ ′). 모두 같은 것으로 봅니다. */
+  const tokens = raw.split(/\s+/).filter(Boolean)
+    .map(function(t){ return t.replace(/[\u2018\u2019\u0060\u00B4\u2032\uFF07]/g, "'"); });
   const grid = document.getElementById("fingering");
   grid.innerHTML = "";
   let unknown = [];
