@@ -1491,35 +1491,63 @@ function resetFingering(){
 }
 
 function makeFingering(keepScroll){
-  const raw = input.value.trim();
-  if(!raw){ alert("계이름을 먼저 넣어주세요."); return; }
-  /* 작은따옴표는 자판에 따라 모양이 달라요 (' ' ` ´ ′). 모두 같은 것으로 봅니다. */
-  const tokens = raw.split(/\s+/).filter(Boolean)
-    .map(function(t){ return t.replace(/[\u2018\u2019\u0060\u00B4\u2032\uFF07]/g, "'"); });
-  const grid = document.getElementById("fingering");
-  grid.innerHTML = "";
-  let unknown = [];
+  const raw = input.value.replace(/\r/g, "");
+  if(!raw.trim()){ alert("계이름을 먼저 넣어주세요."); return; }
 
-  tokens.forEach(t=>{
-    if(t === "/" || t === "쉼"){
-      const d = document.createElement("div");
-      d.className = "fing brk";
-      d.textContent = "쉼표";
-      grid.appendChild(d);
-      return;
+  /* 줄바꿈으로 나눠서 '1째 줄, 2째 줄…' 로 보여줍니다 */
+  const lines = raw.split("\n").map(function(l){ return l.trim(); }).filter(Boolean);
+  const wrap = document.getElementById("fingering");
+  wrap.innerHTML = "";
+  wrap.className = "";                      /* 줄마다 따로 칸을 만들어요 */
+  let unknown = [];
+  const many = lines.length > 1;            /* 한 줄뿐이면 제목을 붙이지 않아요 */
+
+  lines.forEach(function(line, li){
+    if(many){
+      const head = document.createElement("div");
+      head.style.cssText = "font-family:Jua,sans-serif;font-size:14px;margin:" +
+        (li === 0 ? "2px" : "18px") + " 0 7px;padding-bottom:4px;border-bottom:2px solid var(--line);";
+      head.textContent = (li+1) + "째 줄";
+      wrap.appendChild(head);
     }
-    let isLong = false;
-    if(t.startsWith("[") && t.endsWith("]")){ isLong = true; t = t.slice(1,-1); }
-    const n = NOTE_MAP[t];
-    if(!n){ unknown.push(t); return; }
-    const idx = NOTES.indexOf(n);
-    const d = document.createElement("div");
-    d.className = "fing" + (n.chk ? " chk" : "");
-    if(isLong) d.style.cssText = "border-width:3px;border-color:var(--wood);background:#FFFBF4;";
-    d.innerHTML = '<div class="nm">'+n.ko+(n.chk?' <span title="확인이 필요한 반음">⚠️</span>':'')+'</div>'
-                + '<div class="en">'+n.en+(n.edited?' · 고침':'')+'</div>'
-                + recorderSvg(n.holes, editMode ? idx : undefined);
-    grid.appendChild(d);
+    const grid = document.createElement("div");
+    grid.className = "fingering-grid";
+    wrap.appendChild(grid);
+
+    const tokens = line.split(/\s+/).filter(Boolean)
+      .map(function(t){ return t.replace(/[\u2018\u2019\u0060\u00B4\u2032\uFF07]/g, "'"); });
+
+    tokens.forEach(function(t){
+      if(t === "/" || t === "쉼"){
+        const d = document.createElement("div");
+        d.className = "fing brk";
+        d.textContent = "쉼표";
+        grid.appendChild(d);
+        return;
+      }
+      /* 이음줄 — 다시 불지 않고 앞 음을 이어서 붑니다 */
+      if(/^[-\u2013\u2014\uFF0D\u3161\u2212]+$/.test(t)){
+        const d = document.createElement("div");
+        d.className = "fing";
+        d.style.cssText = "border-style:dashed;background:#FBFBFB;";
+        d.innerHTML = '<div class="nm" style="font-size:20px;color:var(--ink-soft);">－</div>'
+                    + '<div style="font-size:10.5px;color:var(--ink-soft);padding:16px 4px;line-height:1.5;">앞 음을<br>이어서</div>';
+        grid.appendChild(d);
+        return;
+      }
+      let isLong = false;
+      if(t.startsWith("[") && t.endsWith("]")){ isLong = true; t = t.slice(1,-1); }
+      const n = NOTE_MAP[t];
+      if(!n){ unknown.push(t); return; }
+      const idx = NOTES.indexOf(n);
+      const d = document.createElement("div");
+      d.className = "fing" + (n.chk ? " chk" : "");
+      if(isLong) d.style.cssText = "border-width:3px;border-color:var(--wood);background:#FFFBF4;";
+      d.innerHTML = '<div class="nm">'+n.ko+(n.chk?' <span title="확인이 필요한 반음">⚠️</span>':'')+'</div>'
+                  + '<div class="en">'+n.en+(n.edited?' · 고침':'')+'</div>'
+                  + recorderSvg(n.holes, editMode ? idx : undefined);
+      grid.appendChild(d);
+    });
   });
 
   document.getElementById("result-card").classList.remove("hidden");
