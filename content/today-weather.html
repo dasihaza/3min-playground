@@ -206,6 +206,17 @@
     <p>우리 동네(시·군만 검색 가능) 날씨 보고, 옷차림과 마스크를 정해요!</p>
   </div>
   
+  <div class="search-card">
+    <div class="search-row">
+      <input id="q" type="text" placeholder="우리 지역을 찾아보세요 (예: 청주, 수원, 제주)" autocomplete="off">
+      <button class="btn" onclick="goSearch()">찾기</button>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="sug hidden" id="sug"></div>
+  </div>
+
+  <div id="panel"></div>
+
   <!-- 프로그램 소개 안내글 -->
   <div class="intro-box">
     <h3>🌤️ 우리 아이 건강 지킴이, '오늘 뭐 입지?'</h3>
@@ -225,17 +236,6 @@
     </p>
   </div>
   
-  <div class="search-card">
-    <div class="search-row">
-      <input id="q" type="text" placeholder="우리 지역을 찾아보세요 (예: 청주, 수원, 제주)" autocomplete="off">
-      <button class="btn" onclick="goSearch()">찾기</button>
-    </div>
-    <div class="chips" id="chips"></div>
-    <div class="sug hidden" id="sug"></div>
-  </div>
-
-  <div id="panel"></div>
-
   <div class="foot">
     날씨·미세먼지 자료 : Open-Meteo<br>
     옷차림은 참고용이에요. 몸이 느끼는 추위는 사람마다 달라요!
@@ -545,10 +545,10 @@ function draw(dayIdx){
   }
   if(!isToday){ pm10=avgHourly(ad,'pm10',1); pm25=avgHourly(ad,'pm2_5',1); }
 
-  var h='';
+  var wHtml='', dHtml='', sHtml='', mHtml='', cHtml='';
 
   /* 날씨 */
-  h+='<div class="card"><h2 class="rowhead">📍 '+r[0]+'의 '+(isToday?'오늘':'내일')+' 날씨'
+  wHtml+='<div class="card"><h2 class="rowhead">📍 '+r[0]+'의 '+(isToday?'오늘':'내일')+' 날씨'
    + '<span class="daybtns">'
    +   '<span class="daybtn'+(isToday?' on':'')+'" onclick="showDay(0)">오늘</span>'
    +   '<span class="daybtn'+(isToday?'':' on')+'" onclick="showDay(1)">내일</span>'
@@ -566,16 +566,16 @@ function draw(dayIdx){
   /* 미세먼지 */
   var dust=0, g10=null, g25=null;
   if(pm10!==null || pm25!==null){
-    h+='<div class="card"><h2>🌫️ 미세먼지'+(isToday?'':' (내일 하루 평균)')+'</h2><div class="dust">';
+    dHtml+='<div class="card"><h2>🌫️ 미세먼지'+(isToday?'':' (내일 하루 평균)')+'</h2><div class="dust">';
     if(pm10!==null){ g10=gradePM10(pm10);
-      h+='<div class="dust-item" style="border-color:'+g10.c+';background:'+g10.bg+'">'
+      dHtml+='<div class="dust-item" style="border-color:'+g10.c+';background:'+g10.bg+'">'
        + '<div class="lbl">미세먼지 (PM10)</div><div class="val" style="color:'+g10.c+'">'+pm10+'</div>'
        + '<div class="st" style="color:'+g10.c+'">'+g10.e+' '+g10.t+'</div></div>'; }
     if(pm25!==null){ g25=gradePM25(pm25);
-      h+='<div class="dust-item" style="border-color:'+g25.c+';background:'+g25.bg+'">'
+      dHtml+='<div class="dust-item" style="border-color:'+g25.c+';background:'+g25.bg+'">'
        + '<div class="lbl">초미세먼지 (PM2.5)</div><div class="val" style="color:'+g25.c+'">'+pm25+'</div>'
        + '<div class="st" style="color:'+g25.c+'">'+g25.e+' '+g25.t+'</div></div>'; }
-    h+='</div></div>';
+    dHtml+='</div></div>';
     dust=Math.max(g10?g10.n:0, g25?g25.n:0);
   }
 
@@ -583,44 +583,47 @@ function draw(dayIdx){
   var sick=activeOutbreaks();
   var sickLv=outbreakLevel(sick);
   if(sick.length===0){
-    h+='<div class="rec sick-none"><h2>🦠 요즘 유행하는 병이 있을까?</h2>'
+    sHtml+='<div class="rec sick-none"><h2>🦠 요즘 유행하는 병이 있을까?</h2>'
      + '<div class="big">😌 공식적으로 유행하는 전염병(감염병)은 현재 없습니다.</div>'
      + '<div class="why">그래도 손 씻기와 기침 예절은 늘 기억해요. 건강한 습관이 가장 좋은 예방법이에요!</div>'
      + '<div class="updated">자료 기준일 : '+OUTBREAK_UPDATED+'</div></div>';
   } else {
-    h+='<div class="rec sick-on"><h2>🦠 요즘 유행하는 병이 있을까?</h2>'
+    sHtml+='<div class="rec sick-on"><h2>🦠 요즘 유행하는 병이 있을까?</h2>'
      + '<div class="big">⚠️ 지금 <b>'+sick.length+'가지</b> 감염병이 돌고 있어요</div>'
      + '<div class="why">아래 내용을 읽고 예방 방법을 꼭 지켜 주세요.</div>';
     for(var k=0;k<sick.length;k++){
       var o=sick[k];
-      h+='<div class="sick-item"><div class="nm">'+(o.emoji||'🦠')+' '+o.name+'</div>'
+      sHtml+='<div class="sick-item"><div class="nm">'+(o.emoji||'🦠')+' '+o.name+'</div>'
        + '<div class="ds">'+o.desc+'</div><ul>';
-      for(var j=0;j<o.prevent.length;j++) h+='<li><i>✅</i><span>'+o.prevent[j]+'</span></li>';
-      h+='</ul></div>';
+      for(var j=0;j<o.prevent.length;j++) sHtml+='<li><i>✅</i><span>'+o.prevent[j]+'</span></li>';
+      sHtml+='</ul></div>';
     }
-    h+='<div class="updated">자료 기준일 : '+OUTBREAK_UPDATED+'</div></div>';
+    sHtml+='<div class="updated">자료 기준일 : '+OUTBREAK_UPDATED+'</div></div>';
   }
 
   /* 마스크 */
   if(pm10===null && pm25===null && sickLv===0){
-    h+='<div class="rec mask-ok"><h2>😷 마스크, 써야 할까?</h2>'
+    mHtml+='<div class="rec mask-ok"><h2>😷 마스크, 써야 할까?</h2>'
      + '<div class="big">미세먼지 정보를 가져오지 못했어요</div>'
      + '<div class="why">하늘이 뿌옇게 보이면 마스크를 챙기는 게 안전해요.</div></div>';
   } else {
     var m=maskAdvice(dust, sickLv);
-    h+='<div class="rec '+m.cls+'"><h2>😷 마스크, 써야 할까?</h2>'
+    mHtml+='<div class="rec '+m.cls+'"><h2>😷 마스크, 써야 할까?</h2>'
      + '<div class="big">'+m.icon+' '+m.big+'</div>'
      + '<div class="why">'+m.why+'</div></div>';
   }
 
   /* 옷차림 */
   var c=clothAdvice(hi, lo, rainP, wind);
-  h+='<div class="rec cloth"><h2>👕 '+(isToday?'오늘':'내일')+'의 옷차림</h2>'
+  cHtml+='<div class="rec cloth"><h2>👕 '+(isToday?'오늘':'내일')+'의 옷차림</h2>'
    + '<div class="big">'+c.big+'</div><div class="why">'+c.why+'</div><div class="items">';
-  for(var i=0;i<c.items.length;i++) h+='<span class="item"><i>'+c.items[i][0]+'</i>'+c.items[i][1]+'</span>';
-  h+='</div>';
-  for(i=0;i<c.notes.length;i++) h+='<div class="extra">'+c.notes[i]+'</div>';
-  h+='</div>';
+  for(var i=0;i<c.items.length;i++) cHtml+='<span class="item"><i>'+c.items[i][0]+'</i>'+c.items[i][1]+'</span>';
+  cHtml+='</div>';
+  for(i=0;i<c.notes.length;i++) cHtml+='<div class="extra">'+c.notes[i]+'</div>';
+  cHtml+='</div>';
+
+  /* ★ 카드 순서 : 옷차림 → 마스크 → 날씨 → 미세먼지 → 감염병 */
+  var h = cHtml + mHtml + wHtml + dHtml + sHtml;
 
   document.getElementById('panel').innerHTML=h;
 }
