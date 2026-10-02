@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>애들아 모여라 | 3분 놀이터</title>
+<meta name="description" content="방 번호 하나로 모이는 실시간 교실 활동판. 선생님은 아이들이 쓰는 글·그림·문제 풀이를 한눈에 보고, 눌러서 크게 볼 수 있어요.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<style>
+  :root{
+    --bg:#F3F7FF; --card:#FFFFFF; --ink:#3F4650; --ink-soft:#8D96A3; --line:#E3EAF4;
+    --blue:#5B9BE8; --blue-d:#3C7CC9;
+    --pink:#FF9DB6; --pink-d:#E97694;
+    --mint:#5FD0B0; --mint-d:#43AE90;
+    --lemon:#FFD36E; --grape:#B49BE8;
+    --shadow:0 3px 0 rgba(63,70,80,.09);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 8% 5%, rgba(255,211,110,.22) 0 110px, transparent 111px),
+      radial-gradient(circle at 92% 10%, rgba(255,157,182,.18) 0 90px, transparent 91px),
+      var(--bg);
+    background-attachment:fixed;
+    color:var(--ink); font-family:'Noto Sans KR',sans-serif; min-height:100vh;
+  }
+  .topbar{max-width:1100px;margin:0 auto;padding:12px 16px 0;display:flex;align-items:center;justify-content:space-between;}
+  .topbar a{text-decoration:none;color:var(--ink);}
+  .topbar .brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;}
+  .topbar .back{font-size:12.5px;font-weight:700;color:var(--ink-soft);border:2px solid #fff;background:#fff;padding:6px 12px;border-radius:999px;box-shadow:var(--shadow);}
+  .shell{max-width:1100px;margin:0 auto;padding:12px 16px 50px;}
+
+  .hero{text-align:center;margin-bottom:16px;}
+  .hero h1{font-family:'Jua',sans-serif;font-size:clamp(25px,5vw,33px);margin:0 0 4px;color:var(--blue-d);}
+  .hero p{font-family:'Gaegu',cursive;font-weight:700;font-size:17px;color:var(--ink-soft);margin:0;}
+
+  .card{background:var(--card);border-radius:20px;padding:20px;box-shadow:var(--shadow),0 8px 20px rgba(63,70,80,.07);margin-bottom:14px;}
+  .btn{
+    font-family:'Jua',sans-serif;border:none;cursor:pointer;font-size:16px;
+    padding:14px 24px;border-radius:15px;background:var(--blue);color:#fff;box-shadow:0 4px 0 var(--blue-d);
+  }
+  .btn:active{transform:translateY(4px);box-shadow:none;}
+  .btn.pink{background:var(--pink);box-shadow:0 4px 0 var(--pink-d);}
+  .btn.mint{background:var(--mint);box-shadow:0 4px 0 var(--mint-d);}
+  .btn.ghost{background:#fff;color:var(--ink);box-shadow:0 4px 0 var(--line);}
+  .btn.sm{font-size:13.5px;padding:10px 16px;border-radius:12px;}
+  input[type=text],input[type=number],textarea{
+    border:2.5px solid var(--line);border-radius:13px;padding:12px 14px;
+    font-family:'Noto Sans KR',sans-serif;font-size:16px;color:var(--ink);background:#FDFEFF;width:100%;
+  }
+  input:focus,textarea:focus{outline:none;border-color:var(--blue);}
+
+  /* 첫 화면 */
+  .pick{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+  .pick button{flex:1 1 220px;max-width:300px;padding:26px 18px;border-radius:20px;border:3px solid var(--line);
+    background:#fff;cursor:pointer;font-family:'Jua',sans-serif;font-size:19px;color:var(--ink);box-shadow:var(--shadow);}
+  .pick button:hover{border-color:var(--blue);}
+  .pick .em{display:block;font-size:40px;margin-bottom:8px;}
+  .pick small{display:block;font-family:'Noto Sans KR',sans-serif;font-size:12.5px;color:var(--ink-soft);margin-top:6px;font-weight:400;}
+
+  /* 방 번호 */
+  .roomcode{font-family:'Jua',sans-serif;font-size:clamp(40px,11vw,72px);letter-spacing:.12em;color:var(--blue-d);text-align:center;line-height:1.1;}
+  .roomhint{text-align:center;color:var(--ink-soft);font-size:13.5px;margin-top:4px;}
+
+  /* 활동 고르기 */
+  .modes{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+  .modes button{flex:1 1 150px;padding:14px 10px;border-radius:14px;border:3px solid var(--line);background:#fff;
+    cursor:pointer;font-family:'Jua',sans-serif;font-size:15px;color:var(--ink-soft);}
+  .modes button.on{border-color:var(--blue);background:#EEF5FF;color:var(--blue-d);}
+  .modes .em{display:block;font-size:22px;margin-bottom:4px;}
+
+  /* 학생 타일 */
+  .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:10px;}
+  .tile{background:#fff;border:3px solid var(--line);border-radius:16px;padding:10px;cursor:pointer;overflow:hidden;}
+  .tile:hover{border-color:var(--blue);}
+  .tile .nm{font-family:'Jua',sans-serif;font-size:14.5px;display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--mint);flex:0 0 auto;}
+  .dot.away{background:#D8DEE7;}
+  .tile .prev{
+    height:112px;border-radius:10px;background:#FAFCFF;border:1px solid var(--line);
+    font-size:12px;line-height:1.6;color:var(--ink);padding:8px;overflow:hidden;white-space:pre-wrap;word-break:break-word;
+  }
+  .tile .prev img{width:100%;height:100%;object-fit:contain;display:block;}
+  .tile .meta{font-size:11px;color:var(--ink-soft);margin-top:6px;display:flex;justify-content:space-between;}
+  .bar{height:7px;background:var(--line);border-radius:999px;overflow:hidden;margin-top:6px;}
+  .bar i{display:block;height:100%;background:var(--mint);width:0;}
+  .empty{text-align:center;color:var(--ink-soft);font-size:14px;padding:40px 10px;line-height:1.9;}
+
+  /* 크게 보기 */
+  .modal{position:fixed;inset:0;background:rgba(30,36,45,.82);display:none;z-index:60;padding:16px;}
+  .modal.on{display:flex;align-items:center;justify-content:center;}
+  .modal-in{background:#fff;border-radius:20px;max-width:900px;width:100%;max-height:92vh;overflow:auto;padding:20px;}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;}
+  .modal-head .nm{font-family:'Jua',sans-serif;font-size:21px;}
+  .big-view{min-height:300px;border:2px solid var(--line);border-radius:14px;padding:16px;background:#FAFCFF;
+    font-size:17px;line-height:1.9;white-space:pre-wrap;word-break:break-word;}
+  .big-view img{width:100%;display:block;}
+
+  /* 학생 쪽 */
+  .pad{width:100%;height:58vh;min-height:280px;border:2.5px solid var(--line);border-radius:14px;background:#fff;touch-action:none;display:block;}
+  .tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center;}
+  .sw{width:30px;height:30px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px var(--line);cursor:pointer;}
+  .sw.on{box-shadow:0 0 0 3px var(--blue);}
+  .qrow{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+  .qrow span{font-family:'Jua',sans-serif;width:54px;flex:0 0 auto;color:var(--ink-soft);}
+  .saveinfo{font-size:12px;color:var(--ink-soft);text-align:center;margin-top:8px;}
+  .hidden{display:none !important;}
+  .foot{text-align:center;font-size:12px;color:var(--ink-soft);margin-top:18px;line-height:1.8;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="../index.html">
+    <svg width="26" height="26" viewBox="0 0 34 34" fill="none">
+      <circle cx="17" cy="18" r="14" fill="#fff" stroke="#3F4650" stroke-width="2"/>
+      <path d="M17 9 L17 18 L23 21" stroke="#5B9BE8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="13" y="2" width="8" height="4" rx="1.5" fill="#3F4650"/>
+    </svg>
+    <span>3분 놀이터</span>
+  </a>
+  <a class="back" href="../index.html">← 다른 콘텐츠 보기</a>
+</div>
+
+<div class="shell">
+
+  <!-- ===== 첫 화면 ===== -->
+  <div id="v-home">
+    <div class="hero">
+      <h1>🙌 애들아 모여라</h1>
+      <p>방 번호 하나로 우리 반이 한 화면에!</p>
+    </div>
+    <div class="card">
+      <div class="pick">
+        <button onclick="goTeacher()"><span class="em">👩‍🏫</span>선생님으로 방 만들기
+          <small>방 번호가 만들어져요</small></button>
+        <button onclick="goStudentForm()"><span class="em">🧒</span>학생으로 들어가기
+          <small>방 번호를 입력해요</small></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 학생 입장 ===== -->
+  <div id="v-join" class="hidden">
+    <div class="hero"><h1>🧒 들어가기</h1><p>선생님이 알려준 방 번호를 넣어요</p></div>
+    <div class="card">
+      <div style="margin-bottom:10px;"><label style="font-size:13px;color:var(--ink-soft);font-weight:700;">방 번호</label>
+        <input type="text" id="j-code" inputmode="numeric" maxlength="4" placeholder="예) 1234" style="font-family:'Jua',sans-serif;font-size:28px;letter-spacing:.2em;text-align:center;"></div>
+      <div style="margin-bottom:14px;"><label style="font-size:13px;color:var(--ink-soft);font-weight:700;">내 이름</label>
+        <input type="text" id="j-name" maxlength="10" placeholder="예) 김하늘"></div>
+      <div style="text-align:center;"><button class="btn mint" onclick="joinRoom()">들어가기</button></div>
+      <div id="j-msg" class="saveinfo"></div>
+    </div>
+  </div>
+
+  <!-- ===== 선생님 화면 ===== -->
+  <div id="v-teacher" class="hidden">
+    <div class="card">
+      <div class="roomcode" id="t-code">----</div>
+      <div class="roomhint">아이들에게 이 번호를 알려주세요</div>
+      <div class="modes" id="t-modes">
+        <button data-m="write" onclick="setMode('write')"><span class="em">✏️</span>글쓰기</button>
+        <button data-m="draw"  onclick="setMode('draw')"><span class="em">🎨</span>그림·필기</button>
+        <button data-m="quiz"  onclick="setMode('quiz')"><span class="em">🧮</span>문제 풀이</button>
+      </div>
+      <div id="t-prompt-wrap" style="margin-top:12px;">
+        <input type="text" id="t-prompt" maxlength="60" placeholder="아이들에게 보여줄 안내 (예: 오늘 배운 내용을 세 줄로 써 보세요)" oninput="pushRoom()">
+      </div>
+      <div id="t-quiz-wrap" class="hidden" style="margin-top:10px;display:flex;gap:8px;align-items:center;">
+        <span style="font-size:13.5px;color:var(--ink-soft);font-weight:700;">문제 수</span>
+        <input type="number" id="t-qcount" min="1" max="20" value="5" style="width:90px;" oninput="pushRoom()">
+        <span style="font-size:12.5px;color:var(--ink-soft);">개</span>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn sm ghost" onclick="clearAll()">🧹 아이들 화면 비우기</button>
+        <button class="btn sm ghost" onclick="closeRoom()">🚪 방 닫기</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="font-family:'Jua',sans-serif;font-size:17px;">👀 우리 반 보기 <span id="t-count" style="color:var(--ink-soft);font-size:14px;"></span></div>
+        <div style="font-size:12px;color:var(--ink-soft);">칸을 누르면 크게 봐요</div>
+      </div>
+      <div class="tiles" id="t-tiles"></div>
+      <div class="empty" id="t-empty">아직 들어온 친구가 없어요.<br>방 번호를 알려주세요!</div>
+    </div>
+  </div>
+
+  <!-- ===== 학생 활동 화면 ===== -->
+  <div id="v-work" class="hidden">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <div style="font-family:'Jua',sans-serif;font-size:17px;" id="w-who"></div>
+        <button class="btn sm ghost" onclick="leaveRoom()">나가기</button>
+      </div>
+      <div id="w-prompt" style="margin-top:8px;font-size:14.5px;line-height:1.8;color:var(--ink);word-break:keep-all;"></div>
+    </div>
+
+    <div class="card" id="w-write-card">
+      <textarea id="w-text" rows="10" placeholder="여기에 써 보세요" oninput="touchWork()"></textarea>
+    </div>
+
+    <div class="card hidden" id="w-draw-card">
+      <canvas class="pad" id="w-pad"></canvas>
+      <div class="tools">
+        <span class="sw on" style="background:#2E3440" onclick="setPen('#2E3440',this)"></span>
+        <span class="sw" style="background:#E8483C" onclick="setPen('#E8483C',this)"></span>
+        <span class="sw" style="background:#3B82F6" onclick="setPen('#3B82F6',this)"></span>
+        <span class="sw" style="background:#22A06B" onclick="setPen('#22A06B',this)"></span>
+        <span class="sw" style="background:#F5A524" onclick="setPen('#F5A524',this)"></span>
+        <button class="btn sm ghost" onclick="setEraser(this)">지우개</button>
+        <button class="btn sm ghost" onclick="clearPad()">모두 지우기</button>
+      </div>
+    </div>
+
+    <div class="card hidden" id="w-quiz-card">
+      <div id="w-quiz-rows"></div>
+    </div>
+
+    <div class="saveinfo" id="w-save">선생님 화면에 실시간으로 보여요 🙂</div>
+  </div>
+
+  <div class="foot">
+    같은 방에 들어온 사람만 볼 수 있어요. 수업이 끝나면 '방 닫기'를 눌러 주세요.
+  </div>
+</div>
+
+<!-- 크게 보기 -->
+<div class="modal" id="modal" onclick="if(event.target===this) closeBig()">
+  <div class="modal-in">
+    <div class="modal-head">
+      <div class="nm" id="m-name"></div>
+      <button class="btn sm ghost" onclick="closeBig()">닫기</button>
+    </div>
+    <div class="big-view" id="m-body"></div>
+    <div class="saveinfo" id="m-time"></div>
+  </div>
+</div>
+
+<script>
+/* ===== 파이어베이스 ===== */
+const firebaseConfig = {
+  apiKey: "AIzaSyAqXsG8npxettrCRH3MbZwFZGLg5aehxdw",
+  authDomain: "min-playground.firebaseapp.com",
+  projectId: "min-playground",
+  storageBucket: "min-playground.firebasestorage.app",
+  messagingSenderId: "472071492052",
+  appId: "1:472071492052:web:00263046925133e55a4641"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+/* ===== 상태 ===== */
+let role = null;          /* 'teacher' | 'student' */
+let roomCode = null;
+let myId = null, myName = "";
+let roomMode = "write", roomPrompt = "", roomQCount = 5;
+let unsubRoom = null, unsubStudents = null;
+let openStudentId = null;
+let students = {};
+
+const $ = id => document.getElementById(id);
+function show(id){
+  ["v-home","v-join","v-teacher","v-work"].forEach(v => $(v).classList.toggle("hidden", v !== id));
+  window.scrollTo({top:0});
+}
+function esc(s){
+  return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+function ago(ms){
+  if(!ms) return "";
+  const s = Math.floor((Date.now()-ms)/1000);
+  if(s < 10) return "방금";
+  if(s < 60) return s+"초 전";
+  return Math.floor(s/60)+"분 전";
+}
+
+/* ===== 선생님 : 방 만들기 ===== */
+async function goTeacher(){
+  role = "teacher";
+  roomCode = String(Math.floor(1000 + Math.random()*9000));
+  try{
+    await db.collection("rooms").doc(roomCode).set({
+      mode: "write", prompt: "", qcount: 5, open: true, at: Date.now()
+    });
+  }catch(e){ alert("방을 만들지 못했어요.\n" + (e.message||"")); return; }
+  $("t-code").textContent = roomCode;
+  markMode("write");
+  show("v-teacher");
+  watchStudents();
+}
+
+function markMode(m){
+  roomMode = m;
+  document.querySelectorAll("#t-modes button").forEach(b =>
+    b.classList.toggle("on", b.dataset.m === m));
+  $("t-quiz-wrap").classList.toggle("hidden", m !== "quiz");
+}
+function setMode(m){ markMode(m); pushRoom(); }
+
+function pushRoom(){
+  if(role !== "teacher" || !roomCode) return;
+  roomPrompt = $("t-prompt").value.trim();
+  roomQCount = Math.max(1, Math.min(20, parseInt($("t-qcount").value||"5",10)));
+  db.collection("rooms").doc(roomCode).set({
+    mode: roomMode, prompt: roomPrompt, qcount: roomQCount, open: true, at: Date.now()
+  }, { merge:true }).catch(function(){});
+}
+
+function watchStudents(){
+  if(unsubStudents) unsubStudents();
+  unsubStudents = db.collection("rooms").doc(roomCode).collection("students")
+    .onSnapshot(function(snap){
+      students = {};
+      snap.forEach(function(d){ students[d.id] = d.data(); });
+      renderTiles();
+      if(openStudentId) renderBig();
+    }, function(e){ console.log(e); });
+}
+
+function renderTiles(){
+  const ids = Object.keys(students).sort(function(a,b){
+    return (students[a].name||"").localeCompare(students[b].name||"");
+  });
+  $("t-count").textContent = ids.length ? "(" + ids.length + "명)" : "";
+  $("t-empty").classList.toggle("hidden", ids.length > 0);
+  const wrap = $("t-tiles");
+  wrap.innerHTML = ids.map(function(id){
+    const s = students[id];
+    const away = (Date.now() - (s.at||0)) > 60000 || s.away;
+    let prev = "";
+    if(s.mode === "draw" && s.img)      prev = '<img src="'+s.img+'" alt="">';
+    else if(s.mode === "quiz")          prev = quizPreview(s);
+    else                                prev = esc((s.text||"").slice(0,120)) || '<span style="color:#C3CBD6">아직 비어 있어요</span>';
+    return '<div class="tile" onclick="openBig(\'' + id + '\')">'
+      + '<div class="nm"><span class="dot'+(away?' away':'')+'"></span>'+esc(s.name||"이름 없음")+'</div>'
+      + '<div class="prev">'+prev+'</div>'
+      + (s.mode === "quiz" ? '<div class="bar"><i style="width:'+pct(s)+'%"></i></div>' : '')
+      + '<div class="meta"><span>'+modeLabel(s.mode)+'</span><span>'+ago(s.at)+'</span></div>'
+      + '</div>';
+  }).join("");
+}
+function modeLabel(m){ return m === "draw" ? "🎨 그림" : (m === "quiz" ? "🧮 문제" : "✏️ 글"); }
+function pct(s){
+  const tot = (s.answers||[]).length || roomQCount || 1;
+  const done = (s.answers||[]).filter(function(x){ return x && String(x).trim(); }).length;
+  return Math.round(done/tot*100);
+}
+function quizPreview(s){
+  const a = s.answers || [];
+  if(!a.length) return '<span style="color:#C3CBD6">아직 안 풀었어요</span>';
+  return a.map(function(v,i){
+    const ok = v && String(v).trim();
+    return '<div style="font-size:12px;line-height:1.75;">'+(i+1)+'. '
+      + (ok ? esc(String(v).slice(0,14)) : '<span style="color:#C3CBD6">…</span>') + '</div>';
+  }).join("");
+}
+
+/* 크게 보기 */
+function openBig(id){
+  openStudentId = id;
+  $("modal").classList.add("on");
+  renderBig();
+}
+function renderBig(){
+  const s = students[openStudentId];
+  if(!s){ closeBig(); return; }
+  $("m-name").textContent = s.name || "이름 없음";
+  let html = "";
+  if(s.mode === "draw" && s.img) html = '<img src="'+s.img+'" alt="">';
+  else if(s.mode === "quiz"){
+    const a = s.answers || [];
+    html = a.map(function(v,i){
+      return '<div style="margin-bottom:8px;"><b>'+(i+1)+'번</b> &nbsp;'
+        + (v && String(v).trim() ? esc(v) : '<span style="color:#C3CBD6">아직 안 적었어요</span>') + '</div>';
+    }).join("") || "아직 안 풀었어요";
+  }
+  else html = esc(s.text || "") || "아직 비어 있어요";
+  $("m-body").innerHTML = html;
+  $("m-time").textContent = "마지막 움직임 : " + ago(s.at);
+}
+function closeBig(){ openStudentId = null; $("modal").classList.remove("on"); }
+
+async function clearAll(){
+  if(!confirm("아이들이 쓴 내용을 모두 비울까요?")) return;
+  const snap = await db.collection("rooms").doc(roomCode).collection("students").get();
+  const batch = db.batch();
+  snap.forEach(function(d){
+    batch.set(d.ref, { text:"", img:"", answers:[], at: Date.now() }, { merge:true });
+  });
+  await batch.commit();
+}
+async function closeRoom(){
+  if(!confirm("방을 닫을까요?\n아이들 화면도 함께 끝나요.")) return;
+  await db.collection("rooms").doc(roomCode).set({ open:false, at:Date.now() }, { merge:true });
+  if(unsubStudents) unsubStudents();
+  alert("방을 닫았어요.");
+  location.reload();
+}
+
+/* ===== 학생 ===== */
+function goStudentForm(){ role = "student"; show("v-join"); }
+
+async function joinRoom(){
+  const code = ($("j-code").value||"").replace(/\D/g,"");
+  const name = ($("j-name").value||"").trim();
+  if(code.length !== 4){ $("j-msg").textContent = "방 번호 네 자리를 넣어 주세요."; return; }
+  if(!name){ $("j-msg").textContent = "이름을 넣어 주세요."; return; }
+  $("j-msg").textContent = "들어가는 중…";
+  let doc;
+  try{ doc = await db.collection("rooms").doc(code).get(); }
+  catch(e){ $("j-msg").textContent = "연결하지 못했어요. 와이파이를 확인해 주세요."; return; }
+  if(!doc.exists || doc.data().open === false){
+    $("j-msg").textContent = "그런 방이 없어요. 번호를 다시 확인해 주세요."; return;
+  }
+  roomCode = code; myName = name;
+  myId = (localStorage.getItem("sambun-class-id") || "");
+  if(!myId){ myId = "s" + Date.now() + Math.floor(Math.random()*1000); 
+    try{ localStorage.setItem("sambun-class-id", myId); }catch(e){} }
+  await db.collection("rooms").doc(roomCode).collection("students").doc(myId)
+    .set({ name: myName, mode: "write", text:"", img:"", answers:[], at: Date.now(), away:false }, { merge:true });
+  $("w-who").textContent = "🧒 " + myName;
+  show("v-work");
+  watchRoom();
+  startSaver();
+}
+
+function watchRoom(){
+  if(unsubRoom) unsubRoom();
+  unsubRoom = db.collection("rooms").doc(roomCode).onSnapshot(function(d){
+    if(!d.exists) return;
+    const r = d.data();
+    if(r.open === false){ alert("선생님이 방을 닫았어요."); leaveRoom(); return; }
+    roomMode = r.mode || "write";
+    roomPrompt = r.prompt || "";
+    roomQCount = r.qcount || 5;
+    $("w-prompt").textContent = roomPrompt ? "📣 " + roomPrompt : "";
+    applyMode();
+  });
+}
+function applyMode(){
+  $("w-write-card").classList.toggle("hidden", roomMode !== "write");
+  $("w-draw-card").classList.toggle("hidden", roomMode !== "draw");
+  $("w-quiz-card").classList.toggle("hidden", roomMode !== "quiz");
+  if(roomMode === "draw") setupPad();
+  if(roomMode === "quiz") buildQuizRows();
+  dirty = true;
+}
+function buildQuizRows(){
+  const wrap = $("w-quiz-rows");
+  const have = wrap.querySelectorAll(".qrow").length;
+  if(have === roomQCount) return;
+  let h = "";
+  for(let i=0;i<roomQCount;i++){
+    h += '<div class="qrow"><span>'+(i+1)+'번</span>'
+       + '<input type="text" id="q-'+i+'" maxlength="40" placeholder="답" oninput="touchWork()"></div>';
+  }
+  wrap.innerHTML = h;
+}
+function leaveRoom(){
+  if(unsubRoom) unsubRoom();
+  if(saveTimer) clearInterval(saveTimer);
+  location.reload();
+}
+
+/* ===== 그림판 ===== */
+let pad, pctx, drawing = false, pen = "#2E3440", erasing = false, padReady = false;
+function setupPad(){
+  if(padReady) return;
+  pad = $("w-pad");
+  const r = pad.getBoundingClientRect();
+  pad.width = Math.round(r.width); pad.height = Math.round(r.height);
+  pctx = pad.getContext("2d");
+  pctx.fillStyle = "#fff"; pctx.fillRect(0,0,pad.width,pad.height);
+  pctx.lineCap = "round"; pctx.lineJoin = "round";
+  const pos = e => {
+    const b = pad.getBoundingClientRect();
+    const t = e.touches ? e.touches[0] : e;
+    return { x: t.clientX - b.left, y: t.clientY - b.top };
+  };
+  const start = e => { e.preventDefault(); drawing = true; const p = pos(e);
+    pctx.beginPath(); pctx.moveTo(p.x,p.y); };
+  const move = e => { if(!drawing) return; e.preventDefault(); const p = pos(e);
+    pctx.strokeStyle = erasing ? "#fff" : pen;
+    pctx.lineWidth = erasing ? 22 : 3.5;
+    pctx.lineTo(p.x,p.y); pctx.stroke(); dirty = true; };
+  const end = () => { drawing = false; };
+  pad.addEventListener("mousedown",start); pad.addEventListener("mousemove",move);
+  window.addEventListener("mouseup",end);
+  pad.addEventListener("touchstart",start,{passive:false});
+  pad.addEventListener("touchmove",move,{passive:false});
+  pad.addEventListener("touchend",end);
+  padReady = true;
+}
+function setPen(c, el){
+  pen = c; erasing = false;
+  document.querySelectorAll(".sw").forEach(s => s.classList.remove("on"));
+  if(el) el.classList.add("on");
+}
+function setEraser(){ erasing = true; document.querySelectorAll(".sw").forEach(s => s.classList.remove("on")); }
+function clearPad(){
+  if(!pctx) return;
+  pctx.fillStyle = "#fff"; pctx.fillRect(0,0,pad.width,pad.height); dirty = true;
+}
+function padThumb(){
+  if(!pad) return "";
+  const w = 260, h = Math.round(pad.height * w / pad.width);
+  const c = document.createElement("canvas"); c.width = w; c.height = h;
+  const x = c.getContext("2d");
+  x.fillStyle = "#fff"; x.fillRect(0,0,w,h);
+  x.drawImage(pad, 0, 0, w, h);
+  return c.toDataURL("image/jpeg", 0.5);
+}
+
+/* ===== 저장 (선생님 화면에 보내기) =====
+   너무 자주 보내면 사용량이 금방 차서, 바뀐 것이 있을 때만 5초마다 보냅니다. */
+let dirty = false, saveTimer = null, lastSent = "";
+function touchWork(){ dirty = true; }
+function startSaver(){
+  if(saveTimer) clearInterval(saveTimer);
+  saveTimer = setInterval(sendWork, 5000);
+  document.addEventListener("visibilitychange", function(){
+    db.collection("rooms").doc(roomCode).collection("students").doc(myId)
+      .set({ away: document.hidden, at: Date.now() }, { merge:true }).catch(function(){});
+  });
+}
+function sendWork(){
+  if(!roomCode || !myId) return;
+  const payload = { name: myName, mode: roomMode, at: Date.now(), away: document.hidden };
+  if(roomMode === "write") payload.text = ($("w-text").value||"").slice(0, 1500);
+  else if(roomMode === "draw") payload.img = padThumb();
+  else {
+    const a = [];
+    for(let i=0;i<roomQCount;i++){ const el = $("q-"+i); a.push(el ? el.value : ""); }
+    payload.answers = a;
+  }
+  const sig = JSON.stringify([payload.text, payload.img, payload.answers, payload.mode, payload.away]);
+  if(!dirty && sig === lastSent) return;      /* 바뀐 게 없으면 보내지 않아요 */
+  lastSent = sig; dirty = false;
+  db.collection("rooms").doc(roomCode).collection("students").doc(myId)
+    .set(payload, { merge:true })
+    .then(function(){ $("w-save").textContent = "선생님 화면에 보냈어요 ✓ " + new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"}); })
+    .catch(function(){ $("w-save").textContent = "보내지 못했어요. 와이파이를 확인해 주세요."; });
+}
+
+/* 선생님 화면의 '몇 분 전' 표시를 살아 있게 */
+setInterval(function(){ if(role === "teacher") renderTiles(); }, 15000);
+</script>
+</body>
+</html>
