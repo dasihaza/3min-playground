@@ -108,6 +108,33 @@
   .qrow{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
   .qrow span{font-family:'Jua',sans-serif;width:54px;flex:0 0 auto;color:var(--ink-soft);}
   .saveinfo{font-size:12px;color:var(--ink-soft);text-align:center;margin-top:8px;}
+  /* 제출 표시 */
+  .tile.sub{border-color:var(--mint);border-width:5px;box-shadow:0 0 0 2px rgba(95,208,176,.25);}
+  .tile .sub-badge{font-size:11px;color:var(--mint-d);font-weight:700;}
+  /* 16색 팔레트 */
+  .palette{display:flex;flex-wrap:wrap;gap:8px;max-width:344px;}
+  .palette .sw{width:34px;height:34px;border-radius:50%;border:3px solid #fff;
+    box-shadow:0 0 0 2px var(--line);cursor:pointer;flex:0 0 auto;}
+  .palette .sw.on{box-shadow:0 0 0 3px var(--blue);transform:scale(1.12);}
+  .widths{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap;}
+  .widths .wbtn{width:40px;height:34px;border-radius:11px;border:3px solid var(--line);background:#fff;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .widths .wbtn.on{border-color:var(--blue);background:#EEF5FF;}
+  .widths .wbtn i{display:block;background:var(--ink);border-radius:999px;}
+  /* 제출 단추 줄 */
+  .submitbar{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap;align-items:center;}
+  .submitted-note{font-family:'Jua',sans-serif;color:var(--mint-d);font-size:15px;}
+  /* 선생님 피드백 */
+  .fb-wrap{position:relative;}
+  .fb-wrap canvas{position:absolute;left:0;top:0;touch-action:none;border-radius:14px;}
+  .fb-tools{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:10px;}
+  .fb-tools .sw{width:28px;height:28px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px var(--line);cursor:pointer;}
+  .fb-tools .sw.on{box-shadow:0 0 0 3px var(--blue);}
+  .fb-tools .tbtn{font-family:'Jua',sans-serif;font-size:13px;padding:9px 13px;border-radius:11px;
+    border:3px solid var(--line);background:#fff;cursor:pointer;color:var(--ink);}
+  .fb-tools .tbtn.on{border-color:var(--blue);background:#EEF5FF;color:var(--blue-d);}
+  .fb-mine{margin-top:12px;border:3px dashed var(--mint);border-radius:14px;padding:10px;background:#F2FCF8;}
+  .fb-mine img{width:100%;display:block;border-radius:8px;}
   .hidden{display:none !important;}
   .foot{text-align:center;font-size:12px;color:var(--ink-soft);margin-top:18px;line-height:1.8;}
 </style>
@@ -207,19 +234,31 @@
 
     <div class="card hidden" id="w-draw-card">
       <canvas class="pad" id="w-pad"></canvas>
-      <div class="tools">
-        <span class="sw on" style="background:#2E3440" onclick="setPen('#2E3440',this)"></span>
-        <span class="sw" style="background:#E8483C" onclick="setPen('#E8483C',this)"></span>
-        <span class="sw" style="background:#3B82F6" onclick="setPen('#3B82F6',this)"></span>
-        <span class="sw" style="background:#22A06B" onclick="setPen('#22A06B',this)"></span>
-        <span class="sw" style="background:#F5A524" onclick="setPen('#F5A524',this)"></span>
-        <button class="btn sm ghost" onclick="setEraser(this)">지우개</button>
+      <div class="palette" id="w-palette" style="margin-top:12px;"></div>
+      <div class="widths">
+        <span style="font-size:13px;color:var(--ink-soft);font-weight:700;">굵기</span>
+        <button class="wbtn" onclick="setWidth(2,this)"><i style="width:4px;height:4px;"></i></button>
+        <button class="wbtn on" onclick="setWidth(4,this)"><i style="width:8px;height:8px;"></i></button>
+        <button class="wbtn" onclick="setWidth(8,this)"><i style="width:14px;height:14px;"></i></button>
+        <button class="wbtn" onclick="setWidth(16,this)"><i style="width:22px;height:22px;"></i></button>
+        <button class="btn sm ghost" onclick="setEraser()">지우개</button>
         <button class="btn sm ghost" onclick="clearPad()">모두 지우기</button>
       </div>
     </div>
 
     <div class="card hidden" id="w-quiz-card">
       <div id="w-quiz-rows"></div>
+    </div>
+
+    <div class="submitbar">
+      <button class="btn mint" id="w-submit" onclick="submitWork()">✅ 제출하기</button>
+      <button class="btn ghost hidden" id="w-edit" onclick="editWork()">✏️ 수정하기</button>
+      <span class="submitted-note hidden" id="w-done">제출했어요!</span>
+    </div>
+
+    <div class="fb-mine hidden" id="w-fb">
+      <div style="font-family:'Jua',sans-serif;font-size:14.5px;color:var(--mint-d);margin-bottom:6px;">💬 선생님이 남긴 말</div>
+      <img id="w-fb-img" alt="">
     </div>
 
     <div class="saveinfo" id="w-save">선생님 화면에 실시간으로 보여요 🙂</div>
@@ -237,7 +276,22 @@
       <div class="nm" id="m-name"></div>
       <button class="btn sm ghost" onclick="closeBig()">닫기</button>
     </div>
-    <div class="big-view" id="m-body"></div>
+    <div class="fb-wrap" id="m-wrap">
+      <div class="big-view" id="m-body"></div>
+      <canvas id="m-fb"></canvas>
+    </div>
+    <div class="fb-tools" id="m-tools">
+      <span class="sw on" style="background:#E8483C" onclick="fbPen('#E8483C',this)"></span>
+      <span class="sw" style="background:#3B82F6" onclick="fbPen('#3B82F6',this)"></span>
+      <span class="sw" style="background:#22A06B" onclick="fbPen('#22A06B',this)"></span>
+      <span class="sw" style="background:#F5A524" onclick="fbPen('#F5A524',this)"></span>
+      <span class="sw" style="background:#2E3440" onclick="fbPen('#2E3440',this)"></span>
+      <button class="tbtn on" id="fb-t-pen" onclick="fbTool('pen')">✏️ 펜</button>
+      <button class="tbtn" id="fb-t-text" onclick="fbTool('text')">🅰️ 글자</button>
+      <button class="tbtn" id="fb-t-eraser" onclick="fbTool('eraser')">🧽 지우개</button>
+      <button class="tbtn" onclick="fbTrash()">🗑️ 전부 지우기</button>
+      <span style="font-size:12px;color:var(--ink-soft);" id="fb-msg"></span>
+    </div>
     <div class="saveinfo" id="m-time"></div>
   </div>
 </div>
@@ -337,8 +391,9 @@ function renderTiles(){
     if(s.mode === "draw" && s.img)      prev = '<img src="'+s.img+'" alt="">';
     else if(s.mode === "quiz")          prev = quizPreview(s);
     else                                prev = esc((s.text||"").slice(0,120)) || '<span style="color:#C3CBD6">아직 비어 있어요</span>';
-    return '<div class="tile" onclick="openBig(\'' + id + '\')">'
-      + '<div class="nm"><span class="dot'+(away?' away':'')+'"></span>'+esc(s.name||"이름 없음")+'</div>'
+    return '<div class="tile'+(s.submitted?' sub':'')+'" onclick="openBig(\'' + id + '\')">'
+      + '<div class="nm"><span class="dot'+(away?' away':'')+'"></span>'+esc(s.name||"이름 없음")
+      + (s.submitted?' <span class="sub-badge">제출 ✓</span>':'')+'</div>'
       + '<div class="prev">'+prev+'</div>'
       + (s.mode === "quiz" ? '<div class="bar"><i style="width:'+pct(s)+'%"></i></div>' : '')
       + '<div class="meta"><span>'+modeLabel(s.mode)+'</span><span>'+ago(s.at)+'</span></div>'
@@ -365,7 +420,9 @@ function quizPreview(s){
 function openBig(id){
   openStudentId = id;
   $("modal").classList.add("on");
+  $("fb-msg").textContent = "";
   renderBig();
+  setTimeout(setupFb, 60);        /* 내용이 그려진 뒤 크기를 재요 */
 }
 function renderBig(){
   const s = students[openStudentId];
@@ -384,14 +441,114 @@ function renderBig(){
   $("m-body").innerHTML = html;
   $("m-time").textContent = "마지막 움직임 : " + ago(s.at);
 }
-function closeBig(){ openStudentId = null; $("modal").classList.remove("on"); }
+function closeBig(){
+  saveFeedback(true);
+  openStudentId = null;
+  $("modal").classList.remove("on");
+}
+
+/* ===== 선생님 피드백 (펜·글자·지우개·휴지통) ===== */
+let fbCv = null, fbCtx = null, fbColor = "#E8483C", fbMode = "pen", fbDrawing = false, fbTimer = null;
+function fbTool(m){
+  fbMode = m;
+  ["pen","text","eraser"].forEach(function(k){ $("fb-t-"+k).classList.toggle("on", k === m); });
+}
+function fbPen(c, el){
+  fbColor = c;
+  if(fbMode === "eraser") fbTool("pen");
+  document.querySelectorAll("#m-tools .sw").forEach(function(x){ x.classList.remove("on"); });
+  if(el) el.classList.add("on");
+}
+function setupFb(){
+  fbCv = $("m-fb");
+  const r = $("m-body").getBoundingClientRect();
+  fbCv.width = Math.round(r.width); fbCv.height = Math.round(r.height);
+  fbCv.style.width = r.width + "px"; fbCv.style.height = r.height + "px";
+  fbCtx = fbCv.getContext("2d");
+  fbCtx.lineCap = "round"; fbCtx.lineJoin = "round";
+  const st = students[openStudentId];
+  if(st && st.fb){
+    const im = new Image();
+    im.onload = function(){ fbCtx.drawImage(im, 0, 0, fbCv.width, fbCv.height); };
+    im.src = st.fb;
+  }
+  if(fbCv._bound) return;
+  fbCv._bound = true;
+  const pos = function(e){
+    const b = fbCv.getBoundingClientRect();
+    const t = e.touches ? e.touches[0] : e;
+    return { x: t.clientX - b.left, y: t.clientY - b.top };
+  };
+  const start = function(e){
+    e.preventDefault();
+    const p = pos(e);
+    if(fbMode === "text"){
+      const txt = prompt("남길 말을 적어 주세요");
+      if(txt){
+        fbCtx.globalCompositeOperation = "source-over";
+        fbCtx.fillStyle = fbColor;
+        fbCtx.font = "700 20px 'Jua', 'Noto Sans KR', sans-serif";
+        fbCtx.fillText(txt, p.x, p.y);
+        saveFeedback();
+      }
+      return;
+    }
+    fbDrawing = true; fbCtx.beginPath(); fbCtx.moveTo(p.x, p.y);
+  };
+  const move = function(e){
+    if(!fbDrawing) return;
+    e.preventDefault();
+    const p = pos(e);
+    if(fbMode === "eraser"){
+      fbCtx.globalCompositeOperation = "destination-out"; fbCtx.lineWidth = 26;
+    } else {
+      fbCtx.globalCompositeOperation = "source-over";
+      fbCtx.strokeStyle = fbColor; fbCtx.lineWidth = 4;
+    }
+    fbCtx.lineTo(p.x, p.y); fbCtx.stroke();
+  };
+  const end = function(){
+    if(!fbDrawing) return;
+    fbDrawing = false;
+    fbCtx.globalCompositeOperation = "source-over";
+    saveFeedback();
+  };
+  fbCv.addEventListener("mousedown", start); fbCv.addEventListener("mousemove", move);
+  window.addEventListener("mouseup", end);
+  fbCv.addEventListener("touchstart", start, {passive:false});
+  fbCv.addEventListener("touchmove", move, {passive:false});
+  fbCv.addEventListener("touchend", end);
+}
+function saveFeedback(now){
+  if(!fbCv || !openStudentId) return;
+  if(fbTimer) clearTimeout(fbTimer);
+  const id = openStudentId;
+  const go = function(){
+    let data = "";
+    try{ data = fbCv.toDataURL("image/png"); }catch(e){ return; }
+    db.collection("rooms").doc(roomCode).collection("students").doc(id)
+      .set({ fb: data }, { merge:true })
+      .then(function(){ $("fb-msg").textContent = "아이 화면에 보냈어요 ✓"; })
+      .catch(function(){ $("fb-msg").textContent = "보내지 못했어요"; });
+  };
+  if(now) go(); else fbTimer = setTimeout(go, 1200);
+}
+function fbTrash(){
+  if(!fbCtx) return;
+  fbCtx.clearRect(0, 0, fbCv.width, fbCv.height);
+  if(openStudentId){
+    db.collection("rooms").doc(roomCode).collection("students").doc(openStudentId)
+      .set({ fb: "" }, { merge:true }).catch(function(){});
+  }
+  $("fb-msg").textContent = "지웠어요";
+}
 
 async function clearAll(){
   if(!confirm("아이들이 쓴 내용을 모두 비울까요?")) return;
   const snap = await db.collection("rooms").doc(roomCode).collection("students").get();
   const batch = db.batch();
   snap.forEach(function(d){
-    batch.set(d.ref, { text:"", img:"", answers:[], at: Date.now() }, { merge:true });
+    batch.set(d.ref, { text:"", img:"", answers:[], fb:"", submitted:false, at: Date.now() }, { merge:true });
   });
   await batch.commit();
 }
@@ -427,7 +584,22 @@ async function joinRoom(){
   $("w-who").textContent = "🧒 " + myName;
   show("v-work");
   watchRoom();
+  watchMyFeedback();
   startSaver();
+}
+
+let unsubMine = null;
+function watchMyFeedback(){
+  if(unsubMine) unsubMine();
+  unsubMine = db.collection("rooms").doc(roomCode).collection("students").doc(myId)
+    .onSnapshot(function(d){
+      if(!d.exists) return;
+      const v = d.data();
+      const has = !!v.fb;
+      $("w-fb").classList.toggle("hidden", !has);
+      if(has) $("w-fb-img").src = v.fb;
+      if(v.submitted !== undefined && v.submitted !== submitted) lockWork(!!v.submitted);
+    });
 }
 
 function watchRoom(){
@@ -447,7 +619,7 @@ function applyMode(){
   $("w-write-card").classList.toggle("hidden", roomMode !== "write");
   $("w-draw-card").classList.toggle("hidden", roomMode !== "draw");
   $("w-quiz-card").classList.toggle("hidden", roomMode !== "quiz");
-  if(roomMode === "draw") setupPad();
+  if(roomMode === "draw"){ setupPad(); buildPalette(); }
   if(roomMode === "quiz") buildQuizRows();
   dirty = true;
 }
@@ -469,7 +641,25 @@ function leaveRoom(){
 }
 
 /* ===== 그림판 ===== */
+const COLORS = ["#2E3440","#7B8794","#C0392B","#E8483C","#F26C4F","#F5A524",
+                "#F7D154","#A3C940","#22A06B","#3FBFA0","#4AA8E8","#3B82F6",
+                "#5B5BD6","#8E6AD6","#D96BB8","#8B5E3C"];
 let pad, pctx, drawing = false, pen = "#2E3440", erasing = false, padReady = false;
+let penWidth = 4;
+let submitted = false;
+
+function buildPalette(){
+  const wrap = $("w-palette");
+  if(!wrap || wrap.children.length) return;
+  wrap.innerHTML = COLORS.map(function(c,i){
+    return '<span class="sw'+(i===0?' on':'')+'" style="background:'+c+'" onclick="setPen(\''+c+'\',this)"></span>';
+  }).join("");
+}
+function setWidth(w, el){
+  penWidth = w; erasing = false;
+  document.querySelectorAll(".widths .wbtn").forEach(function(b){ b.classList.remove("on"); });
+  if(el) el.classList.add("on");
+}
 function setupPad(){
   if(padReady) return;
   pad = $("w-pad");
@@ -487,7 +677,7 @@ function setupPad(){
     pctx.beginPath(); pctx.moveTo(p.x,p.y); };
   const move = e => { if(!drawing) return; e.preventDefault(); const p = pos(e);
     pctx.strokeStyle = erasing ? "#fff" : pen;
-    pctx.lineWidth = erasing ? 22 : 3.5;
+    pctx.lineWidth = erasing ? 24 : penWidth;
     pctx.lineTo(p.x,p.y); pctx.stroke(); dirty = true; };
   const end = () => { drawing = false; };
   pad.addEventListener("mousedown",start); pad.addEventListener("mousemove",move);
@@ -499,10 +689,35 @@ function setupPad(){
 }
 function setPen(c, el){
   pen = c; erasing = false;
-  document.querySelectorAll(".sw").forEach(s => s.classList.remove("on"));
+  document.querySelectorAll("#w-palette .sw").forEach(function(s){ s.classList.remove("on"); });
   if(el) el.classList.add("on");
 }
-function setEraser(){ erasing = true; document.querySelectorAll(".sw").forEach(s => s.classList.remove("on")); }
+function setEraser(){
+  erasing = true;
+  document.querySelectorAll("#w-palette .sw").forEach(function(s){ s.classList.remove("on"); });
+}
+
+/* ===== 제출하기 / 수정하기 ===== */
+function lockWork(on){
+  submitted = on;
+  const t = $("w-text"); if(t) t.readOnly = on;
+  for(let i=0;i<30;i++){ const q = $("q-"+i); if(q) q.readOnly = on; }
+  if(pad) pad.style.pointerEvents = on ? "none" : "auto";
+  $("w-submit").classList.toggle("hidden", on);
+  $("w-edit").classList.toggle("hidden", !on);
+  $("w-done").classList.toggle("hidden", !on);
+  document.querySelectorAll("#w-palette, .widths").forEach(function(el){ el.style.opacity = on ? ".45" : "1"; });
+}
+function submitWork(){
+  lockWork(true);
+  dirty = true; sendWork();
+  $("w-save").textContent = "제출했어요! 고치려면 '수정하기'를 눌러요 ✓";
+}
+function editWork(){
+  lockWork(false);
+  dirty = true; sendWork();
+  $("w-save").textContent = "다시 고칠 수 있어요 🙂";
+}
 function clearPad(){
   if(!pctx) return;
   pctx.fillStyle = "#fff"; pctx.fillRect(0,0,pad.width,pad.height); dirty = true;
@@ -531,7 +746,7 @@ function startSaver(){
 }
 function sendWork(){
   if(!roomCode || !myId) return;
-  const payload = { name: myName, mode: roomMode, at: Date.now(), away: document.hidden };
+  const payload = { name: myName, mode: roomMode, at: Date.now(), away: document.hidden, submitted: submitted };
   if(roomMode === "write") payload.text = ($("w-text").value||"").slice(0, 1500);
   else if(roomMode === "draw") payload.img = padThumb();
   else {
@@ -539,7 +754,7 @@ function sendWork(){
     for(let i=0;i<roomQCount;i++){ const el = $("q-"+i); a.push(el ? el.value : ""); }
     payload.answers = a;
   }
-  const sig = JSON.stringify([payload.text, payload.img, payload.answers, payload.mode, payload.away]);
+  const sig = JSON.stringify([payload.text, payload.img, payload.answers, payload.mode, payload.away, payload.submitted]);
   if(!dirty && sig === lastSent) return;      /* 바뀐 게 없으면 보내지 않아요 */
   lastSent = sig; dirty = false;
   db.collection("rooms").doc(roomCode).collection("students").doc(myId)
