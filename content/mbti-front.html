@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>나의 성격 앞글자 찾기 | 3분 놀이터</title>
+<meta name="description" content="20가지 학교 상황으로 알아보는 나의 성격 앞 두 글자. 유니콘·사자·마법사·기사 중 나는 누구일까?">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFF7FB; --card:#FFFFFF; --ink:#4A4149; --ink-soft:#948C94; --line:#F3E6EE;
+    --pink:#FF9DB6; --pink-d:#E97694; --purple:#C77DFF; --mint:#5FD0B0; --lemon:#FFD36E;
+    --shadow:0 3px 0 rgba(74,65,73,.09);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 8% 4%, rgba(255,211,110,.26) 0 120px, transparent 121px),
+      radial-gradient(circle at 92% 8%, rgba(199,125,255,.20) 0 100px, transparent 101px),
+      radial-gradient(circle at 88% 90%, rgba(95,208,176,.18) 0 110px, transparent 111px),
+      var(--bg);
+    background-attachment:fixed;
+    color:var(--ink); font-family:'Noto Sans KR',sans-serif; min-height:100vh;
+  }
+  .topbar{max-width:720px;margin:0 auto;padding:14px 18px 0;display:flex;align-items:center;justify-content:space-between;}
+  .topbar a{text-decoration:none;color:var(--ink);}
+  .topbar .brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;}
+  .topbar .back{font-size:12.5px;font-weight:700;color:var(--ink-soft);border:2px solid #fff;background:#fff;padding:6px 12px;border-radius:999px;box-shadow:var(--shadow);}
+  .shell{max-width:720px;margin:0 auto;padding:14px 18px 56px;}
+  .card{background:var(--card);border-radius:22px;padding:22px;box-shadow:var(--shadow),0 8px 22px rgba(74,65,73,.07);margin-bottom:14px;}
+
+  .hero{text-align:center;margin-bottom:14px;}
+  .hero h1{font-family:'Jua',sans-serif;font-size:clamp(25px,5.4vw,33px);margin:0 0 5px;color:var(--pink-d);}
+  .hero p{font-family:'Gaegu',cursive;font-weight:700;font-size:17px;color:var(--ink-soft);margin:0;}
+
+  .btn{font-family:'Jua',sans-serif;border:none;cursor:pointer;font-size:17px;padding:15px 30px;
+    border-radius:17px;background:var(--pink);color:#fff;box-shadow:0 5px 0 var(--pink-d);}
+  .btn:active{transform:translateY(5px);box-shadow:none;}
+  .btn.ghost{background:#fff;color:var(--ink);box-shadow:0 5px 0 var(--line);}
+  .btn.mint{background:var(--mint);box-shadow:0 5px 0 #43AE90;}
+  .btn.sm{font-size:14px;padding:11px 18px;border-radius:13px;box-shadow:0 4px 0 var(--line);}
+
+  .faces{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:16px 0 6px;}
+  .face{flex:1 1 130px;max-width:150px;background:#fff;border:3px solid var(--line);border-radius:18px;padding:14px 8px;text-align:center;}
+  .face .e{font-size:34px;display:block;}
+  .face .n{font-family:'Jua',sans-serif;font-size:13.5px;margin-top:5px;color:var(--ink);}
+
+  /* 진행 막대 */
+  .prog{display:flex;gap:4px;margin-bottom:14px;}
+  .prog i{flex:1;height:7px;border-radius:999px;background:var(--line);}
+  .prog i.on{background:var(--pink);}
+  .qnum{font-family:'Jua',sans-serif;font-size:13px;color:var(--pink-d);letter-spacing:.06em;}
+  .qtext{font-family:'Jua',sans-serif;font-size:20px;line-height:1.55;margin:6px 0 18px;word-break:keep-all;}
+  .opt{display:block;width:100%;text-align:left;background:#FFFBFD;border:3px solid var(--line);
+    border-radius:16px;padding:16px 18px;margin-bottom:11px;font-size:15.5px;cursor:pointer;
+    font-family:'Noto Sans KR',sans-serif;line-height:1.6;word-break:keep-all;color:var(--ink);}
+  .opt:hover{border-color:var(--pink);background:#fff;}
+
+  /* 결과 */
+  .res-top{text-align:center;}
+  .res-sym{font-size:72px;line-height:1;}
+  .res-tag{font-family:'Gaegu',cursive;font-weight:700;font-size:16px;color:var(--ink-soft);margin-top:6px;}
+  .res-name{font-family:'Jua',sans-serif;font-size:27px;margin:4px 0 2px;}
+  .res-code{display:inline-block;font-family:'Jua',sans-serif;font-size:15px;padding:6px 16px;border-radius:999px;color:#fff;}
+  .charts{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:20px 0 6px;}
+  .chart{text-align:center;}
+  .chart .lab{font-family:'Jua',sans-serif;font-size:13.5px;color:var(--ink-soft);margin-top:6px;}
+  .res-text{font-size:15px;line-height:2.05;color:var(--ink);word-break:keep-all;margin-top:18px;white-space:pre-line;}
+  .box{border-radius:16px;padding:15px 17px;margin-top:12px;}
+  .box h3{font-family:'Jua',sans-serif;font-size:15.5px;margin:0 0 8px;}
+  .box ul{margin:0;padding-left:19px;font-size:14.5px;line-height:1.95;}
+  .b-good{background:#EFFBF6;border:2px solid #C7EEE1;} .b-good h3{color:#2E9B7A;}
+  .b-care{background:#FFF3F6;border:2px solid #FBD8E2;} .b-care h3{color:#D9607F;}
+  .b-tip{background:#F6F1FF;border:2px solid #E0D2FA;} .b-tip h3{color:#8A5BD1;}
+  .acts{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:20px;}
+  .others{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:16px;}
+  .oth{background:#fff;border:2px solid var(--line);border-radius:14px;padding:9px 13px;font-size:12.5px;color:var(--ink-soft);}
+  .hidden{display:none !important;}
+  .foot{text-align:center;font-size:12px;color:var(--ink-soft);margin-top:18px;line-height:1.8;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="../index.html">
+    <svg width="26" height="26" viewBox="0 0 34 34" fill="none">
+      <circle cx="17" cy="18" r="14" fill="#fff" stroke="#4A4149" stroke-width="2"/>
+      <path d="M17 9 L17 18 L23 21" stroke="#FF9DB6" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="13" y="2" width="8" height="4" rx="1.5" fill="#4A4149"/>
+    </svg>
+    <span>3분 놀이터</span>
+  </a>
+  <a class="back" href="../index.html">← 다른 콘텐츠 보기</a>
+</div>
+
+<div class="shell">
+
+  <div id="v-intro">
+    <div class="hero">
+      <h1>✨ 나의 성격 앞글자 찾기</h1>
+      <p>스무 고개를 넘으면 내 상징이 나타나요!</p>
+    </div>
+    <div class="card" style="text-align:center;">
+      <p style="font-size:14.5px;line-height:1.95;color:var(--ink-soft);word-break:keep-all;margin:0 0 4px;">
+        학교에서 흔히 겪는 스무 가지 상황을 보고 마음이 더 끌리는 쪽을 고르면 돼요.<br>
+        정답은 없어요. 지금 내 모습 그대로 골라 보세요!
+      </p>
+      <div class="faces">
+        <div class="face"><span class="e">🦄</span><span class="n">반짝이는<br>유니콘</span></div>
+        <div class="face"><span class="e">🦁</span><span class="n">용감한<br>사자</span></div>
+        <div class="face"><span class="e">🔮</span><span class="n">별을 읽는<br>마법사</span></div>
+        <div class="face"><span class="e">🛡️</span><span class="n">든든한<br>기사</span></div>
+      </div>
+      <button class="btn" style="margin-top:16px;" onclick="startTest()">시작하기</button>
+    </div>
+  </div>
+
+  <div id="v-quiz" class="hidden">
+    <div class="card">
+      <div class="prog" id="prog"></div>
+      <div class="qnum" id="q-num"></div>
+      <div class="qtext" id="q-text"></div>
+      <div id="q-opts"></div>
+      <div style="text-align:center;margin-top:6px;">
+        <button class="btn sm ghost" onclick="prevQ()" id="back-btn">← 이전 문제</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="v-result" class="hidden">
+    <div class="card">
+      <div class="res-top">
+        <div class="res-sym" id="r-sym"></div>
+        <div class="res-name" id="r-name"></div>
+        <div class="res-tag" id="r-tag"></div>
+        <div style="margin-top:8px;"><span class="res-code" id="r-code"></span></div>
+      </div>
+      <div class="charts" id="r-charts"></div>
+      <div class="res-text" id="r-text"></div>
+      <div class="box b-good"><h3>🌟 이런 점이 멋져요</h3><ul id="r-good"></ul></div>
+      <div class="box b-care"><h3>🌱 이런 점은 조금만</h3><ul id="r-care"></ul></div>
+      <div class="box b-tip"><h3>💌 오늘의 한 걸음</h3><div id="r-tip" style="font-size:14.5px;line-height:1.9;"></div></div>
+      <div class="acts">
+        <button class="btn mint" onclick="shareResult()">📤 결과 공유하기</button>
+        <button class="btn ghost" onclick="restart()">🔄 다시 하기</button>
+        <a class="btn ghost" href="../index.html" style="text-decoration:none;display:inline-block;">다른 콘텐츠</a>
+      </div>
+      <div class="others" id="r-others"></div>
+    </div>
+  </div>
+
+  <div class="foot">
+    재미로 보는 테스트예요. 사람의 성격은 네 가지로 나뉘지 않는답니다 🙂
+  </div>
+</div>
+
+<script>
+const TYPES = {
+ "EN": {
+  "sym": "🦄",
+  "name": "반짝이는 유니콘",
+  "tag": "상상을 몰고 다니는 꿈의 전령",
+  "color": "#C77DFF",
+  "bg": "#F6EDFF",
+  "text": "유니콘은 뿔 끝에서 반짝이는 가루를 흩뿌리며 달리는 동물이에요. 지나간 자리마다 없던 길이 생기고, 심심하던 운동장이 모험의 무대로 바뀌지요. 너는 꼭 그런 어린이예요. 머릿속에 늘 새로운 생각이 둥둥 떠다니고, 그 생각을 혼자 품고 있질 못해서 곧바로 친구에게 달려가 이야기해요. \"우리 이거 해볼까?\" 하는 말이 입에서 떠나지 않지요.\n모둠 활동이 시작되면 가장 먼저 손을 들어 엉뚱한 의견을 내놓는 사람도, 그 의견에 친구들이 깔깔 웃으면 더 신이 나서 살을 붙이는 사람도 너예요. 교실에 아이디어가 뚝 끊겨 조용해질 때 \"아! 이러면 되겠다!\" 하고 분위기를 되살리는 힘이 있어요. 네가 말하기 시작하면 친구들 눈이 반짝이는 걸 느껴본 적 있을 거예요.\n다만 유니콘은 너무 빨리 달려서 가끔 뒤를 못 봐요. 재미있는 생각이 자꾸 떠오르다 보니 먼저 시작한 일을 끝맺지 못한 채 다음 일로 넘어가곤 하지요. 친구가 아직 따라오지 못했는데 혼자 저만치 앞서가 있기도 하고요.\n그래서 네게 필요한 건 딱 한 가지, 잠깐 멈춰 서는 연습이에요. 새 생각이 떠올랐을 때 공책 한 귀퉁이에 적어 두고 지금 하던 일을 먼저 마무리해 보세요. 그리고 가끔 뒤를 돌아 \"너는 어떻게 생각해?\" 하고 물어봐 주세요. 그 한마디면 친구들은 네 뒤를 신나게 따라 달릴 거예요. 네 반짝임은 혼자 빛날 때보다 함께 빛날 때 훨씬 멀리 간답니다.",
+  "good": [
+   "새로운 생각이 샘솟아요",
+   "친구들을 신나게 만들어요",
+   "처음 하는 일도 겁내지 않아요"
+  ],
+  "care": [
+   "끝맺기 전에 다음 일로 넘어가요",
+   "친구 속도를 놓칠 때가 있어요",
+   "말이 앞서다 실수할 수 있어요"
+  ],
+  "tip": "떠오른 생각은 적어 두고, 지금 일을 먼저 끝내 보기"
+ },
+ "ES": {
+  "sym": "🦁",
+  "name": "용감한 사자",
+  "tag": "지금 여기서 바로 뛰어드는 영웅",
+  "color": "#FF9F43",
+  "bg": "#FFF3E2",
+  "text": "사자는 수풀 뒤에서 오래 고민하지 않아요. 눈앞에 해야 할 일이 보이면 어흥 하고 달려 나가지요. 너는 꼭 그런 어린이예요. 머리로 상상하기보다 몸으로 부딪혀 알아내는 쪽이 훨씬 편하고, 설명을 길게 듣는 것보다 한 번 해보는 게 빠르다고 느껴요.\n체육 시간에 가장 먼저 뛰어나가는 사람, 무거운 교구를 번쩍 들어 옮기는 사람, 청소 시간에 \"내가 할게!\" 하고 빗자루를 잡는 사람이 너예요. 친구가 넘어지면 생각하기도 전에 손이 먼저 나가고, 모둠에서 아무도 나서지 않을 때 \"그럼 내가 하지 뭐\" 하며 자리를 채우지요. 그래서 반 아이들은 어려운 일이 생기면 자연스레 너를 쳐다봐요. 믿음직한 사람 곁에는 늘 친구가 모이는 법이니까요.\n사자의 힘은 빠른 몸이지만, 가끔 그 빠름이 발을 걸기도 해요. 문제를 끝까지 듣기 전에 움직여서 엉뚱한 답을 내놓거나, 신나게 달리다 친구와 부딪히기도 하지요. 당장 눈에 보이는 것에 마음을 쏟다 보니 며칠 뒤 일을 미리 챙기는 건 조금 서툴 수 있어요.\n그러니 달리기 전에 숨을 한 번만 크게 쉬어 보세요. 하나, 둘, 셋을 세는 그 짧은 사이에 \"무엇부터 하면 좋을까?\"를 떠올리면 네 용기는 훨씬 더 단단해져요. 사자가 영웅이 되는 건 힘이 세서가 아니라, 그 힘을 알맞게 쓸 줄 알아서랍니다. 네가 한 번 숨을 고르고 달려 나가는 날, 반 아이들은 전보다 더 든든한 마음으로 네 뒤를 따라올 거예요.",
+  "good": [
+   "생각보다 행동이 빨라요",
+   "어려운 일에 먼저 나서요",
+   "친구들이 믿고 따라요"
+  ],
+  "care": [
+   "끝까지 듣기 전에 움직여요",
+   "서두르다 실수할 수 있어요",
+   "앞일을 미리 챙기기 어려워요"
+  ],
+  "tip": "달리기 전에 숨 한 번, 하나 둘 셋 세어 보기"
+ },
+ "IN": {
+  "sym": "🔮",
+  "name": "별을 읽는 마법사",
+  "tag": "조용히 깊은 생각을 길어 올리는",
+  "color": "#6C8AE4",
+  "bg": "#ECF1FF",
+  "text": "마법사는 시끄러운 광장이 아니라 조용한 탑 꼭대기에 살아요. 거기서 밤하늘을 올려다보며 남들이 못 보는 별자리를 읽어 내지요. 너는 꼭 그런 어린이예요. 겉으로는 말이 많지 않지만 머릿속에서는 끊임없이 질문이 피어올라요. \"왜 그럴까?\" \"만약에 이러면 어떻게 될까?\" 하는 생각들이 꼬리를 물지요.\n쉬는 시간에 혼자 창밖을 보거나 책 속으로 쏙 들어가 있을 때, 너는 심심한 게 아니라 가장 바쁜 순간이에요. 그래서 네가 가끔 꺼내는 한마디에 친구들이 \"오, 그건 생각 못 했는데!\" 하고 놀라곤 하지요. 수업에서 선생님이 \"왜 그렇게 생각했니?\" 하고 물으면 남들과 전혀 다른 답을 내놓는 사람도 너예요. 혼자 오래 품고 있던 생각이라 그만큼 깊거든요.\n다만 마법사는 탑에서 내려오기를 어려워해요. 좋은 생각을 잔뜩 품고도 말할 기회를 놓쳐 버리거나, 먼저 말을 거는 게 부담스러워 혼자 있는 쪽을 고르기도 하지요. 생각이 너무 깊어져 아직 일어나지도 않은 일을 걱정하기도 하고요.\n그러니 하루에 한 번만 탑 아래로 내려와 보세요. 손을 번쩍 들지 않아도 괜찮아요. 짝꿍에게 작게 \"나는 이렇게 생각했어\" 하고 건네는 것만으로 충분합니다. 네가 길어 올린 생각은 혼자 두기엔 너무 아까운 보물이에요. 꺼내 놓는 순간 교실 전체가 환해질 거예요. 말수가 적다는 건 할 말이 없다는 뜻이 아니라, 고르고 고른 말을 한다는 뜻이니까요. 네 한마디는 그래서 더 귀합니다.",
+  "good": [
+   "깊고 남다른 생각을 해요",
+   "혼자서도 집중을 잘해요",
+   "상상 속 이야기가 풍부해요"
+  ],
+  "care": [
+   "말할 기회를 놓치곤 해요",
+   "걱정이 길어질 때가 있어요",
+   "먼저 말 걸기를 어려워해요"
+  ],
+  "tip": "하루에 한 번, 짝꿍에게 내 생각 한 줄 건네기"
+ },
+ "IS": {
+  "sym": "🛡️",
+  "name": "든든한 기사",
+  "tag": "묵묵히 제자리를 지키는 믿음직한",
+  "color": "#3FBFA0",
+  "bg": "#E8F9F4",
+  "text": "기사는 요란하게 나서지 않아요. 대신 맡은 자리를 하루도 빠짐없이 지키지요. 비가 오나 눈이 오나 같은 자리에 서 있는 그 모습이 사람들에게 가장 큰 안심이 됩니다. 너는 꼭 그런 어린이예요. 큰 소리로 자랑하지 않지만, 해야 할 일을 조용히 끝까지 해내는 힘이 있어요.\n준비물을 잊는 법이 거의 없고, 숙제는 미리 해 두어야 마음이 놓이고, 사물함과 책상 서랍이 늘 가지런한 사람. 선생님이 \"이거 누가 맡아 줄래?\" 하고 물으면 손은 늦게 들지만 한 번 맡으면 끝까지 해내는 사람이 너예요. 친구들은 그래서 너를 믿어요. 요란한 약속보다 지켜지는 약속이 훨씬 귀하다는 걸 아이들도 느끼거든요.\n기사의 방패는 튼튼하지만 조금 무거워요. 하던 방식이 편해서 새로운 것을 시작할 때 머뭇거리게 되고, 갑자기 계획이 바뀌면 마음이 불편해지지요. 혼자 끙끙 앓으면서도 도와달라는 말을 잘 못 꺼내기도 해요.\n그러니 가끔은 방패를 잠시 내려놓아 보세요. 틀려도 괜찮은 일에서 새로운 방법을 한 번만 시도해 보는 거예요. 그리고 힘들 땐 \"조금 도와줄래?\" 하고 말해 보세요. 그건 약한 게 아니라 더 멀리 가기 위한 지혜랍니다. 네 꾸준함은 하루아침에 빛나지 않지만, 한 해가 끝날 즈음 가장 크게 빛나는 종류의 힘이에요. 반짝 빛나는 별보다 늘 같은 자리에 떠 있는 북극성이 길을 알려 주듯, 네 한결같음이 친구들에게는 방향이 되어 줍니다.",
+  "good": [
+   "맡은 일을 끝까지 해내요",
+   "준비와 정리를 잘해요",
+   "약속을 꼭 지켜요"
+  ],
+  "care": [
+   "새로운 것을 시작하기 어려워요",
+   "계획이 바뀌면 불편해요",
+   "도와달라고 말하기 힘들어요"
+  ],
+  "tip": "틀려도 괜찮은 일에서 새 방법 한 번 시도하기"
+ }
+};
+const QUESTIONS = [
+ {
+  "ax": "EI",
+  "q": "쉬는 시간 종이 쳤어요. 나는?",
+  "a": [
+   {
+    "t": "친구들한테 달려가 \"뭐 하고 놀까?\" 물어봐요",
+    "v": "E"
+   },
+   {
+    "t": "자리에 앉아 하던 그림이나 책을 마저 봐요",
+    "v": "I"
+   }
+  ]
+ },
+ {
+  "ax": "NS",
+  "q": "선생님이 \"구름을 보고 떠오르는 걸 말해 보자\"고 했어요.",
+  "a": [
+   {
+    "t": "\"솜사탕 같아요! 용 모양 같기도 해요!\"",
+    "v": "N"
+   },
+   {
+    "t": "\"하얗고 뭉게뭉게해요. 비가 올 것 같아요\"",
+    "v": "S"
+   }
+  ]
+ },
+ {
+  "ax": "EI",
+  "q": "새 학기 첫날, 짝꿍이 바뀌었어요.",
+  "a": [
+   {
+    "t": "먼저 \"안녕! 나는 OO야\" 하고 말을 걸어요",
+    "v": "E"
+   },
+   {
+    "t": "짝꿍이 말을 걸어 줄 때까지 기다려요",
+    "v": "I"
+   }
+  ]
+ },
+ {
+  "ax": "NS",
+  "q": "모둠 신문을 만들어요. 나는 어느 쪽이 더 재미있나요?",
+  "a": [
+   {
+    "t": "\"만약에 우리 학교가 하늘에 있다면?\" 상상 기사",
+    "v": "N"
+   },
+   {
+    "t": "지난주에 있었던 운동회를 그대로 전하는 기사",
+    "v": "S"
+   }
+  ]
+ },
+ {
+  "ax": "EI",
+  "q": "모둠에서 발표자를 정해요.",
+  "a": [
+   {
+    "t": "\"내가 할래!\" 하고 손을 들어요",
+    "v": "E"
+   },
+   {
+    "t": "다른 친구가 하면 좋겠다고 생각해요",
+    "v": "I"
+   }
+  ]
+ },
+ {
+  "ax": "NS",
+  "q": "과학 시간에 식물을 관찰해요.",
+  "a": [
+   {
+    "t": "\"이 잎이 사람 손처럼 생겼어!\" 하고 떠올려요",
+    "v": "N"
+   },
+   {
+    "t": "잎의 개수와 길이를 하나씩 세어 적어요",
+    "v": "S"
+   }
+  ]
+ },
+ {
+  "ax": "EI",
+  "q": "주말에 뭘 할지 고르라면?",
+  "a": [
+   {
+    "t": "친구들을 불러서 놀이터에서 놀기",
+    "v": "E"
+   },
+   {
+    "t": "집에서 좋아하는 걸 혼자 푹 하기",
+    "v": "I"
+   }
+  ]
+ },
+ {
+  "ax": "NS",
+  "q": "선생님이 \"앞으로 어떤 어른이 되고 싶니?\" 물었어요.",
+  "a": [
+   {
+    "t": "아직 세상에 없는 직업을 만들고 싶어요",
+    "v": "N"
+   },
+   {
+    "t": "내가 아는 직업 중에 하고 싶은 걸 말해요",
+    "v": "S"
+   }
+  ]
+ },
+ {
+  "ax": "EI",
+  "q": "점심시간, 급식을 다 먹었어요.",
+  "a": [
+   {
+    "t": "친구들과 수다를 떨며 교실로 가요",
+    "v": "E"
+   },
+   {
+    "t": "조용히 먼저 나와 교실로 가요",
+    "v": "I"
+   }
+  ]
+ },
+ {
+  "ax": "NS",
+  "q": "숙제 설명을 들을 때 나는?",
+  "a": [
+   {
+    "t": "\"그래서 결국 왜 하는 거지?\"가 궁금해요",
+    "v": "N"
+   },
+   {
+    "t": "\"몇 쪽까지, 언제까지?\"를 정확히 알고 싶어요",
+    "v": "S"
+   }
+  ]
+ },
+ {
+  "ax": "EI",
+  "q": "학예회 연습을 해요.",
+  "a": [
+   {
+    "t": "사람들 앞에 서면 더 신이 나요",
+    "v": "E"
+   },
+   {
+    "t": "무대에 서기 전에 가슴이 콩닥거려요",
+    "v": "I"
+   }
+  ]
+ },
+ {
+  "ax": "NS",
+  "q": "친구가 새 장난감을 보여 줬어요.",
+  "a": [
+   {
+    "t": "\"이걸로 이런 놀이 만들면 어때?\" 하고 생각해요",
+    "v": "N"
+   },
+   {
+    "t": "\"얼마야? 어디서 샀어?\" 하고 물어봐요",
+    "v": "S"
+   }
+  ]
+ },
+ {
+  "ax": "EI",
+  "q": "속상한 일이 생겼을 때 나는?",
+  "a": [
+   {
+    "t": "친구나 가족에게 바로 이야기해요",
+    "v": "E"
+   },
+   {
+    "t": "혼자 한참 생각하다가 나중에 말해요",
+    "v": "I"
+   }
+  ]
+ },
+ {
+  "ax": "NS",
+  "q": "만들기 시간에 설명서를 받았어요.",
+  "a": [
+   {
+    "t": "내 마음대로 바꿔서 새롭게 만들어요",
+    "v": "N"
+   },
+   {
+    "t": "설명서 순서대로 차근차근 따라 해요",
+    "v": "S"
+   }
+  ]
+ },
+ {
+  "ax": "EI",
+  "q": "모둠 회의가 시작됐어요.",
+  "a": [
+   {
+    "t": "떠오르는 대로 말하면서 생각을 정리해요",
+    "v": "E"
+   },
+   {
+    "t": "머릿속으로 정리한 뒤에 말을 꺼내요",
+    "v": "I"
+   }
+  ]
+ },
+ {
+  "ax": "NS",
+  "q": "책을 읽을 때 더 좋아하는 건?",
+  "a": [
+   {
+    "t": "마법이 나오는 이야기나 공상 과학",
+    "v": "N"
+   },
+   {
+    "t": "실제로 있었던 일이나 사실이 담긴 책",
+    "v": "S"
+   }
+  ]
+ },
+ {
+  "ax": "EI",
+  "q": "생일잔치에 초대받았어요.",
+  "a": [
+   {
+    "t": "모르는 친구가 많아도 금방 어울려요",
+    "v": "E"
+   },
+   {
+    "t": "아는 친구 옆에 주로 붙어 있어요",
+    "v": "I"
+   }
+  ]
+ },
+ {
+  "ax": "NS",
+  "q": "현장체험학습을 다녀왔어요. 일기에 쓰는 건?",
+  "a": [
+   {
+    "t": "그곳에서 떠오른 생각과 상상",
+    "v": "N"
+   },
+   {
+    "t": "본 것과 한 일을 순서대로 자세히",
+    "v": "S"
+   }
+  ]
+ },
+ {
+  "ax": "EI",
+  "q": "수업 중 모르는 게 생겼어요.",
+  "a": [
+   {
+    "t": "바로 손을 들어 물어봐요",
+    "v": "E"
+   },
+   {
+    "t": "끝나고 조용히 물어보거나 혼자 찾아봐요",
+    "v": "I"
+   }
+  ]
+ },
+ {
+  "ax": "NS",
+  "q": "보드게임을 처음 해요.",
+  "a": [
+   {
+    "t": "\"이 규칙 바꾸면 더 재밌겠다!\" 생각해요",
+    "v": "N"
+   },
+   {
+    "t": "원래 규칙을 먼저 정확히 익히려 해요",
+    "v": "S"
+   }
+  ]
+ }
+];
+
+/* ===== 상태 ===== */
+let idx = 0;
+const picks = [];          /* 각 문항에서 고른 글자 */
+
+const $ = id => document.getElementById(id);
+function show(v){
+  ["v-intro","v-quiz","v-result"].forEach(x => $(x).classList.toggle("hidden", x !== v));
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function startTest(){
+  idx = 0; picks.length = 0;
+  buildProg();
+  show("v-quiz");
+  renderQ();
+}
+
+function buildProg(){
+  $("prog").innerHTML = QUESTIONS.map(function(_,i){ return '<i id="p-'+i+'"></i>'; }).join("");
+}
+function paintProg(){
+  QUESTIONS.forEach(function(_,i){
+    const el = $("p-"+i); if(el) el.classList.toggle("on", i < idx);
+  });
+}
+
+function renderQ(){
+  paintProg();
+  const q = QUESTIONS[idx];
+  $("q-num").textContent = (idx+1) + " / " + QUESTIONS.length;
+  $("q-text").textContent = q.q;
+  $("back-btn").style.visibility = idx === 0 ? "hidden" : "visible";
+  $("q-opts").innerHTML = q.a.map(function(o,i){
+    return '<button class="opt" onclick="choose(' + i + ')">' + o.t + '</button>';
+  }).join("");
+}
+
+function choose(i){
+  picks[idx] = QUESTIONS[idx].a[i].v;
+  idx++;
+  if(idx < QUESTIONS.length) renderQ();
+  else showResult();
+}
+function prevQ(){
+  if(idx > 0){ idx--; renderQ(); }
+}
+
+/* ===== 결과 ===== */
+function tally(){
+  const c = { E:0, I:0, N:0, S:0 };
+  picks.forEach(function(v){ if(c[v] !== undefined) c[v]++; });
+  return c;
+}
+
+function donut(pct, color, big, small){
+  /* 원그래프 — 고른 쪽이 몇 퍼센트인지 보여줘요 */
+  const R = 42, C = 2 * Math.PI * R;
+  const on = C * pct / 100;
+  return '<svg width="118" height="118" viewBox="0 0 118 118">'
+    + '<circle cx="59" cy="59" r="'+R+'" fill="none" stroke="#F0E8EE" stroke-width="15"/>'
+    + '<circle cx="59" cy="59" r="'+R+'" fill="none" stroke="'+color+'" stroke-width="15"'
+    + ' stroke-linecap="round" stroke-dasharray="'+on.toFixed(1)+' '+(C-on).toFixed(1)+'"'
+    + ' transform="rotate(-90 59 59)"/>'
+    + '<text x="59" y="54" text-anchor="middle" font-family="Jua, sans-serif" font-size="26" fill="'+color+'">'+big+'</text>'
+    + '<text x="59" y="76" text-anchor="middle" font-family="Jua, sans-serif" font-size="16" fill="#948C94">'+small+'</text>'
+    + '</svg>';
+}
+
+let myCode = "EN";
+function showResult(){
+  const c = tally();
+  const eiTot = c.E + c.I, nsTot = c.N + c.S;
+  const e = eiTot ? Math.round(c.E / eiTot * 100) : 50;
+  const n = nsTot ? Math.round(c.N / nsTot * 100) : 50;
+
+  const first  = e >= 50 ? "E" : "I";
+  const second = n >= 50 ? "N" : "S";
+  myCode = first + second;
+  const t = TYPES[myCode];
+
+  $("r-sym").textContent = t.sym;
+  $("r-name").textContent = t.name;
+  $("r-tag").textContent = t.tag;
+  const code = $("r-code");
+  code.textContent = myCode + " 유형";
+  code.style.background = t.color;
+
+  const eiPct = first === "E" ? e : 100 - e;
+  const nsPct = second === "N" ? n : 100 - n;
+  $("r-charts").innerHTML =
+      '<div class="chart">' + donut(eiPct, t.color, first, eiPct + "%")
+    + '<div class="lab">' + (first === "E" ? "밖으로 뻗는 힘" : "안으로 모으는 힘") + '</div></div>'
+    + '<div class="chart">' + donut(nsPct, t.color, second, nsPct + "%")
+    + '<div class="lab">' + (second === "N" ? "상상하는 눈" : "사실을 보는 눈") + '</div></div>';
+
+  $("r-text").textContent = t.text;
+  $("r-good").innerHTML = t.good.map(function(x){ return "<li>" + x + "</li>"; }).join("");
+  $("r-care").innerHTML = t.care.map(function(x){ return "<li>" + x + "</li>"; }).join("");
+  $("r-tip").textContent = t.tip;
+
+  $("r-others").innerHTML = Object.keys(TYPES).filter(function(k){ return k !== myCode; })
+    .map(function(k){ return '<span class="oth">' + TYPES[k].sym + " " + TYPES[k].name + '</span>'; }).join("");
+
+  document.body.style.background =
+    "radial-gradient(circle at 10% 6%, " + t.bg + " 0 240px, transparent 241px), var(--bg)";
+
+  show("v-result");
+}
+
+function restart(){
+  document.body.style.background = "";
+  startTest();
+}
+
+/* ===== 공유 ===== */
+function shareResult(){
+  const t = TYPES[myCode];
+  const text = "나는 " + t.sym + " " + t.name + "(" + myCode + ")! 너는 어떤 상징일까?";
+  const url = window.location.href;
+  if(navigator.share){
+    navigator.share({ title: "나의 성격 앞글자 찾기", text: text, url: url }).catch(function(){});
+  } else if(navigator.clipboard){
+    navigator.clipboard.writeText(text + "\n" + url).then(function(){
+      alert("결과가 복사됐어요! 친구에게 붙여넣어 보세요 🙂");
+    }).catch(function(){ prompt("아래 내용을 복사해 주세요", text + "\n" + url); });
+  } else {
+    prompt("아래 내용을 복사해 주세요", text + "\n" + url);
+  }
+}
+</script>
+</body>
+</html>
