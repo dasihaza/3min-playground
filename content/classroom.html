@@ -126,7 +126,8 @@
   .submitted-note{font-family:'Jua',sans-serif;color:var(--mint-d);font-size:15px;}
   /* 선생님 피드백 */
   .fb-wrap{position:relative;}
-  .fb-wrap canvas{position:absolute;left:0;top:0;touch-action:none;border-radius:14px;}
+  .fb-wrap #m-base{display:block;width:100%;border:2px solid var(--line);border-radius:14px;background:#fff;}
+  .fb-wrap #m-fb{position:absolute;left:0;top:0;touch-action:none;border-radius:14px;}
   .fb-tools{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:10px;}
   .fb-tools .sw{width:28px;height:28px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px var(--line);cursor:pointer;}
   .fb-tools .sw.on{box-shadow:0 0 0 3px var(--blue);}
@@ -135,6 +136,24 @@
   .fb-tools .tbtn.on{border-color:var(--blue);background:#EEF5FF;color:var(--blue-d);}
   .fb-mine{margin-top:12px;border:3px dashed var(--mint);border-radius:14px;padding:10px;background:#F2FCF8;}
   .fb-mine img{width:100%;display:block;border-radius:8px;}
+  /* 소개글 */
+  .intro{
+    background:linear-gradient(180deg,#FFFDF6 0%,#FFF8EC 100%);
+    border:3px dashed #FFD79B;border-radius:22px;padding:24px 22px;margin-top:16px;
+    box-shadow:0 6px 18px rgba(63,70,80,.06);
+  }
+  .intro h2{font-family:'Jua',sans-serif;font-size:21px;color:#E08A2E;margin:0 0 4px;text-align:center;}
+  .intro .sub{font-family:'Gaegu',cursive;font-weight:700;font-size:16px;color:#B9925C;text-align:center;margin-bottom:16px;}
+  .intro p{font-size:14.5px;line-height:1.95;color:#5C5347;word-break:keep-all;margin:0 0 12px;}
+  .intro b{color:#D9741F;}
+  .steps{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 12px;}
+  .step{flex:1 1 150px;background:#fff;border:2px solid #FFE6BF;border-radius:16px;padding:14px 12px;text-align:center;}
+  .step .n{display:inline-block;width:26px;height:26px;line-height:26px;border-radius:50%;
+    background:#FFD36E;color:#7A5A12;font-family:'Jua',sans-serif;font-size:14px;margin-bottom:6px;}
+  .step .t{font-family:'Jua',sans-serif;font-size:14.5px;color:#5C5347;}
+  .step .d{font-size:12px;color:#9A8E7C;line-height:1.6;margin-top:4px;}
+  .intro .tags{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin-top:14px;}
+  .intro .tag{background:#fff;border:2px solid #FFE6BF;border-radius:999px;padding:7px 13px;font-size:12.5px;color:#8A7A62;font-weight:700;}
   .hidden{display:none !important;}
   .foot{text-align:center;font-size:12px;color:var(--ink-soft);margin-top:18px;line-height:1.8;}
 </style>
@@ -167,6 +186,57 @@
           <small>방 번호가 만들어져요</small></button>
         <button onclick="goStudentForm()"><span class="em">🧒</span>학생으로 들어가기
           <small>방 번호를 입력해요</small></button>
+      </div>
+    </div>
+
+    <div class="intro">
+      <h2>🌈 우리 반이 한 화면에 모이는 곳</h2>
+      <div class="sub">회원가입도, 앱 설치도 없어요!</div>
+
+      <p>
+        수업 중에 아이들이 무엇을 쓰고 있는지 궁금해 자리 사이를 바삐 오가신 적 있으시죠?
+        <b>애들아 모여라</b>는 그 걸음을 줄여 주는 작은 도구예요. 선생님이 방을 만들면
+        <b>네 자리 번호</b> 하나가 생기고, 아이들은 태블릿에서 그 번호와 이름만 넣으면 끝.
+        어려운 가입 절차도, 깔아야 할 앱도 없답니다.
+      </p>
+      <p>
+        아이들이 글을 쓰거나 그림을 그리는 모습이 선생님 화면에 <b>타일처럼 주르륵</b> 나타나요.
+        칸을 톡 누르면 그 아이의 화면이 큼직하게 펼쳐지고, 그 위에 바로
+        <b>밑줄을 긋고 동그라미를 치고 칭찬을 적어</b> 줄 수 있어요. 선생님이 남긴 표시는
+        아이 태블릿에도 똑같이 나타나서, 멀리 앉은 아이에게도 마음이 곧장 가 닿습니다.
+        다 한 아이가 <b>제출하기</b>를 누르면 그 칸에 초록 테두리가 둘러져,
+        누가 끝냈고 누가 아직인지 한눈에 보여요.
+      </p>
+
+      <div class="steps">
+        <div class="step"><span class="n">1</span><div class="t">방 만들기</div>
+          <div class="d">번호가 짠 하고 생겨요</div></div>
+        <div class="step"><span class="n">2</span><div class="t">번호 알려주기</div>
+          <div class="d">아이들이 쏙쏙 들어와요</div></div>
+        <div class="step"><span class="n">3</span><div class="t">함께 보고 칭찬하기</div>
+          <div class="d">눌러서 크게, 바로 피드백</div></div>
+      </div>
+
+      <p>
+        활동은 세 가지예요. 생각을 글로 풀어내는 <b>글쓰기</b>, 열여섯 가지 색과 네 단계 굵기로
+        마음껏 표현하는 <b>그림·필기</b>, 그리고 누가 어디까지 왔는지 막대로 보여 주는
+        <b>문제 풀이</b>. 수업 중간에 활동을 바꾸면 아이들 화면도 함께 바뀌니,
+        흐름을 끊지 않고 이어 갈 수 있어요.
+      </p>
+      <p>
+        발표를 부끄러워하던 아이도 여기서는 자기 생각을 또박또박 적어 냅니다.
+        조용하던 교실이 글과 그림으로 북적이는 모습을 보실 거예요.
+        수업이 끝나면 <b>방 닫기</b> 한 번으로 깔끔하게 정리되고,
+        같은 방에 들어온 우리 반만 서로의 화면을 볼 수 있으니 안심하셔도 좋아요.
+      </p>
+      <p style="text-align:center;margin-bottom:0;">
+        오늘 아이들의 생각이 한자리에 모입니다. 🙌
+      </p>
+
+      <div class="tags">
+        <span class="tag">가입 없음</span><span class="tag">앱 설치 없음</span>
+        <span class="tag">태블릿 바로 사용</span><span class="tag">실시간</span>
+        <span class="tag">피드백 쓰기</span>
       </div>
     </div>
   </div>
@@ -277,7 +347,7 @@
       <button class="btn sm ghost" onclick="closeBig()">닫기</button>
     </div>
     <div class="fb-wrap" id="m-wrap">
-      <div class="big-view" id="m-body"></div>
+      <canvas id="m-base"></canvas>
       <canvas id="m-fb"></canvas>
     </div>
     <div class="fb-tools" id="m-tools">
@@ -425,22 +495,70 @@ function openBig(id){
   setTimeout(setupFb, 60);        /* 내용이 그려진 뒤 크기를 재요 */
 }
 function renderBig(){
-  const s = students[openStudentId];
-  if(!s){ closeBig(); return; }
-  $("m-name").textContent = s.name || "이름 없음";
-  let html = "";
-  if(s.mode === "draw" && s.img) html = '<img src="'+s.img+'" alt="">';
-  else if(s.mode === "quiz"){
-    const a = s.answers || [];
-    html = a.map(function(v,i){
-      return '<div style="margin-bottom:8px;"><b>'+(i+1)+'번</b> &nbsp;'
-        + (v && String(v).trim() ? esc(v) : '<span style="color:#C3CBD6">아직 안 적었어요</span>') + '</div>';
-    }).join("") || "아직 안 풀었어요";
-  }
-  else html = esc(s.text || "") || "아직 비어 있어요";
-  $("m-body").innerHTML = html;
-  $("m-time").textContent = "마지막 움직임 : " + ago(s.at);
+  const st = students[openStudentId];
+  if(!st){ closeBig(); return; }
+  $("m-name").textContent = (st.name || "이름 없음") + (st.submitted ? "  ✅ 제출함" : "");
+  drawBase(st);
+  $("m-time").textContent = "마지막 움직임 : " + ago(st.at);
 }
+
+/* 학생이 쓴 글·그린 그림을 캔버스에 그려 둡니다.
+   선생님 표시는 이 위에 겹쳐지고, 저장할 때 둘을 합쳐 보내요. */
+function drawBase(st){
+  const cv = $("m-base");
+  const wrap = $("m-wrap");
+  const w = Math.max(320, Math.round(wrap.getBoundingClientRect().width));
+  const h = Math.round(w * 0.62);
+  if(cv.width !== w || cv.height !== h){ cv.width = w; cv.height = h; }
+  cv.style.height = h + "px";
+  const x = cv.getContext("2d");
+  x.fillStyle = "#fff"; x.fillRect(0,0,w,h);
+
+  if(st.mode === "draw" && st.img){
+    const im = new Image();
+    im.onload = function(){
+      const r = Math.min(w/im.width, h/im.height);
+      const dw = im.width*r, dh = im.height*r;
+      x.drawImage(im, (w-dw)/2, (h-dh)/2, dw, dh);
+    };
+    im.src = st.img;
+    return;
+  }
+
+  x.fillStyle = "#3F4650";
+  x.textBaseline = "top";
+  if(st.mode === "quiz"){
+    x.font = "600 19px 'Noto Sans KR', sans-serif";
+    const a = st.answers || [];
+    if(!a.length){ x.fillStyle = "#AEB6C2"; x.fillText("아직 안 풀었어요", 22, 24); return; }
+    a.forEach(function(v,i){
+      const y = 24 + i*34;
+      if(y > h-30) return;
+      const txt = (i+1) + "번   " + (v && String(v).trim() ? v : "…");
+      x.fillStyle = (v && String(v).trim()) ? "#3F4650" : "#AEB6C2";
+      x.fillText(txt, 22, y);
+    });
+    return;
+  }
+
+  /* 글쓰기 — 줄바꿈까지 맞춰 그려요 */
+  x.font = "400 19px 'Noto Sans KR', sans-serif";
+  const text = (st.text || "").trim();
+  if(!text){ x.fillStyle = "#AEB6C2"; x.fillText("아직 비어 있어요", 22, 24); return; }
+  const maxW = w - 44;
+  let y = 24;
+  text.split(/\n/).forEach(function(para){
+    let line = "";
+    for(const ch of para){
+      if(x.measureText(line + ch).width > maxW){
+        x.fillText(line, 22, y); y += 31; line = ch;
+        if(y > h-34) return;
+      } else line += ch;
+    }
+    if(line && y <= h-34){ x.fillText(line, 22, y); y += 31; }
+  });
+}
+
 function closeBig(){
   saveFeedback(true);
   openStudentId = null;
@@ -461,9 +579,12 @@ function fbPen(c, el){
 }
 function setupFb(){
   fbCv = $("m-fb");
-  const r = $("m-body").getBoundingClientRect();
-  fbCv.width = Math.round(r.width); fbCv.height = Math.round(r.height);
-  fbCv.style.width = r.width + "px"; fbCv.style.height = r.height + "px";
+  const base = $("m-base");
+  fbCv.width = base.width; fbCv.height = base.height;
+  fbCv.style.width = base.getBoundingClientRect().width + "px";
+  fbCv.style.height = base.getBoundingClientRect().height + "px";
+  fbCtx = fbCv.getContext("2d");
+  fbCtx.clearRect(0,0,fbCv.width,fbCv.height);
   fbCtx = fbCv.getContext("2d");
   fbCtx.lineCap = "round"; fbCtx.lineJoin = "round";
   const st = students[openStudentId];
@@ -525,7 +646,16 @@ function saveFeedback(now){
   const id = openStudentId;
   const go = function(){
     let data = "";
-    try{ data = fbCv.toDataURL("image/png"); }catch(e){ return; }
+    try{
+      const base = $("m-base");
+      const out = document.createElement("canvas");
+      out.width = base.width; out.height = base.height;
+      const o = out.getContext("2d");
+      o.fillStyle = "#fff"; o.fillRect(0,0,out.width,out.height);
+      o.drawImage(base, 0, 0);          /* 학생 작품 */
+      o.drawImage(fbCv, 0, 0);          /* 그 위에 선생님 표시 */
+      data = out.toDataURL("image/jpeg", 0.75);
+    }catch(e){ return; }
     db.collection("rooms").doc(roomCode).collection("students").doc(id)
       .set({ fb: data }, { merge:true })
       .then(function(){ $("fb-msg").textContent = "아이 화면에 보냈어요 ✓"; })
