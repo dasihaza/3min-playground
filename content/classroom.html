@@ -517,14 +517,14 @@ function drawBase(st){
   const x = cv.getContext("2d");
   x.fillStyle = "#fff"; x.fillRect(0,0,w,h);
 
-  if(st.mode === "draw" && st.img){
+  if(st.mode === "draw" && (st.imgHi || st.img)){
     const im = new Image();
     im.onload = function(){
       const r = Math.min(w/im.width, h/im.height);
       const dw = im.width*r, dh = im.height*r;
       x.drawImage(im, (w-dw)/2, (h-dh)/2, dw, dh);
     };
-    im.src = st.img;
+    im.src = st.imgHi || st.img;
     return;
   }
 
@@ -681,7 +681,7 @@ async function clearAll(){
   const snap = await db.collection("rooms").doc(roomCode).collection("students").get();
   const batch = db.batch();
   snap.forEach(function(d){
-    batch.set(d.ref, { text:"", img:"", answers:[], fb:"", submitted:false, at: Date.now() }, { merge:true });
+    batch.set(d.ref, { text:"", img:"", imgHi:"", answers:[], fb:"", submitted:false, at: Date.now() }, { merge:true });
   });
   await batch.commit();
 }
@@ -779,6 +779,7 @@ const COLORS = ["#2E3440","#7B8794","#C0392B","#E8483C","#F26C4F","#F5A524",
                 "#5B5BD6","#8E6AD6","#D96BB8","#8B5E3C"];
 let pad, pctx, drawing = false, pen = "#2E3440", erasing = false, padReady = false;
 let penWidth = 4;
+let DPR = 1, padW = 0, padH = 0;
 let submitted = false;
 
 function buildPalette(){
@@ -797,10 +798,17 @@ function setupPad(){
   if(padReady) return;
   pad = $("w-pad");
   const r = pad.getBoundingClientRect();
-  pad.width = Math.round(r.width); pad.height = Math.round(r.height);
+  /* ★ 태블릿 화면은 보이는 크기보다 실제 점이 2~3배 촘촘해요.
+     그만큼 크게 만들어야 글씨와 사진이 또렷해집니다. */
+  DPR = Math.min(window.devicePixelRatio || 1, 3);
+  padW = Math.round(r.width); padH = Math.round(r.height);
+  pad.width = Math.round(padW * DPR); pad.height = Math.round(padH * DPR);
+  pad.style.width = padW + "px"; pad.style.height = padH + "px";
   pctx = pad.getContext("2d");
-  pctx.fillStyle = "#fff"; pctx.fillRect(0,0,pad.width,pad.height);
+  pctx.scale(DPR, DPR);                 /* 좌표는 보이는 크기 그대로 쓰면 돼요 */
+  pctx.fillStyle = "#fff"; pctx.fillRect(0,0,padW,padH);
   pctx.lineCap = "round"; pctx.lineJoin = "round";
+  pctx.imageSmoothingQuality = "high";
   const pos = e => {
     const b = pad.getBoundingClientRect();
     const t = e.touches ? e.touches[0] : e;
@@ -811,7 +819,7 @@ function setupPad(){
   const move = e => { if(!drawing) return; e.preventDefault(); const p = pos(e);
     pctx.strokeStyle = erasing ? "#fff" : pen;
     pctx.lineWidth = erasing ? 24 : penWidth;
-    pctx.lineTo(p.x,p.y); pctx.stroke(); dirty = true; };
+    pctx.lineTo(p.x,p.y); pctx.stroke(); dirty = true; lastStroke = Date.now(); };
   const end = () => { drawing = false; };
   pad.addEventListener("mousedown",start); pad.addEventListener("mousemove",move);
   window.addEventListener("mouseup",end);
@@ -853,7 +861,7 @@ function editWork(){
 }
 function clearPad(){
   if(!pctx) return;
-  pctx.fillStyle = "#fff"; pctx.fillRect(0,0,pad.width,pad.height); dirty = true;
+  pctx.fillStyle = "#fff"; pctx.fillRect(0,0,padW,padH); dirty = true;
 }
 /* ===== 사진 넣기 =====
    고른 사진을 그림판에 올려 주면, 그 위에 바로 표시를 그릴 수 있어요. */
@@ -875,11 +883,12 @@ function putPhoto(input){
     const im = new Image();
     im.onload = function(){
       /* 그림판 안에 비율 그대로 들어가게 맞춰요 */
-      const r = Math.min(pad.width / im.width, pad.height / im.height);
+      const r = Math.min(padW / im.width, padH / im.height);
       const w = im.width * r, h = im.height * r;
-      pctx.fillStyle = "#fff"; pctx.fillRect(0, 0, pad.width, pad.height);
-      pctx.drawImage(im, (pad.width - w) / 2, (pad.height - h) / 2, w, h);
+      pctx.fillStyle = "#fff"; pctx.fillRect(0, 0, padW, padH);
+      pctx.drawImage(im, (padW - w) / 2, (padH - h) / 2, w, h);
       dirty = true;
+      lastStroke = 0;          /* 사진은 바로 선명하게 보내요 */
       sendWork();
       $("w-save").textContent = "사진을 넣었어요! 위에 그리거나 적어 보세요 ✏️";
     };
@@ -890,19 +899,26 @@ function putPhoto(input){
   fr.readAsDataURL(f);
 }
 
-function padThumb(){
+/* 작은 미리보기(선생님 타일용) — 자주 보내도 가볍게 */
+function padThumb(){ return padShot(360, 0.6); }
+/* 큰 그림(크게 볼 때용) — 손을 멈췄을 때만 보냅니다 */
+function padBig(){ return padShot(1100, 0.82); }
+
+function padShot(maxW, q){
   if(!pad) return "";
-  const w = 320, h = Math.round(pad.height * w / pad.width);
+  const w = Math.min(maxW, pad.width);
+  const h = Math.round(pad.height * w / pad.width);
   const c = document.createElement("canvas"); c.width = w; c.height = h;
   const x = c.getContext("2d");
+  x.imageSmoothingQuality = "high";
   x.fillStyle = "#fff"; x.fillRect(0,0,w,h);
   x.drawImage(pad, 0, 0, w, h);
-  return c.toDataURL("image/jpeg", 0.6);
+  return c.toDataURL("image/jpeg", q);
 }
 
 /* ===== 저장 (선생님 화면에 보내기) =====
    너무 자주 보내면 사용량이 금방 차서, 바뀐 것이 있을 때만 5초마다 보냅니다. */
-let dirty = false, saveTimer = null, lastSent = "";
+let dirty = false, saveTimer = null, lastSent = "", lastStroke = 0, lastBig = "";
 function touchWork(){ dirty = true; }
 function startSaver(){
   if(saveTimer) clearInterval(saveTimer);
@@ -916,7 +932,14 @@ function sendWork(){
   if(!roomCode || !myId) return;
   const payload = { name: myName, mode: roomMode, at: Date.now(), away: document.hidden, submitted: submitted };
   if(roomMode === "write") payload.text = ($("w-text").value||"").slice(0, 1500);
-  else if(roomMode === "draw") payload.img = padThumb();
+  else if(roomMode === "draw"){
+    payload.img = padThumb();
+    /* 그리기를 3초 넘게 멈췄을 때만 큰 그림을 함께 보내요 (사용량 아끼기) */
+    if(Date.now() - lastStroke > 3000){
+      const big = padBig();
+      if(big && big !== lastBig){ payload.imgHi = big; lastBig = big; }
+    }
+  }
   else {
     const a = [];
     for(let i=0;i<roomQCount;i++){ const el = $("q-"+i); a.push(el ? el.value : ""); }
