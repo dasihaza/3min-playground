@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>우리 반 소음 신호등 | 3분 놀이터</title>
+<meta name="description" content="교실 소리를 재서 초록·노랑·빨강 신호등으로 알려줘요. 아이들이 스스로 목소리를 조절하는 귀여운 소음측정기.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F2F8FF; --card:#FFFFFF; --ink:#45414D; --ink-soft:#9A95A3; --line:#E7EDF6;
+    --green:#4ECB8E; --green-d:#2FA76E;
+    --yellow:#FFC94D; --yellow-d:#E0A520;
+    --red:#FF7B72; --red-d:#E04E45;
+    --blue:#6FA8F5; --blue-d:#4B86D8;
+    --shadow:0 3px 0 rgba(69,65,77,.09);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 8% 5%, rgba(255,201,77,.22) 0 120px, transparent 121px),
+      radial-gradient(circle at 92% 8%, rgba(111,168,245,.18) 0 100px, transparent 101px),
+      radial-gradient(circle at 88% 92%, rgba(78,203,142,.16) 0 110px, transparent 111px),
+      var(--bg);
+    background-attachment:fixed;
+    color:var(--ink); font-family:'Noto Sans KR',sans-serif; min-height:100vh;
+    transition:background-color .5s;
+  }
+  body.lv-g{background-color:#F0FBF5;} body.lv-y{background-color:#FFFAEE;} body.lv-r{background-color:#FFF2F1;}
+  .topbar{max-width:760px;margin:0 auto;padding:13px 18px 0;display:flex;align-items:center;justify-content:space-between;}
+  .topbar a{text-decoration:none;color:var(--ink);}
+  .topbar .brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;}
+  .topbar .back{font-size:12.5px;font-weight:700;color:var(--ink-soft);border:2px solid #fff;background:#fff;padding:6px 12px;border-radius:999px;box-shadow:var(--shadow);}
+  .shell{max-width:760px;margin:0 auto;padding:12px 18px 50px;}
+  .card{background:var(--card);border-radius:22px;padding:20px;box-shadow:var(--shadow),0 8px 22px rgba(69,65,77,.07);margin-bottom:14px;}
+
+  .hero{text-align:center;margin-bottom:14px;}
+  .hero h1{font-family:'Jua',sans-serif;font-size:clamp(25px,5.2vw,32px);margin:0 0 4px;color:var(--blue-d);}
+  .hero p{font-family:'Gaegu',cursive;font-weight:700;font-size:17px;color:var(--ink-soft);margin:0;}
+
+  .btn{font-family:'Jua',sans-serif;border:none;cursor:pointer;font-size:17px;padding:15px 30px;
+    border-radius:17px;background:var(--blue);color:#fff;box-shadow:0 5px 0 var(--blue-d);}
+  .btn:active{transform:translateY(5px);box-shadow:none;}
+  .btn.ghost{background:#fff;color:var(--ink);box-shadow:0 5px 0 var(--line);}
+  .btn.sm{font-size:14px;padding:11px 17px;border-radius:13px;box-shadow:0 4px 0 var(--line);}
+  .btn.red{background:var(--red);box-shadow:0 5px 0 var(--red-d);}
+
+  /* ===== 신호등 ===== */
+  .light-wrap{display:flex;gap:22px;align-items:center;justify-content:center;flex-wrap:wrap;}
+  .light{
+    background:linear-gradient(180deg,#FFF6E0 0%,#FFE9C2 100%);
+    border:5px solid #F2C98A;border-radius:34px;padding:16px 15px 14px;
+    box-shadow:0 8px 0 #E3B471, 0 14px 24px rgba(69,65,77,.14);position:relative;
+  }
+  .light .hat{position:absolute;left:50%;top:-17px;transform:translateX(-50%);
+    width:64px;height:16px;border-radius:12px 12px 4px 4px;background:#F2C98A;}
+  .lamp{width:104px;height:104px;border-radius:50%;margin-bottom:12px;position:relative;
+    background:#EFE7DA;box-shadow:inset 0 4px 10px rgba(0,0,0,.10);transition:all .25s;}
+  .lamp:last-child{margin-bottom:0;}
+  .lamp .face{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:44px;opacity:.18;transition:opacity .25s;}
+  .lamp.on .face{opacity:1;}
+  .lamp.g.on{background:var(--green);box-shadow:0 0 0 5px rgba(78,203,142,.28), 0 0 26px rgba(78,203,142,.75);}
+  .lamp.y.on{background:var(--yellow);box-shadow:0 0 0 5px rgba(255,201,77,.28), 0 0 26px rgba(255,201,77,.75);}
+  .lamp.r.on{background:var(--red);box-shadow:0 0 0 5px rgba(255,123,114,.28), 0 0 26px rgba(255,123,114,.8);
+    animation:thump .7s ease-in-out infinite;}
+  @keyframes thump{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
+  .pole{width:26px;height:34px;background:#F2C98A;border-radius:0 0 8px 8px;margin:0 auto;}
+
+  /* 말풍선 */
+  .bubble{position:relative;background:#fff;border:4px solid var(--line);border-radius:22px;
+    padding:18px 20px;max-width:290px;text-align:center;}
+  .bubble:after{content:"";position:absolute;left:-16px;top:50%;margin-top:-10px;
+    border:10px solid transparent;border-right-color:#fff;}
+  .bubble:before{content:"";position:absolute;left:-23px;top:50%;margin-top:-13px;
+    border:13px solid transparent;border-right-color:var(--line);}
+  .bub-em{font-size:40px;line-height:1;}
+  .bub-t{font-family:'Jua',sans-serif;font-size:21px;margin:7px 0 4px;}
+  .bub-s{font-size:13.5px;color:var(--ink-soft);line-height:1.7;word-break:keep-all;}
+
+  /* 소리 크기 */
+  .meter{margin-top:20px;}
+  .meter .num{font-family:'Jua',sans-serif;font-size:42px;text-align:center;line-height:1;}
+  .meter .unit{font-size:15px;color:var(--ink-soft);}
+  .bar{height:24px;background:#EDF1F7;border-radius:999px;overflow:hidden;margin-top:12px;position:relative;}
+  .bar i{display:block;height:100%;border-radius:999px;transition:width .12s linear, background .3s;}
+  .ticks{display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink-soft);margin-top:6px;}
+
+  /* 설정 */
+  .presets{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .presets button{flex:1 1 130px;padding:13px 10px;border-radius:15px;border:3px solid var(--line);
+    background:#fff;cursor:pointer;font-family:'Jua',sans-serif;font-size:14.5px;color:var(--ink-soft);}
+  .presets button.on{border-color:var(--blue);background:#EFF6FF;color:var(--blue-d);}
+  .presets .em{display:block;font-size:22px;margin-bottom:3px;}
+  .slide{display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap;}
+  .slide label{font-size:13px;font-weight:700;color:var(--ink-soft);min-width:96px;}
+  input[type=range]{flex:1;min-width:150px;accent-color:var(--blue);}
+  .val{font-family:'Jua',sans-serif;font-size:15px;min-width:34px;text-align:right;}
+
+  .stat{display:flex;gap:9px;flex-wrap:wrap;justify-content:center;margin-top:14px;}
+  .chip{background:#fff;border:2px solid var(--line);border-radius:999px;padding:8px 14px;font-size:12.5px;color:var(--ink-soft);}
+  .chip b{color:var(--ink);}
+  .msg{text-align:center;font-size:13.5px;color:var(--ink-soft);line-height:1.8;margin-top:12px;word-break:keep-all;}
+  .hidden{display:none !important;}
+  .foot{text-align:center;font-size:12px;color:var(--ink-soft);margin-top:16px;line-height:1.8;}
+
+  /* 큰 화면 모드 */
+  body.big .topbar,body.big .hero,body.big .setting-card,body.big .foot{display:none;}
+  body.big .shell{max-width:1100px;padding-top:24px;}
+  body.big .lamp{width:150px;height:150px;}
+  body.big .lamp .face{font-size:64px;}
+  body.big .bub-t{font-size:30px;}
+  body.big .meter .num{font-size:60px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="../index.html">
+    <svg width="26" height="26" viewBox="0 0 34 34" fill="none">
+      <circle cx="17" cy="18" r="14" fill="#fff" stroke="#45414D" stroke-width="2"/>
+      <path d="M17 9 L17 18 L23 21" stroke="#6FA8F5" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="13" y="2" width="8" height="4" rx="1.5" fill="#45414D"/>
+    </svg>
+    <span>3분 놀이터</span>
+  </a>
+  <a class="back" href="../index.html">← 다른 콘텐츠 보기</a>
+</div>
+
+<div class="shell">
+  <div class="hero">
+    <h1>🚦 우리 반 소음 신호등</h1>
+    <p>목소리 크기를 신호등이 알려줘요!</p>
+  </div>
+
+  <div class="card">
+    <div class="light-wrap">
+      <div>
+        <div class="light">
+          <div class="hat"></div>
+          <div class="lamp r" id="lamp-r"><span class="face">😫</span></div>
+          <div class="lamp y" id="lamp-y"><span class="face">😮</span></div>
+          <div class="lamp g on" id="lamp-g"><span class="face">😊</span></div>
+        </div>
+        <div class="pole"></div>
+      </div>
+      <div class="bubble">
+        <div class="bub-em" id="b-em">🙂</div>
+        <div class="bub-t" id="b-title">시작을 눌러 주세요</div>
+        <div class="bub-s" id="b-sub">마이크를 켜면 교실 소리를 재기 시작해요</div>
+      </div>
+    </div>
+
+    <div class="meter">
+      <div class="num"><span id="m-num">0</span><span class="unit"> / 100</span></div>
+      <div class="bar"><i id="m-bar" style="width:0%;background:var(--green)"></i></div>
+      <div class="ticks"><span>조용</span><span>보통</span><span>시끌시끌</span></div>
+    </div>
+
+    <div class="stat">
+      <span class="chip">초록으로 지낸 시간 <b id="s-green">0분 0초</b></span>
+      <span class="chip">빨강이 켜진 횟수 <b id="s-red">0번</b></span>
+    </div>
+
+    <div style="text-align:center;margin-top:18px;display:flex;gap:9px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn" id="go" onclick="toggleMic()">🎤 시작하기</button>
+      <button class="btn ghost sm" onclick="bigMode()">🖥️ 크게 보기</button>
+      <button class="btn ghost sm" onclick="resetStat()">기록 지우기</button>
+    </div>
+    <div class="msg" id="msg"></div>
+  </div>
+
+  <div class="card setting-card">
+    <div style="font-family:'Jua',sans-serif;font-size:17px;margin-bottom:4px;">⚙️ 어떤 활동인가요?</div>
+    <div style="font-size:12.5px;color:var(--ink-soft);">활동에 맞게 고르면 기준이 알맞게 바뀌어요</div>
+    <div class="presets" id="presets">
+      <button data-p="quiet" onclick="setPreset('quiet')"><span class="em">📖</span>조용한 활동<br><span style="font-size:11px;">독서·시험</span></button>
+      <button data-p="normal" class="on" onclick="setPreset('normal')"><span class="em">✏️</span>보통 수업<br><span style="font-size:11px;">설명·발표</span></button>
+      <button data-p="busy" onclick="setPreset('busy')"><span class="em">🎨</span>모둠 활동<br><span style="font-size:11px;">토의·만들기</span></button>
+    </div>
+    <div class="slide">
+      <label>노란불 기준</label>
+      <input type="range" id="t1" min="10" max="80" value="35" oninput="tuneFrom()">
+      <span class="val" id="v1">35</span>
+    </div>
+    <div class="slide">
+      <label>빨간불 기준</label>
+      <input type="range" id="t2" min="20" max="95" value="60" oninput="tuneFrom()">
+      <span class="val" id="v2">60</span>
+    </div>
+    <div class="msg">교실이 원래 조용한데 노란불이 자주 켜지면 기준을 올려 주세요.</div>
+  </div>
+
+  <div class="foot">
+    소리 크기는 기기마다 다르게 느껴져요. 실제 데시벨(dB)이 아니라 <b>0~100으로 나타낸 값</b>이랍니다.<br>
+    소리는 이 기기 안에서만 쓰이고 저장되거나 어디로도 보내지지 않아요.
+  </div>
+</div>
+
+<script>
+/* ===== 상태 ===== */
+let ctx = null, analyser = null, stream = null, buf = null, raf = null;
+let running = false;
+let level = 0;              /* 0~100 으로 다듬은 소리 크기 */
+let zone = "g";             /* g / y / r */
+let t1 = 35, t2 = 60;       /* 노란불·빨간불 기준 */
+let greenMs = 0, redCount = 0, lastTick = 0, redSince = 0;
+
+const $ = id => document.getElementById(id);
+
+const PRESETS = {
+  quiet:  { t1:22, t2:42 },
+  normal: { t1:35, t2:60 },
+  busy:   { t1:48, t2:75 }
+};
+function setPreset(p){
+  const v = PRESETS[p]; if(!v) return;
+  t1 = v.t1; t2 = v.t2;
+  $("t1").value = t1; $("t2").value = t2;
+  $("v1").textContent = t1; $("v2").textContent = t2;
+  document.querySelectorAll("#presets button").forEach(function(b){
+    b.classList.toggle("on", b.dataset.p === p);
+  });
+}
+function tuneFrom(){
+  t1 = parseInt($("t1").value, 10);
+  t2 = parseInt($("t2").value, 10);
+  if(t2 <= t1 + 5){ t2 = t1 + 5; $("t2").value = t2; }   /* 두 기준이 겹치지 않게 */
+  $("v1").textContent = t1; $("v2").textContent = t2;
+  document.querySelectorAll("#presets button").forEach(function(b){ b.classList.remove("on"); });
+}
+
+/* ===== 마이크 ===== */
+async function toggleMic(){
+  if(running){ stopMic(); return; }
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation:false, noiseSuppression:false, autoGainControl:false }
+    });
+  }catch(e){
+    $("msg").innerHTML = "마이크를 쓸 수 없어요. 😢<br>주소창 옆 자물쇠를 눌러 <b>마이크 허용</b>으로 바꿔 주세요.";
+    return;
+  }
+  ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const src = ctx.createMediaStreamSource(stream);
+  analyser = ctx.createAnalyser();
+  analyser.fftSize = 1024;
+  analyser.smoothingTimeConstant = 0.6;
+  src.connect(analyser);
+  buf = new Uint8Array(analyser.fftSize);
+  running = true; lastTick = Date.now();
+  $("go").textContent = "⏸ 멈추기";
+  $("go").classList.add("red");
+  $("msg").textContent = "";
+  loop();
+}
+function stopMic(){
+  running = false;
+  if(raf) cancelAnimationFrame(raf);
+  if(stream) stream.getTracks().forEach(function(t){ t.stop(); });
+  if(ctx) ctx.close();
+  ctx = null; analyser = null; stream = null;
+  $("go").textContent = "🎤 시작하기";
+  $("go").classList.remove("red");
+  paint(0, "g");
+  $("b-title").textContent = "잠깐 멈췄어요";
+  $("b-sub").textContent = "다시 시작하려면 버튼을 눌러 주세요";
+  $("b-em").textContent = "😴";
+}
+
+/* 소리 크기를 0~100 으로 바꾸기 */
+function readLevel(){
+  analyser.getByteTimeDomainData(buf);
+  let sum = 0;
+  for(let i=0;i<buf.length;i++){ const v = (buf[i]-128)/128; sum += v*v; }
+  const rms = Math.sqrt(sum / buf.length);
+  const db = 20 * Math.log10(rms + 1e-8);      /* 대략 -80 ~ 0 */
+  /* 교실 소리에 맞춰 눈금을 잡았어요.
+     아주 조용 0 · 소곤소곤 35 안쪽 · 여럿이 떠들면 60 넘김 */
+  const v = (db + 69.5) * 1.58;
+  return Math.max(0, Math.min(100, v));
+}
+
+function loop(){
+  if(!running) return;
+  const raw = readLevel();
+  level = level * 0.78 + raw * 0.22;           /* 갑자기 튀지 않게 부드럽게 */
+  const z = zoneOf(level);
+
+  const now = Date.now();
+  const gap = Math.min(500, now - lastTick); lastTick = now;
+  if(z === "g") greenMs += gap;
+  if(z === "r" && zone !== "r"){ redCount++; redSince = now; }
+  zone = z;
+
+  paint(level, z);
+  $("s-green").textContent = fmt(greenMs);
+  $("s-red").textContent = redCount + "번";
+  raf = requestAnimationFrame(loop);
+}
+function zoneOf(v){ return v >= t2 ? "r" : (v >= t1 ? "y" : "g"); }
+function fmt(ms){
+  const s = Math.floor(ms/1000);
+  return Math.floor(s/60) + "분 " + (s%60) + "초";
+}
+
+const WORDS = {
+  g: { em:"😊", t:"아주 좋아요!", s:"지금처럼만 이야기하면 모두가 잘 들을 수 있어요" },
+  y: { em:"😮", t:"조금만 작게!", s:"목소리가 커지고 있어요. 한 칸만 낮춰 볼까요?" },
+  r: { em:"😫", t:"너무 시끄러워요", s:"옆 친구에게만 들리도록 소곤소곤 말해 주세요" }
+};
+function paint(v, z){
+  $("m-num").textContent = Math.round(v);
+  const col = z === "r" ? "var(--red)" : (z === "y" ? "var(--yellow)" : "var(--green)");
+  const bar = $("m-bar");
+  bar.style.width = Math.round(v) + "%";
+  bar.style.background = col;
+  ["g","y","r"].forEach(function(k){ $("lamp-"+k).classList.toggle("on", k === z); });
+  const w = WORDS[z];
+  $("b-em").textContent = w.em;
+  $("b-title").textContent = w.t;
+  $("b-sub").textContent = w.s;
+  document.body.classList.remove("lv-g","lv-y","lv-r");
+  document.body.classList.add("lv-" + z);
+}
+
+function resetStat(){
+  greenMs = 0; redCount = 0;
+  $("s-green").textContent = "0분 0초";
+  $("s-red").textContent = "0번";
+}
+function bigMode(){
+  document.body.classList.toggle("big");
+  if(document.documentElement.requestFullscreen && document.body.classList.contains("big")){
+    document.documentElement.requestFullscreen().catch(function(){});
+  } else if(document.exitFullscreen && document.fullscreenElement){
+    document.exitFullscreen().catch(function(){});
+  }
+}
+document.addEventListener("keydown", function(e){
+  if(e.key === "Escape") document.body.classList.remove("big");
+});
+
+setPreset("normal");
+paint(0, "g");
+$("b-title").textContent = "시작을 눌러 주세요";
+$("b-sub").textContent = "마이크를 켜면 교실 소리를 재기 시작해요";
+$("b-em").textContent = "🙂";
+</script>
+</body>
+</html>
