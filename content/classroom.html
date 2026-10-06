@@ -313,6 +313,9 @@
         <button class="wbtn" onclick="setWidth(16,this)"><i style="width:22px;height:22px;"></i></button>
         <button class="btn sm ghost" onclick="setEraser()">지우개</button>
         <button class="btn sm ghost" onclick="clearPad()">모두 지우기</button>
+        <button class="btn sm ghost" onclick="pickPhoto()">🖼️ 사진 넣기</button>
+        <input type="file" id="w-photo" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
+               style="display:none" onchange="putPhoto(this)">
       </div>
     </div>
 
@@ -852,14 +855,49 @@ function clearPad(){
   if(!pctx) return;
   pctx.fillStyle = "#fff"; pctx.fillRect(0,0,pad.width,pad.height); dirty = true;
 }
+/* ===== 사진 넣기 =====
+   고른 사진을 그림판에 올려 주면, 그 위에 바로 표시를 그릴 수 있어요. */
+function pickPhoto(){
+  if(submitted){ alert("제출한 뒤에는 바꿀 수 없어요.\n'수정하기'를 먼저 눌러 주세요."); return; }
+  const el = $("w-photo");
+  el.value = "";          /* 같은 사진을 다시 골라도 반응하도록 */
+  el.click();
+}
+function putPhoto(input){
+  const f = input.files && input.files[0];
+  if(!f) return;
+  if(!/^image\//.test(f.type)){ alert("사진 파일만 넣을 수 있어요."); return; }
+  if(f.size > 12 * 1024 * 1024){ alert("사진이 너무 커요. 12MB보다 작은 사진을 골라 주세요."); return; }
+  if(!padReady) setupPad();
+
+  const fr = new FileReader();
+  fr.onload = function(){
+    const im = new Image();
+    im.onload = function(){
+      /* 그림판 안에 비율 그대로 들어가게 맞춰요 */
+      const r = Math.min(pad.width / im.width, pad.height / im.height);
+      const w = im.width * r, h = im.height * r;
+      pctx.fillStyle = "#fff"; pctx.fillRect(0, 0, pad.width, pad.height);
+      pctx.drawImage(im, (pad.width - w) / 2, (pad.height - h) / 2, w, h);
+      dirty = true;
+      sendWork();
+      $("w-save").textContent = "사진을 넣었어요! 위에 그리거나 적어 보세요 ✏️";
+    };
+    im.onerror = function(){ alert("사진을 읽지 못했어요. 다른 사진으로 해볼까요?"); };
+    im.src = fr.result;
+  };
+  fr.onerror = function(){ alert("사진을 읽지 못했어요."); };
+  fr.readAsDataURL(f);
+}
+
 function padThumb(){
   if(!pad) return "";
-  const w = 260, h = Math.round(pad.height * w / pad.width);
+  const w = 320, h = Math.round(pad.height * w / pad.width);
   const c = document.createElement("canvas"); c.width = w; c.height = h;
   const x = c.getContext("2d");
   x.fillStyle = "#fff"; x.fillRect(0,0,w,h);
   x.drawImage(pad, 0, 0, w, h);
-  return c.toDataURL("image/jpeg", 0.5);
+  return c.toDataURL("image/jpeg", 0.6);
 }
 
 /* ===== 저장 (선생님 화면에 보내기) =====
