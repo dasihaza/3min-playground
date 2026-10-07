@@ -7,6 +7,8 @@
 <meta name="description" content="씨앗을 심고 벌레를 잡고 물을 주며 작물을 키워요. 세 단계를 지나 농사의 왕이 되어 보는 초등학생용 귀여운 농장 게임.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
 <style>
   :root{
     --sky:#EAF6FF; --cream:#FFFBF2; --card:#FFFFFF;
@@ -190,7 +192,8 @@
     align-items:center;justify-content:center;padding:18px;z-index:90;backdrop-filter:blur(2px);}
   .veil.show{display:flex;}
   .modal{background:#fff;border-radius:28px;padding:26px 22px 22px;max-width:380px;width:100%;
-    text-align:center;box-shadow:0 14px 40px rgba(0,0,0,.26);animation:pop .4s cubic-bezier(.2,1.5,.5,1);}
+    text-align:center;box-shadow:0 14px 40px rgba(0,0,0,.26);animation:pop .4s cubic-bezier(.2,1.5,.5,1);
+    max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
   @keyframes pop{0%{transform:scale(.7);opacity:0;}100%{transform:scale(1);opacity:1;}}
   .modal .mi{font-size:62px;line-height:1;margin-bottom:6px;}
   .modal h2{font-family:'Jua',sans-serif;font-size:26px;margin:0 0 6px;color:var(--soil-dk);}
@@ -207,6 +210,53 @@
   .lv-card .ci{font-size:58px;line-height:1;margin:4px 0 6px;}
   .lv-card h2{font-family:'Jua',sans-serif;font-size:23px;margin:0 0 6px;color:var(--soil-dk);}
   .lv-card p{font-family:'Gaegu',cursive;font-weight:700;font-size:17px;color:var(--ink-soft);margin:0 0 16px;}
+
+  /* ===== 썩은 땅 (5초 동안 심을 수 없어요) ===== */
+  .cell.rot{background:linear-gradient(180deg,#8E8276 0%, #6E6459 100%);
+    box-shadow:inset 0 -3px 0 rgba(60,54,48,.5), inset 0 2px 0 rgba(255,255,255,.12);cursor:not-allowed;}
+  .cell.rot .crop{opacity:.75;filter:grayscale(.45) drop-shadow(0 2px 1px rgba(0,0,0,.3));}
+  .cell .wait{position:absolute;left:50%;bottom:5px;transform:translateX(-50%);
+    font-family:'Jua',sans-serif;font-size:calc(var(--evs,30px) * .62);color:#fff;
+    background:rgba(60,54,48,.78);border-radius:99px;padding:1px 9px;z-index:12;pointer-events:none;}
+  .pop.bad{background:var(--red,#FF7B72);}
+
+  /* ===== 마을 순위판 (나무 팻말) ===== */
+  .board-sign{position:relative;background:linear-gradient(180deg,#F6DCB4 0%, #EFCB96 100%);
+    border:5px solid #C8894F;border-radius:22px;padding:16px 15px 15px;margin-bottom:14px;
+    box-shadow:0 7px 0 #AC6F3B, 0 14px 26px rgba(74,64,56,.14);}
+  .board-sign .nails{position:absolute;left:12px;right:12px;top:7px;display:flex;justify-content:space-between;}
+  .board-sign .nails i{width:9px;height:9px;border-radius:50%;background:#C8894F;box-shadow:inset 0 -2px 0 #A96C38;}
+  .board-sign h3{font-family:'Jua',sans-serif;font-size:19px;color:#8C5C3A;margin:7px 0 11px;text-align:center;}
+  .rank-list{display:grid;gap:7px;}
+  .rank-row{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.72);
+    border-radius:14px;padding:9px 13px;box-shadow:0 2px 0 rgba(140,92,58,.14);}
+  .rank-row .pos{flex:0 0 auto;width:30px;text-align:center;font-family:'Jua',sans-serif;
+    font-size:17px;color:#A9714A;}
+  .rank-row .who{flex:1;min-width:0;font-family:'Jua',sans-serif;font-size:16px;color:var(--ink);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .rank-row .amt{flex:0 0 auto;font-family:'Jua',sans-serif;font-size:16px;color:var(--sun-d);}
+  .rank-row.first{background:linear-gradient(180deg,#FFF3CF 0%,#FFE9A8 100%);
+    box-shadow:0 2px 0 #E8C76A, 0 0 0 2.5px #FFD45E inset;}
+  .rank-row.first .who{color:#8C5C3A;}
+  .rank-row.me{outline:2.5px dashed var(--orange);outline-offset:1px;}
+  .rank-empty{text-align:center;font-family:'Gaegu',cursive;font-weight:700;font-size:16px;
+    color:#A9714A;padding:12px 4px;line-height:1.5;}
+
+  /* 이름 적어서 순위 올리기 */
+  .name-box{background:#FFF8EC;border:2.5px dashed #F0CFA0;border-radius:18px;padding:13px;margin:4px 0 14px;}
+  .name-box p{font-family:'Gaegu',cursive;font-weight:700;font-size:16px;color:#A9714A;margin:0 0 9px;}
+  .name-row{display:flex;gap:7px;}
+  .name-row input{flex:1;min-width:0;font-family:'Noto Sans KR',sans-serif;font-size:15px;
+    border:2.5px solid var(--line);border-radius:13px;padding:10px 12px;outline:none;color:var(--ink);background:#fff;}
+  .name-row input:focus{border-color:var(--sun);}
+  .name-row .btn{padding:10px 16px;font-size:15px;border-radius:13px;}
+
+  /* 관리자용 전구 (평소엔 눈에 잘 띄지 않아요) */
+  .bulb-wrap{text-align:center;padding:14px 0 6px;}
+  .bulb{background:none;border:none;cursor:pointer;padding:8px;line-height:0;
+    color:#D9BE72;opacity:.65;transition:all .2s;}
+  .bulb:hover{color:#F0B429;opacity:1;filter:drop-shadow(0 0 8px rgba(240,180,41,.7));transform:scale(1.15);}
+  .bulb.on{color:#F0B429;opacity:1;filter:drop-shadow(0 0 10px rgba(240,180,41,.85));}
 
   .hidden{display:none !important;}
 
@@ -286,7 +336,7 @@
       </div>
       <div class="how-item">
         <div class="ic">🐛</div>
-        <div><b>2. 벌레가 오면 🧴 스프레이</b><span>작물 옆에 벌레가 붙으면 스프레이를 고르고 그 밭을 눌러요. 늦으면 작물이 시들어요!</span></div>
+        <div><b>2. 벌레가 오면 🧴 스프레이</b><span>작물 옆에 벌레가 붙으면 스프레이를 고르고 그 밭을 눌러요. 제때 해결하면 10원씩 더 받아요!</span></div>
       </div>
       <div class="how-item">
         <div class="ic">💧</div>
@@ -295,6 +345,18 @@
       <div class="how-item">
         <div class="ic">🎒</div>
         <div><b>4. 다 자라면 🎒 마대자루</b><span>작물이 통통 튀면 수확할 때예요! 마대자루를 고르고 눌러 돈을 벌어요.</span></div>
+      </div>
+      <div class="how-item">
+        <div class="ic">🥀</div>
+        <div><b>5. 늦으면 작물이 썩어요</b><span>벌레와 목마름을 그냥 두면 작물이 썩어요. 300원을 잃고, 그 땅은 5초 동안 아무것도 심을 수 없어요!</span></div>
+      </div>
+    </div>
+
+    <div class="board-sign">
+      <div class="nails"><i></i><i></i></div>
+      <h3>🏆 우리 마을 농사왕 순위</h3>
+      <div class="rank-list" id="rank-home">
+        <div class="rank-empty">순위표를 불러오는 중이에요… 🌾</div>
       </div>
     </div>
 
@@ -342,6 +404,15 @@
     </div>
   </div>
 
+  <div class="bulb-wrap">
+    <button class="bulb" id="bulb" onclick="adminReset()" aria-label=" ">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" aria-hidden="true">
+        <path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.5.4.8 1 .8 1.6v.5h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0 0 12 3z"
+              stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+
   <div class="foot">
     👑 농사의 왕 · <a href="../index.html">3분 놀이터</a>에서 더 많은 놀이를 만나요
   </div>
@@ -355,6 +426,23 @@
     <div class="stars" id="r-stars">⭐⭐⭐</div>
     <div class="big-money" id="r-money">0원</div>
     <p id="r-desc"></p>
+
+    <div class="name-box hidden" id="name-box">
+      <p id="name-why">🎉 마을 순위표에 올릴 수 있어요! 이름을 적어 주세요.</p>
+      <div class="name-row">
+        <input id="name-input" type="text" maxlength="8" placeholder="이름 (최대 8글자)" autocomplete="off">
+        <button class="btn sm" id="btn-save">올리기</button>
+      </div>
+    </div>
+
+    <div class="board-sign" style="margin-bottom:16px;">
+      <div class="nails"><i></i><i></i></div>
+      <h3>🏆 우리 마을 농사왕 순위</h3>
+      <div class="rank-list" id="rank-result">
+        <div class="rank-empty">불러오는 중이에요… 🌾</div>
+      </div>
+    </div>
+
     <div class="row">
       <button class="btn orange sm" id="btn-again">🔁 한 번 더</button>
       <button class="btn ghost sm" id="btn-home">🏠 처음으로</button>
@@ -380,6 +468,8 @@ var LEVELS = {
 var SEED="🌰", SPROUT="🌱", LEAF="🌿", DEAD="🥀", PEST="🐛", DROP="💧";
 var TIME_PER_LEVEL = 60;
 var FIX_BONUS = 10;             /* 벌레·물 문제를 해결하면 주는 보너스 */
+var ROT_PENALTY = 300;          /* 작물이 썩으면 잃는 돈 */
+var ROT_LOCK = 5000;            /* 썩은 땅은 5초 동안 심을 수 없어요 */
 var BEST_KEY = "farmking-best";
 
 var level=1, money=0, timeLeft=TIME_PER_LEVEL, playing=false;
@@ -462,18 +552,24 @@ var HINTS = [
   "벌레 🐛 가 보이면 🧴 스프레이를 골라요.",
   "물방울 💧 이 뜨면 🚿 물뿌리개를 골라요.",
   "작물이 통통 튀면 🎒 마대자루로 수확!",
-  "밭을 가득 채우면 더 많이 벌 수 있어요 🌾"
+  "밭을 가득 채우면 더 많이 벌 수 있어요 🌾",
+  "작물이 썩으면 300원을 잃어요. 빨리 해결해요!"
 ];
 var hintIdx = 0;
 function hint(){ hintIdx = (hintIdx+1) % HINTS.length; return HINTS[hintIdx]; }
+
+/* 모은 돈은 1,000 단위로 끊어서 보여 줘요 */
+function showMoney(){ $("d-money").textContent = money.toLocaleString("ko-KR"); }
 
 /* ---------- 이펙트 ---------- */
 function fx(el, emoji){
   var d=document.createElement("div"); d.className="fx"; d.textContent=emoji;
   el.appendChild(d); setTimeout(function(){ if(d.parentNode) d.remove(); }, 660);
 }
-function pop(el, text, small){
-  var d=document.createElement("div"); d.className="pop"+(small?" small":""); d.textContent=text;
+function pop(el, text, small, bad){
+  var d=document.createElement("div");
+  d.className="pop"+(small?" small":"")+(bad?" bad":"");
+  d.textContent=text;
   el.appendChild(d); setTimeout(function(){ if(d.parentNode) d.remove(); }, 1010);
 }
 
@@ -503,8 +599,9 @@ function Plot(el){
   this.reset();
 }
 Plot.prototype.reset = function(){
-  this.state = "empty";   /* empty · growing · ready · dead */
+  this.state = "empty";   /* empty · growing · ready · rot(썩은 땅) */
   this.stage = 0;
+  this.clearRot();
   this.dropEvent();
   this.paint();
 };
@@ -512,15 +609,38 @@ Plot.prototype.dropEvent = function(){
   this.event = null;
   if(this.timer){ clearTimeout(this.timer); this.timer = null; }
 };
+/* 작물이 썩었어요 → 300원을 잃고, 그 땅은 5초 동안 쉬어야 해요 */
 Plot.prototype.wither = function(){
-  if(this.state === "growing" || this.state === "ready"){
-    this.state = "dead";
-    this.dropEvent();
-    this.paint();
-    fx(this.el, "💔");
-    beep("sad");
-    say("앗, 작물이 시들었어요. 다시 심어 볼까요?", "😢", true);
-  }
+  if(this.state !== "growing" && this.state !== "ready") return;
+  this.state = "rot";
+  this.dropEvent();
+  this.rotUntil = Date.now() + ROT_LOCK;
+  this.paint();
+
+  money = Math.max(0, money - ROT_PENALTY);
+  showMoney();
+  pop(this.el, "-" + ROT_PENALTY + "원", false, true);
+  fx(this.el, "💔");
+  beep("sad");
+  say("앗, 작물이 썩었어요! " + ROT_PENALTY + "원을 잃고 5초 동안 쉬는 땅이 돼요.", "😢", true);
+
+  var self = this;
+  this.rotTimer = setInterval(function(){
+    if(!self.rotUntil) return;
+    var left = Math.ceil((self.rotUntil - Date.now()) / 1000);
+    if(left <= 0){
+      clearInterval(self.rotTimer); self.rotTimer = null; self.rotUntil = 0;
+      self.reset();
+      fx(self.el, "✨");
+    } else {
+      self.paint();
+    }
+  }, 250);
+};
+/* 단계가 끝나거나 다시 시작할 때 썩은 땅 시계도 정리해요 */
+Plot.prototype.clearRot = function(){
+  if(this.rotTimer){ clearInterval(this.rotTimer); this.rotTimer = null; }
+  this.rotUntil = 0;
 };
 Plot.prototype.paint = function(){
   /* 작물 그림 */
@@ -529,14 +649,22 @@ Plot.prototype.paint = function(){
     e = (this.stage === 0) ? SEED : (this.stage === 1) ? SPROUT : LEAF;
   } else if(this.state === "ready"){
     e = LEVELS[level].crop;
-  } else if(this.state === "dead"){
+  } else if(this.state === "rot"){
     e = DEAD;
   }
   this.crop.textContent = e;
 
   this.el.classList.toggle("ready", this.state === "ready" && !this.event);
-  this.el.classList.toggle("dead", this.state === "dead");
+  this.el.classList.toggle("rot", this.state === "rot");
   this.el.classList.toggle("urgent", !!this.event);
+
+  /* 썩은 땅에 남은 시간을 숫자로 보여 줘요 */
+  var w = this.el.querySelector(".wait");
+  if(this.state === "rot" && this.rotUntil){
+    var left = Math.max(Math.ceil((this.rotUntil - Date.now()) / 1000), 1);
+    if(!w){ w = document.createElement("div"); w.className = "wait"; this.el.appendChild(w); }
+    w.textContent = left + "초";
+  } else if(w){ w.remove(); }
 
   /* 벌레 · 물방울 아이콘 */
   if(this.evEl){ this.evEl.remove(); this.evEl = null; }
@@ -560,8 +688,16 @@ Plot.prototype.tap = function(){
   if(!playing) return;
   wake();
 
-  /* 1) 빈 밭 · 시든 밭 → 씨앗 심기 (도구와 상관없이) */
-  if(this.state === "empty" || this.state === "dead"){
+  /* 0) 썩은 땅은 쉬는 중이라 심을 수 없어요 */
+  if(this.state === "rot"){
+    var left = Math.max(Math.ceil((this.rotUntil - Date.now()) / 1000), 1);
+    beep("wrong");
+    say("썩은 땅이에요. " + left + "초만 기다렸다가 심어요!", "🪹", true);
+    return;
+  }
+
+  /* 1) 빈 밭 → 씨앗 심기 (도구와 상관없이) */
+  if(this.state === "empty"){
     this.state = "growing"; this.stage = 0;
     this.paint();
     fx(this.el, "✨"); beep("plant");
@@ -576,7 +712,7 @@ Plot.prototype.tap = function(){
       beep(isPest ? "spray" : "water");
       fx(this.el, isPest ? "💨" : "💦");
       money += FIX_BONUS;
-      $("d-money").textContent = money;
+      showMoney();
       pop(this.el, "+" + FIX_BONUS + "원", true);
       if(this.evEl){
         this.evEl.textContent = isPest ? "😵" : "😊";
@@ -601,7 +737,7 @@ Plot.prototype.tap = function(){
       beep("harvest");
       var earn = LEVELS[level].money;
       money += earn;
-      $("d-money").textContent = money;
+      showMoney();
       pop(this.el, "+" + earn + "원");
       fx(this.el, "🎉");
       var me = this;
@@ -683,7 +819,7 @@ function startLevel(){
   playing = true;
   pickTool(tool || "water");
   $("d-lv").textContent = level;
-  $("d-money").textContent = money;
+  showMoney();
   $("d-time").textContent = timeLeft;
   $("tbar-i").style.width = "100%";
   $("tbar").classList.remove("warn");
@@ -717,7 +853,7 @@ function startClocks(){
 function stopTimers(){
   stopClocks();
   if(sayTimer) clearTimeout(sayTimer);
-  cells.forEach(function(c){ c.dropEvent(); c.paint(); });
+  cells.forEach(function(c){ c.clearRot(); c.dropEvent(); c.paint(); });
 }
 
 function endLevel(){
@@ -736,10 +872,10 @@ function endLevel(){
 
 /* ---------- 결과 ---------- */
 var RANKS = [
-  { min:4500, icon:"👑", title:"농사의 왕!",   stars:"⭐⭐⭐", desc:"온 마을이 깜짝 놀랄 솜씨예요! 벌레도 목마름도 모두 척척 해결했네요. 진짜 농사의 왕이에요!" },
-  { min:2500, icon:"🏅", title:"농사 박사",   stars:"⭐⭐☆", desc:"아주 잘했어요! 다 자란 작물을 조금만 더 빨리 수확하면 왕관을 쓸 수 있어요. 한 번 더 도전해 볼까요?" },
-  { min:1000, icon:"🌾", title:"열심 농부",   stars:"⭐☆☆", desc:"잘 키웠어요! 벌레와 물방울이 뜨면 바로 알맞은 도구를 고르는 게 비결이에요. 도구를 미리 골라 두면 더 빨라요!" },
-  { min:0,    icon:"🌱", title:"농사 꿈나무", stars:"☆☆☆", desc:"괜찮아요, 농사는 연습이 필요하죠! 빈 밭을 많이 채워 두고, 다 자란 작물을 놓치지 않으면 돈이 쑥쑥 늘어요." }
+  { min:15000, icon:"👑", title:"농사의 왕!",   stars:"⭐⭐⭐", desc:"온 마을이 깜짝 놀랄 솜씨예요! 벌레도 목마름도 모두 척척 해결했네요. 진짜 농사의 왕이에요!" },
+  { min:10000, icon:"🏅", title:"농사 박사",   stars:"⭐⭐☆", desc:"아주 잘했어요! 다 자란 작물을 조금만 더 빨리 수확하면 왕관을 쓸 수 있어요. 한 번 더 도전해 볼까요?" },
+  { min:5000,  icon:"🌾", title:"열심 농부",   stars:"⭐☆☆", desc:"잘 키웠어요! 벌레와 물방울이 뜨면 바로 알맞은 도구를 고르는 게 비결이에요. 작물이 썩지 않게 지키는 게 가장 중요해요!" },
+  { min:0,     icon:"🌱", title:"농사 꿈나무", stars:"☆☆☆", desc:"괜찮아요, 농사는 연습이 필요하죠! 빈 밭을 많이 채워 두고, 벌레와 물방울을 빨리 해결하면 돈이 쑥쑥 늘어요." }
 ];
 function finish(){
   beep("level");
@@ -760,6 +896,24 @@ function finish(){
     extra = " (내 최고 기록 " + best.toLocaleString("ko-KR") + "원)";
   }
   $("r-desc").textContent = r.desc + extra;
+
+  /* 5등 안에 들면 이름을 적어 순위표에 올릴 수 있어요 */
+  var box = $("name-box");
+  if(makesTop(money)){
+    box.classList.remove("hidden");
+    $("name-why").textContent = topList.length
+      ? "🎉 마을 순위 " + TOP_N + "등 안에 들었어요! 이름을 적어 주세요."
+      : "🎉 첫 번째 기록이에요! 이름을 적어 주세요.";
+    var saved = "";
+    try{ saved = localStorage.getItem("farmking-name") || ""; }catch(e){}
+    $("name-input").value = saved;
+    $("btn-save").disabled = false;
+    $("btn-save").textContent = "올리기";
+  } else {
+    box.classList.add("hidden");
+  }
+  renderRanks();
+
   $("veil").classList.add("show");
   paintBest();
 }
@@ -794,7 +948,127 @@ document.addEventListener("visibilitychange", function(){
   else                startClocks();
 });
 
+$("btn-save").addEventListener("click", submitRank);
+$("name-input").addEventListener("keydown", function(e){ if(e.key === "Enter") submitRank(); });
+
 paintBest();
+
+/* ===================================================================
+   🏆 우리 마을 농사왕 순위 (모든 방문자가 함께 보는 순위표, 5등까지)
+   =================================================================== */
+var RANK_DOC = "top5", RANK_COL = "farm_rankings", TOP_N = 5;
+var topList = [], myRowKey = "", rankReady = false;
+
+var fdb = null;
+try{
+  firebase.initializeApp({
+    apiKey: "AIzaSyAqXsG8npxettrCRH3MbZwFZGLg5aehxdw",
+    authDomain: "min-playground.firebaseapp.com",
+    projectId: "min-playground",
+    storageBucket: "min-playground.firebasestorage.app",
+    messagingSenderId: "472071492052",
+    appId: "1:472071492052:web:00263046925133e55a4641"
+  });
+  fdb = firebase.firestore();
+}catch(e){ fdb = null; }
+
+function esc(t){
+  return String(t == null ? "" : t)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+/* 순위표를 실시간으로 지켜봐요 (다른 친구가 기록을 세우면 바로 바뀝니다) */
+function listenRanks(){
+  if(!fdb){ renderRanks(); return; }
+  fdb.collection(RANK_COL).doc(RANK_DOC).onSnapshot(function(doc){
+    topList = (doc.exists && doc.data().top5) ? doc.data().top5 : [];
+    rankReady = true;
+    renderRanks();
+  }, function(){ rankReady = true; renderRanks(); });
+}
+
+function rankHtml(){
+  if(!fdb) return '<div class="rank-empty">순위표를 불러올 수 없어요.<br>인터넷 연결을 확인해 주세요 🌐</div>';
+  if(!rankReady) return '<div class="rank-empty">순위표를 불러오는 중이에요… 🌾</div>';
+  if(!topList.length) return '<div class="rank-empty">아직 기록이 없어요.<br>첫 번째 농사왕이 되어 보세요! 👑</div>';
+  var pos = ["👑","🥈","🥉","4","5"], h = "";
+  for(var i = 0; i < Math.min(topList.length, TOP_N); i++){
+    var r = topList[i];
+    var mine = (r.key && r.key === myRowKey) ? " me" : "";
+    h += '<div class="rank-row' + (i === 0 ? " first" : "") + mine + '">' +
+           '<span class="pos">' + pos[i] + '</span>' +
+           '<span class="who">' + esc(r.name) + '</span>' +
+           '<span class="amt">' + (Number(r.money) || 0).toLocaleString("ko-KR") + '원</span>' +
+         '</div>';
+  }
+  return h;
+}
+function renderRanks(){
+  var h = rankHtml();
+  var a = $("rank-home"), b = $("rank-result");
+  if(a) a.innerHTML = h;
+  if(b) b.innerHTML = h;
+}
+
+/* 이번 점수가 5등 안에 드는지 */
+function makesTop(amount){
+  if(!fdb || amount <= 0) return false;
+  if(topList.length < TOP_N) return true;
+  return amount > (Number(topList[topList.length - 1].money) || 0);
+}
+
+/* 순위표에 이름 올리기 */
+function saveRank(nick, amount){
+  if(!fdb) return Promise.resolve(false);
+  var ref = fdb.collection(RANK_COL).doc(RANK_DOC);
+  var key = String(Date.now()) + "-" + Math.floor(Math.random() * 10000);
+  return ref.get().then(function(doc){
+    var arr = (doc.exists && doc.data().top5) ? doc.data().top5.slice() : [];
+    arr.push({ name: nick, money: amount, key: key, at: Date.now() });
+    arr.sort(function(a, b){ return (Number(b.money)||0) - (Number(a.money)||0); });
+    arr = arr.slice(0, TOP_N);
+    myRowKey = key;
+    return ref.set({ top5: arr }).then(function(){ return true; });
+  }).catch(function(){ return false; });
+}
+
+/* 결과 창에서 '올리기'를 눌렀을 때 */
+function submitRank(){
+  var input = $("name-input");
+  var nick = (input.value || "").trim().slice(0, 8);
+  if(!nick){ alert("이름을 적어 주세요!"); input.focus(); return; }
+  var btn = $("btn-save");
+  btn.disabled = true; btn.textContent = "올리는 중…";
+  saveRank(nick, money).then(function(ok){
+    btn.disabled = false; btn.textContent = "올리기";
+    if(ok){
+      $("name-box").classList.add("hidden");
+      try{ localStorage.setItem("farmking-name", nick); }catch(e){}
+    } else {
+      alert("순위표에 올리지 못했어요.\n인터넷을 확인하고 다시 눌러 주세요.");
+    }
+  });
+}
+
+/* ===== 관리자용 순위 초기화 (페이지 맨 아래 전구) ===== */
+var ADMIN_PW = "3min";
+function adminReset(){
+  var bulb = $("bulb");
+  var pw = prompt("관리자 비밀번호를 입력하세요.");
+  if(pw === null) return;
+  if(pw !== ADMIN_PW){ alert("비밀번호가 달라요."); return; }
+  if(!confirm("'농사의 왕' 순위를 모두 지울까요?\n지우면 되돌릴 수 없어요.")) return;
+  if(!fdb){ alert("순위 서버에 연결되어 있지 않아요."); return; }
+  if(bulb) bulb.classList.add("on");
+  fdb.collection(RANK_COL).doc(RANK_DOC).set({ top5: [] }).then(function(){
+    myRowKey = "";
+    alert("\u2705 순위를 초기화했어요.");
+  }).catch(function(e){
+    alert("초기화하지 못했어요.\n" + (e && e.message ? e.message : ""));
+  }).then(function(){ if(bulb) bulb.classList.remove("on"); });
+}
+
+listenRanks();
 </script>
 </body>
 </html>
