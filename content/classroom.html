@@ -815,12 +815,12 @@ function setupPad(){
     return { x: t.clientX - b.left, y: t.clientY - b.top };
   };
   const start = e => { e.preventDefault(); drawing = true; const p = pos(e);
-    pctx.beginPath(); pctx.moveTo(p.x,p.y); };
+    pctx.beginPath(); pctx.moveTo(p.x,p.y); lastStroke = Date.now(); };
   const move = e => { if(!drawing) return; e.preventDefault(); const p = pos(e);
     pctx.strokeStyle = erasing ? "#fff" : pen;
     pctx.lineWidth = erasing ? 24 : penWidth;
     pctx.lineTo(p.x,p.y); pctx.stroke(); dirty = true; lastStroke = Date.now(); };
-  const end = () => { drawing = false; };
+  const end = () => { if(drawing) lastStroke = Date.now(); drawing = false; };
   pad.addEventListener("mousedown",start); pad.addEventListener("mousemove",move);
   window.addEventListener("mouseup",end);
   pad.addEventListener("touchstart",start,{passive:false});
@@ -849,15 +849,29 @@ function lockWork(on){
   $("w-done").classList.toggle("hidden", !on);
   document.querySelectorAll("#w-palette, .widths").forEach(function(el){ el.style.opacity = on ? ".45" : "1"; });
 }
+let sending = false;
 function submitWork(){
-  lockWork(true);
-  dirty = true; sendWork();
-  $("w-save").textContent = "제출했어요! 고치려면 '수정하기'를 눌러요 ✓";
+  if(sending) return;                       /* 두 번 눌러도 한 번만 */
+  sending = true;
+  lockWork(true);                           /* 보내는 동안 그림이 바뀌지 않게 잠가요 */
+  $("w-save").textContent = "선생님께 보내는 중이에요… 잠깐만 기다려 주세요 ⏳";
+  sendWorkSure().then(function(ok){
+    sending = false;
+    if(ok){
+      $("w-save").textContent = "제출 완료! 선생님께 잘 전해졌어요 ✓ 고치려면 '수정하기'를 눌러요";
+    } else {
+      lockWork(false);                      /* 못 보냈으면 다시 고칠 수 있게 풀어 줘요 */
+      submitted = false;
+      $("w-save").textContent = "아직 못 보냈어요 😢 와이파이를 확인하고 '제출하기'를 다시 눌러 주세요.";
+      alert("선생님께 보내지 못했어요.\n와이파이를 확인한 뒤 '제출하기'를 한 번 더 눌러 주세요.\n(그림은 그대로 남아 있어요!)");
+    }
+  });
 }
 function editWork(){
+  if(sending) return;
   lockWork(false);
-  dirty = true; sendWork();
   $("w-save").textContent = "다시 고칠 수 있어요 🙂";
+  sendWork(true);
 }
 function clearPad(){
   if(!pctx) return;
@@ -888,8 +902,7 @@ function putPhoto(input){
       pctx.fillStyle = "#fff"; pctx.fillRect(0, 0, padW, padH);
       pctx.drawImage(im, (padW - w) / 2, (padH - h) / 2, w, h);
       dirty = true;
-      lastStroke = 0;          /* 사진은 바로 선명하게 보내요 */
-      sendWork();
+      sendWork(true);          /* 사진은 바로 선명하게 보내요 */
       $("w-save").textContent = "사진을 넣었어요! 위에 그리거나 적어 보세요 ✏️";
     };
     im.onerror = function(){ alert("사진을 읽지 못했어요. 다른 사진으로 해볼까요?"); };
@@ -922,22 +935,26 @@ let dirty = false, saveTimer = null, lastSent = "", lastStroke = 0, lastBig = ""
 function touchWork(){ dirty = true; }
 function startSaver(){
   if(saveTimer) clearInterval(saveTimer);
-  saveTimer = setInterval(sendWork, 5000);
+  saveTimer = setInterval(function(){ if(!sending) sendWork(false); }, 5000);
   document.addEventListener("visibilitychange", function(){
     db.collection("rooms").doc(roomCode).collection("students").doc(myId)
       .set({ away: document.hidden, at: Date.now() }, { merge:true }).catch(function(){});
   });
 }
-function sendWork(){
-  if(!roomCode || !myId) return;
+/* force = true  : '제출하기'처럼 꼭 보내야 할 때.
+                    지금 화면 그대로의 큰 그림까지 반드시 함께 보내고,
+                    잘 도착했는지 기다려서 알려 줍니다. */
+function sendWork(force){
+  if(!roomCode || !myId) return Promise.resolve(false);
   const payload = { name: myName, mode: roomMode, at: Date.now(), away: document.hidden, submitted: submitted };
   if(roomMode === "write") payload.text = ($("w-text").value||"").slice(0, 1500);
   else if(roomMode === "draw"){
     payload.img = padThumb();
-    /* 그리기를 3초 넘게 멈췄을 때만 큰 그림을 함께 보내요 (사용량 아끼기) */
-    if(Date.now() - lastStroke > 3000){
+    /* 평소에는 그리기를 3초 넘게 멈췄을 때만 큰 그림을 함께 보내요 (사용량 아끼기).
+       ★ 제출할 때는 멈춘 시간과 상관없이 '지금 이 순간의 완성본'을 꼭 함께 보냅니다. */
+    if(force || Date.now() - lastStroke > 3000){
       const big = padBig();
-      if(big && big !== lastBig){ payload.imgHi = big; lastBig = big; }
+      if(big && (force || big !== lastBig)){ payload.imgHi = big; lastBig = big; }
     }
   }
   else {
@@ -946,12 +963,29 @@ function sendWork(){
     payload.answers = a;
   }
   const sig = JSON.stringify([payload.text, payload.img, payload.answers, payload.mode, payload.away, payload.submitted]);
-  if(!dirty && sig === lastSent) return;      /* 바뀐 게 없으면 보내지 않아요 */
+  /* 제출할 때(force)는 '바뀐 게 없어 보여도' 무조건 보냅니다 */
+  if(!force && !dirty && sig === lastSent) return Promise.resolve(true);
   lastSent = sig; dirty = false;
-  db.collection("rooms").doc(roomCode).collection("students").doc(myId)
+  return db.collection("rooms").doc(roomCode).collection("students").doc(myId)
     .set(payload, { merge:true })
-    .then(function(){ $("w-save").textContent = "선생님 화면에 보냈어요 ✓ " + new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"}); })
-    .catch(function(){ $("w-save").textContent = "보내지 못했어요. 와이파이를 확인해 주세요."; });
+    .then(function(){
+      if(!force) $("w-save").textContent = "선생님 화면에 보냈어요 ✓ " + new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"});
+      return true;
+    })
+    .catch(function(){
+      lastSent = "";                /* 다음 번에 다시 보내도록 기억을 지워요 */
+      dirty = true;
+      if(!force) $("w-save").textContent = "보내지 못했어요. 와이파이를 확인해 주세요.";
+      return false;
+    });
+}
+
+/* 꼭 보내야 할 때 쓰는 함수 — 한 번 실패하면 1.2초 뒤에 한 번 더 시도해요 */
+function sendWorkSure(){
+  return sendWork(true).then(function(ok){
+    if(ok) return true;
+    return new Promise(function(r){ setTimeout(r, 1200); }).then(function(){ return sendWork(true); });
+  });
 }
 
 /* 선생님 화면의 '몇 분 전' 표시를 살아 있게 */
