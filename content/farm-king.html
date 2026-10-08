@@ -601,6 +601,7 @@ function Plot(el){
 Plot.prototype.reset = function(){
   this.state = "empty";   /* empty · growing · ready · rot(썩은 땅) */
   this.stage = 0;
+  this.busy = false;
   this.clearRot();
   this.dropEvent();
   this.paint();
@@ -613,6 +614,7 @@ Plot.prototype.dropEvent = function(){
 Plot.prototype.wither = function(){
   if(this.state !== "growing" && this.state !== "ready") return;
   this.state = "rot";
+  this.busy = false;
   this.dropEvent();
   this.rotUntil = Date.now() + ROT_LOCK;
   this.paint();
@@ -686,6 +688,9 @@ Plot.prototype.grow = function(){
 };
 Plot.prototype.tap = function(){
   if(!playing) return;
+  /* ★ 수확하거나 벌레를 잡는 '짧은 순간'에는 더 눌려도 아무 일이 없어요.
+     이걸 막지 않으면 연타할 때마다 돈이 여러 번 올라갑니다. */
+  if(this.busy) return;
   wake();
 
   /* 0) 썩은 땅은 쉬는 중이라 심을 수 없어요 */
@@ -719,8 +724,13 @@ Plot.prototype.tap = function(){
         this.evEl.classList.add("gone");
       }
       if(this.timer){ clearTimeout(this.timer); this.timer = null; }
+      this.busy = true;                       /* 처리 중 — 중복 클릭 막기 */
       var self = this;
-      setTimeout(function(){ self.event = null; self.paint(); }, 650);
+      setTimeout(function(){
+        self.busy = false;
+        self.event = null;
+        self.paint();
+      }, 650);
       this.el.classList.remove("urgent");
       say(isPest ? "벌레를 잡았어요! 잘했어요 👏" : "시원하게 물을 줬어요! 💧", isPest ? "😎" : "😊", false);
       return;
@@ -735,6 +745,8 @@ Plot.prototype.tap = function(){
   if(this.state === "ready"){
     if(tool === "bag"){
       beep("harvest");
+      this.busy = true;                       /* 처리 중 — 중복 수확 막기 */
+      this.el.classList.remove("ready");      /* 통통 튀는 동작도 바로 멈춰요 */
       var earn = LEVELS[level].money;
       money += earn;
       showMoney();
@@ -787,7 +799,7 @@ window.addEventListener("resize", function(){ if(cells.length) sizeBoard(); });
 /* ---------- 벌레 · 목마름 만들기 ---------- */
 function spawn(){
   var ready = cells.filter(function(c){
-    return (c.state === "growing" || c.state === "ready") && !c.event;
+    return (c.state === "growing" || c.state === "ready") && !c.event && !c.busy;
   });
   if(!ready.length) return;
   var c = ready[Math.floor(Math.random() * ready.length)];
