@@ -6,37 +6,166 @@
 <title>3분 놀이터 — 쉬는 시간, 3분이면 충분해요</title>
 <meta name="description" content="성향 테스트, 밸런스 게임, 웹게임, 교실에서 바로 쓰는 디지털 교구까지. 3분이면 끝나는 재미있는 콘텐츠가 매일 올라오는 놀이터.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7592272420796389" crossorigin="anonymous"></script>
 <style>
-  /* 소개글 영역 전용 스타일 (기존 style.css를 해치지 않게 인라인 추가) */
-  .intro-box {
-    background-color: #FFF6E9;
-    border: 2px dashed #FFC288;
-    border-radius: 16px;
-    padding: 24px 28px;
-    margin: 0 auto 32px;
-    max-width: 680px;
-    text-align: center;
-    box-shadow: 0 4px 12px rgba(255, 194, 136, 0.15);
+  :root{
+    --sky: #EEF6FF;
+    --paper: #FFFFFF;
+    --ink: #26304F;
+    --ink-soft: #5E6788;
+    --line: #D6E4F5;
+    --mint: #3FBF95;   --mint-bg: #E3F8EF;
+    --blue: #4DA3EE;   --blue-bg: #E2F0FD;
+    --orange: #FF9A52; --orange-bg: #FFEEDD;
+    --lilac: #9682EE;  --lilac-bg: #EEEAFF;
+    --pink: #FF7BA4;   --pink-bg: #FFE6EE;
+    --lemon: #FFD54F;
   }
-  .intro-box h2 {
-    font-family: 'Jua', sans-serif;
-    color: #FF785A;
-    font-size: 22px;
-    margin: 0 0 12px;
-  }
-  .intro-box p {
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--sky);
+    color: var(--ink);
     font-family: 'Noto Sans KR', sans-serif;
-    color: #554A42;
-    font-size: 15px;
-    line-height: 1.7;
-    margin: 0;
+    -webkit-font-smoothing: antialiased;
     word-break: keep-all;
   }
-  .intro-box strong {
-    color: #E8483C;
+  a{ color:inherit; text-decoration:none; }
+  a:focus-visible{ outline: 3px solid var(--ink); outline-offset: 3px; }
+  .wrap{ max-width: 960px; margin: 0 auto; padding: 0 16px; }
+
+  /* ---- header ---- */
+  .site-header{ display:flex; align-items:center; padding: 18px 0 6px; }
+  .brand{ display:flex; align-items:center; gap:10px; border-radius:12px; }
+  .brand-mark{ width:36px; height:36px; }
+  .brand-word{ font-family:'Jua', sans-serif; font-size:22px; }
+
+  /* ---- hero ---- */
+  .hero{
+    display:grid; grid-template-columns: 1fr 260px; align-items:center; gap: 24px;
+    padding: 28px 0 8px;
+  }
+  .hero h1{
+    font-family:'Jua', sans-serif; font-weight:400;
+    font-size: clamp(32px, 6vw, 52px); line-height:1.25;
+    margin:0 0 16px;
+  }
+  .hero p{
+    color: var(--ink-soft); font-size:16px; line-height:1.75;
+    max-width: 30em; margin:0 0 20px;
+  }
+  .perks{ display:flex; flex-wrap:wrap; gap:8px; margin:0; padding:0; list-style:none; }
+  .perks li{
+    font-size:13.5px; font-weight:700;
+    padding:7px 13px; border-radius:999px;
+    background: var(--paper); border:2px solid var(--ink);
+  }
+  .perks li:nth-child(1){ transform: rotate(-2deg); background: var(--lemon); }
+  .perks li:nth-child(2){ transform: rotate(1.5deg); background: var(--mint-bg); }
+  .perks li:nth-child(3){ transform: rotate(-1deg); background: var(--pink-bg); }
+
+  .buddy{ position:relative; justify-self:center; width:240px; }
+  .buddy svg{ width:100%; height:auto; display:block; animation: bob 3.2s ease-in-out infinite; }
+  .bubble{
+    position:absolute; top:-6px; left:-34px;
+    font-family:'Jua', sans-serif; font-size:16px;
+    background: var(--paper); border:2px solid var(--ink); border-radius: 18px 18px 18px 4px;
+    padding:8px 14px; white-space:nowrap;
+  }
+  @keyframes bob{ 0%,100%{ transform: translateY(0) rotate(-2deg); } 50%{ transform: translateY(-8px) rotate(2deg); } }
+
+  /* ---- room menu ---- */
+  .menu-title{ font-family:'Jua', sans-serif; font-weight:400; font-size:24px; margin: 36px 0 14px; }
+  .rooms{
+    display:grid; grid-template-columns: repeat(5, 1fr); gap: 12px;
+    margin:0; padding:0; list-style:none;
+  }
+  .room{
+    display:flex; flex-direction:column; align-items:flex-start; gap:6px;
+    height:100%; padding: 18px 16px 16px;
+    border-radius: 24px; border:2px solid var(--ink);
+    background: var(--c-bg); box-shadow: 0 5px 0 var(--ink);
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .room:hover{ transform: translateY(-2px); box-shadow: 0 7px 0 var(--ink); }
+  .room:active{ transform: translateY(4px); box-shadow: 0 1px 0 var(--ink); }
+  .room-emoji{
+    font-size:30px; line-height:1;
+    width:54px; height:54px; display:grid; place-items:center;
+    border-radius: 50%; background: var(--paper); border:2px solid var(--c);
+  }
+  .room-name{ font-family:'Jua', sans-serif; font-size:19px; margin-top:6px; }
+  .room-desc{ font-size:13px; color: var(--ink-soft); line-height:1.5; }
+  .room-count{ margin-top:auto; padding-top:6px; font-size:12.5px; font-weight:700; color: var(--ink); }
+
+  .c-mint{ --c: var(--mint); --c-bg: var(--mint-bg); }
+  .c-blue{ --c: var(--blue); --c-bg: var(--blue-bg); }
+  .c-orange{ --c: var(--orange); --c-bg: var(--orange-bg); }
+  .c-lilac{ --c: var(--lilac); --c-bg: var(--lilac-bg); }
+  .c-pink{ --c: var(--pink); --c-bg: var(--pink-bg); }
+
+  /* ---- sections ---- */
+  .shelf{
+    margin-top: 36px; padding: 22px 20px 24px;
+    background: var(--paper); border-radius: 30px;
+    border-top: 10px solid var(--c);
+    scroll-margin-top: 16px;
+  }
+  .shelf-head{ display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+  .shelf-head .room-emoji{ width:46px; height:46px; font-size:24px; background: var(--c-bg); border:none; }
+  .shelf-head h2{ font-family:'Jua', sans-serif; font-weight:400; font-size:24px; margin:0; }
+  .shelf-head p{ margin:2px 0 0; font-size:13.5px; color: var(--ink-soft); }
+
+  .items{
+    display:grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap:10px;
+    margin:0; padding:0; list-style:none;
+  }
+  .item{
+    display:flex; gap:12px; align-items:flex-start; height:100%;
+    padding: 14px; border-radius: 16px;
+    background: var(--c-bg); border-bottom: 3px solid transparent;
+    transition: border-color .12s ease, background-color .12s ease;
+  }
+  .item:hover{ border-bottom-color: var(--c); background: color-mix(in srgb, var(--c-bg) 70%, var(--c) 12%); }
+  .item-emoji{
+    flex: 0 0 44px; height:44px; display:grid; place-items:center;
+    font-size:24px; border-radius: 14px; background: var(--paper);
+  }
+  .item-body{ min-width:0; }
+  .item h3{ font-family:'Jua', sans-serif; font-weight:400; font-size:18px; line-height:1.35; margin:0 0 3px; }
+  .item p{ margin:0; font-size:13.5px; line-height:1.55; color: var(--ink-soft); }
+  .tag{
+    display:inline-block; margin-top:7px;
+    font-size:12px; font-weight:700; padding:2px 9px; border-radius:999px;
+    background: var(--paper); color: var(--ink);
+  }
+
+  /* ---- footer ---- */
+  .site-footer{
+    margin-top: 44px; padding: 24px 0 48px;
+    color: var(--ink-soft); font-size:13px; line-height:1.9; text-align:center;
+  }
+  .site-footer a{ text-decoration:underline; }
+
+  @media (max-width: 860px){
+    .rooms{ grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 640px){
+    .hero{ grid-template-columns: 1fr; text-align:left; padding-top:12px; }
+    .buddy{ order:-1; width:118px; margin: 18px 0 0 24px; justify-self:start; }
+    .bubble{ left:auto; right:-128px; top:16px; font-size:14px; }
+    .rooms{ grid-template-columns: repeat(2, 1fr); gap:10px; }
+    .room{ padding:14px 12px; border-radius:20px; }
+    .room-desc{ display:none; }
+    .shelf{ padding: 18px 12px 16px; border-radius:24px; }
+    .items{ grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    .buddy svg{ animation:none; }
+    .room, .item{ transition:none; }
   }
 </style>
 </head>
@@ -46,288 +175,246 @@
 
   <header class="site-header">
     <a class="brand" href="index.html">
-      <svg class="brand-mark" viewBox="0 0 34 34" fill="none">
-        <circle cx="17" cy="18" r="14" fill="#FAF7F0" stroke="#1D1B16" stroke-width="2"/>
-        <path d="M17 9 L17 18 L23 21" stroke="#E8483C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-        <rect x="13" y="2" width="8" height="4" rx="1.5" fill="#1D1B16"/>
+      <svg class="brand-mark" viewBox="0 0 34 34" fill="none" aria-hidden="true">
+        <circle cx="17" cy="18" r="14" fill="#FFD54F" stroke="#26304F" stroke-width="2"/>
+        <path d="M17 9 L17 18 L23 21" stroke="#26304F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="13" y="2" width="8" height="4" rx="1.5" fill="#26304F"/>
       </svg>
       <span class="brand-word">3분 놀이터</span>
     </a>
   </header>
 
   <section class="hero">
-    <div class="hero-eyebrow">쉬는 시간 전용 콘텐츠</div>
-    <h1>3분이면 충분해요,<br>지금 하나 골라볼까요?</h1>
-    <p>성향 테스트, 밸런스 게임, 미니 퀴즈까지 — 짧고 굵게 즐기는 콘텐츠를 매일 새로 올려요. 부담 없이 하나만 골라보세요.</p>
+    <div>
+      <h1>쉬는 시간,<br>3분이면 충분해요</h1>
+      <p>교실에서 꼭 필요한 도구와 짧게 즐기는 놀이를 한곳에 모았어요. 로그인 없이 누르면 바로 시작해요.</p>
+      <ul class="perks">
+        <li>로그인 없이 바로</li>
+        <li>설치 없이 브라우저로</li>
+        <li>교실 TV 화면에 딱</li>
+      </ul>
+    </div>
+
+    <div class="buddy">
+      <span class="bubble">오늘은 뭐 할까?</span>
+      <svg viewBox="0 0 200 210" aria-hidden="true">
+        <!-- bells -->
+        <circle cx="52" cy="46" r="20" fill="#FF7BA4" stroke="#26304F" stroke-width="5"/>
+        <circle cx="148" cy="46" r="20" fill="#FF7BA4" stroke="#26304F" stroke-width="5"/>
+        <rect x="88" y="14" width="24" height="16" rx="5" fill="#26304F"/>
+        <!-- feet -->
+        <path d="M62 178 L50 200" stroke="#26304F" stroke-width="7" stroke-linecap="round"/>
+        <path d="M138 178 L150 200" stroke="#26304F" stroke-width="7" stroke-linecap="round"/>
+        <!-- body -->
+        <circle cx="100" cy="112" r="76" fill="#FFD54F" stroke="#26304F" stroke-width="5"/>
+        <circle cx="100" cy="112" r="60" fill="#FFFFFF"/>
+        <!-- hour ticks -->
+        <g stroke="#26304F" stroke-width="4" stroke-linecap="round">
+          <path d="M100 56 v8"/><path d="M100 160 v8"/><path d="M44 112 h8"/><path d="M148 112 h8"/>
+        </g>
+        <!-- face -->
+        <ellipse cx="80" cy="108" rx="6" ry="8" fill="#26304F"/>
+        <ellipse cx="120" cy="108" rx="6" ry="8" fill="#26304F"/>
+        <circle cx="82" cy="105" r="2" fill="#fff"/>
+        <circle cx="122" cy="105" r="2" fill="#fff"/>
+        <ellipse cx="66" cy="126" rx="10" ry="6" fill="#FF7BA4" opacity=".55"/>
+        <ellipse cx="134" cy="126" rx="10" ry="6" fill="#FF7BA4" opacity=".55"/>
+        <path d="M90 128 Q100 138 110 128" fill="none" stroke="#26304F" stroke-width="4" stroke-linecap="round"/>
+        <!-- clock hands as a little tuft -->
+        <path d="M100 82 L100 70 M100 82 L112 76" stroke="#3FBF95" stroke-width="5" stroke-linecap="round"/>
+      </svg>
+    </div>
   </section>
 
-  <!-- 새로 추가된 귀여운 소개글 영역 -->
-  <div class="intro-box">
-    <h2>🎈 놀이와 학습이 만나는 에듀테크 놀이터!</h2>
-    <p>
-      '3분 놀이터'는 교실에서 꼭 필요하지만 <strong>번거로웠던 기능들을 쏙쏙 뽑아 만든 에듀테크 도구 모음</strong>입니다. 기존 도구들을 쓰며 아쉬웠던 2%를 채우고, 복잡한 <strong>로그인 없이 누구나 1초 만에 바로 쓸 수 있도록</strong> 만들었어요! 선생님은 업무를 줄이고, 아이들은 재미있게 배울 수 있는 알찬 공간이 되길 바랍니다. 틈새 시간, 부담 없이 즐겨보세요! 😊
-    </p>
-  </div>
+  <h2 class="menu-title">무엇을 찾고 있나요?</h2>
+  <ul class="rooms">
+    <li><a class="room c-mint" href="#class">
+      <span class="room-emoji">🍎</span>
+      <span class="room-name">수업 도구</span>
+      <span class="room-desc">타이머, 자리 뽑기, 소음 신호등</span>
+      <span class="room-count">9개</span>
+    </a></li>
+    <li><a class="room c-blue" href="#work">
+      <span class="room-emoji">📋</span>
+      <span class="room-name">업무 꾸러미</span>
+      <span class="room-desc">알림장, 품의서 자동 작성</span>
+      <span class="room-count">2개</span>
+    </a></li>
+    <li><a class="room c-orange" href="#play">
+      <span class="room-emoji">🎮</span>
+      <span class="room-name">놀이·퀴즈</span>
+      <span class="room-desc">웹게임, 밸런스 게임, 상식 퀴즈</span>
+      <span class="room-count">5개</span>
+    </a></li>
+    <li><a class="room c-lilac" href="#me">
+      <span class="room-emoji">🔮</span>
+      <span class="room-name">나 알아보기</span>
+      <span class="room-desc">MBTI, 진로, 연애 스타일 테스트</span>
+      <span class="room-count">4개</span>
+    </a></li>
+    <li><a class="room c-pink" href="#talk">
+      <span class="room-emoji">💬</span>
+      <span class="room-name">이야기방</span>
+      <span class="room-desc">정보교육과 AI 이야기 나누기</span>
+      <span class="room-count">1개</span>
+    </a></li>
+  </ul>
 
-  <div class="chip-row" id="filters">
-    <button class="chip" data-filter="all" data-active="true">전체</button>
-    <button class="chip" data-filter="test">성향테스트</button>
-    <button class="chip" data-filter="balance">밸런스게임</button>
-    <button class="chip" data-filter="quiz">미니퀴즈</button>
-    <button class="chip" data-filter="game">웹게임</button>
-    <button class="chip" data-filter="board">게시판</button>
-    <button class="chip" data-filter="teacher">디지털 교구</button>
-    <button class="chip" data-filter="work">업무 꾸러미</button>
-  </div>
-
-  <div class="grid" id="grid">
-    <a class="card" href="content/farm-king.html" data-cat="game">
-      <div class="badge-row">
-        <span class="badge game">웹게임</span>
-        <span class="time-pill">3분</span>
+  <!-- 수업 도구 -->
+  <section class="shelf c-mint" id="class">
+    <div class="shelf-head">
+      <span class="room-emoji">🍎</span>
+      <div>
+        <h2>수업 도구</h2>
+        <p>수업 시간에 교실 화면에 띄워 쓰는 디지털 교구예요.</p>
       </div>
-      <h3>👑 농사의 왕</h3>
-      <p>씨앗을 심고, 벌레를 잡고, 물을 주며 작물을 키워요. 세 단계를 지나 농사의 왕이 되어 보세요!</p>
-      <span class="play">농사 지으러 가기 →</span>
-    </a>
+    </div>
+    <ul class="items">
+      <li><a class="item" href="content/noise-meter.html">
+        <span class="item-emoji">🚦</span>
+        <div class="item-body"><h3>우리 반 소음 신호등</h3><p>교실 소리를 재서 초록·노랑·빨강으로 알려줘요.</p><span class="tag">수업용</span></div>
+      </a></li>
+      <li><a class="item" href="content/classroom.html">
+        <span class="item-emoji">🙋</span>
+        <div class="item-body"><h3>애들아 모여라</h3><p>방 번호 하나로 아이들의 글·그림·풀이를 한 화면에서 실시간으로 봐요.</p><span class="tag">실시간</span></div>
+      </a></li>
+      <li><a class="item" href="content/timer.html">
+        <span class="item-emoji">⏰</span>
+        <div class="item-body"><h3>똑딱똑딱 교실 타이머</h3><p>1분마다·10초 전·종료 알림을 골라 켤 수 있는 타이머예요.</p><span class="tag">수업용</span></div>
+      </a></li>
+      <li><a class="item" href="content/seat-shuffle.html">
+        <span class="item-emoji">🪑</span>
+        <div class="item-body"><h3>두근두근 자리바꾸기</h3><p>명단만 넣으면 분단·모둠 자리를 남녀 골고루 뽑아줘요.</p><span class="tag">1분</span></div>
+      </a></li>
+      <li><a class="item" href="content/ladder.html">
+        <span class="item-emoji">🪜</span>
+        <div class="item-body"><h3>두근두근 사다리타기</h3><p>사람 수와 당첨 개수만 정하면 바로 탈 수 있어요.</p><span class="tag">1분</span></div>
+      </a></li>
+      <li><a class="item" href="content/today-weather.html">
+        <span class="item-emoji">🌤️</span>
+        <div class="item-body"><h3>오늘 뭐 입지?</h3><p>우리 지역 날씨와 미세먼지로 옷차림과 마스크를 알려줘요.</p><span class="tag">1분</span></div>
+      </a></li>
+      <li><a class="item" href="content/writing-tool.html">
+        <span class="item-emoji">✏️</span>
+        <div class="item-body"><h3>슥삭슥삭 필기도구</h3><p>캡처한 화면 위에 밑줄·별표·글자를 써요. 화이트보드로도 써요.</p><span class="tag">수업용</span></div>
+      </a></li>
+      <li><a class="item" href="content/recorder-helper.html">
+        <span class="item-emoji">🎵</span>
+        <div class="item-body"><h3>도레미 리코더 도우미</h3><p>계이름을 넣으면 운지법 그림이 나오고, 악보로 인쇄할 수 있어요.</p><span class="tag">음악시간</span></div>
+      </a></li>
+      <li><a class="item" href="content/morning-hub.html">
+        <span class="item-emoji">📒</span>
+        <div class="item-body"><h3>2학기 아침활동지</h3><p>학년별 90일치. 수학 10문제에 영어·한자·속담까지 하루 한 장.</p><span class="tag">3~6학년</span></div>
+      </a></li>
+    </ul>
+  </section>
 
-    <a class="card" href="content/noise-meter.html" data-cat="teacher">
-      <div class="badge-row">
-        <span class="badge teacher">디지털 교구</span>
-        <span class="time-pill">수업용</span>
+  <!-- 업무 꾸러미 -->
+  <section class="shelf c-blue" id="work">
+    <div class="shelf-head">
+      <span class="room-emoji">📋</span>
+      <div>
+        <h2>업무 꾸러미</h2>
+        <p>선생님 업무를 1분 만에 끝내 주는 자동완성 도구예요.</p>
       </div>
-      <h3>우리 반 소음 신호등</h3>
-      <p>교실 소리를 재서 초록·노랑·빨강으로 알려줘요. 아이들이 스스로 목소리를 조절해요.</p>
-      <span class="play">신호등 켜기 →</span>
-    </a>
+    </div>
+    <ul class="items">
+      <li><a class="item" href="content/notice-helper.html">
+        <span class="item-emoji">📮</span>
+        <div class="item-body"><h3>알림장 자동완성기</h3><p>다섯 가지만 체크하면 가정통신문·행사·준비물·안전수칙까지 한 번에.</p><span class="tag">1분</span></div>
+      </a></li>
+      <li><a class="item" href="content/purchase-helper.html">
+        <span class="item-emoji">🧾</span>
+        <div class="item-body"><h3>품의 자동완성기</h3><p>장바구니를 붙여넣으면 품목내역 표가 나오고, 엑셀로 내려받아요.</p><span class="tag">1분</span></div>
+      </a></li>
+    </ul>
+  </section>
 
-    <a class="card" href="content/mbti-back.html" data-cat="test">
-      <div class="badge-row">
-        <span class="badge test">성향테스트</span>
-        <span class="time-pill">3분</span>
+  <!-- 놀이·퀴즈 -->
+  <section class="shelf c-orange" id="play">
+    <div class="shelf-head">
+      <span class="room-emoji">🎮</span>
+      <div>
+        <h2>놀이·퀴즈</h2>
+        <p>쉬는 시간에 가볍게 즐기는 게임과 퀴즈예요.</p>
       </div>
-      <h3>MBTI 학교ver(뒤)</h3>
-      <p>스무 가지 학교 상황으로 알아보는 내 안의 자연. 햇살·숲·번개·바위산 중 나는 무엇일까?</p>
-      <span class="play">테스트 시작 →</span>
-    </a>
+    </div>
+    <ul class="items">
+      <li><a class="item" href="content/farm-king.html">
+        <span class="item-emoji">👑</span>
+        <div class="item-body"><h3>농사의 왕</h3><p>씨앗을 심고 벌레를 잡고 물을 주며 농사의 왕이 되어 보세요.</p><span class="tag">웹게임 3분</span></div>
+      </a></li>
+      <li><a class="item" href="content/flag-memory.html">
+        <span class="item-emoji">🚩</span>
+        <div class="item-body"><h3>세계 국기 짝 맞추기</h3><p>국기 카드 50장 중에서 같은 국기를 찾아 짝을 맞춰요.</p><span class="tag">웹게임 3분</span></div>
+      </a></li>
+      <li><a class="item" href="content/core-mixmaster.html">
+        <span class="item-emoji">👾</span>
+        <div class="item-body"><h3>몬조운</h3><p>몬스터를 조합해 오늘의 운세를 알아보고, 더 강한 몬스터로 키워요.</p><span class="tag">웹게임 3분+</span></div>
+      </a></li>
+      <li><a class="item" href="content/balance-game.html">
+        <span class="item-emoji">⚖️</span>
+        <div class="item-body"><h3>인생 최고의 딜레마 8선</h3><p>평생 여름 vs 평생 겨울? 고민되는 밸런스 게임 8가지.</p><span class="tag">밸런스게임 3분</span></div>
+      </a></li>
+      <li><a class="item" href="content/manmul-quiz.html">
+        <span class="item-emoji">🧠</span>
+        <div class="item-body"><h3>초등 상식 퀴즈(만물박사)</h3><p>만물박사 선발대회 대비 예상문제. 매일 새 문제가 나와요.</p><span class="tag">매일 50문제</span></div>
+      </a></li>
+    </ul>
+  </section>
 
-    <a class="card" href="content/mbti-front.html" data-cat="test">
-      <div class="badge-row">
-        <span class="badge test">성향테스트</span>
-        <span class="time-pill">3분</span>
+  <!-- 나 알아보기 -->
+  <section class="shelf c-lilac" id="me">
+    <div class="shelf-head">
+      <span class="room-emoji">🔮</span>
+      <div>
+        <h2>나 알아보기</h2>
+        <p>질문에 답하면서 나를 알아가는 성향 테스트예요.</p>
       </div>
-      <h3>MBTI 학교ver(앞)</h3>
-      <p>스무 가지 학교 상황으로 알아보는 내 상징. 유니콘·사자·마법사·기사 중 나는 누구?</p>
-      <span class="play">테스트 시작 →</span>
-    </a>
+    </div>
+    <ul class="items">
+      <li><a class="item" href="content/mbti-front.html">
+        <span class="item-emoji">🦄</span>
+        <div class="item-body"><h3>MBTI 학교ver(앞)</h3><p>학교 상황 20가지로 알아보는 내 상징. 유니콘·사자·마법사·기사 중 누구?</p><span class="tag">3분</span></div>
+      </a></li>
+      <li><a class="item" href="content/mbti-back.html">
+        <span class="item-emoji">🌳</span>
+        <div class="item-body"><h3>MBTI 학교ver(뒤)</h3><p>학교 상황 20가지로 알아보는 내 안의 자연. 햇살·숲·번개·바위산 중 무엇?</p><span class="tag">3분</span></div>
+      </a></li>
+      <li><a class="item" href="content/career-test.html">
+        <span class="item-emoji">🧭</span>
+        <div class="item-body"><h3>나의 커리어 나침반</h3><p>학교생활 질문 10가지로 나에게 어울리는 직업을 찾아요.</p><span class="tag">3분</span></div>
+      </a></li>
+      <li><a class="item" href="content/love-style-test.html">
+        <span class="item-emoji">💌</span>
+        <div class="item-body"><h3>나의 연애 스타일 테스트</h3><p>썸·다툼·화해의 순간들로 알아보는 나만의 연애 스타일.</p><span class="tag">3분</span></div>
+      </a></li>
+    </ul>
+  </section>
 
-    <a class="card" href="content/classroom.html" data-cat="teacher">
-      <div class="badge-row">
-        <span class="badge teacher">디지털 교구</span>
-        <span class="time-pill">실시간</span>
+  <!-- 이야기방 -->
+  <section class="shelf c-pink" id="talk">
+    <div class="shelf-head">
+      <span class="room-emoji">💬</span>
+      <div>
+        <h2>이야기방</h2>
+        <p>선생님들이 생각을 나누는 게시판이에요.</p>
       </div>
-      <h3>애들아 모여라</h3>
-      <p>방 번호 하나로 우리 반이 한 화면에! 아이들이 쓰는 글·그림·문제 풀이를 실시간으로 보고, 눌러서 크게 봐요.</p>
-      <span class="play">방 만들러 가기 →</span>
-    </a>
-
-    <a class="card" href="content/notice-helper.html" data-cat="work">
-      <div class="badge-row">
-        <span class="badge work">업무 꾸러미</span>
-        <span class="time-pill">1분</span>
-      </div>
-      <h3>알림장 자동완성기</h3>
-      <p>다섯 가지만 체크하면 알림장이 뚝딱! 가정통신문·행사·준비물·안전수칙까지 한 번에.</p>
-      <span class="play">알림장 만들러 가기 →</span>
-    </a>
-
-    <a class="card" href="content/today-weather.html" data-cat="teacher">
-      <div class="badge-row">
-        <span class="badge teacher">디지털 교구</span>
-        <span class="time-pill">1분</span>
-      </div>
-      <h3>오늘 뭐 입지?</h3>
-      <p>우리 지역 날씨와 미세먼지를 보고 옷차림과 마스크를 알려줘요. 아침 활동으로 딱!</p>
-      <span class="play">날씨 보러 가기 →</span>
-    </a>
-
-    <a class="card" href="content/purchase-helper.html" data-cat="work">
-      <div class="badge-row">
-        <span class="badge work">업무 꾸러미</span>
-        <span class="time-pill">1분</span>
-      </div>
-      <h3>품의 자동완성기</h3>
-      <p>장바구니를 붙여넣으면 품목내역 표가 뚝딱. 확인하고 엑셀로 내려받으세요.</p>
-      <span class="play">품의 만들러 가기 →</span>
-    </a>
-
-    <a class="card" href="content/seat-shuffle.html" data-cat="teacher">
-      <div class="badge-row">
-        <span class="badge teacher">디지털 교구</span>
-        <span class="time-pill">1분</span>
-      </div>
-      <h3>두근두근 자리바꾸기</h3>
-      <p>학생 명단만 넣으면 분단·모둠 자리를 남녀 골고루 섞어 뽑아줘요.</p>
-      <span class="play">자리 뽑으러 가기 →</span>
-    </a>
-
-    <a class="card" href="content/timer.html" data-cat="teacher">
-      <div class="badge-row">
-        <span class="badge teacher">디지털 교구</span>
-        <span class="time-pill">수업용</span>
-      </div>
-      <h3>똑딱똑딱 교실 타이머</h3>
-      <p>책상 위 디지털 시계로 시간 재기. 1분마다·10초 전·종료 알림을 골라 켤 수 있어요.</p>
-      <span class="play">타이머 열기 →</span>
-    </a>
-
-    <a class="card" href="content/ladder.html" data-cat="teacher">
-      <div class="badge-row">
-        <span class="badge teacher">디지털 교구</span>
-        <span class="time-pill">1분</span>
-      </div>
-      <h3>두근두근 사다리타기</h3>
-      <p>사람 수와 당첨 개수만 정하면 끝. 하나씩 눌러 타거나 한 번에 결과를 볼 수 있어요.</p>
-      <span class="play">사다리 타러 가기 →</span>
-    </a>
-
-    <a class="card" href="content/writing-tool.html" data-cat="teacher">
-      <div class="badge-row">
-        <span class="badge teacher">디지털 교구</span>
-        <span class="time-pill">수업용</span>
-      </div>
-      <h3>슥삭슥삭 필기도구</h3>
-      <p>화면을 캡처해 붙여넣고 그 위에 밑줄·별표·글자를 쓸 수 있어요. 빈 화이트보드로도 써요.</p>
-      <span class="play">필기하러 가기 →</span>
-    </a>
-
-    <a class="card" href="content/recorder-helper.html" data-cat="teacher">
-      <div class="badge-row">
-        <span class="badge teacher">디지털 교구</span>
-        <span class="time-pill">음악시간</span>
-      </div>
-      <h3>도레미 리코더 도우미</h3>
-      <p>계이름을 넣으면 운지법 그림이 나와요. 악보 위에 계이름을 적어 인쇄할 수도 있어요.</p>
-      <span class="play">리코더 도우미 열기 →</span>
-    </a>
-
-    <a class="card" href="content/morning-hub.html" data-cat="teacher">
-      <div class="badge-row">
-        <span class="badge teacher">디지털 교구</span>
-        <span class="time-pill">3~6학년</span>
-      </div>
-      <h3>2학기 아침활동지</h3>
-      <p>학년별 90일치 아침활동지. 수학 10문제에 영어·한자·속담까지 하루 한 장으로.</p>
-      <span class="play">학년 고르러 가기 →</span>
-    </a>
-
-    <a class="card" href="content/manmul-quiz.html" data-cat="quiz">
-      <div class="badge-row">
-        <span class="badge quiz">미니퀴즈</span>
-        <span class="time-pill">매일 50문제</span>
-      </div>
-      <h3>초등 상식 퀴즈(만물박사)</h3>
-      <p>충북 동양일보 만물박사 선발대회 대비 예상문제. 매일 새로운 50문제가 출제돼요.</p>
-      <span class="play">오늘의 문제 풀기 →</span>
-    </a>
-
-    <a class="card" href="content/flag-memory.html" data-cat="game">
-      <div class="badge-row">
-        <span class="badge game">웹게임</span>
-        <span class="time-pill">3분</span>
-      </div>
-      <h3>세계 국기 짝 맞추기</h3>
-      <p>나라 100개 중 25개를 뽑아 카드 50장! 같은 국기를 찾아 짝을 맞춰요.</p>
-      <span class="play">게임하러 가기 →</span>
-    </a>
-
-    <a class="card" href="content/core-mixmaster.html" data-cat="game">
-      <div class="badge-row">
-        <span class="badge game">웹게임</span>
-        <span class="time-pill">
-          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="13" r="8" stroke="currentColor" stroke-width="2"/><path d="M12 9v4l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          3분+
-        </span>
-      </div>
-      <h3>몬조운</h3>
-      <p>몬스터를 조합해 오늘의 운세를 알아보세요. 코어를 모아 믹스해서 더 강한 몬스터로 키워보세요.</p>
-      <span class="play">게임 시작 →</span>
-    </a>
-
-    <a class="card" href="content/balance-game.html" data-cat="balance">
-      <div class="badge-row">
-        <span class="badge balance">밸런스게임</span>
-        <span class="time-pill">
-          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="13" r="8" stroke="currentColor" stroke-width="2"/><path d="M12 9v4l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          3분
-        </span>
-      </div>
-      <h3>인생 최고의 딜레마 8선</h3>
-      <p>평생 여름 vs 평생 겨울, 순간이동 vs 하늘 날기... 고민되는 8가지 밸런스 게임.</p>
-      <span class="play">지금 골라보기 →</span>
-    </a>
-
-    <a class="card" href="content/career-test.html" data-cat="test">
-      <div class="badge-row">
-        <span class="badge test">성향테스트</span>
-        <span class="time-pill">
-          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="13" r="8" stroke="currentColor" stroke-width="2"/><path d="M12 9v4l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          3분
-        </span>
-      </div>
-      <h3>나의 커리어 나침반</h3>
-      <p>10가지 학교생활 질문으로 알아보는 나에게 어울리는 직업.</p>
-      <span class="play">테스트 시작 →</span>
-    </a>
-
-    <a class="card" href="content/love-style-test.html" data-cat="test">
-      <div class="badge-row">
-        <span class="badge test">성향테스트</span>
-        <span class="time-pill">
-          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="13" r="8" stroke="currentColor" stroke-width="2"/><path d="M12 9v4l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          3분
-        </span>
-      </div>
-      <h3>나의 연애 스타일 테스트</h3>
-      <p>썸·다툼·화해의 순간들로 알아보는 나만의 연애 스타일.</p>
-      <span class="play">테스트 시작 →</span>
-    </a>
-
-  </div>
-
-  <div class="grid">
-    <a class="card" href="content/board.html" data-cat="board">
-      <div class="badge-row">
-        <span class="badge board">게시판</span>
-        <span class="time-pill">자유 주제</span>
-      </div>
-      <h3>정보교육과 AI</h3>
-      <p>최신 정보교육과 AI 소식에 대하여 교육자로서 느끼는 점, 관점 등을 나누는 공간이에요.</p>
-      <span class="play">게시판 가기 →</span>
-    </a>
-  </div>
+    </div>
+    <ul class="items">
+      <li><a class="item" href="content/board.html">
+        <span class="item-emoji">🤖</span>
+        <div class="item-body"><h3>정보교육과 AI</h3><p>정보교육과 AI 소식에 대해 교육자로서 느낀 점과 관점을 나눠요.</p><span class="tag">자유 주제</span></div>
+      </a></li>
+    </ul>
+  </section>
 
   <footer class="site-footer">
     <div>© 2026 3분 놀이터. 콘텐츠는 재미로 즐겨주세요.</div>
-    <div><a href="privacy.html">개인정보처리방침</a> · 문의: dasihaza@gmail.com</div>
+    <div><a href="privacy.html">개인정보처리방침</a> | 문의: dasihaza@gmail.com</div>
   </footer>
 
 </div>
-
-<script>
-  const chips = document.querySelectorAll('.chip');
-  const cards = document.querySelectorAll('.card');
-  chips.forEach(chip=>{
-    chip.addEventListener('click', ()=>{
-      chips.forEach(c=>c.setAttribute('data-active','false'));
-      chip.setAttribute('data-active','true');
-      const f = chip.dataset.filter;
-      cards.forEach(card=>{
-        card.style.display = (f==='all' || card.dataset.cat===f) ? '' : 'none';
-      });
-    });
-  });
-</script>
 
 </body>
 </html>
