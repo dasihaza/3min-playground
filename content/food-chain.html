@@ -53,6 +53,9 @@
   .chain .c:nth-child(3){animation-delay:.3s} .chain .c:nth-child(5){animation-delay:.6s}
   .chain .c:nth-child(7){animation-delay:.9s} .chain .c:nth-child(9){animation-delay:1.2s}
   .chain .ar{font-family:'Jua',sans-serif;font-size:20px;color:#b9ab9c;}
+  .chain .c img{width:80%;height:80%;object-fit:contain;}
+  .title .hero{display:block;width:min(100%,520px);aspect-ratio:16/9;object-fit:cover;margin:14px auto 0;
+               border:3px solid var(--ink);border-radius:24px;box-shadow:0 5px 0 var(--ink);background:#CFEAF7;}
   @keyframes bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-6px) rotate(3deg)}}
 
   .card{background:#fff;border:3px solid var(--ink);border-radius:26px;padding:18px;margin-top:18px;box-shadow:0 5px 0 var(--ink);}
@@ -107,6 +110,7 @@
        width:min(460px,100%);max-height:92vh;overflow:auto;padding:22px 20px;text-align:center;animation:popin .35s cubic-bezier(.3,1.6,.6,1);}
   @keyframes popin{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
   .pop .big-em{font-size:84px;line-height:1;margin:4px 0;display:inline-block;animation:bob 2s ease-in-out infinite;}
+  .pop .big-em img{display:block;width:130px;height:130px;object-fit:contain;}
   .pop h2{font-family:'Jua',sans-serif;font-weight:400;font-size:30px;margin:6px 0;}
   .pop .sub{font-family:'Gaegu',cursive;font-size:19px;margin:0 0 10px;color:#7a6d62;}
   .goal-list{text-align:left;list-style:none;padding:0;margin:10px 0;}
@@ -213,12 +217,13 @@
   </div>
   <div class="title">
     <h1><span>먹이사슬</span> <span>대작전</span></h1>
+    <img class="hero" src="../assets/food-chain/title.jpg" alt="논과 연못에 모인 메뚜기, 개구리, 뱀, 농부" onerror="this.remove()">
     <div class="chain">
-      <div class="c">🌾</div><span class="ar">▶</span>
-      <div class="c">🦗</div><span class="ar">▶</span>
-      <div class="c">🐸</div><span class="ar">▶</span>
-      <div class="c">🐍</div><span class="ar">▶</span>
-      <div class="c">🧑‍🌾</div>
+      <div class="c"><img src="../assets/food-chain/rice_ripe.png" alt="🌾" onerror="this.replaceWith(this.alt)"></div><span class="ar">▶</span>
+      <div class="c"><img src="../assets/food-chain/card_hopper.png" alt="🦗" onerror="this.replaceWith(this.alt)"></div><span class="ar">▶</span>
+      <div class="c"><img src="../assets/food-chain/card_frog.png" alt="🐸" onerror="this.replaceWith(this.alt)"></div><span class="ar">▶</span>
+      <div class="c"><img src="../assets/food-chain/card_snake.png" alt="🐍" onerror="this.replaceWith(this.alt)"></div><span class="ar">▶</span>
+      <div class="c"><img src="../assets/food-chain/card_human.png" alt="🧑‍🌾" onerror="this.replaceWith(this.alt)"></div>
     </div>
     <p>누가 친구고 누가 컴퓨터일까? 3분 동안 살아남아요!</p>
   </div>
@@ -1105,7 +1110,10 @@ function leaveToHome(msg){
    =================================================================== */
 function beginReveal(){
   var role = app.roles[app.pid], R = ROLE_INFO[role];
-  $("rvEm").textContent = R.emo; $("rvNm").textContent = R.name;
+  var rvImg = new Image();
+  rvImg.alt = R.name; rvImg.src = "../assets/food-chain/card_" + role + ".png";
+  rvImg.onerror = function(){ $("rvEm").textContent = R.emo; };
+  $("rvEm").textContent = ""; $("rvEm").appendChild(rvImg); $("rvNm").textContent = R.name;
   $("rvGoals").innerHTML = R.goals.map(function(g){ return "<li>" + g + "</li>"; }).join("");
   $("rvTip").textContent = R.tip;
   $("reveal").classList.remove("hidden");
@@ -1488,6 +1496,19 @@ var trails = {}, faces = {}, pops = [], lastEvI = 0, pendingEv = [], airAnim = {
 var lastView = null, lastFrame = performance.now();
 var decor = null, grassPat = null;
 
+/* ---------- 그림 파일 (못 불러오면 예전처럼 코드로 그려요) ---------- */
+var SPR = {};
+["hopper","frog","human","snake_head","snake_body","rice_sprout","rice_green","rice_ripe","grass",
+ "flower_0","flower_1","flower_2","flower_3","tree_0","tree_1","tree_2","paddy","pond"].forEach(function(n){
+  var im = new Image(); im.src = "../assets/food-chain/" + n + ".png"; SPR[n] = im;
+});
+function sprOk(n){ var im = SPR[n]; return !!im && im.complete && im.naturalWidth > 0; }
+// 너비 w로 그려요. (x, y)는 그림의 가로 가운데, 세로는 ay 비율 지점(기본은 맨 아래)
+function drawSpr(c, n, x, y, w, ay){
+  var im = SPR[n], h = w*im.naturalHeight/im.naturalWidth;
+  c.drawImage(im, x - w/2, y - h*(ay === undefined ? 1 : ay), w, h);
+}
+
 function prepDecor(){
   // 들판 무늬
   var pc = document.createElement("canvas"); pc.width = 120; pc.height = 120;
@@ -1595,8 +1616,11 @@ function draw(v, T){
   // 논
   map.paddies.forEach(function(p){
     if(!inView(p.x + p.w/2, p.y + p.h/2, p.w)) return;
-    c.fillStyle = "#B88A5A"; roundRect(c, p.x - 9, p.y - 9, p.w + 18, p.h + 18, 30); c.fill();
-    c.fillStyle = "#BFE4E6"; roundRect(c, p.x, p.y, p.w, p.h, 24); c.fill();
+    if(sprOk("paddy")) c.drawImage(SPR.paddy, p.x - 9, p.y - 9, p.w + 18, p.h + 18);
+    else {
+      c.fillStyle = "#B88A5A"; roundRect(c, p.x - 9, p.y - 9, p.w + 18, p.h + 18, 30); c.fill();
+      c.fillStyle = "#BFE4E6"; roundRect(c, p.x, p.y, p.w, p.h, 24); c.fill();
+    }
     c.strokeStyle = "rgba(255,255,255,.55)"; c.lineWidth = 2.5; c.lineCap = "round";
     for(var i=0;i<4;i++){
       var yy = p.y + 26 + i*46, ph = Math.sin(T*1.5 + i)*6;
@@ -1606,20 +1630,26 @@ function draw(v, T){
   // 연못
   map.ponds.forEach(function(p){
     if(!inView(p.x, p.y, p.rx + 40)) return;
-    c.fillStyle = "#E7D9A8"; c.beginPath(); c.ellipse(p.x, p.y, p.rx + 12, p.ry + 12, 0, 0, Math.PI*2); c.fill();
-    c.fillStyle = "#86CDEF"; c.beginPath(); c.ellipse(p.x, p.y, p.rx, p.ry, 0, 0, Math.PI*2); c.fill();
-    c.fillStyle = "#A9DDF5"; c.beginPath(); c.ellipse(p.x - p.rx*0.15, p.y - p.ry*0.2, p.rx*0.7, p.ry*0.55, 0, 0, Math.PI*2); c.fill();
+    if(sprOk("pond")) c.drawImage(SPR.pond, p.x - p.rx - 14, p.y - p.ry - 14, (p.rx + 14)*2, (p.ry + 14)*2);
+    else {
+      c.fillStyle = "#E7D9A8"; c.beginPath(); c.ellipse(p.x, p.y, p.rx + 12, p.ry + 12, 0, 0, Math.PI*2); c.fill();
+      c.fillStyle = "#86CDEF"; c.beginPath(); c.ellipse(p.x, p.y, p.rx, p.ry, 0, 0, Math.PI*2); c.fill();
+      c.fillStyle = "#A9DDF5"; c.beginPath(); c.ellipse(p.x - p.rx*0.15, p.y - p.ry*0.2, p.rx*0.7, p.ry*0.55, 0, 0, Math.PI*2); c.fill();
+    }
     c.strokeStyle = "rgba(255,255,255,.7)"; c.lineWidth = 3;
     c.beginPath(); c.ellipse(p.x + p.rx*0.3, p.y + p.ry*0.25, 18 + (T*12 % 20), 7 + (T*5 % 8), 0, 0, Math.PI*2); c.stroke();
   });
-  decor.pads.forEach(function(d){
+  if(!sprOk("pond")) decor.pads.forEach(function(d){
     if(!inView(d.x, d.y)) return;
     c.fillStyle = "#6FBF5A"; c.beginPath(); c.moveTo(d.x, d.y); c.arc(d.x, d.y, d.r, d.rot, d.rot + Math.PI*1.75); c.closePath(); c.fill();
     if(d.fl){ c.fillStyle = "#FFB6CB"; c.beginPath(); c.arc(d.x + 3, d.y - 3, 5, 0, Math.PI*2); c.fill(); c.fillStyle = "#FFE27A"; c.beginPath(); c.arc(d.x + 3, d.y - 3, 2, 0, Math.PI*2); c.fill(); }
   });
   // 풀, 꽃
   c.strokeStyle = "#6FB257"; c.lineWidth = 2.5; c.lineCap = "round";
-  map.tufts.forEach(function(g){
+  if(sprOk("grass")) map.tufts.forEach(function(g){
+    if(inView(g.x, g.y)) drawSpr(c, "grass", g.x, g.y + 2, 24*g.s);
+  });
+  else map.tufts.forEach(function(g){
     if(!inView(g.x, g.y)) return;
     var sw = Math.sin(T*2 + g.x*0.01)*1.5;
     c.beginPath();
@@ -1631,6 +1661,7 @@ function draw(v, T){
   var FCOL = ["#FF9BB3", "#FFD45E", "#FFFFFF", "#C7B4F5"];
   map.flowers.forEach(function(f){
     if(!inView(f.x, f.y)) return;
+    if(sprOk("flower_" + f.k)){ drawSpr(c, "flower_" + f.k, f.x, f.y + 7*f.s, 18*f.s); return; }
     c.fillStyle = FCOL[f.k];
     for(var i=0;i<5;i++){ var a = i*Math.PI*2/5; c.beginPath(); c.arc(f.x + Math.cos(a)*4.5*f.s, f.y + Math.sin(a)*4.5*f.s, 3.6*f.s, 0, Math.PI*2); c.fill(); }
     c.fillStyle = f.k === 1 ? "#FF9B5E" : "#FFE07A"; c.beginPath(); c.arc(f.x, f.y, 2.8*f.s, 0, Math.PI*2); c.fill();
@@ -1767,6 +1798,7 @@ var riceCols = [];
 for(var rc=0; rc<=20; rc++) riceCols.push({ stem:lerpCol("#6DBA4E", "#C9A23E", rc/20*0.7), grain:lerpCol("#A6DD72", "#F2C14E", rc/20) });
 function drawRice(c, x, y, g, ripe, T, i){
   var col = riceCols[Math.round(ripe*20)];
+  if(!g && sprOk("rice_sprout")){ drawSpr(c, "rice_sprout", x, y + 5, 17); return; }
   if(!g){
     // 다시 자라는 새싹
     c.strokeStyle = "#7CC65C"; c.lineWidth = 3; c.lineCap = "round";
@@ -1775,6 +1807,14 @@ function drawRice(c, x, y, g, ripe, T, i){
   }
   var sw = Math.sin(T*1.8 + i*0.7)*2.5;
   c.fillStyle = "rgba(60,100,40,.18)"; c.beginPath(); c.ellipse(x, y + 6, 13, 5, 0, 0, Math.PI*2); c.fill();
+  if(sprOk("rice_green") && sprOk("rice_ripe")){
+    // 초록 벼 위에 익은 벼를 점점 진하게 겹쳐요
+    c.save(); c.translate(x, y + 6); c.rotate(sw*0.03);
+    drawSpr(c, "rice_green", 0, 0, 32);
+    if(ripe > 0.02){ c.globalAlpha = Math.min(1, ripe*1.15); drawSpr(c, "rice_ripe", 0, 0, 32); }
+    c.restore();
+    return;
+  }
   c.strokeStyle = col.stem; c.lineWidth = 2.6; c.lineCap = "round";
   var tips = [[-9, -22], [-3, -28], [4, -27], [10, -21]];
   c.beginPath();
@@ -1795,6 +1835,7 @@ function drawRice(c, x, y, g, ripe, T, i){
 }
 function drawTree(c, t, T){
   var s = t.s, x = t.x, y = t.y;
+  if(sprOk("tree_" + t.k)){ drawSpr(c, "tree_" + t.k, x + Math.sin(T*1.2 + x)*0.8, y + 10*s, 106*s); return; }
   c.fillStyle = "#B07A4F"; roundRect(c, x - 8*s, y - 26*s, 16*s, 32*s, 6*s); c.fill();
   var cols = [["#6CC062", "#86D27A"], ["#58B47A", "#79CC94"], ["#9BD36A", "#B6E38A"]][t.k];
   var sw = Math.sin(T*1.2 + x)*1.5;
@@ -1827,6 +1868,11 @@ function eye(c, x, y, r){
 }
 function blush(c, x, y, rx){ c.fillStyle = "rgba(255,130,160,.55)"; c.beginPath(); c.ellipse(x, y, rx, rx*0.6, 0, 0, Math.PI*2); c.fill(); }
 function drawHopper(c, air, T, id){
+  if(sprOk("hopper")){
+    if(air) c.rotate(-0.25);
+    drawSpr(c, "hopper", 0, 13, 40);
+    return;
+  }
   var ol = "#4E8F36";
   c.lineCap = "round"; c.lineJoin = "round";
   if(air){
@@ -1860,6 +1906,11 @@ function drawHopper(c, air, T, id){
   c.beginPath(); c.arc(15.5, 0.5, 1.6, 0.2, Math.PI - 0.2); c.stroke();
 }
 function drawFrog(c, air, T, id){
+  if(sprOk("frog")){
+    if(air) c.scale(0.92, 1.1);
+    drawSpr(c, "frog", 0, 17, 37);
+    return;
+  }
   var ol = "#3F8F3A";
   c.lineJoin = "round";
   // 발
@@ -1887,6 +1938,11 @@ function drawFrog(c, air, T, id){
   c.beginPath(); c.arc(0, -1, 4.5, 0.25, Math.PI - 0.25); c.stroke();
 }
 function drawHuman(c, fl, T, id){
+  if(sprOk("human")){
+    c.rotate(Math.sin(T*9 + id)*0.04);
+    drawSpr(c, "human", 0, 20, 36);
+    return;
+  }
   var walk = Math.sin(T*9 + id);
   c.lineCap = "round"; c.lineJoin = "round";
   // 다리
@@ -1918,9 +1974,26 @@ function drawHuman(c, fl, T, id){
 function drawSnake(c, e, sc, T){
   var tr = trails[e.id];
   if(!tr){ tr = trails[e.id] = []; for(var i=0;i<12;i++) tr.push({ x:e.x - i*3, y:e.y }); }
-  var h = tr[0], dx = e.x - h.x, dy = e.y - h.y;
-  if(dx*dx + dy*dy > 25){ tr.unshift({ x:e.x, y:e.y }); if(tr.length > 12) tr.pop(); }
-  else { tr[0] = { x:e.x, y:e.y }; }
+  // tr[0]은 지금 머리, tr[1]부터는 5px마다 남긴 자국이에요
+  var h = tr[1], dx = e.x - h.x, dy = e.y - h.y;
+  if(dx*dx + dy*dy > 10000){ for(var k=0;k<tr.length;k++) tr[k] = { x:e.x - k*3, y:e.y }; }
+  else if(dx*dx + dy*dy > 25){ tr.splice(1, 0, { x:e.x, y:e.y }); if(tr.length > 12) tr.pop(); }
+  tr[0] = { x:e.x, y:e.y };
+  if(sprOk("snake_body") && sprOk("snake_head")){
+    // 몸 조각을 꼬리부터 머리 쪽으로 겹쳐 그려요
+    for(var si=tr.length-1; si>=1; si--){
+      var swv = Math.sin(T*8 - si*0.9)*1.8, sd = (16 - si*0.6)*sc;
+      c.drawImage(SPR.snake_body, tr[si].x + swv - sd/2, tr[si].y + swv*0.5 - sd/2, sd, sd);
+    }
+    var hang = Math.atan2(tr[0].y - tr[Math.min(2, tr.length-1)].y, tr[0].x - tr[Math.min(2, tr.length-1)].x);
+    if(isFinite(hang) && ((T*1.3 + e.id) % 2) < 0.35){
+      c.strokeStyle = "#FF5C7A"; c.lineWidth = 1.8*sc; c.lineCap = "round";
+      var tx = e.x + Math.cos(hang)*12*sc, ty = e.y + Math.sin(hang)*12*sc;
+      c.beginPath(); c.moveTo(tx, ty); c.lineTo(tx + Math.cos(hang)*8*sc, ty + Math.sin(hang)*8*sc); c.stroke();
+    }
+    drawSpr(c, "snake_head", e.x, e.y, 30*sc, 0.62);
+    return;
+  }
   // 몸 (뒤에서부터)
   c.lineCap = "round"; c.lineJoin = "round";
   for(var pass=0; pass<2; pass++){
