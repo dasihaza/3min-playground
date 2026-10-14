@@ -1,0 +1,2042 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>먹이사슬 대작전 | 3분 놀이터</title>
+<meta name="description" content="메뚜기, 개구리, 뱀, 사람 중 하나가 되어 3분 동안 살아남아요. 최대 4명이 함께하는 귀여운 먹이사슬 게임. 스마트패드에 맞춘 터치 조작.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
+<style>
+  :root{
+    --sky:#EAF6FF; --cream:#FFFBF2; --card:#FFFFFF;
+    --ink:#4A4038; --ink-soft:#9C9087; --line:#F0E6D8;
+    --grass:#7FCB6B; --grass-d:#58A748;
+    --sun:#FFD45E; --sun-d:#E8B22F;
+    --orange:#FF8E62; --orange-d:#E06A3C;
+    --pink:#FF9BB3; --pink-d:#E06B88;
+    --blue:#74B3F5; --blue-d:#4A8CD6;
+    --purple:#B49BF0; --purple-d:#8B6FD8;
+    --hopper:#8ED36A; --frog:#5FC08A; --snake:#B48BEA; --human:#FFB061;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    background:
+      radial-gradient(circle at 10% 4%, rgba(255,212,94,.30) 0 130px, transparent 131px),
+      radial-gradient(circle at 90% 10%, rgba(116,179,245,.20) 0 110px, transparent 111px),
+      radial-gradient(circle at 85% 90%, rgba(127,203,107,.22) 0 120px, transparent 121px),
+      linear-gradient(180deg, var(--sky) 0%, var(--cream) 45%, var(--cream) 100%);
+    background-attachment:fixed;
+    color:var(--ink); font-family:'Noto Sans KR',sans-serif;
+    user-select:none; -webkit-user-select:none; -webkit-touch-callout:none;
+    overflow-x:hidden;
+  }
+  button{font-family:'Jua',sans-serif;cursor:pointer;color:var(--ink);}
+  .hidden{display:none !important;}
+
+  /* ===== 첫 화면 ===== */
+  .screen{max-width:760px;margin:0 auto;padding:14px 18px 40px;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;}
+  .back{font-family:'Jua',sans-serif;font-size:16px;color:var(--ink);text-decoration:none;
+        background:#fff;border:2px solid var(--ink);border-radius:999px;padding:6px 14px;box-shadow:0 3px 0 var(--ink);}
+  .title{text-align:center;margin:22px 0 6px;}
+  .title h1{font-family:'Jua',sans-serif;font-weight:400;font-size:clamp(34px,7vw,54px);margin:0;line-height:1.15;}
+  .title h1 span{display:inline-block;}
+  .title p{font-family:'Gaegu',cursive;font-size:21px;margin:8px 0 0;color:#7a6d62;}
+  .chain{display:flex;justify-content:center;align-items:center;gap:6px;margin:16px 0 4px;flex-wrap:wrap;}
+  .chain .c{width:62px;height:62px;border-radius:50%;background:#fff;border:3px solid var(--ink);
+            display:grid;place-items:center;font-size:32px;box-shadow:0 4px 0 var(--ink);animation:bob 2.6s ease-in-out infinite;}
+  .chain .c:nth-child(3){animation-delay:.3s} .chain .c:nth-child(5){animation-delay:.6s}
+  .chain .c:nth-child(7){animation-delay:.9s} .chain .c:nth-child(9){animation-delay:1.2s}
+  .chain .ar{font-family:'Jua',sans-serif;font-size:20px;color:#b9ab9c;}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-6px) rotate(3deg)}}
+
+  .card{background:#fff;border:3px solid var(--ink);border-radius:26px;padding:18px;margin-top:18px;box-shadow:0 5px 0 var(--ink);}
+  .card h2{font-family:'Jua',sans-serif;font-weight:400;font-size:22px;margin:0 0 12px;}
+  .name-row{display:flex;gap:10px;align-items:center;}
+  .name-row label{font-family:'Jua',sans-serif;font-size:18px;white-space:nowrap;}
+  input.txt{flex:1;min-width:0;font-family:'Jua',sans-serif;font-size:20px;padding:10px 14px;border-radius:16px;
+            border:3px solid var(--ink);background:var(--cream);color:var(--ink);outline:none;}
+  input.txt:focus{background:#fff;border-color:var(--orange-d);}
+  .big-btns{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
+  .bbtn{font-size:21px;padding:16px 10px;border-radius:20px;border:3px solid var(--ink);box-shadow:0 5px 0 var(--ink);
+        background:var(--sun);transition:transform .08s,box-shadow .08s;display:flex;flex-direction:column;align-items:center;gap:2px;}
+  .bbtn small{font-family:'Noto Sans KR',sans-serif;font-size:12.5px;font-weight:500;opacity:.75;}
+  .bbtn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink);}
+  .bbtn.solo{grid-column:1/-1;background:var(--grass);font-size:24px;}
+  .bbtn.make{background:var(--pink);}
+  .bbtn.join{background:var(--blue);}
+  .bbtn:disabled{opacity:.5;}
+  .join-row{display:flex;gap:10px;margin-top:12px;}
+  .join-row input{letter-spacing:6px;text-align:center;}
+  .msg{min-height:22px;margin:10px 0 0;font-size:14.5px;font-weight:700;color:var(--orange-d);text-align:center;}
+
+  .roles{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .role{border-radius:20px;padding:14px;border:2.5px solid var(--ink);background:var(--rc-bg);}
+  .role h3{font-family:'Jua',sans-serif;font-weight:400;font-size:21px;margin:0 0 6px;display:flex;align-items:center;gap:8px;}
+  .role h3 .em{font-size:28px;}
+  .role h3 .cnt{margin-left:auto;font-size:13px;background:#fff;border-radius:999px;padding:3px 9px;border:2px solid var(--ink);}
+  .role h4{font-family:'Jua',sans-serif;font-weight:400;font-size:15px;margin:10px 0 4px;}
+  .role ul{margin:0;padding-left:18px;font-size:13.5px;line-height:1.6;}
+  .r-hopper{--rc-bg:#ECF9E0}.r-frog{--rc-bg:#E0F6EA}.r-snake{--rc-bg:#F1E8FF}.r-human{--rc-bg:#FFF0DE}
+  .rules-more{font-size:14px;line-height:1.75;margin:0;padding-left:18px;}
+
+  /* ===== 대기실 ===== */
+  .code-box{text-align:center;}
+  .code-box .lbl{font-family:'Jua',sans-serif;font-size:18px;}
+  .code-box .code{font-family:'Jua',sans-serif;font-size:64px;letter-spacing:10px;line-height:1.1;margin:6px 0;
+                  background:var(--cream);border:3px dashed var(--ink);border-radius:22px;display:inline-block;padding:4px 20px 4px 30px;}
+  .code-box p{font-size:14px;color:#7a6d62;margin:6px 0 0;}
+  .seats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px;}
+  .seat{border:3px solid var(--ink);border-radius:20px;padding:12px 6px;text-align:center;background:#fff;min-height:104px;
+        display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;}
+  .seat .av{font-size:34px;}
+  .seat .nm{font-family:'Jua',sans-serif;font-size:16px;word-break:break-all;}
+  .seat.empty{border-style:dashed;color:#b9ab9c;background:transparent;}
+  .seat.me{background:#FFF6D6;}
+  .lobby-note{text-align:center;font-family:'Gaegu',cursive;font-size:20px;margin:14px 0 0;}
+
+  /* ===== 역할 공개 ===== */
+  .overlay{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:18px;
+           background:rgba(74,64,56,.45);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);}
+  .pop{background:#fff;border:3px solid var(--ink);border-radius:30px;box-shadow:0 6px 0 var(--ink);
+       width:min(460px,100%);max-height:92vh;overflow:auto;padding:22px 20px;text-align:center;animation:popin .35s cubic-bezier(.3,1.6,.6,1);}
+  @keyframes popin{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+  .pop .big-em{font-size:84px;line-height:1;margin:4px 0;display:inline-block;animation:bob 2s ease-in-out infinite;}
+  .pop h2{font-family:'Jua',sans-serif;font-weight:400;font-size:30px;margin:6px 0;}
+  .pop .sub{font-family:'Gaegu',cursive;font-size:19px;margin:0 0 10px;color:#7a6d62;}
+  .goal-list{text-align:left;list-style:none;padding:0;margin:10px 0;}
+  .goal-list li{background:var(--cream);border:2px solid var(--line);border-radius:14px;padding:8px 12px;margin:6px 0;font-size:15px;font-weight:500;}
+  .count-down{font-family:'Jua',sans-serif;font-size:20px;color:var(--orange-d);margin-top:8px;}
+  .pop .row-btns{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+  .pop .row-btns .bbtn{flex:1;min-width:140px;font-size:19px;padding:12px;}
+  .res-list{list-style:none;padding:0;margin:12px 0 0;text-align:left;}
+  .res-list li{display:flex;align-items:center;gap:10px;border:2.5px solid var(--ink);border-radius:18px;padding:9px 12px;margin:8px 0;background:var(--cream);}
+  .res-list li.win{background:#EAF8DF;} .res-list li.lose{background:#FFEDEA;}
+  .res-list .em{font-size:30px;}
+  .res-list .who{flex:1;min-width:0;}
+  .res-list .who b{font-family:'Jua',sans-serif;font-weight:400;font-size:18px;display:block;}
+  .res-list .who span{font-size:13px;color:#7a6d62;}
+  .res-list .badge{font-family:'Jua',sans-serif;font-size:16px;padding:4px 10px;border-radius:999px;border:2px solid var(--ink);background:#fff;white-space:nowrap;}
+  .final-counts{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:12px;}
+  .final-counts span{background:var(--cream);border:2px solid var(--line);border-radius:999px;padding:4px 10px;font-weight:700;font-size:14px;}
+
+  /* ===== 게임 화면 ===== */
+  #game{position:fixed;inset:0;z-index:10;background:#9BD27E;touch-action:none;overflow:hidden;}
+  #cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;}
+  .hud{position:absolute;pointer-events:none;font-family:'Jua',sans-serif;}
+  .hud-tl{left:calc(10px + env(safe-area-inset-left));top:calc(10px + env(safe-area-inset-top));width:min(270px,44vw);}
+  .me-card{background:rgba(255,255,255,.94);border:3px solid var(--ink);border-radius:20px;padding:8px 10px;box-shadow:0 4px 0 var(--ink);}
+  .me-row{display:flex;align-items:center;gap:8px;}
+  .me-row .em{font-size:30px;line-height:1;}
+  .me-row .nm{font-size:18px;}
+  .ebar{position:relative;height:22px;border-radius:999px;border:2.5px solid var(--ink);background:#F3EDE4;overflow:hidden;margin-top:6px;}
+  .ebar i{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:linear-gradient(180deg,#9BE07A,#5FBF4A);transition:width .25s;}
+  .ebar.mid i{background:linear-gradient(180deg,#FFE07A,#F2B83A);}
+  .ebar.low i{background:linear-gradient(180deg,#FF9F8A,#F0645A);animation:blink .6s infinite;}
+  .ebar b{position:absolute;inset:0;display:grid;place-items:center;font-weight:400;font-size:14px;}
+  @keyframes blink{50%{opacity:.55}}
+  .drain{font-size:12px;color:#7a6d62;margin-top:4px;font-family:'Noto Sans KR',sans-serif;font-weight:700;}
+  .goals{margin-top:6px;display:flex;flex-direction:column;gap:4px;}
+  .goals span{background:rgba(255,255,255,.9);border:2px solid var(--ink);border-radius:999px;padding:3px 10px;font-size:13px;width:fit-content;max-width:100%;}
+  .goals span.bad{background:#FFD9D2;text-decoration:line-through;}
+  .goals span.ok::before{content:"✓ ";color:var(--grass-d);}
+  .hud-tc{left:50%;top:calc(10px + env(safe-area-inset-top));transform:translateX(-50%);text-align:center;}
+  .timer{background:rgba(255,255,255,.94);border:3px solid var(--ink);border-radius:999px;padding:4px 16px;font-size:26px;box-shadow:0 4px 0 var(--ink);min-width:96px;}
+  .timer.hurry{background:#FFE1D8;}
+  .ripe{margin:6px auto 0;width:120px;height:12px;border:2px solid var(--ink);border-radius:999px;background:#fff;overflow:hidden;}
+  .ripe i{display:block;height:100%;background:linear-gradient(90deg,#9BD86B,#F2C14E);}
+  .ripe-l{font-size:12px;margin-top:2px;color:#4A4038;text-shadow:0 1px 0 #fff;}
+  .hud-tr{right:calc(10px + env(safe-area-inset-right));top:calc(10px + env(safe-area-inset-top));display:flex;flex-direction:column;gap:5px;align-items:flex-end;}
+  .cnt{background:rgba(255,255,255,.94);border:2.5px solid var(--ink);border-radius:999px;padding:2px 10px 2px 6px;font-size:17px;display:flex;align-items:center;gap:4px;min-width:72px;justify-content:space-between;}
+  .cnt.warn{background:#FFE1D8;}
+  .toast{position:absolute;left:50%;top:26%;transform:translateX(-50%);background:#fff;border:3px solid var(--ink);border-radius:999px;
+         padding:8px 18px;font-family:'Jua',sans-serif;font-size:19px;box-shadow:0 4px 0 var(--ink);pointer-events:none;white-space:nowrap;
+         opacity:0;transition:opacity .25s, transform .25s;}
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(-6px);}
+
+  .pad{position:absolute;bottom:calc(16px + env(safe-area-inset-bottom));display:flex;align-items:flex-end;gap:12px;z-index:5;}
+  .pad.left{left:calc(16px + env(safe-area-inset-left));}
+  .pad.right{right:calc(16px + env(safe-area-inset-right));flex-direction:column;align-items:flex-end;}
+  .pad .col{display:flex;gap:12px;align-items:flex-end;}
+  .sk{position:relative;width:104px;height:104px;border-radius:50%;border:4px solid var(--ink);box-shadow:0 6px 0 var(--ink);
+      background:var(--sun);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;touch-action:none;
+      font-size:19px;line-height:1.1;padding:0;overflow:hidden;}
+  .sk .ic{font-size:38px;line-height:1;}
+  .sk .lb{font-size:17px;}
+  .sk .cs{font-size:12px;font-family:'Noto Sans KR',sans-serif;font-weight:700;opacity:.8;}
+  .sk.press{transform:translateY(5px);box-shadow:0 1px 0 var(--ink);}
+  .sk.eat{background:#FFB3C6;}
+  .sk.skill{background:#A8D8FF;}
+  .sk.stash{background:#FFE08A;width:92px;height:92px;}
+  .sk.cook{background:#FFB27A;width:92px;height:92px;}
+  .sk .cool{position:absolute;inset:0;border-radius:50%;background:conic-gradient(rgba(74,64,56,.45) var(--p,0%), transparent 0);pointer-events:none;}
+  .sk.off{filter:grayscale(.6);opacity:.65;}
+  .basket{display:flex;gap:8px;background:rgba(255,255,255,.92);border:3px solid var(--ink);border-radius:20px;padding:6px 8px;box-shadow:0 4px 0 var(--ink);}
+  .slot{position:relative;width:56px;height:56px;border-radius:14px;border:2.5px dashed #C9BBAA;display:grid;place-items:center;font-size:28px;background:var(--cream);touch-action:none;}
+  .slot.full{border-style:solid;border-color:var(--ink);background:#FFF6D6;}
+  .slot .t{position:absolute;bottom:-2px;right:2px;font-family:'Jua',sans-serif;font-size:13px;}
+  .slot.rot{animation:blink .5s infinite;background:#E9F3C9;}
+  .basket-l{font-family:'Jua',sans-serif;font-size:13px;text-align:center;margin-top:2px;}
+  .quit{position:absolute;right:calc(10px + env(safe-area-inset-right));bottom:calc(140px + env(safe-area-inset-bottom));}
+  .menu-btn{pointer-events:auto;font-size:14px;background:rgba(255,255,255,.9);border:2.5px solid var(--ink);border-radius:999px;padding:4px 10px;}
+  .wait-net{position:absolute;inset:0;display:grid;place-items:center;font-family:'Jua',sans-serif;font-size:24px;pointer-events:none;}
+
+  @media (max-width:640px){
+    .hud-tl{top:calc(64px + env(safe-area-inset-top));width:min(230px,58vw);}
+    .roles{grid-template-columns:1fr;}
+    .seats{grid-template-columns:repeat(2,1fr);}
+    .sk{width:84px;height:84px;} .sk .ic{font-size:30px;} .sk .lb{font-size:15px;}
+    .sk.stash,.sk.cook{width:74px;height:74px;}
+    .slot{width:46px;height:46px;font-size:23px;}
+    .cnt{font-size:15px;min-width:62px;}
+    .timer{font-size:22px;min-width:80px;}
+    .me-row .nm{font-size:15px;} .goals span{font-size:11.5px;}
+  }
+  @media (max-height:520px){
+    .goals{display:none;}
+    .sk{width:80px;height:80px;} .sk .ic{font-size:28px;}
+    .sk.stash,.sk.cook{width:70px;height:70px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== 첫 화면 ===================== -->
+<div id="home" class="screen">
+  <div class="topbar">
+    <a class="back" href="../index.html">← 3분 놀이터</a>
+  </div>
+  <div class="title">
+    <h1><span>먹이사슬</span> <span>대작전</span></h1>
+    <div class="chain">
+      <div class="c">🌾</div><span class="ar">▶</span>
+      <div class="c">🦗</div><span class="ar">▶</span>
+      <div class="c">🐸</div><span class="ar">▶</span>
+      <div class="c">🐍</div><span class="ar">▶</span>
+      <div class="c">🧑‍🌾</div>
+    </div>
+    <p>누가 친구고 누가 컴퓨터일까? 3분 동안 살아남아요!</p>
+  </div>
+
+  <div class="card">
+    <div class="name-row">
+      <label for="nameIn">내 이름</label>
+      <input id="nameIn" class="txt" maxlength="8" placeholder="이름을 적어요" autocomplete="off">
+    </div>
+    <div class="big-btns">
+      <button class="bbtn solo" id="btnSolo">🎮 혼자 하기<small>나머지 생물은 모두 컴퓨터가 움직여요</small></button>
+      <button class="bbtn make" id="btnMake">🏠 방 만들기<small>친구 최대 4명까지</small></button>
+      <button class="bbtn join" id="btnJoinOpen">🚪 방 들어가기<small>친구가 알려준 번호로</small></button>
+    </div>
+    <div class="join-row hidden" id="joinRow">
+      <input id="codeIn" class="txt" inputmode="numeric" maxlength="4" placeholder="0000" autocomplete="off">
+      <button class="bbtn join" id="btnJoin" style="padding:10px 18px;font-size:20px;">들어가기</button>
+    </div>
+    <div class="msg" id="homeMsg"></div>
+  </div>
+
+  <div class="card">
+    <h2>📜 어떻게 해요?</h2>
+    <ul class="rules-more">
+      <li>유저는 <b>메뚜기, 개구리, 뱀, 사람</b> 중 하나로 <b>무작위</b>로 정해져요. 같은 역할을 맡는 유저는 없어요.</li>
+      <li>내 생물이 늘 화면 <b>가운데</b>에 있어요. 가고 싶은 곳을 <b>터치</b>하면 그쪽으로 움직여요.</li>
+      <li>왼쪽 버튼은 <b>먹기</b>, 오른쪽 버튼은 <b>특별 기술</b>이에요.</li>
+      <li>에너지는 100%에서 시작해서 <b>5초마다 10%씩</b> 줄어요. 0%가 되면 쓰러져요.</li>
+      <li>맵에는 벼 200포기, 메뚜기 70마리, 개구리 20마리, 뱀 5마리, 사람 2명이 살아요. 유저가 누구인지는 <b>아무도 몰라요</b>.</li>
+      <li>배부른 생물은 가끔 새끼를 낳고, 먹힌 벼는 25초 뒤에 다시 자라요.</li>
+      <li>3분이 지나면 벼가 익고 생물들이 다 자라요. 그때 승리 조건을 확인해요.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>🏆 역할별 승리 조건과 기술</h2>
+    <div class="roles">
+      <div class="role r-hopper">
+        <h3><span class="em">🦗</span>메뚜기<span class="cnt">70마리</span></h3>
+        <h4>승리 조건</h4>
+        <ul><li>3분이 끝날 때까지 살아남기</li><li>벼가 익을 때까지 벼를 모두 먹지 않기</li><li>굶지 않기 (에너지 &gt; 0)</li></ul>
+        <h4>기술</h4>
+        <ul><li>🍚 먹기: 벼를 먹으면 +20%</li><li>🪽 날기: 2m 날아가요 (−5%)</li></ul>
+      </div>
+      <div class="role r-frog">
+        <h3><span class="em">🐸</span>개구리<span class="cnt">20마리</span></h3>
+        <h4>승리 조건</h4>
+        <ul><li>3분이 끝날 때까지 살아남기</li><li>메뚜기가 다 자랄 때까지 메뚜기를 모두 먹지 않기</li><li>굶지 않기 (에너지 &gt; 0)</li></ul>
+        <h4>기술</h4>
+        <ul><li>🍚 먹기: 메뚜기를 먹으면 +40%</li><li>💨 점프: 3m 뛰어올라요 (−5%)</li></ul>
+      </div>
+      <div class="role r-snake">
+        <h3><span class="em">🐍</span>뱀<span class="cnt">5마리</span></h3>
+        <h4>승리 조건</h4>
+        <ul><li>3분이 끝날 때까지 살아남기</li><li>개구리가 다 자랄 때까지 개구리를 모두 먹지 않기</li><li>굶지 않기 (에너지 &gt; 0)</li></ul>
+        <h4>기술</h4>
+        <ul><li>🍚 먹기: 개구리를 먹으면 +60%</li><li>⚡ 빠르게 기어가기: 5초 동안 2배 속도 (−10%)</li></ul>
+      </div>
+      <div class="role r-human">
+        <h3><span class="em">🧑‍🌾</span>사람<span class="cnt">2명</span></h3>
+        <h4>승리 조건</h4>
+        <ul><li>3분이 끝날 때까지 살아남기</li><li>벼·메뚜기·개구리·뱀이 모두 2마리 이상 남아 있게 하기</li><li>굶지 않기 (에너지 &gt; 0)</li></ul>
+        <h4>기술</h4>
+        <ul><li>🍚 먹기: 벼 +10%, 메뚜기 +20%, 개구리 +30%, 뱀 +50%</li><li>🧺 담기: 잡은 생물을 장바구니에 3개까지 (50초 뒤엔 썩어요)</li><li>🔥 굽기: 장바구니 속 생물을 구우면 2배 에너지 (−10%)</li><li>장바구니 칸을 누르면 날로 먹을 수 있어요</li></ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 대기실 ===================== -->
+<div id="lobby" class="screen hidden">
+  <div class="topbar">
+    <button class="back" id="btnLeave">← 나가기</button>
+  </div>
+  <div class="card code-box">
+    <div class="lbl">우리 방 번호</div>
+    <div class="code" id="lobbyCode">0000</div>
+    <p>친구들에게 이 번호를 알려 주세요. 최대 4명까지 들어올 수 있어요.</p>
+    <div class="seats" id="seats"></div>
+    <div class="lobby-note" id="lobbyNote">친구를 기다리는 중…</div>
+    <div class="big-btns" style="grid-template-columns:1fr;">
+      <button class="bbtn solo" id="btnStart">🚀 게임 시작!<small>빈자리는 컴퓨터가 맡아요</small></button>
+    </div>
+    <div class="msg" id="lobbyMsg"></div>
+  </div>
+</div>
+
+<!-- ===================== 게임 ===================== -->
+<div id="game" class="hidden">
+  <canvas id="cv"></canvas>
+  <div class="wait-net hidden" id="waitNet">방장의 세상을 불러오는 중…</div>
+
+  <div class="hud hud-tl">
+    <div class="me-card">
+      <div class="me-row"><span class="em" id="hudEm">🦗</span><span class="nm" id="hudNm">메뚜기</span></div>
+      <div class="ebar" id="ebar"><i id="ebarFill" style="width:100%"></i><b id="ebarTxt">100%</b></div>
+      <div class="drain" id="drainTxt">5초 뒤 −10%</div>
+    </div>
+    <div class="goals" id="goals"></div>
+  </div>
+
+  <div class="hud hud-tc">
+    <div class="timer" id="timer">3:00</div>
+    <div class="ripe"><i id="ripeFill" style="width:0%"></i></div>
+    <div class="ripe-l">🌾 벼가 익고 생물이 자라는 중</div>
+  </div>
+
+  <div class="hud hud-tr" id="counts"></div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="pad left">
+    <button class="sk eat" id="bEat"><span class="ic">😋</span><span class="lb">먹기</span><span class="cs" id="eatCs">+20%</span><span class="cool"></span></button>
+  </div>
+  <div class="pad right" id="padR">
+    <div id="basketBox" class="hidden">
+      <div class="basket" id="basket"></div>
+      <div class="basket-l">🧺 칸을 누르면 바로 먹어요</div>
+    </div>
+    <div class="col">
+      <button class="sk stash hidden" id="bStash"><span class="ic">🧺</span><span class="lb">담기</span><span class="cool"></span></button>
+      <button class="sk cook hidden" id="bCook"><span class="ic">🔥</span><span class="lb">굽기</span><span class="cs">−10%</span><span class="cool"></span></button>
+      <button class="sk skill" id="bSkill"><span class="ic" id="skIc">🪽</span><span class="lb" id="skLb">날기</span><span class="cs" id="skCs">−5%</span><span class="cool" id="skCool"></span></button>
+    </div>
+  </div>
+</div>
+
+<!-- 역할 공개 -->
+<div id="reveal" class="overlay hidden">
+  <div class="pop">
+    <div class="sub">두구두구… 나는 바로!</div>
+    <div class="big-em" id="rvEm">🦗</div>
+    <h2 id="rvNm">메뚜기</h2>
+    <ul class="goal-list" id="rvGoals"></ul>
+    <div class="sub" id="rvTip"></div>
+    <div class="count-down" id="rvCount">3초 뒤에 시작해요</div>
+  </div>
+</div>
+
+<!-- 쓰러졌을 때 -->
+<div id="dead" class="overlay hidden">
+  <div class="pop">
+    <div class="big-em" id="deadEm">😵</div>
+    <h2 id="deadTitle">앗, 먹혀 버렸어요!</h2>
+    <div class="sub" id="deadSub"></div>
+    <div class="row-btns">
+      <button class="bbtn join" id="btnWatch">👀 끝까지 지켜보기</button>
+      <button class="bbtn make" id="btnHome1">🏠 처음으로</button>
+    </div>
+  </div>
+</div>
+
+<!-- 결과 -->
+<div id="result" class="overlay hidden">
+  <div class="pop">
+    <div class="big-em" id="resEm">🏆</div>
+    <h2 id="resTitle">승리!</h2>
+    <div class="sub" id="resSub"></div>
+    <ul class="res-list" id="resList"></ul>
+    <div class="final-counts" id="resCounts"></div>
+    <div class="row-btns">
+      <button class="bbtn solo" id="btnAgain">🔁 다시 하기</button>
+      <button class="bbtn make" id="btnHome2">🏠 처음으로</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===================================================================
+   먹이사슬 시뮬레이션 (방장 / 혼자 하기 기기에서만 돌아가요)
+   =================================================================== */
+var FC = (function(){
+  var W = 2400, H = 1800;          // 맵 크기 (1m = 50px)
+  var GAME_TIME = 180;             // 3분
+  var DRAIN_EVERY = 5, DRAIN = 10; // 5초마다 10%
+  var REGROW = 25;                 // 먹힌 벼가 다시 자라는 시간
+  var ROT_TIME = 50;               // 장바구니 보관 시간
+  var ROLES = ["hopper","frog","snake","human"];
+
+  var SPEC = {
+    hopper:{ r:12, sp:92, food:{rice:20}, n:70, name:"메뚜기", emo:"🦗", cost:5, dist:100 },
+    frog:  { r:16, sp:98, food:{hopper:40}, n:20, name:"개구리", emo:"🐸", cost:5, dist:150 },
+    snake: { r:18, sp:82, food:{frog:60}, n:5,  name:"뱀",     emo:"🐍", cost:10, dist:0 },
+    human: { r:20, sp:80, food:{rice:10, hopper:20, frog:30, snake:50}, n:2, name:"사람", emo:"🧑‍🌾", cost:10, dist:0 }
+  };
+  // AI가 도망치기 시작하는 거리 [먹이][포식자]
+  var FLEE = {
+    hopper:{ frog:90, human:80 },
+    frog:{ snake:105, human:90 },
+    snake:{ human:90 },
+    human:{}
+  };
+  var AI = {   // 배고픔 기준, 먹이 찾는 거리, 쫓기 포기 시간
+    hopper:{ hungry:60, sense:320, giveup:9 },
+    frog:  { hungry:65, sense:300, giveup:6 },
+    snake: { hungry:72, sense:460, giveup:8 },
+    human: { hungry:65, sense:700, giveup:6 }
+  };
+  var SCARCE = { rice:10, hopper:6, frog:4, snake:2, human:9 };
+  // 배부른 컴퓨터 생물은 가끔 새끼를 낳아요 [필요 에너지, 1초당 확률, 최대 마릿수]
+  var BREED = {
+    hopper:{ e:60, p:1/10, max:70 },
+    frog:  { e:60, p:1/12, max:20 },
+    snake: { e:50, p:1/15, max:5 }
+  };
+
+  function rng(seed){
+    var s = seed >>> 0;
+    return function(){
+      s = (s + 0x6D2B79F5) >>> 0;
+      var t = s;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
+  function d2(a,b){ var dx=a.x-b.x, dy=a.y-b.y; return dx*dx+dy*dy; }
+
+  /* ---------- 맵 (씨앗값이 같으면 모든 기기에서 똑같이 만들어져요) ---------- */
+  function genMap(seed){
+    var R = rng(seed);
+    var paddies = [], ponds = [], trees = [], flowers = [], tufts = [], rice = [];
+    function overlapRect(x,y,w,h,m){
+      for(var i=0;i<paddies.length;i++){
+        var p = paddies[i];
+        if(x < p.x+p.w+m && x+w+m > p.x && y < p.y+p.h+m && y+h+m > p.y) return true;
+      }
+      return false;
+    }
+    function inPond(x,y,m){
+      for(var i=0;i<ponds.length;i++){
+        var p = ponds[i], dx=(x-p.x)/(p.rx+m), dy=(y-p.y)/(p.ry+m);
+        if(dx*dx+dy*dy < 1) return true;
+      }
+      return false;
+    }
+    var tries = 0;
+    while(paddies.length < 8 && tries++ < 2000){
+      var pw = 270, ph = 200;
+      var px = 110 + R()*(W-220-pw), py = 110 + R()*(H-220-ph);
+      if(Math.abs(px+pw/2-W/2) < 260 && Math.abs(py+ph/2-H/2) < 220) continue; // 가운데 광장은 비워 둬요
+      if(overlapRect(px,py,pw,ph,90)) continue;
+      paddies.push({x:px, y:py, w:pw, h:ph});
+    }
+    tries = 0;
+    while(ponds.length < 2 && tries++ < 2000){
+      var rx = 130 + R()*40, ry = 90 + R()*30;
+      var cx = 200 + R()*(W-400), cy = 200 + R()*(H-400);
+      if(overlapRect(cx-rx, cy-ry, rx*2, ry*2, 60)) continue;
+      if(inPond(cx,cy,260)) continue;
+      ponds.push({x:cx, y:cy, rx:rx, ry:ry});
+    }
+    paddies.forEach(function(p){
+      for(var j=0;j<4;j++) for(var i=0;i<5;i++){
+        rice.push({ x: p.x + 33 + i*51 + (R()-.5)*10, y: p.y + 38 + j*42 + (R()-.5)*8 });
+      }
+    });
+    while(rice.length < 200){
+      var x = 80 + R()*(W-160), y = 80 + R()*(H-160);
+      if(inPond(x,y,30) || overlapRect(x-10,y-10,20,20,10)) continue;
+      rice.push({x:x, y:y});
+    }
+    tries = 0;
+    while(trees.length < 18 && tries++ < 3000){
+      var tx = 60 + R()*(W-120), ty = 60 + R()*(H-120);
+      if(inPond(tx,ty,60) || overlapRect(tx-50,ty-50,100,100,10)) continue;
+      trees.push({x:tx, y:ty, s:0.85+R()*0.4, k:Math.floor(R()*3)});
+    }
+    for(var f=0; f<110; f++){
+      var fx = R()*W, fy = R()*H;
+      if(inPond(fx,fy,10) || overlapRect(fx,fy,1,1,4)) continue;
+      flowers.push({x:fx, y:fy, k:Math.floor(R()*4), s:0.8+R()*0.5});
+    }
+    for(var g=0; g<220; g++){
+      var gx = R()*W, gy = R()*H;
+      if(inPond(gx,gy,4) || overlapRect(gx,gy,1,1,0)) continue;
+      tufts.push({x:gx, y:gy, s:0.7+R()*0.6});
+    }
+    return { W:W, H:H, paddies:paddies, ponds:ponds, trees:trees, flowers:flowers, tufts:tufts, rice:rice };
+  }
+
+  /* ---------- 세상 만들기 ---------- */
+  // players: { pid: {name, role} }
+  function create(seed, players){
+    var map = genMap(seed);
+    var R = rng(seed ^ 0x9E3779B9);
+    var w = {
+      R:R, map:map, time:0, nextDrain:DRAIN_EVERY, over:false,
+      rice: map.rice.map(function(r,i){ return {id:i, x:r.x, y:r.y, g:1, re:0}; }),
+      animals:[], byId:{}, nid:1, ev:[], evn:0, players:{}, flags:{}, counts:{}, results:null
+    };
+    function nearPaddy(){
+      var p = map.paddies[Math.floor(R()*map.paddies.length)];
+      return { x: clamp(p.x - 60 + R()*(p.w+120), 30, W-30), y: clamp(p.y - 60 + R()*(p.h+120), 30, H-30) };
+    }
+    function nearPond(){
+      var p = map.ponds[Math.floor(R()*map.ponds.length)];
+      var a = R()*Math.PI*2, k = 1.15 + R()*0.5;
+      return { x: clamp(p.x + Math.cos(a)*p.rx*k, 30, W-30), y: clamp(p.y + Math.sin(a)*p.ry*k, 30, H-30) };
+    }
+    function anywhere(){ return { x: 60 + R()*(W-120), y: 60 + R()*(H-120) }; }
+    function add(t, pos){ return spawn(w, t, pos); }
+    for(var i=0;i<70;i++) add("hopper", i < 50 ? nearPaddy() : anywhere());
+    for(i=0;i<20;i++) add("frog", i < 12 ? nearPond() : anywhere());
+    for(i=0;i<5;i++) add("snake", anywhere());
+    for(i=0;i<2;i++) add("human", { x: W/2 + (i?120:-120), y: H/2 + (R()-.5)*80 });
+
+    // 유저에게 생물 한 마리씩 맡겨요 (가장 안전한 녀석으로)
+    Object.keys(players).forEach(function(pid){
+      var role = players[pid].role, best = null, bestD = -1;
+      w.animals.forEach(function(a){
+        if(a.t !== role || a.pid) return;
+        var nd = 1e12;
+        w.animals.forEach(function(b){ if(FLEE[role][b.t]) nd = Math.min(nd, d2(a,b)); });
+        if(nd > bestD){ bestD = nd; best = a; }
+      });
+      if(role === "human"){ best.x = W/2; best.y = H/2; best.tx = best.x; best.ty = best.y; }
+      best.pid = pid;
+      w.players[pid] = { pid:pid, name:players[pid].name || "", role:role, eid:best.id,
+                         alive:true, reason:"", basket:[], fail:"" };
+    });
+    count(w);
+    return w;
+  }
+
+  function spawn(w, t, pos){
+    var R = w.R;
+    var a = { id:w.nid++, t:t, x:pos.x, y:pos.y, tx:pos.x, ty:pos.y, e:100, alive:true,
+              pid:null, face:R()*Math.PI*2, think:R()*0.5, air:null, sprint:0, cd:0,
+              prey:null, chase:0, rest:0, wander:0, mode:"wander", born:w.time };
+    w.animals.push(a); w.byId[a.id] = a;
+    return a;
+  }
+
+  function addEv(w, k, x, y, txt, eid){
+    w.ev.push({ i:++w.evn, k:k, x:Math.round(x), y:Math.round(y), txt:txt || "", eid:eid || 0, tm:+w.time.toFixed(2) });
+    if(w.ev.length > 40) w.ev.shift();
+  }
+
+  function kill(w, a, reason){
+    if(!a.alive) return;
+    a.alive = false;
+    delete w.byId[a.id];
+    if(a.pid && w.players[a.pid]){
+      var p = w.players[a.pid];
+      p.alive = false; p.reason = reason;
+    }
+  }
+
+  function gain(a, v){ a.e = Math.min(100, a.e + v); }
+
+  // 손이 닿는 가장 가까운 먹이
+  function reachable(w, a, extra){
+    var best = null, bd = 1e12, S = SPEC[a.t];
+    if(S.food.rice){
+      for(var i=0;i<w.rice.length;i++){
+        var r = w.rice[i];
+        if(r.g !== 1) continue;
+        var lim = S.r + 10 + extra, dd = d2(a, r);
+        if(dd < lim*lim && dd < bd){ bd = dd; best = r; }
+      }
+    }
+    for(i=0;i<w.animals.length;i++){
+      var b = w.animals[i];
+      if(!b.alive || b === a || b.air || !S.food[b.t]) continue;
+      var lim2 = S.r + SPEC[b.t].r + extra, dd2 = d2(a, b);
+      if(dd2 < lim2*lim2 && dd2 < bd){ bd = dd2; best = b; }
+    }
+    return best;
+  }
+
+  function eat(w, a, f){
+    var S = SPEC[a.t];
+    if(f.t === undefined){  // 벼
+      f.g = 0; f.re = REGROW;
+      gain(a, S.food.rice);
+      addEv(w, "eat", f.x, f.y, "+" + S.food.rice + "%", a.id);
+    } else {
+      var v = S.food[f.t];
+      kill(w, f, a.t);
+      gain(a, v);
+      addEv(w, "eat", f.x, f.y, "+" + v + "%", a.id);
+    }
+  }
+
+  function doSkill(w, a){
+    var S = SPEC[a.t];
+    if(a.cd > 0 || a.air || !a.alive) return false;
+    if(a.e <= S.cost) return false;
+    if(a.t === "hopper" || a.t === "frog"){
+      var dx = a.tx - a.x, dy = a.ty - a.y, ang = (dx*dx+dy*dy > 64) ? Math.atan2(dy,dx) : a.face;
+      var ex = clamp(a.x + Math.cos(ang)*S.dist, 20, W-20), ey = clamp(a.y + Math.sin(ang)*S.dist, 20, H-20);
+      a.e -= S.cost;
+      a.air = { t:0, dur:a.t === "frog" ? 0.5 : 0.45, sx:a.x, sy:a.y, ex:ex, ey:ey };
+      a.face = ang; a.cd = 1.2;
+      // 착지한 곳에서 멈추지 않고, 원래 가던 곳이 그 너머면 계속 가요
+      addEv(w, "air", a.x, a.y, "", a.id);
+      return true;
+    }
+    if(a.t === "snake"){
+      if(a.sprint > 0) return false;
+      a.e -= S.cost; a.sprint = 5; a.cd = 5;
+      addEv(w, "dash", a.x, a.y, "", a.id);
+      return true;
+    }
+    return false;
+  }
+
+  /* ---------- 유저 명령 ---------- */
+  function command(w, pid, c){
+    var p = w.players[pid];
+    if(!p || !p.alive || w.over) return;
+    var a = w.byId[p.eid];
+    if(!a) return;
+    if(c.k === "move"){
+      a.tx = clamp(c.x, 20, W-20); a.ty = clamp(c.y, 20, H-20);
+    } else if(c.k === "eat"){
+      if(a.air) return;
+      var f = reachable(w, a, a.t === "human" ? 34 : 24);
+      if(f) eat(w, a, f);
+      else addEv(w, "miss", a.x, a.y - 30, "먹을 게 없어요", a.id);
+    } else if(c.k === "skill"){
+      doSkill(w, a);
+    } else if(c.k === "stash" && a.t === "human"){
+      if(p.basket.length >= 3){ addEv(w, "miss", a.x, a.y - 30, "장바구니가 꽉 찼어요", a.id); return; }
+      var g = reachable(w, a, 34);
+      if(!g){ addEv(w, "miss", a.x, a.y - 30, "담을 게 없어요", a.id); return; }
+      var type = (g.t === undefined) ? "rice" : g.t;
+      if(type === "rice"){ g.g = 0; g.re = REGROW; } else kill(w, g, "human");
+      p.basket.push({ t:type, left:ROT_TIME });
+      addEv(w, "stash", g.x, g.y, "담았다!", a.id);
+    } else if(c.k === "cook" && a.t === "human"){
+      if(!p.basket.length){ addEv(w, "miss", a.x, a.y - 30, "구울 게 없어요", a.id); return; }
+      if(a.e <= 10){ addEv(w, "miss", a.x, a.y - 30, "힘이 모자라요", a.id); return; }
+      var sum = 0;
+      p.basket.forEach(function(b){ sum += SPEC.human.food[b.t] * 2; });
+      a.e -= 10; gain(a, sum); p.basket = [];
+      addEv(w, "cook", a.x, a.y, "+" + sum + "%", a.id);
+    } else if(c.k === "eatb" && a.t === "human"){
+      var b = p.basket[c.i | 0];
+      if(!b) return;
+      p.basket.splice(c.i | 0, 1);
+      gain(a, SPEC.human.food[b.t]);
+      addEv(w, "eat", a.x, a.y, "+" + SPEC.human.food[b.t] + "%", a.id);
+    }
+  }
+
+  /* ---------- 컴퓨터 생물의 생각 ---------- */
+  function think(w, a){
+    var R = w.R, S = SPEC[a.t], A = AI[a.t], fl = FLEE[a.t];
+    a.think = 0.3 + R()*0.2;
+    // 1) 무서운 녀석이 가까우면 도망
+    var thr = null, td = 1e12;
+    for(var i=0;i<w.animals.length;i++){
+      var b = w.animals[i];
+      if(!b.alive || !fl[b.t]) continue;
+      var dd = d2(a,b);
+      if(dd < fl[b.t]*fl[b.t] && dd < td){ td = dd; thr = b; }
+    }
+    if(thr){
+      var ang = Math.atan2(a.y - thr.y, a.x - thr.x) + (R()-.5)*0.8;
+      var nx = a.x + Math.cos(ang)*170, ny = a.y + Math.sin(ang)*170;
+      if(nx < 40 || nx > W-40) ang = Math.PI - ang;
+      if(ny < 40 || ny > H-40) ang = -ang;
+      a.tx = clamp(a.x + Math.cos(ang)*170, 20, W-20); a.ty = clamp(a.y + Math.sin(ang)*170, 20, H-20);
+      a.mode = "flee"; a.prey = null;
+      if(Math.sqrt(td) < 60 && a.e > 30 && R() < 0.45) doSkill(w, a);
+      return;
+    }
+    if(a.rest > 0){ a.prey = null; }
+    // 2) 배고프면 먹이 찾기
+    if(a.e < A.hungry && a.rest <= 0){
+      var best = null, bd = A.sense*A.sense;
+      // 먹이가 아주 적어지면 컴퓨터 생물은 그 먹이를 찾지 않아요 (자연의 균형)
+      if(S.food.rice && w.counts.rice > SCARCE.rice){
+        for(i=0;i<w.rice.length;i++){
+          var r = w.rice[i];
+          if(r.g !== 1) continue;
+          var rd = d2(a, r);
+          if(rd < bd){ bd = rd; best = r; }
+        }
+      }
+      for(i=0;i<w.animals.length;i++){
+        var c = w.animals[i];
+        if(!c.alive || c === a || !S.food[c.t] || w.counts[c.t] <= SCARCE[c.t]) continue;
+        if(a.t === "human" && (c.t === "frog" || c.t === "snake")) continue; // 컴퓨터 사람은 벼와 메뚜기만 먹어요
+        var cd = d2(a, c);
+        if(cd < bd){ bd = cd; best = c; }
+      }
+      if(best){
+        if(best !== a.prey) a.chase = 0;
+        a.prey = best; a.mode = "hunt";
+        a.tx = best.x; a.ty = best.y;
+        if(best.t){
+          a.chase += a.think;
+          if(a.chase > A.giveup){ a.rest = 3 + R()*3; a.chase = 0; a.prey = null; }
+          var dist = Math.sqrt(bd);
+          if(a.t === "snake" && dist < 160 && a.e > 25 && R() < 0.35) doSkill(w, a);
+          if(a.t === "frog" && dist < 150 && dist > 50 && a.e > 25 && R() < 0.25) doSkill(w, a);
+        }
+        return;
+      }
+    }
+    // 3) 어슬렁어슬렁
+    a.mode = "wander"; a.prey = null;
+    if(a.wander <= 0 || d2(a, {x:a.tx, y:a.ty}) < 100){
+      a.wander = 2 + R()*3;
+      var wa = R()*Math.PI*2, wd = 60 + R()*180;
+      a.tx = clamp(a.x + Math.cos(wa)*wd, 30, W-30); a.ty = clamp(a.y + Math.sin(wa)*wd, 30, H-30);
+      if(R() < 0.25){ a.tx = a.x; a.ty = a.y; } // 잠깐 쉬기
+    }
+  }
+
+  function count(w){
+    var c = { rice:0, hopper:0, frog:0, snake:0, human:0 };
+    for(var i=0;i<w.rice.length;i++) if(w.rice[i].g === 1) c.rice++;
+    for(i=0;i<w.animals.length;i++) if(w.animals[i].alive) c[w.animals[i].t]++;
+    w.counts = c;
+    var f = w.flags;
+    if(c.rice === 0) f.rice0 = true;
+    if(c.hopper === 0) f.hopper0 = true;
+    if(c.frog === 0) f.frog0 = true;
+    ["rice","hopper","frog","snake"].forEach(function(k){ if(c[k] < 2) f[k + "Under2"] = true; });
+    return c;
+  }
+
+  function condFail(w, role){
+    var f = w.flags;
+    if(role === "hopper" && f.rice0) return "벼가 모두 사라졌어요";
+    if(role === "frog" && f.hopper0) return "메뚜기가 모두 사라졌어요";
+    if(role === "snake" && f.frog0) return "개구리가 모두 사라졌어요";
+    if(role === "human"){
+      var names = { rice:"벼", hopper:"메뚜기", frog:"개구리", snake:"뱀" };
+      for(var k in names) if(f[k + "Under2"]) return names[k] + "가 2마리보다 적어졌어요";
+    }
+    return "";
+  }
+
+  function finish(w){
+    w.over = true;
+    w.results = {};
+    Object.keys(w.players).forEach(function(pid){
+      var p = w.players[pid], a = w.byId[p.eid];
+      var why = "", win = false;
+      if(!p.alive) why = p.reason === "starve" ? "배고파서 쓰러졌어요" : (SPEC[p.reason] ? SPEC[p.reason].name + "에게 먹혔어요" : "살아남지 못했어요");
+      else if(!a || a.e <= 0) why = "배고파서 쓰러졌어요";
+      else if(condFail(w, p.role)) why = condFail(w, p.role);
+      else { win = true; why = "끝까지 살아남고 먹이사슬을 지켰어요!"; }
+      w.results[pid] = { win:win, why:why };
+    });
+  }
+
+  /* ---------- 한 걸음 ---------- */
+  function step(w, dt){
+    if(w.over) return;
+    w.time += dt;
+    var i, a;
+
+    // 5초마다 모두 배고파져요
+    while(w.time >= w.nextDrain){
+      w.nextDrain += DRAIN_EVERY;
+      for(i=0;i<w.animals.length;i++){
+        a = w.animals[i];
+        if(!a.alive) continue;
+        a.e -= DRAIN;
+        if(a.e <= 0){ a.e = 0; kill(w, a, "starve"); addEv(w, "starve", a.x, a.y, "", a.id); }
+      }
+    }
+    // 벼가 다시 자라요
+    for(i=0;i<w.rice.length;i++){
+      var r = w.rice[i];
+      if(r.g === 0){ r.re -= dt; if(r.re <= 0) r.g = 1; }
+    }
+    // 장바구니 속 생물은 50초가 지나면 썩어요
+    Object.keys(w.players).forEach(function(pid){
+      var p = w.players[pid];
+      for(var j=p.basket.length-1;j>=0;j--){
+        p.basket[j].left -= dt;
+        if(p.basket[j].left <= 0){
+          p.basket.splice(j,1);
+          var ha = w.byId[p.eid];
+          if(ha) addEv(w, "rot", ha.x, ha.y - 30, "썩어 버렸어요…", ha.id);
+        }
+      }
+    });
+
+    for(i=0;i<w.animals.length;i++){
+      a = w.animals[i];
+      if(!a.alive) continue;
+      if(a.cd > 0) a.cd -= dt;
+      if(a.sprint > 0) a.sprint -= dt;
+      if(a.rest > 0) a.rest -= dt;
+      if(a.wander > 0) a.wander -= dt;
+      if(a.air){
+        var ai = a.air;
+        ai.t += dt;
+        var k = Math.min(1, ai.t / ai.dur);
+        a.x = ai.sx + (ai.ex - ai.sx)*k; a.y = ai.sy + (ai.ey - ai.sy)*k;
+        if(k >= 1){ a.air = null; if(!a.pid){ a.tx = a.x; a.ty = a.y; a.think = 0; } }
+        continue;
+      }
+      if(!a.pid){
+        a.think -= dt;
+        if(a.think <= 0) think(w, a);
+        else if(a.prey && a.prey.t && a.prey.alive){ a.tx = a.prey.x; a.ty = a.prey.y; }
+      }
+      var dx = a.tx - a.x, dy = a.ty - a.y, dist = Math.sqrt(dx*dx + dy*dy);
+      var sp = SPEC[a.t].sp * (a.sprint > 0 ? 2 : 1) * (a.mode === "wander" && !a.pid ? 0.55 : 1);
+      if(dist > 1){
+        var m = Math.min(dist, sp*dt);
+        a.x += dx/dist*m; a.y += dy/dist*m;
+        a.face = Math.atan2(dy, dx);
+      }
+      // 새끼 낳기
+      var B = BREED[a.t];
+      if(B && !a.pid && a.e >= B.e && w.counts[a.t] < B.max && w.time > 8 && w.R() < B.p*dt){
+        var ba = w.R()*Math.PI*2;
+        var kid = spawn(w, a.t, { x:clamp(a.x + Math.cos(ba)*22, 20, W-20), y:clamp(a.y + Math.sin(ba)*22, 20, H-20) });
+        kid.e = 60; a.e -= 20; w.counts[a.t]++;
+        addEv(w, "baby", kid.x, kid.y, "", kid.id);
+      }
+      // 컴퓨터 생물은 배고플 때 먹이에 닿으면 먹어요
+      if(!a.pid && a.prey && a.e < 85){
+        var pr = a.prey;
+        if(pr.t ? !pr.alive : pr.g !== 1){ a.prey = null; a.think = 0; }
+        else {
+          var lim = SPEC[a.t].r + (pr.t ? SPEC[pr.t].r : 10) + 4;
+          if(d2(a, pr) < lim*lim && canEatAI(a, pr)){ eat(w, a, pr); a.prey = null; a.chase = 0; a.think = 0.2; }
+        }
+      }
+    }
+    // 죽은 생물 정리
+    if(w.animals.some(function(x){ return !x.alive; })){
+      w.animals = w.animals.filter(function(x){ return x.alive; });
+    }
+    count(w);
+    Object.keys(w.players).forEach(function(pid){
+      var p = w.players[pid];
+      if(!p.fail){ p.fail = condFail(w, p.role); }
+    });
+    if(w.time >= GAME_TIME) finish(w);
+  }
+  function canEatAI(a, f){
+    if(!f.t) return f.g === 1;
+    return f.alive && !f.air;
+  }
+
+  function isBaby(w, a){ return a.born > 0 && w.time - a.born < 30; }
+
+  /* ---------- 네트워크로 보낼 요약 ---------- */
+  var TCODE = { hopper:"h", frog:"f", snake:"s", human:"m" };
+  function snapshot(w){
+    var parts = [];
+    for(var i=0;i<w.animals.length;i++){
+      var a = w.animals[i];
+      if(!a.alive) continue;
+      parts.push(a.id.toString(36) + "," + TCODE[a.t] + "," + Math.round(a.x) + "," + Math.round(a.y) + "," + ((a.air?1:0) | (a.sprint>0?2:0) | (isBaby(w,a)?4:0)));
+    }
+    var rice = "";
+    for(i=0;i<w.rice.length;i++) rice += w.rice[i].g;
+    var pl = {};
+    Object.keys(w.players).forEach(function(pid){
+      var p = w.players[pid], a = w.byId[p.eid];
+      pl[pid] = { r:p.role, n:p.name, eid:p.eid, al:p.alive ? 1 : 0, rs:p.reason, f:p.fail,
+                  e: a ? Math.round(a.e) : 0, cd: a ? Math.max(0, +a.cd.toFixed(1)) : 0,
+                  sp: a ? Math.max(0, +a.sprint.toFixed(1)) : 0,
+                  b: p.basket.map(function(b){ return b.t + ":" + Math.ceil(b.left); }).join("|") };
+    });
+    return { tm:+w.time.toFixed(2), a:parts.join(";"), r:rice, p:pl,
+             ev:w.ev.slice(-20), c:w.counts, ov:w.over ? 1 : 0, res:w.results || null };
+  }
+  var TDECODE = { h:"hopper", f:"frog", s:"snake", m:"human" };
+  function parseAnimals(str){
+    var out = {};
+    if(!str) return out;
+    str.split(";").forEach(function(s){
+      var q = s.split(",");
+      out[q[0]] = { id:parseInt(q[0],36), t:TDECODE[q[1]], x:+q[2], y:+q[3], fl:+q[4] };
+    });
+    return out;
+  }
+
+  return { W:W, H:H, GAME_TIME:GAME_TIME, ROT_TIME:ROT_TIME, ROLES:ROLES, SPEC:SPEC,
+           rng:rng, genMap:genMap, create:create, step:step, command:command,
+           snapshot:snapshot, parseAnimals:parseAnimals, condFail:condFail, isBaby:isBaby };
+})();
+
+</script>
+<script>
+/* ===================================================================
+   화면, 조작, 네트워크
+   =================================================================== */
+(function(){
+"use strict";
+var $ = function(id){ return document.getElementById(id); };
+var SPEC = FC.SPEC, W = FC.W, H = FC.H;
+
+var ROLE_INFO = {
+  hopper:{ name:"메뚜기", emo:"🦗", food:["rice"],
+    goals:["⏱ 3분 동안 살아남기", "🌾 벼를 모두 먹지 않기", "🍚 굶지 않기"],
+    tip:"벼 🌾 를 먹고, 개구리와 사람을 피해요!", skill:{ ic:"🪽", lb:"날기", cs:"−5%" }, eat:"+20%" },
+  frog:{ name:"개구리", emo:"🐸", food:["hopper"],
+    goals:["⏱ 3분 동안 살아남기", "🦗 메뚜기를 모두 먹지 않기", "🍚 굶지 않기"],
+    tip:"메뚜기 🦗 를 잡아먹고, 뱀과 사람을 피해요!", skill:{ ic:"💨", lb:"점프", cs:"−5%" }, eat:"+40%" },
+  snake:{ name:"뱀", emo:"🐍", food:["frog"],
+    goals:["⏱ 3분 동안 살아남기", "🐸 개구리를 모두 먹지 않기", "🍚 굶지 않기"],
+    tip:"개구리 🐸 를 잡아먹고, 사람을 피해요!", skill:{ ic:"⚡", lb:"빠르게", cs:"−10%" }, eat:"+60%" },
+  human:{ name:"사람", emo:"🧑‍🌾", food:["rice","hopper","frog","snake"],
+    goals:["⏱ 3분 동안 살아남기", "🌾🦗🐸🐍 모두 2마리 이상 지키기", "🍚 굶지 않기"],
+    tip:"무엇이든 먹을 수 있지만, 너무 많이 먹으면 생물이 사라져요!", skill:null, eat:"+10~50%" }
+};
+var EMO = { rice:"🌾", hopper:"🦗", frog:"🐸", snake:"🐍", human:"🧑‍🌾" };
+
+/* ---------------- 상태 ---------------- */
+var app = {
+  mode:null,          // "solo" | "host" | "guest"
+  pid: "p" + Math.random().toString(36).slice(2, 10),
+  name:"", code:"", roomData:null, started:false,
+  seed:0, roles:{}, names:{}
+};
+var world = null, map = null;
+var simTimer = null, lastSim = 0, lastPub = 0, pubK = 0;
+var gameOn = false, ended = false, deadShown = false, watching = false;
+
+// 손님 기기용
+var snaps = [], offEst = null, lastSnapAt = 0;
+var me = null;                 // 내 생물 (손님 기기에서 미리 움직여 보는 위치)
+var cmdSeq = 0, cmdPending = [], cmdRecent = [], lastCmdWrite = 0, cmdTimer = null;
+var unsubs = [];
+
+try{ $("nameIn").value = localStorage.getItem("fc_name") || ""; }catch(e){}
+
+/* ---------------- Firebase ---------------- */
+var db = null;
+try{
+  firebase.initializeApp({
+    apiKey: "AIzaSyAqXsG8npxettrCRH3MbZwFZGLg5aehxdw",
+    authDomain: "min-playground.firebaseapp.com",
+    projectId: "min-playground",
+    storageBucket: "min-playground.firebasestorage.app",
+    messagingSenderId: "472071492052",
+    appId: "1:472071492052:web:00263046925133e55a4641"
+  });
+  db = firebase.firestore();
+}catch(e){ db = null; }
+function roomRef(){ return db.collection("rooms").doc("fc" + app.code); }
+function subRef(id){ return roomRef().collection("students").doc(id); }
+function stopListen(){ unsubs.forEach(function(u){ try{ u(); }catch(e){} }); unsubs = []; }
+
+function esc(t){ return String(t == null ? "" : t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function show(id){ ["home","lobby","game"].forEach(function(s){ $(s).classList.toggle("hidden", s !== id); }); }
+function myName(){
+  var n = $("nameIn").value.trim().slice(0, 8);
+  if(!n) n = "친구" + Math.floor(10 + Math.random()*90);
+  try{ localStorage.setItem("fc_name", n); }catch(e){}
+  return n;
+}
+function shuffle(a, R){ for(var i=a.length-1;i>0;i--){ var j = Math.floor((R ? R() : Math.random())*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+
+/* ===================================================================
+   첫 화면 · 대기실
+   =================================================================== */
+$("btnSolo").onclick = function(){
+  app.mode = "solo"; app.name = myName();
+  var role = FC.ROLES[Math.floor(Math.random()*4)];
+  app.roles = {}; app.roles[app.pid] = role;
+  app.names = {}; app.names[app.pid] = app.name;
+  app.seed = Math.floor(Math.random()*1e9);
+  beginReveal();
+};
+$("btnJoinOpen").onclick = function(){
+  $("joinRow").classList.remove("hidden");
+  $("codeIn").focus();
+};
+$("btnMake").onclick = async function(){
+  if(!db){ $("homeMsg").textContent = "인터넷 연결이 필요해요. 혼자 하기는 바로 할 수 있어요!"; return; }
+  app.name = myName(); app.mode = "host";
+  $("btnMake").disabled = true; $("homeMsg").textContent = "방을 만드는 중…";
+  try{
+    for(var tries=0; tries<8; tries++){
+      app.code = String(Math.floor(1000 + Math.random()*9000));
+      var snap = await roomRef().get();
+      if(!snap.exists || Date.now() - (snap.data().at || 0) > 3*3600*1000) break;
+    }
+    var players = {}; players[app.pid] = { n:app.name, j:Date.now() };
+    await roomRef().set({ game:"foodchain", st:"lobby", host:app.pid, players:players, at:Date.now() });
+    $("homeMsg").textContent = "";
+    enterLobby();
+  }catch(e){
+    $("homeMsg").textContent = "방을 만들지 못했어요. 혼자 하기로 놀아 보세요! (" + (e.code || e.message || "") + ")";
+  }
+  $("btnMake").disabled = false;
+};
+$("btnJoin").onclick = async function(){
+  if(!db){ $("homeMsg").textContent = "인터넷 연결이 필요해요."; return; }
+  var code = $("codeIn").value.replace(/\D/g, "");
+  if(code.length !== 4){ $("homeMsg").textContent = "방 번호 4자리를 적어 주세요."; return; }
+  app.code = code; app.name = myName(); app.mode = "guest";
+  $("btnJoin").disabled = true; $("homeMsg").textContent = "방을 찾는 중…";
+  try{
+    await db.runTransaction(async function(tx){
+      var s = await tx.get(roomRef());
+      if(!s.exists || s.data().game !== "foodchain") throw new Error("방을 찾을 수 없어요.");
+      var d = s.data();
+      if(d.st !== "lobby") throw new Error("이미 게임이 시작된 방이에요.");
+      var n = Object.keys(d.players || {}).length;
+      if(n >= 4 && !(d.players || {})[app.pid]) throw new Error("방이 꽉 찼어요. (최대 4명)");
+      var up = {}; up["players." + app.pid] = { n:app.name, j:Date.now() };
+      tx.update(roomRef(), up);
+    });
+    $("homeMsg").textContent = "";
+    enterLobby();
+  }catch(e){
+    $("homeMsg").textContent = e.message && e.message.length < 40 ? e.message : "방에 들어가지 못했어요.";
+  }
+  $("btnJoin").disabled = false;
+};
+$("codeIn").addEventListener("keydown", function(e){ if(e.key === "Enter") $("btnJoin").click(); });
+
+function enterLobby(){
+  show("lobby");
+  $("lobbyCode").textContent = app.code;
+  $("btnStart").classList.toggle("hidden", app.mode !== "host");
+  $("lobbyNote").textContent = app.mode === "host" ? "친구가 다 들어오면 시작을 눌러요. 혼자서도 시작할 수 있어요!" : "방장이 시작하기를 기다리는 중…";
+  stopListen();
+  unsubs.push(roomRef().onSnapshot(function(s){
+    if(!s.exists){ return; }
+    var d = s.data(); app.roomData = d;
+    renderSeats(d);
+    if(d.st === "closed" && app.mode === "guest" && !app.started){
+      leaveToHome("방장이 방을 닫았어요.");
+      return;
+    }
+    if(d.st === "playing" && !app.started){
+      if(!d.roles || !d.roles[app.pid]){ leaveToHome("게임이 이미 시작됐어요."); return; }
+      app.started = true;
+      app.seed = d.seed; app.roles = d.roles;
+      app.names = {}; Object.keys(d.players || {}).forEach(function(k){ app.names[k] = d.players[k].n; });
+      beginReveal();
+    }
+  }, function(){ $("lobbyMsg").textContent = "연결이 끊겼어요."; }));
+}
+function renderSeats(d){
+  var ids = Object.keys(d.players || {}).sort(function(a,b){ return d.players[a].j - d.players[b].j; });
+  var avs = ["🐣","🐥","🐤","🐔"], html = "";
+  for(var i=0;i<4;i++){
+    var id = ids[i];
+    if(id) html += '<div class="seat' + (id === app.pid ? " me" : "") + '"><div class="av">' + avs[i] + '</div><div class="nm">' + esc(d.players[id].n) + (id === d.host ? " 👑" : "") + '</div></div>';
+    else html += '<div class="seat empty"><div class="av">🤖</div><div class="nm">컴퓨터</div></div>';
+  }
+  $("seats").innerHTML = html;
+}
+$("btnStart").onclick = async function(){
+  var d = app.roomData;
+  if(!d) return;
+  var ids = Object.keys(d.players || {}).sort(function(a,b){ return d.players[a].j - d.players[b].j; }).slice(0, 4);
+  var roles = shuffle(FC.ROLES.slice()), map = {};
+  ids.forEach(function(id, i){ map[id] = roles[i]; });
+  $("btnStart").disabled = true;
+  try{
+    await roomRef().update({ st:"playing", roles:map, seed:Math.floor(Math.random()*1e9), startAt:Date.now() });
+  }catch(e){ $("lobbyMsg").textContent = "시작하지 못했어요. 다시 눌러 주세요."; }
+  $("btnStart").disabled = false;
+};
+$("btnLeave").onclick = function(){
+  if(db && app.code){
+    if(app.mode === "host") roomRef().update({ st:"closed" }).catch(function(){});
+    else { var up = {}; up["players." + app.pid] = firebase.firestore.FieldValue.delete(); roomRef().update(up).catch(function(){}); }
+  }
+  leaveToHome("");
+};
+function leaveToHome(msg){
+  stopListen();
+  stopGame();
+  app.started = false; app.code = ""; app.mode = null;
+  ["reveal","dead","result"].forEach(function(o){ $(o).classList.add("hidden"); });
+  show("home");
+  $("homeMsg").textContent = msg || "";
+}
+
+/* ===================================================================
+   역할 공개 → 게임 시작
+   =================================================================== */
+function beginReveal(){
+  var role = app.roles[app.pid], R = ROLE_INFO[role];
+  $("rvEm").textContent = R.emo; $("rvNm").textContent = R.name;
+  $("rvGoals").innerHTML = R.goals.map(function(g){ return "<li>" + g + "</li>"; }).join("");
+  $("rvTip").textContent = R.tip;
+  $("reveal").classList.remove("hidden");
+  var n = 4;
+  (function tick(){
+    if(n <= 0){ $("reveal").classList.add("hidden"); startGame(); return; }
+    $("rvCount").textContent = n + "초 뒤에 시작해요";
+    n--; setTimeout(tick, 1000);
+  })();
+}
+
+function startGame(){
+  var role = app.roles[app.pid];
+  map = FC.genMap(app.seed);
+  prepDecor();
+  ended = false; deadShown = false; watching = false; gameOn = true;
+  trails = {}; faces = {}; pops = []; lastEvI = 0; pendingEv = []; marker = null; airAnim = {};
+  camPan.x = 0; camPan.y = 0; lastMePos = null;
+  setupHud(role);
+  show("game");
+  resize();
+  if(app.mode === "solo" || app.mode === "host"){
+    var players = {};
+    Object.keys(app.roles).forEach(function(pid){ players[pid] = { role:app.roles[pid], name:app.names[pid] || "" }; });
+    world = FC.create(app.seed, players);
+    lastSim = performance.now(); lastPub = 0; pubK = 0; lastCmdN = {};
+    simTimer = setInterval(simTick, 33);
+    if(app.mode === "host") listenCommands();
+    $("waitNet").classList.add("hidden");
+  } else {
+    world = null; snaps = []; offEst = null; me = null; lastSnapAt = performance.now();
+    cmdSeq = 0; cmdPending = []; cmdRecent = []; lastCmdWrite = 0;
+    $("waitNet").classList.remove("hidden");
+    listenWorld();
+    cmdTimer = setInterval(flushCmds, 100);
+  }
+}
+function stopGame(){
+  gameOn = false;
+  if(simTimer){ clearInterval(simTimer); simTimer = null; }
+  if(cmdTimer){ clearInterval(cmdTimer); cmdTimer = null; }
+  world = null;
+}
+
+/* ---------------- 방장 / 혼자: 시뮬레이션 ---------------- */
+function simTick(){
+  if(!world) return;
+  var now = performance.now();
+  var dt = Math.min(0.25, (now - lastSim)/1000); lastSim = now;
+  while(dt > 0.0001){ var s = Math.min(dt, 0.05); FC.step(world, s); dt -= s; }
+  if(app.mode === "host" && (now - lastPub > 380 || world.over)){
+    lastPub = now; publish();
+  }
+  if(world.over && !ended) onGameOver(world.results, world.counts);
+}
+function publish(){
+  pubK++;
+  var s = FC.snapshot(world);
+  subRef("_w" + (pubK % 2)).set({ k:pubK, s:JSON.stringify(s) }).catch(function(){});
+  if(world.over) roomRef().update({ st:"ended" }).catch(function(){});
+}
+var lastCmdN = {};
+function listenCommands(){
+  unsubs.push(roomRef().collection("students").onSnapshot(function(qs){
+    qs.docChanges().forEach(function(ch){
+      var id = ch.doc.id;
+      if(id.charAt(0) === "_" || !world) return;
+      var d = ch.doc.data(), list = (d.c || []).slice().sort(function(a,b){ return a.n - b.n; });
+      list.forEach(function(c){
+        if(c.n > (lastCmdN[id] || 0)){ lastCmdN[id] = c.n; FC.command(world, id, c); }
+      });
+    });
+  }));
+}
+
+/* ---------------- 손님: 세상 받아오기 ---------------- */
+function listenWorld(){
+  ["_w0","_w1"].forEach(function(id){
+    unsubs.push(subRef(id).onSnapshot(function(s){
+      if(!s.exists) return;
+      var d = s.data(), sn;
+      try{ sn = JSON.parse(d.s); }catch(e){ return; }
+      if(snaps.length && sn.tm <= snaps[snaps.length-1].tm) return;   // 지난 게임이나 늦게 온 것
+      if(!sn.p[app.pid]) return;
+      sn.A = FC.parseAnimals(sn.a);
+      snaps.push(sn);
+      if(snaps.length > 8) snaps.shift();
+      var o = sn.tm - performance.now()/1000;
+      if(offEst === null || o > offEst) offEst = o; else offEst += (o - offEst)*0.05;
+      lastSnapAt = performance.now();
+      $("waitNet").classList.add("hidden");
+      // 내 생물 위치 맞추기
+      var mp = sn.p[app.pid], mine = sn.A[mp.eid.toString(36)];
+      if(mine){
+        if(!me){ me = { x:mine.x, y:mine.y, tx:mine.x, ty:mine.y, face:0, air:null, sprint:0, cd:0, idle:0 }; }
+        else {
+          var dx = mine.x - me.x, dy = mine.y - me.y;
+          if(dx*dx + dy*dy > 170*170 && !me.air){ me.x = mine.x; me.y = mine.y; }
+          me.srv = mine;
+        }
+      }
+      if(sn.ov && !ended) onGameOver(sn.res, sn.c, sn.p);
+    }));
+  });
+}
+function sendCmd(c){
+  if(app.mode !== "guest"){ if(world) FC.command(world, app.pid, c); return; }
+  c.n = ++cmdSeq;
+  if(c.k === "move") cmdPending = cmdPending.filter(function(x){ return x.k !== "move"; });
+  cmdPending.push(c);
+  flushCmds();
+}
+function flushCmds(){
+  if(!cmdPending.length || !db) return;
+  var now = performance.now();
+  if(now - lastCmdWrite < 160) return;
+  lastCmdWrite = now;
+  cmdRecent = cmdRecent.concat(cmdPending).slice(-14); cmdPending = [];
+  subRef(app.pid).set({ c:cmdRecent, n:app.name }).catch(function(){});
+}
+
+/* ===================================================================
+   보기(view) 만들기 : 방장은 세상에서 바로, 손님은 받은 요약을 이어서
+   =================================================================== */
+function viewFromWorld(){
+  var w = world, ents = [];
+  for(var i=0;i<w.animals.length;i++){
+    var a = w.animals[i];
+    if(!a.alive) continue;
+    var lift = 0;
+    if(a.air){ var k = Math.min(1, a.air.t / a.air.dur); lift = Math.sin(Math.PI*k) * (a.t === "frog" ? 46 : 34); }
+    ents.push({ id:a.id, t:a.t, x:a.x, y:a.y, lift:lift, dash:a.sprint > 0, baby:FC.isBaby(w, a) });
+  }
+  var rice = []; for(i=0;i<w.rice.length;i++) rice.push(w.rice[i].g);
+  var p = w.players[app.pid], a2 = p && w.byId[p.eid];
+  var mine = p ? { role:p.role, eid:p.eid, alive:p.alive, reason:p.reason, fail:p.fail,
+                   e: a2 ? a2.e : 0, cd: a2 ? Math.max(0, a2.cd) : 0, sp: a2 ? Math.max(0, a2.sprint) : 0,
+                   basket: p.basket.map(function(b){ return { t:b.t, left:b.left }; }) } : null;
+  return { time:w.time, counts:w.counts, ents:ents, rice:rice, mine:mine, ev:w.ev,
+           meX: a2 ? a2.x : null, meY: a2 ? a2.y : null, renderT:w.time };
+}
+function viewFromSnaps(fdt){
+  if(!snaps.length) return null;
+  var nowS = performance.now()/1000;
+  var rt = nowS + offEst - 0.5;
+  var last = snaps[snaps.length-1];
+  var A = snaps[0], B = null;
+  for(var i=0;i<snaps.length;i++){
+    if(snaps[i].tm <= rt) A = snaps[i];
+    if(snaps[i].tm > rt){ B = snaps[i]; break; }
+  }
+  if(rt > last.tm){ A = last; B = null; rt = last.tm; }
+  var k = B ? (rt - A.tm) / Math.max(0.001, B.tm - A.tm) : 0;
+  k = Math.max(0, Math.min(1, k));
+  var ents = [];
+  var mp = last.p[app.pid], myKey = mp ? mp.eid.toString(36) : "";
+  for(var key in A.A){
+    var a = A.A[key], b = B ? B.A[key] : null;
+    if(B && !b) continue;          // 다음 장면에서 사라졌으면 (먹힘) 숨겨요
+    var x = b ? a.x + (b.x - a.x)*k : a.x, y = b ? a.y + (b.y - a.y)*k : a.y;
+    var lift = 0, an = airAnim[a.id];
+    if(an){ var q = (rt - an.tm) / an.dur; if(q >= 0 && q <= 1) lift = Math.sin(Math.PI*q) * (a.t === "frog" ? 46 : 34); }
+    if(key === myKey) continue;
+    ents.push({ id:a.id, t:a.t, x:x, y:y, lift:lift, dash:(a.fl & 2) > 0, baby:(a.fl & 4) > 0 });
+  }
+  // 새로 태어난 생물은 B에만 있어요
+  if(B) for(var key2 in B.A){ if(!A.A[key2] && key2 !== myKey){ var nb = B.A[key2]; ents.push({ id:nb.id, t:nb.t, x:nb.x, y:nb.y, lift:0, dash:false, baby:true }); } }
+  // 내 생물은 미리 움직여 본 위치로
+  if(mp && mp.al && me){
+    stepMe(fdt, mp);
+    var ml = 0;
+    if(me.air){ var mk = Math.min(1, me.air.t / me.air.dur); ml = Math.sin(Math.PI*mk) * (mp.r === "frog" ? 46 : 34); }
+    ents.push({ id:mp.eid, t:mp.r, x:me.x, y:me.y, lift:ml, dash:me.sprint > 0, baby:false });
+  }
+  var rice = []; for(i=0;i<last.r.length;i++) rice.push(+last.r.charAt(i));
+  var mine = mp ? { role:mp.r, eid:mp.eid, alive:!!mp.al, reason:mp.rs, fail:mp.f, e:mp.e, cd:Math.max(mp.cd, me ? me.cd : 0), sp:mp.sp,
+                    basket: mp.b ? mp.b.split("|").filter(Boolean).map(function(s){ var q = s.split(":"); return { t:q[0], left:+q[1] }; }) : [] } : null;
+  return { time:last.tm, counts:last.c, ents:ents, rice:rice, mine:mine, ev:last.ev,
+           meX: me ? me.x : null, meY: me ? me.y : null, renderT:rt };
+}
+// 손님 기기: 내 생물 미리 움직이기 (방장도 같은 규칙으로 움직여요)
+function stepMe(dt, mp){
+  var S = SPEC[mp.r];
+  if(me.cd > 0) me.cd -= dt;
+  if(me.sprint > 0) me.sprint -= dt;
+  if(me.air){
+    var ai = me.air; ai.t += dt;
+    var k = Math.min(1, ai.t / ai.dur);
+    me.x = ai.sx + (ai.ex - ai.sx)*k; me.y = ai.sy + (ai.ey - ai.sy)*k;
+    if(k >= 1) me.air = null;
+    return;
+  }
+  var dx = me.tx - me.x, dy = me.ty - me.y, d = Math.sqrt(dx*dx + dy*dy);
+  var sp = S.sp * (me.sprint > 0 ? 2 : 1);
+  if(d > 1){ var m = Math.min(d, sp*dt); me.x += dx/d*m; me.y += dy/d*m; me.face = Math.atan2(dy, dx); me.idle = 0; }
+  else {
+    me.idle += dt;
+    if(me.idle > 1 && me.srv){ me.x += (me.srv.x - me.x)*0.08; me.y += (me.srv.y - me.y)*0.08; me.tx = me.x; me.ty = me.y; }
+  }
+}
+
+/* ===================================================================
+   조작
+   =================================================================== */
+var cv = $("cv"), ctx = cv.getContext("2d");
+var dpr = 1, vw = 0, vh = 0, zoom = 1;
+var cam = { x:W/2, y:H/2 }, camPan = { x:0, y:0 }, lastMePos = null;
+var marker = null;
+function resize(){
+  dpr = Math.min(2, window.devicePixelRatio || 1);
+  vw = window.innerWidth; vh = window.innerHeight;
+  cv.width = Math.round(vw*dpr); cv.height = Math.round(vh*dpr);
+  zoom = Math.max(0.62, Math.min(1.35, Math.min(vw, vh)/640));
+}
+window.addEventListener("resize", resize);
+window.addEventListener("orientationchange", function(){ setTimeout(resize, 200); });
+document.addEventListener("gesturestart", function(e){ e.preventDefault(); });
+
+function toWorld(sx, sy){ return { x: cam.x + (sx - vw/2)/zoom, y: cam.y + (sy - vh/2)/zoom }; }
+var touching = false, lastMoveSent = 0, panStart = null;
+function pointerAt(e){
+  var p = toWorld(e.clientX, e.clientY);
+  var v = lastView;
+  if(!v || !v.mine || !v.mine.alive || ended){
+    // 관전 중에는 화면을 끌어서 둘러봐요
+    if(panStart){ camPan.x = panStart.px - (e.clientX - panStart.x)/zoom; camPan.y = panStart.py - (e.clientY - panStart.y)/zoom; }
+    return;
+  }
+  p.x = Math.max(20, Math.min(W-20, p.x)); p.y = Math.max(20, Math.min(H-20, p.y));
+  marker = { x:p.x, y:p.y, t:performance.now() };
+  if(me){ me.tx = p.x; me.ty = p.y; }
+  var now = performance.now();
+  if(now - lastMoveSent > 90 || e.type === "pointerdown"){ lastMoveSent = now; sendCmd({ k:"move", x:Math.round(p.x), y:Math.round(p.y) }); }
+}
+cv.addEventListener("pointerdown", function(e){
+  e.preventDefault(); touching = true;
+  panStart = { x:e.clientX, y:e.clientY, px:camPan.x, py:camPan.y };
+  try{ cv.setPointerCapture(e.pointerId); }catch(er){}
+  pointerAt(e);
+});
+cv.addEventListener("pointermove", function(e){ if(touching){ e.preventDefault(); pointerAt(e); } });
+function endTouch(e){
+  if(!touching) return;
+  touching = false; panStart = null;
+  var v = lastView;
+  if(v && v.mine && v.mine.alive && !ended){
+    var p = toWorld(e.clientX, e.clientY);
+    p.x = Math.max(20, Math.min(W-20, p.x)); p.y = Math.max(20, Math.min(H-20, p.y));
+    if(me){ me.tx = p.x; me.ty = p.y; }
+    sendCmd({ k:"move", x:Math.round(p.x), y:Math.round(p.y) });
+  }
+}
+cv.addEventListener("pointerup", endTouch);
+cv.addEventListener("pointercancel", endTouch);
+document.addEventListener("touchmove", function(e){ if(gameOn) e.preventDefault(); }, { passive:false });
+
+function bindBtn(id, fn){
+  var b = $(id);
+  b.addEventListener("pointerdown", function(e){
+    e.preventDefault(); e.stopPropagation();
+    b.classList.add("press"); fn();
+  });
+  ["pointerup","pointerleave","pointercancel"].forEach(function(t){ b.addEventListener(t, function(){ b.classList.remove("press"); }); });
+  b.addEventListener("contextmenu", function(e){ e.preventDefault(); });
+}
+bindBtn("bEat", function(){ if(canAct()) sendCmd({ k:"eat" }); });
+bindBtn("bStash", function(){ if(canAct()) sendCmd({ k:"stash" }); });
+bindBtn("bCook", function(){ if(canAct()) sendCmd({ k:"cook" }); });
+bindBtn("bSkill", function(){
+  if(!canAct()) return;
+  var v = lastView, m = v.mine;
+  if(m.cd > 0.05){ toast("조금만 기다려요!"); return; }
+  if(m.e <= SPEC[m.role].cost){ toast("힘이 모자라요…"); return; }
+  if(m.role === "snake" && m.sp > 0) return;
+  // 손님 기기에서는 바로 움직임을 보여 줘요
+  if(app.mode === "guest" && me && !me.air){
+    var S = SPEC[m.role];
+    if(m.role === "hopper" || m.role === "frog"){
+      var dx = me.tx - me.x, dy = me.ty - me.y, ang = (dx*dx + dy*dy > 64) ? Math.atan2(dy, dx) : me.face;
+      var ex = Math.max(20, Math.min(W-20, me.x + Math.cos(ang)*S.dist)), ey = Math.max(20, Math.min(H-20, me.y + Math.sin(ang)*S.dist));
+      me.air = { t:0, dur:m.role === "frog" ? 0.5 : 0.45, sx:me.x, sy:me.y, ex:ex, ey:ey };
+      me.cd = 1.2;
+    } else if(m.role === "snake"){ me.sprint = 5; me.cd = 5; }
+  }
+  sendCmd({ k:"skill" });
+});
+document.addEventListener("keydown", function(e){
+  if(!gameOn) return;
+  if(e.key === " " || e.key === "1"){ e.preventDefault(); $("bEat").dispatchEvent(new PointerEvent("pointerdown")); }
+  if(e.key === "2"){ var r = lastView && lastView.mine && lastView.mine.role; $(r === "human" ? "bStash" : "bSkill").dispatchEvent(new PointerEvent("pointerdown")); }
+  if(e.key === "3"){ $("bCook").dispatchEvent(new PointerEvent("pointerdown")); }
+});
+document.addEventListener("keyup", function(){ ["bEat","bStash","bCook","bSkill"].forEach(function(id){ $(id).classList.remove("press"); }); });
+function canAct(){ var v = lastView; return gameOn && !ended && v && v.mine && v.mine.alive; }
+
+/* ===================================================================
+   HUD
+   =================================================================== */
+var toastT = null;
+function toast(t){
+  var el = $("toast"); el.textContent = t; el.classList.add("on");
+  clearTimeout(toastT); toastT = setTimeout(function(){ el.classList.remove("on"); }, 1300);
+}
+function setupHud(role){
+  var R = ROLE_INFO[role];
+  $("hudEm").textContent = R.emo; $("hudNm").textContent = "나는 " + R.name;
+  $("eatCs").textContent = R.eat;
+  var human = role === "human";
+  $("bSkill").classList.toggle("hidden", human);
+  $("bStash").classList.toggle("hidden", !human);
+  $("bCook").classList.toggle("hidden", !human);
+  $("basketBox").classList.toggle("hidden", !human);
+  if(R.skill){ $("skIc").textContent = R.skill.ic; $("skLb").textContent = R.skill.lb; $("skCs").textContent = R.skill.cs; }
+  $("goals").innerHTML = R.goals.map(function(g, i){ return '<span id="goal' + i + '" class="ok">' + g + '</span>'; }).join("");
+  hudCache = {};
+}
+var hudCache = {};
+function setText(id, t){ if(hudCache[id] !== t){ hudCache[id] = t; $(id).textContent = t; } }
+function updateHud(v){
+  var m = v.mine;
+  if(!m) return;
+  var e = Math.max(0, Math.round(m.e));
+  if(hudCache.e !== e){
+    hudCache.e = e;
+    $("ebarFill").style.width = e + "%"; $("ebarTxt").textContent = "에너지 " + e + "%";
+    $("ebar").className = "ebar" + (e <= 30 ? " low" : e <= 60 ? " mid" : "");
+  }
+  var nextDrain = 5 - (v.time % 5);
+  setText("drainTxt", m.alive ? Math.ceil(nextDrain) + "초 뒤 −10%" : "쓰러졌어요");
+  var left = Math.max(0, FC.GAME_TIME - v.time);
+  setText("timer", Math.floor(left/60) + ":" + String(Math.floor(left % 60)).padStart(2, "0"));
+  $("timer").classList.toggle("hurry", left < 20);
+  $("ripeFill").style.width = Math.min(100, v.time / FC.GAME_TIME * 100) + "%";
+  // 개체 수
+  var c = v.counts || {};
+  var ck = ["rice","hopper","frog","snake","human"].map(function(k){ return c[k]; }).join(",");
+  if(hudCache.counts !== ck){
+    hudCache.counts = ck;
+    $("counts").innerHTML = ["rice","hopper","frog","snake","human"].map(function(k){
+      var warn = (k !== "human" && c[k] < (m.role === "human" ? 4 : 6)) ? " warn" : "";
+      return '<div class="cnt' + warn + '"><span>' + EMO[k] + '</span><span>' + (c[k] || 0) + '</span></div>';
+    }).join("");
+  }
+  // 목표
+  var g0 = m.alive, g1 = !m.fail, g2 = m.alive && m.e > 0;
+  [g0, g1, g2].forEach(function(ok, i){ var el = $("goal" + i); if(el) el.className = ok ? "ok" : "bad"; });
+  if(m.fail && hudCache.fail !== m.fail){ hudCache.fail = m.fail; toast("😢 " + m.fail); }
+  // 버튼
+  var S = SPEC[m.role];
+  var cdMax = m.role === "snake" ? 5 : 1.2;
+  var p = m.cd > 0 ? Math.min(100, m.cd / cdMax * 100) : 0;
+  $("skCool").style.setProperty("--p", p.toFixed(0) + "%");
+  $("bSkill").classList.toggle("off", m.e <= S.cost || !m.alive);
+  $("bCook").classList.toggle("off", !m.basket.length || m.e <= 10 || !m.alive);
+  $("bEat").classList.toggle("off", !m.alive);
+  if(m.role === "human"){
+    var bk = m.basket.map(function(b){ return b.t + Math.ceil(b.left); }).join(",");
+    if(hudCache.basket !== bk){
+      hudCache.basket = bk;
+      var html = "";
+      for(var i=0;i<3;i++){
+        var b = m.basket[i];
+        if(b) html += '<div class="slot full' + (b.left < 10 ? " rot" : "") + '" data-i="' + i + '">' + EMO[b.t] + '<span class="t">' + Math.ceil(b.left) + '초</span></div>';
+        else html += '<div class="slot"></div>';
+      }
+      $("basket").innerHTML = html;
+    }
+  }
+}
+$("basket").addEventListener("pointerdown", function(e){
+  e.preventDefault(); e.stopPropagation();
+  var s = e.target.closest(".slot.full");
+  if(s && canAct()) sendCmd({ k:"eatb", i:+s.getAttribute("data-i") });
+});
+
+/* ===================================================================
+   그리기
+   =================================================================== */
+var trails = {}, faces = {}, pops = [], lastEvI = 0, pendingEv = [], airAnim = {};
+var lastView = null, lastFrame = performance.now();
+var decor = null, grassPat = null;
+
+function prepDecor(){
+  // 들판 무늬
+  var pc = document.createElement("canvas"); pc.width = 120; pc.height = 120;
+  var p = pc.getContext("2d");
+  p.fillStyle = "#BDE5A0"; p.fillRect(0, 0, 120, 120);
+  var R = FC.rng(7);
+  for(var i=0;i<26;i++){
+    p.fillStyle = R() < 0.5 ? "rgba(255,255,255,.18)" : "rgba(90,160,70,.13)";
+    p.beginPath(); p.arc(R()*120, R()*120, 2 + R()*3, 0, Math.PI*2); p.fill();
+  }
+  grassPat = ctx.createPattern(pc, "repeat");
+  // 연잎
+  decor = { pads:[] };
+  map.ponds.forEach(function(pd, i){
+    var R2 = FC.rng(app.seed + i*31);
+    for(var j=0;j<5;j++){
+      var a = R2()*Math.PI*2, k = R2()*0.65;
+      decor.pads.push({ x:pd.x + Math.cos(a)*pd.rx*k, y:pd.y + Math.sin(a)*pd.ry*k, r:12 + R2()*9, rot:R2()*6, fl:R2() < 0.4 });
+    }
+  });
+}
+
+function frame(){
+  requestAnimationFrame(frame);
+  if(!gameOn) return;
+  var now = performance.now();
+  var fdt = Math.min(0.05, (now - lastFrame)/1000); lastFrame = now;
+  var v = (app.mode === "guest") ? viewFromSnaps(fdt) : (world ? viewFromWorld() : null);
+  if(app.mode === "guest" && !ended && now - lastSnapAt > 9000 && snaps.length){
+    toast("방장과 연결이 끊긴 것 같아요…");
+  }
+  if(!v){ drawEmpty(); return; }
+  lastView = v;
+  // 카메라: 내 생물이 늘 가운데
+  if(v.mine && v.mine.alive && v.meX !== null){
+    cam.x = v.meX; cam.y = v.meY; lastMePos = { x:v.meX, y:v.meY }; camPan.x = 0; camPan.y = 0;
+  } else if(lastMePos){
+    cam.x = lastMePos.x + camPan.x; cam.y = lastMePos.y + camPan.y;
+  }
+  cam.x = Math.max(-200, Math.min(W+200, cam.x)); cam.y = Math.max(-200, Math.min(H+200, cam.y));
+  handleEvents(v);
+  draw(v, now/1000);
+  updateHud(v);
+  if(v.mine && !v.mine.alive && !deadShown && !ended) showDead(v.mine);
+}
+requestAnimationFrame(frame);
+
+function drawEmpty(){
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.fillStyle = "#9BD27E"; ctx.fillRect(0, 0, cv.width, cv.height);
+}
+
+function handleEvents(v){
+  var evs = v.ev || [];
+  for(var i=0;i<evs.length;i++){
+    var e = evs[i];
+    if(e.i <= lastEvI) continue;
+    lastEvI = e.i;
+    if(e.k === "air") airAnim[e.eid] = { tm:e.tm, dur:0.5 };
+    pendingEv.push(e);
+  }
+  // 손님은 화면 시간에 맞춰 보여 줘요
+  var rt = v.renderT;
+  for(var j=pendingEv.length-1;j>=0;j--){
+    var ev = pendingEv[j];
+    if(app.mode === "guest" && ev.tm > rt + 0.05) continue;
+    pendingEv.splice(j, 1);
+    var mineE = v.mine && ev.eid === v.mine.eid;
+    if(ev.k === "eat") addPop(ev.x, ev.y - 10, "냠! " + (mineE ? ev.txt : ""), mineE ? "#E8566F" : "#7a6d62", mineE ? 1 : 0.75, "eat");
+    else if(ev.k === "stash") addPop(ev.x, ev.y - 10, "🧺 쏙!", "#C08A1E", 1, "eat");
+    else if(ev.k === "cook") addPop(ev.x, ev.y - 40, "🔥 지글지글 " + ev.txt, "#E06A3C", 1.2, "cook");
+    else if(ev.k === "baby") addPop(ev.x, ev.y - 16, "💕", "#E06B88", 0.9, "heart");
+    else if(ev.k === "starve") addPop(ev.x, ev.y - 16, "💫", "#9C9087", 0.9, "heart");
+    else if(ev.k === "rot" && mineE) { addPop(ev.x, ev.y, ev.txt, "#7FA34A", 1, "eat"); toast("🤢 장바구니 속 생물이 썩어 버렸어요"); }
+    else if(ev.k === "miss" && mineE) toast(ev.txt);
+    else if(ev.k === "dash") addPop(ev.x, ev.y - 20, "슝슝!", "#8B6FD8", 0.9, "eat");
+  }
+  if(pendingEv.length > 60) pendingEv.splice(0, pendingEv.length - 60);
+}
+function addPop(x, y, txt, col, sc, kind){ pops.push({ x:x, y:y, txt:txt, col:col, sc:sc, t:0, kind:kind }); if(pops.length > 40) pops.shift(); }
+
+function draw(v, T){
+  var c = ctx;
+  c.setTransform(1,0,0,1,0,0);
+  c.fillStyle = "#86C46C"; c.fillRect(0, 0, cv.width, cv.height);
+  var s = dpr*zoom;
+  c.setTransform(s, 0, 0, s, (vw/2 - cam.x*zoom)*dpr, (vh/2 - cam.y*zoom)*dpr);
+  var vx0 = cam.x - vw/2/zoom - 60, vx1 = cam.x + vw/2/zoom + 60, vy0 = cam.y - vh/2/zoom - 60, vy1 = cam.y + vh/2/zoom + 60;
+  function inView(x, y, m){ m = m || 0; return x > vx0 - m && x < vx1 + m && y > vy0 - m && y < vy1 + m; }
+
+  // 바깥 수풀
+  c.fillStyle = "#79B860";
+  for(var bx = Math.floor(vx0/90)*90; bx < vx1; bx += 90){
+    for(var by = Math.floor(vy0/90)*90; by < vy1; by += 90){
+      if(bx > -40 && bx < W+40 && by > -40 && by < H+40) continue;
+      c.beginPath(); c.arc(bx + 45, by + 45, 34, 0, Math.PI*2); c.fill();
+    }
+  }
+  // 땅
+  c.fillStyle = grassPat; roundRect(c, 0, 0, W, H, 40); c.fill();
+  c.lineWidth = 8; c.strokeStyle = "#E7C98F"; c.stroke();
+  // 울타리
+  drawFence(c, vx0, vx1, vy0, vy1);
+
+  // 논
+  map.paddies.forEach(function(p){
+    if(!inView(p.x + p.w/2, p.y + p.h/2, p.w)) return;
+    c.fillStyle = "#B88A5A"; roundRect(c, p.x - 9, p.y - 9, p.w + 18, p.h + 18, 30); c.fill();
+    c.fillStyle = "#BFE4E6"; roundRect(c, p.x, p.y, p.w, p.h, 24); c.fill();
+    c.strokeStyle = "rgba(255,255,255,.55)"; c.lineWidth = 2.5; c.lineCap = "round";
+    for(var i=0;i<4;i++){
+      var yy = p.y + 26 + i*46, ph = Math.sin(T*1.5 + i)*6;
+      c.beginPath(); c.moveTo(p.x + 24 + ph, yy + 20); c.quadraticCurveTo(p.x + 40 + ph, yy + 15, p.x + 56 + ph, yy + 20); c.stroke();
+    }
+  });
+  // 연못
+  map.ponds.forEach(function(p){
+    if(!inView(p.x, p.y, p.rx + 40)) return;
+    c.fillStyle = "#E7D9A8"; c.beginPath(); c.ellipse(p.x, p.y, p.rx + 12, p.ry + 12, 0, 0, Math.PI*2); c.fill();
+    c.fillStyle = "#86CDEF"; c.beginPath(); c.ellipse(p.x, p.y, p.rx, p.ry, 0, 0, Math.PI*2); c.fill();
+    c.fillStyle = "#A9DDF5"; c.beginPath(); c.ellipse(p.x - p.rx*0.15, p.y - p.ry*0.2, p.rx*0.7, p.ry*0.55, 0, 0, Math.PI*2); c.fill();
+    c.strokeStyle = "rgba(255,255,255,.7)"; c.lineWidth = 3;
+    c.beginPath(); c.ellipse(p.x + p.rx*0.3, p.y + p.ry*0.25, 18 + (T*12 % 20), 7 + (T*5 % 8), 0, 0, Math.PI*2); c.stroke();
+  });
+  decor.pads.forEach(function(d){
+    if(!inView(d.x, d.y)) return;
+    c.fillStyle = "#6FBF5A"; c.beginPath(); c.moveTo(d.x, d.y); c.arc(d.x, d.y, d.r, d.rot, d.rot + Math.PI*1.75); c.closePath(); c.fill();
+    if(d.fl){ c.fillStyle = "#FFB6CB"; c.beginPath(); c.arc(d.x + 3, d.y - 3, 5, 0, Math.PI*2); c.fill(); c.fillStyle = "#FFE27A"; c.beginPath(); c.arc(d.x + 3, d.y - 3, 2, 0, Math.PI*2); c.fill(); }
+  });
+  // 풀, 꽃
+  c.strokeStyle = "#6FB257"; c.lineWidth = 2.5; c.lineCap = "round";
+  map.tufts.forEach(function(g){
+    if(!inView(g.x, g.y)) return;
+    var sw = Math.sin(T*2 + g.x*0.01)*1.5;
+    c.beginPath();
+    c.moveTo(g.x - 5*g.s, g.y); c.quadraticCurveTo(g.x - 6*g.s, g.y - 8*g.s, g.x - 8*g.s + sw, g.y - 12*g.s);
+    c.moveTo(g.x, g.y); c.lineTo(g.x + sw, g.y - 15*g.s);
+    c.moveTo(g.x + 5*g.s, g.y); c.quadraticCurveTo(g.x + 6*g.s, g.y - 8*g.s, g.x + 8*g.s + sw, g.y - 11*g.s);
+    c.stroke();
+  });
+  var FCOL = ["#FF9BB3", "#FFD45E", "#FFFFFF", "#C7B4F5"];
+  map.flowers.forEach(function(f){
+    if(!inView(f.x, f.y)) return;
+    c.fillStyle = FCOL[f.k];
+    for(var i=0;i<5;i++){ var a = i*Math.PI*2/5; c.beginPath(); c.arc(f.x + Math.cos(a)*4.5*f.s, f.y + Math.sin(a)*4.5*f.s, 3.6*f.s, 0, Math.PI*2); c.fill(); }
+    c.fillStyle = f.k === 1 ? "#FF9B5E" : "#FFE07A"; c.beginPath(); c.arc(f.x, f.y, 2.8*f.s, 0, Math.PI*2); c.fill();
+  });
+
+  // 벼
+  var ripe = Math.min(1, v.time / FC.GAME_TIME);
+  for(var ri=0; ri<map.rice.length; ri++){
+    var rp = map.rice[ri];
+    if(!inView(rp.x, rp.y)) continue;
+    drawRice(c, rp.x, rp.y, v.rice[ri], ripe, T, ri);
+  }
+
+  // 나무 밑동 그림자
+  map.trees.forEach(function(t){
+    if(!inView(t.x, t.y, 80)) return;
+    c.fillStyle = "rgba(60,110,40,.22)"; c.beginPath(); c.ellipse(t.x, t.y + 8, 46*t.s, 16*t.s, 0, 0, Math.PI*2); c.fill();
+  });
+
+  // 생물 + 나무 (y 순서로)
+  var mineId = v.mine ? v.mine.eid : -1;
+  var list = [];
+  v.ents.forEach(function(e){ if(inView(e.x, e.y, 60)) list.push({ y:e.y, e:e }); });
+  map.trees.forEach(function(t){ if(inView(t.x, t.y, 90)) list.push({ y:t.y, tree:t }); });
+  list.sort(function(a, b){ return a.y - b.y; });
+  var grow = 0.82 + 0.23*ripe;
+
+  // 내가 정한 목적지
+  if(marker && v.mine && v.mine.alive){
+    var age = (performance.now() - marker.t)/1000;
+    if(age < 1.2){
+      c.save(); c.globalAlpha = 1 - age/1.2;
+      c.strokeStyle = "#fff"; c.lineWidth = 4;
+      c.beginPath(); c.arc(marker.x, marker.y, 10 + age*14, 0, Math.PI*2); c.stroke();
+      c.restore();
+    }
+  }
+
+  for(var li=0; li<list.length; li++){
+    var it = list[li];
+    if(it.tree){ drawTree(c, it.tree, T); continue; }
+    var e = it.e;
+    updateFacing(e);
+    var sc = grow * (e.baby ? 0.62 : 1);
+    var isMe = e.id === mineId;
+    // 그림자
+    c.fillStyle = "rgba(40,70,30,.22)";
+    c.beginPath(); c.ellipse(e.x, e.y + SPEC[e.t].r*0.55*sc, SPEC[e.t].r*sc*(1 - e.lift/120), SPEC[e.t].r*0.38*sc, 0, 0, Math.PI*2); c.fill();
+    if(isMe){
+      c.save();
+      c.strokeStyle = "rgba(255,255,255,.95)"; c.lineWidth = 3.5; c.setLineDash([7, 6]); c.lineDashOffset = -T*20;
+      c.beginPath(); c.ellipse(e.x, e.y + SPEC[e.t].r*0.55*sc, SPEC[e.t].r*sc + 12, SPEC[e.t].r*0.45*sc + 6, 0, 0, Math.PI*2); c.stroke();
+      c.restore();
+    }
+    if(e.t === "snake") drawSnake(c, e, sc, T);
+    else {
+      c.save();
+      c.translate(e.x, e.y - e.lift);
+      var bob = Math.sin(T*8 + e.id)*(faces[e.id] && faces[e.id].moving ? 1.6 : 0.5);
+      c.translate(0, bob);
+      c.scale(sc, sc);
+      var fl = faces[e.id] ? faces[e.id].dir : 1;
+      if(e.t === "hopper"){ c.scale(fl, 1); drawHopper(c, e.lift > 0, T, e.id); }
+      else if(e.t === "frog") drawFrog(c, e.lift > 0, T, e.id);
+      else if(e.t === "human"){ drawHuman(c, fl, T, e.id); }
+      c.restore();
+    }
+    if(e.dash){
+      c.strokeStyle = "rgba(255,255,255,.8)"; c.lineWidth = 3;
+      var fd = faces[e.id] ? faces[e.id].ang : 0;
+      for(var q=0;q<3;q++){
+        var ox = -Math.cos(fd)*(26 + q*8), oy = -Math.sin(fd)*(26 + q*8);
+        c.beginPath(); c.moveTo(e.x + ox - Math.sin(fd)*(q-1)*9, e.y + oy + Math.cos(fd)*(q-1)*9);
+        c.lineTo(e.x + ox - Math.cos(fd)*12 - Math.sin(fd)*(q-1)*9, e.y + oy - Math.sin(fd)*12 + Math.cos(fd)*(q-1)*9); c.stroke();
+      }
+    }
+    if(isMe){
+      var ty = e.y - e.lift - SPEC[e.t].r*sc - 26 + Math.sin(T*4)*3;
+      c.fillStyle = "#fff"; c.strokeStyle = "#4A4038"; c.lineWidth = 2.5;
+      roundRect(c, e.x - 17, ty - 13, 34, 22, 11); c.fill(); c.stroke();
+      c.beginPath(); c.moveTo(e.x - 5, ty + 9); c.lineTo(e.x, ty + 15); c.lineTo(e.x + 5, ty + 9); c.fill();
+      c.fillStyle = "#4A4038"; c.font = "16px Jua, sans-serif"; c.textAlign = "center"; c.textBaseline = "middle";
+      c.fillText("나", e.x, ty - 1);
+    }
+  }
+
+  // 글자 효과
+  c.textAlign = "center"; c.textBaseline = "middle";
+  for(var pi=pops.length-1; pi>=0; pi--){
+    var pp = pops[pi];
+    pp.t += 1/60;
+    if(pp.t > 1.1){ pops.splice(pi, 1); continue; }
+    var k = pp.t/1.1;
+    c.save();
+    c.globalAlpha = 1 - k*k;
+    c.font = Math.round(20*pp.sc*(1 + Math.min(0.2, pp.t*2) - Math.max(0, pp.t*2 - 0.2)*0.1)) + "px Jua, sans-serif";
+    c.lineWidth = 5; c.strokeStyle = "#fff"; c.lineJoin = "round";
+    c.strokeText(pp.txt, pp.x, pp.y - k*34);
+    c.fillStyle = pp.col; c.fillText(pp.txt, pp.x, pp.y - k*34);
+    c.restore();
+  }
+
+  // 화면 밖 먹이 방향 화살표
+  if(v.mine && v.mine.alive && v.meX !== null) drawFoodArrow(c, v, vx0 + 60, vx1 - 60, vy0 + 60, vy1 - 60);
+}
+
+function roundRect(c, x, y, w, h, r){
+  c.beginPath();
+  c.moveTo(x + r, y); c.lineTo(x + w - r, y); c.quadraticCurveTo(x + w, y, x + w, y + r);
+  c.lineTo(x + w, y + h - r); c.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  c.lineTo(x + r, y + h); c.quadraticCurveTo(x, y + h, x, y + h - r);
+  c.lineTo(x, y + r); c.quadraticCurveTo(x, y, x + r, y); c.closePath();
+}
+function drawFence(c, x0, x1, y0, y1){
+  c.fillStyle = "#E9B97A"; c.strokeStyle = "#B9844A"; c.lineWidth = 2;
+  function post(x, y){ c.beginPath(); roundRect(c, x - 5, y - 16, 10, 22, 4); c.fill(); c.stroke(); }
+  for(var x = 0; x <= W; x += 60){
+    if(x < x0 - 20 || x > x1 + 20) continue;
+    if(y0 < 30) post(x, -6);
+    if(y1 > H - 30) post(x, H + 10);
+  }
+  for(var y = 0; y <= H; y += 60){
+    if(y < y0 - 20 || y > y1 + 20) continue;
+    if(x0 < 30) post(-8, y);
+    if(x1 > W - 30) post(W + 8, y);
+  }
+}
+function lerpCol(a, b, k){
+  var pa = [parseInt(a.substr(1,2),16), parseInt(a.substr(3,2),16), parseInt(a.substr(5,2),16)];
+  var pb = [parseInt(b.substr(1,2),16), parseInt(b.substr(3,2),16), parseInt(b.substr(5,2),16)];
+  return "rgb(" + pa.map(function(v, i){ return Math.round(v + (pb[i] - v)*k); }).join(",") + ")";
+}
+var riceCols = [];
+for(var rc=0; rc<=20; rc++) riceCols.push({ stem:lerpCol("#6DBA4E", "#C9A23E", rc/20*0.7), grain:lerpCol("#A6DD72", "#F2C14E", rc/20) });
+function drawRice(c, x, y, g, ripe, T, i){
+  var col = riceCols[Math.round(ripe*20)];
+  if(!g){
+    // 다시 자라는 새싹
+    c.strokeStyle = "#7CC65C"; c.lineWidth = 3; c.lineCap = "round";
+    c.beginPath(); c.moveTo(x, y + 4); c.quadraticCurveTo(x - 6, y - 2, x - 7, y - 6); c.moveTo(x, y + 4); c.quadraticCurveTo(x + 6, y - 2, x + 7, y - 7); c.stroke();
+    return;
+  }
+  var sw = Math.sin(T*1.8 + i*0.7)*2.5;
+  c.fillStyle = "rgba(60,100,40,.18)"; c.beginPath(); c.ellipse(x, y + 6, 13, 5, 0, 0, Math.PI*2); c.fill();
+  c.strokeStyle = col.stem; c.lineWidth = 2.6; c.lineCap = "round";
+  var tips = [[-9, -22], [-3, -28], [4, -27], [10, -21]];
+  c.beginPath();
+  tips.forEach(function(tp){ c.moveTo(x + tp[0]*0.3, y + 5); c.quadraticCurveTo(x + tp[0]*0.6, y - 10, x + tp[0] + sw, y + tp[1]); });
+  c.stroke();
+  // 잎
+  c.strokeStyle = "#78C258"; c.lineWidth = 2.2;
+  c.beginPath(); c.moveTo(x, y + 5); c.quadraticCurveTo(x - 12, y - 2, x - 15, y - 6); c.moveTo(x, y + 5); c.quadraticCurveTo(x + 12, y - 1, x + 15, y - 4); c.stroke();
+  // 이삭 (익을수록 고개를 숙여요)
+  c.fillStyle = col.grain;
+  var droop = ripe*8;
+  tips.forEach(function(tp, j){
+    var tx = x + tp[0] + sw, ty = y + tp[1];
+    for(var q=0;q<3;q++){
+      c.beginPath(); c.ellipse(tx + (tp[0] < 0 ? -1 : 1)*q*2.2*ripe, ty + q*3.6 + droop*q/3, 2.4, 3.6, tp[0]*0.05, 0, Math.PI*2); c.fill();
+    }
+  });
+}
+function drawTree(c, t, T){
+  var s = t.s, x = t.x, y = t.y;
+  c.fillStyle = "#B07A4F"; roundRect(c, x - 8*s, y - 26*s, 16*s, 32*s, 6*s); c.fill();
+  var cols = [["#6CC062", "#86D27A"], ["#58B47A", "#79CC94"], ["#9BD36A", "#B6E38A"]][t.k];
+  var sw = Math.sin(T*1.2 + x)*1.5;
+  c.fillStyle = cols[0];
+  [[-22, -38, 24], [20, -40, 24], [0, -58, 28], [-4, -34, 26]].forEach(function(b){
+    c.beginPath(); c.arc(x + b[0]*s + sw, y + b[1]*s, b[2]*s, 0, Math.PI*2); c.fill();
+  });
+  c.fillStyle = cols[1];
+  c.beginPath(); c.arc(x - 8*s + sw, y - 62*s, 12*s, 0, Math.PI*2); c.fill();
+  if(t.k === 0){
+    c.fillStyle = "#FF8A8A";
+    [[-16, -44], [14, -52], [2, -36]].forEach(function(f){ c.beginPath(); c.arc(x + f[0]*s + sw, y + f[1]*s, 4*s, 0, Math.PI*2); c.fill(); });
+  }
+}
+function updateFacing(e){
+  var f = faces[e.id];
+  if(!f){ faces[e.id] = { x:e.x, y:e.y, dir:1, ang:0, moving:false }; return; }
+  var dx = e.x - f.x, dy = e.y - f.y;
+  f.moving = dx*dx + dy*dy > 0.05;
+  if(Math.abs(dx) > 0.3) f.dir = dx > 0 ? 1 : -1;
+  if(dx*dx + dy*dy > 0.3) f.ang = Math.atan2(dy, dx);
+  f.x = e.x; f.y = e.y;
+}
+
+/* ---------- 귀여운 생물들 ---------- */
+function eye(c, x, y, r){
+  c.fillStyle = "#fff"; c.beginPath(); c.arc(x, y, r, 0, Math.PI*2); c.fill();
+  c.fillStyle = "#2E2A26"; c.beginPath(); c.arc(x + r*0.15, y + r*0.05, r*0.62, 0, Math.PI*2); c.fill();
+  c.fillStyle = "#fff"; c.beginPath(); c.arc(x + r*0.38, y - r*0.25, r*0.25, 0, Math.PI*2); c.fill();
+}
+function blush(c, x, y, rx){ c.fillStyle = "rgba(255,130,160,.55)"; c.beginPath(); c.ellipse(x, y, rx, rx*0.6, 0, 0, Math.PI*2); c.fill(); }
+function drawHopper(c, air, T, id){
+  var ol = "#4E8F36";
+  c.lineCap = "round"; c.lineJoin = "round";
+  if(air){
+    c.fillStyle = "rgba(220,245,255,.75)"; c.strokeStyle = "rgba(120,170,200,.8)"; c.lineWidth = 1.5;
+    var fl = Math.sin(T*50)*0.5;
+    c.beginPath(); c.ellipse(-4, -10, 12, 6, -0.5 + fl, 0, Math.PI*2); c.fill(); c.stroke();
+    c.beginPath(); c.ellipse(0, -11, 11, 5, -0.9 - fl, 0, Math.PI*2); c.fill(); c.stroke();
+  }
+  // 뒷다리
+  c.strokeStyle = "#6CB24A"; c.lineWidth = 3.5;
+  c.beginPath(); c.moveTo(-2, 2); c.lineTo(-10, -9); c.lineTo(-17, 7); c.stroke();
+  // 몸
+  c.fillStyle = "#9BDB6B"; c.strokeStyle = ol; c.lineWidth = 2;
+  c.beginPath(); c.ellipse(-2, 1, 13, 7.5, 0, 0, Math.PI*2); c.fill(); c.stroke();
+  c.strokeStyle = "rgba(78,143,54,.45)"; c.lineWidth = 1.5;
+  for(var i=0;i<3;i++){ c.beginPath(); c.moveTo(-10 + i*5, -4); c.lineTo(-10 + i*5, 6); c.stroke(); }
+  // 앞다리
+  c.strokeStyle = ol; c.lineWidth = 2;
+  c.beginPath(); c.moveTo(4, 6); c.lineTo(3, 11); c.moveTo(8, 5); c.lineTo(9, 11); c.stroke();
+  // 머리
+  c.fillStyle = "#A9E37A"; c.strokeStyle = ol;
+  c.beginPath(); c.arc(11, -3, 7.5, 0, Math.PI*2); c.fill(); c.stroke();
+  // 더듬이
+  var wig = Math.sin(T*6 + id)*2;
+  c.strokeStyle = ol; c.lineWidth = 1.6;
+  c.beginPath(); c.moveTo(12, -10); c.quadraticCurveTo(16, -18, 21 + wig, -20); c.moveTo(9, -10); c.quadraticCurveTo(9, -19, 13 + wig, -22); c.stroke();
+  c.fillStyle = "#FF9BB3"; c.beginPath(); c.arc(21 + wig, -20, 1.8, 0, Math.PI*2); c.arc(13 + wig, -22, 1.8, 0, Math.PI*2); c.fill();
+  eye(c, 13, -5, 4);
+  blush(c, 11, 1.5, 2.4);
+  c.strokeStyle = "#2E2A26"; c.lineWidth = 1.2;
+  c.beginPath(); c.arc(15.5, 0.5, 1.6, 0.2, Math.PI - 0.2); c.stroke();
+}
+function drawFrog(c, air, T, id){
+  var ol = "#3F8F3A";
+  c.lineJoin = "round";
+  // 발
+  c.fillStyle = "#6DC25A";
+  if(air){
+    c.beginPath(); c.ellipse(-13, 13, 6, 3, 0.6, 0, Math.PI*2); c.ellipse(13, 13, 6, 3, -0.6, 0, Math.PI*2); c.fill();
+  } else {
+    c.beginPath(); c.ellipse(-12, 12, 7, 3.5, 0, 0, Math.PI*2); c.ellipse(12, 12, 7, 3.5, 0, 0, Math.PI*2); c.fill();
+  }
+  c.fillStyle = "#7DD06A"; c.strokeStyle = ol; c.lineWidth = 2;
+  c.beginPath(); c.ellipse(0, 2, 16, 12.5, 0, 0, Math.PI*2); c.fill(); c.stroke();
+  c.fillStyle = "#E5F7C8"; c.beginPath(); c.ellipse(0, 6, 10, 6.5, 0, 0, Math.PI*2); c.fill();
+  // 눈 언덕
+  c.fillStyle = "#7DD06A";
+  c.beginPath(); c.arc(-7.5, -8, 6.5, 0, Math.PI*2); c.fill(); c.stroke();
+  c.beginPath(); c.arc(7.5, -8, 6.5, 0, Math.PI*2); c.fill(); c.stroke();
+  c.fillStyle = "#7DD06A"; c.beginPath(); c.ellipse(0, -3, 11, 5, 0, 0, Math.PI*2); c.fill();
+  var blink = ((T + id*0.37) % 4) < 0.12;
+  if(blink){
+    c.strokeStyle = "#2E2A26"; c.lineWidth = 1.6;
+    c.beginPath(); c.moveTo(-10, -8); c.lineTo(-5, -8); c.moveTo(5, -8); c.lineTo(10, -8); c.stroke();
+  } else { eye(c, -7.5, -8.5, 4.2); eye(c, 7.5, -8.5, 4.2); }
+  blush(c, -10, 1, 3); blush(c, 10, 1, 3);
+  c.strokeStyle = "#2E2A26"; c.lineWidth = 1.6; c.lineCap = "round";
+  c.beginPath(); c.arc(0, -1, 4.5, 0.25, Math.PI - 0.25); c.stroke();
+}
+function drawHuman(c, fl, T, id){
+  var walk = Math.sin(T*9 + id);
+  c.lineCap = "round"; c.lineJoin = "round";
+  // 다리
+  c.strokeStyle = "#5C6FA8"; c.lineWidth = 5;
+  c.beginPath(); c.moveTo(-4, 12); c.lineTo(-4 + walk*1.5, 19); c.moveTo(4, 12); c.lineTo(4 - walk*1.5, 19); c.stroke();
+  // 몸 (멜빵바지)
+  c.fillStyle = "#FF9B85"; c.strokeStyle = "#4A4038"; c.lineWidth = 2;
+  roundRect(c, -10, -1, 20, 16, 7); c.fill(); c.stroke();
+  c.fillStyle = "#6F86C9"; roundRect(c, -8, 5, 16, 10, 4); c.fill();
+  c.strokeStyle = "#6F86C9"; c.lineWidth = 2.5;
+  c.beginPath(); c.moveTo(-6, 6); c.lineTo(-5, 0); c.moveTo(6, 6); c.lineTo(5, 0); c.stroke();
+  // 팔
+  c.strokeStyle = "#FFD9B8"; c.lineWidth = 4.5;
+  c.beginPath(); c.moveTo(-10, 3); c.lineTo(-14, 9 - walk*2); c.moveTo(10, 3); c.lineTo(14, 9 + walk*2); c.stroke();
+  // 얼굴
+  c.fillStyle = "#FFE1C6"; c.strokeStyle = "#C99B78"; c.lineWidth = 2;
+  c.beginPath(); c.arc(0, -11, 11, 0, Math.PI*2); c.fill(); c.stroke();
+  c.fillStyle = "#2E2A26";
+  c.beginPath(); c.arc(-4 + fl, -10, 1.8, 0, Math.PI*2); c.arc(4 + fl, -10, 1.8, 0, Math.PI*2); c.fill();
+  blush(c, -6.5 + fl, -6, 2.6); blush(c, 6.5 + fl, -6, 2.6);
+  c.strokeStyle = "#2E2A26"; c.lineWidth = 1.4;
+  c.beginPath(); c.arc(fl, -7, 2.5, 0.2, Math.PI - 0.2); c.stroke();
+  // 밀짚모자
+  c.fillStyle = "#F6D365"; c.strokeStyle = "#C9A23E"; c.lineWidth = 2;
+  c.beginPath(); c.ellipse(0, -18, 17, 5, 0, 0, Math.PI*2); c.fill(); c.stroke();
+  c.beginPath(); c.arc(0, -19, 9, Math.PI, 0); c.closePath(); c.fill(); c.stroke();
+  c.fillStyle = "#FF7A7A"; c.fillRect(-9, -21.5, 18, 3);
+}
+function drawSnake(c, e, sc, T){
+  var tr = trails[e.id];
+  if(!tr){ tr = trails[e.id] = []; for(var i=0;i<12;i++) tr.push({ x:e.x - i*3, y:e.y }); }
+  var h = tr[0], dx = e.x - h.x, dy = e.y - h.y;
+  if(dx*dx + dy*dy > 25){ tr.unshift({ x:e.x, y:e.y }); if(tr.length > 12) tr.pop(); }
+  else { tr[0] = { x:e.x, y:e.y }; }
+  // 몸 (뒤에서부터)
+  c.lineCap = "round"; c.lineJoin = "round";
+  for(var pass=0; pass<2; pass++){
+    c.strokeStyle = pass ? "#C9A6F4" : "#8E63C9";
+    c.lineWidth = (pass ? 12 : 16)*sc;
+    c.beginPath(); c.moveTo(tr[0].x, tr[0].y);
+    for(var j=1;j<tr.length;j++){
+      var wv = Math.sin(T*8 - j*0.9)*1.8;
+      c.lineTo(tr[j].x + wv, tr[j].y + wv*0.5);
+    }
+    c.stroke();
+  }
+  // 꼬리 끝은 가늘게
+  c.fillStyle = "#FFE08A";
+  for(var k=2;k<tr.length-1;k+=2){ c.beginPath(); c.arc(tr[k].x, tr[k].y, 2.4*sc, 0, Math.PI*2); c.fill(); }
+  // 머리
+  var ang = Math.atan2(tr[0].y - tr[Math.min(2, tr.length-1)].y, tr[0].x - tr[Math.min(2, tr.length-1)].x);
+  if(!isFinite(ang)) ang = 0;
+  c.save(); c.translate(e.x, e.y); c.scale(sc, sc); c.rotate(ang);
+  if(((T*1.3 + e.id) % 2) < 0.35){
+    c.strokeStyle = "#FF5C7A"; c.lineWidth = 1.8;
+    c.beginPath(); c.moveTo(11, 0); c.lineTo(19, 0); c.lineTo(22, -3); c.moveTo(19, 0); c.lineTo(22, 3); c.stroke();
+  }
+  c.fillStyle = "#C9A6F4"; c.strokeStyle = "#8E63C9"; c.lineWidth = 2;
+  c.beginPath(); c.ellipse(2, 0, 12, 10, 0, 0, Math.PI*2); c.fill(); c.stroke();
+  c.restore();
+  // 눈은 똑바로
+  c.save(); c.translate(e.x + Math.cos(ang)*4*sc, e.y + Math.sin(ang)*4*sc); c.scale(sc, sc);
+  var px = -Math.sin(ang)*5, py = Math.cos(ang)*5;
+  eye(c, px, py - 1, 3.6); eye(c, -px, -py - 1, 3.6);
+  blush(c, px*1.3 + Math.cos(ang)*3, py*1.3 + 3, 2.2);
+  c.restore();
+}
+
+function drawFoodArrow(c, v, x0, x1, y0, y1){
+  var role = v.mine.role, foods = ROLE_INFO[role].food;
+  var best = null, bd = 1e12, mx = v.meX, my = v.meY;
+  if(foods.indexOf("rice") >= 0){
+    for(var i=0;i<map.rice.length;i++){
+      if(!v.rice[i]) continue;
+      var r = map.rice[i], d = (r.x - mx)*(r.x - mx) + (r.y - my)*(r.y - my);
+      if(d < bd){ bd = d; best = { x:r.x, y:r.y, t:"rice" }; }
+    }
+  }
+  v.ents.forEach(function(e){
+    if(foods.indexOf(e.t) < 0 || e.id === v.mine.eid) return;
+    var d = (e.x - mx)*(e.x - mx) + (e.y - my)*(e.y - my);
+    if(d < bd){ bd = d; best = e; }
+  });
+  if(!best) return;
+  if(best.x > x0 && best.x < x1 && best.y > y0 && best.y < y1) return;
+  var ang = Math.atan2(best.y - my, best.x - mx);
+  var hw = (x1 - x0)/2 - 10, hh = (y1 - y0)/2 - 10;
+  var t = Math.min(Math.abs(hw / (Math.cos(ang) || 1e-6)), Math.abs(hh / (Math.sin(ang) || 1e-6)));
+  var ax = mx + Math.cos(ang)*t, ay = my + Math.sin(ang)*t;
+  c.save(); c.translate(ax, ay);
+  c.globalAlpha = 0.9;
+  c.fillStyle = "#fff"; c.strokeStyle = "#4A4038"; c.lineWidth = 2.5;
+  c.beginPath(); c.arc(0, 0, 18, 0, Math.PI*2); c.fill(); c.stroke();
+  c.save(); c.rotate(ang);
+  c.fillStyle = "#4A4038"; c.beginPath(); c.moveTo(27, 0); c.lineTo(19, -6); c.lineTo(19, 6); c.closePath(); c.fill();
+  c.restore();
+  c.font = "20px sans-serif"; c.textAlign = "center"; c.textBaseline = "middle";
+  c.fillText(EMO[best.t], 0, 1);
+  c.restore();
+}
+
+/* ===================================================================
+   쓰러짐 · 결과
+   =================================================================== */
+function showDead(m){
+  deadShown = true;
+  var reason = m.reason;
+  if(reason === "starve"){ $("deadEm").textContent = "😵"; $("deadTitle").textContent = "배가 고파 쓰러졌어요"; $("deadSub").textContent = "에너지가 0%가 되었어요. 다음엔 더 부지런히 먹어요!"; }
+  else { $("deadEm").textContent = EMO[reason] || "😢"; $("deadTitle").textContent = "앗, " + (SPEC[reason] ? SPEC[reason].name : "누군가") + "에게 먹혔어요!"; $("deadSub").textContent = "혹시 그게 친구였을까요? 끝나면 알 수 있어요."; }
+  $("dead").classList.remove("hidden");
+}
+$("btnWatch").onclick = function(){ $("dead").classList.add("hidden"); watching = true; toast("화면을 끌어서 둘러볼 수 있어요"); };
+$("btnHome1").onclick = function(){ quitToHome(); };
+$("btnHome2").onclick = function(){ quitToHome(); };
+$("btnAgain").onclick = function(){
+  if(app.mode === "solo"){ $("result").classList.add("hidden"); stopGame(); $("btnSolo").click(); }
+  else quitToHome();
+};
+function quitToHome(){
+  if(app.mode === "host" && db && app.code && !ended) roomRef().update({ st:"closed" }).catch(function(){});
+  leaveToHome("");
+}
+
+function onGameOver(res, counts, plist){
+  ended = true;
+  $("dead").classList.add("hidden");
+  res = res || {};
+  var players = {};
+  if(plist){ Object.keys(plist).forEach(function(k){ players[k] = { role:plist[k].r, name:plist[k].n }; }); }
+  else if(world){ Object.keys(world.players).forEach(function(k){ players[k] = { role:world.players[k].role, name:world.players[k].name }; }); }
+  var mineR = res[app.pid];
+  var win = mineR && mineR.win;
+  $("resEm").textContent = win ? "🏆" : "🌱";
+  $("resTitle").textContent = win ? "승리! 먹이사슬을 지켰어요" : "아쉬워요!";
+  $("resSub").textContent = mineR ? mineR.why : "";
+  var order = FC.ROLES.slice();
+  var ids = Object.keys(players).sort(function(a, b){ return order.indexOf(players[a].role) - order.indexOf(players[b].role); });
+  $("resList").innerHTML = ids.map(function(id){
+    var p = players[id], r = res[id] || { win:false, why:"" }, R = ROLE_INFO[p.role];
+    return '<li class="' + (r.win ? "win" : "lose") + '"><span class="em">' + R.emo + '</span><div class="who"><b>' + esc(p.name || "친구") + (id === app.pid ? " (나)" : "") +
+           ' · ' + R.name + '</b><span>' + esc(r.why) + '</span></div><span class="badge">' + (r.win ? "승리 🎉" : "실패") + '</span></li>';
+  }).join("") + (ids.length < 4 ? '<li><span class="em">🤖</span><div class="who"><b>나머지 생물</b><span>모두 컴퓨터가 움직였어요</span></div></li>' : "");
+  counts = counts || {};
+  $("resCounts").innerHTML = ["rice","hopper","frog","snake","human"].map(function(k){ return "<span>" + EMO[k] + " " + (counts[k] || 0) + "</span>"; }).join("");
+  $("btnAgain").textContent = app.mode === "solo" ? "🔁 다시 하기" : "🔁 새 방에서 다시";
+  setTimeout(function(){ $("result").classList.remove("hidden"); }, 600);
+}
+
+})();
+
+</script>
+</body>
+</html>
