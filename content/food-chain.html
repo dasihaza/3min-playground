@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-database-compat.js"></script>
 <style>
   :root{
     --sky:#EAF6FF; --cream:#FFFBF2; --card:#FFFFFF;
@@ -957,22 +957,37 @@ var unsubs = [];
 
 try{ $("nameIn").value = localStorage.getItem("fc_name") || ""; }catch(e){}
 
-/* ---------------- Firebase ---------------- */
+/* ---------------- Firebase (Realtime Database) ----------------
+   실시간 게임은 자주 주고받아서, 횟수로 한도를 세는 Firestore 대신
+   데이터 양으로 세는 Realtime Database를 써요.
+   foodchain/rooms/{번호}  방 정보 · foodchain/world/{번호}  방장이 보내는 세상
+   foodchain/cmds/{번호}/{pid}  손님이 보내는 조작 */
 var db = null;
 try{
   firebase.initializeApp({
     apiKey: "AIzaSyAqXsG8npxettrCRH3MbZwFZGLg5aehxdw",
     authDomain: "min-playground.firebaseapp.com",
+    databaseURL: "https://min-playground-default-rtdb.asia-southeast1.firebasedatabase.app",
     projectId: "min-playground",
     storageBucket: "min-playground.firebasestorage.app",
     messagingSenderId: "472071492052",
     appId: "1:472071492052:web:00263046925133e55a4641"
   });
-  db = firebase.firestore();
+  db = firebase.database();
 }catch(e){ db = null; }
-function roomRef(){ return db.collection("rooms").doc("fc" + app.code); }
-function subRef(id){ return roomRef().collection("students").doc(id); }
+function roomRef(){ return db.ref("foodchain/rooms/" + app.code); }
+function worldRef(){ return db.ref("foodchain/world/" + app.code); }
+function cmdsRef(){ return db.ref("foodchain/cmds/" + app.code); }
 function stopListen(){ unsubs.forEach(function(u){ try{ u(); }catch(e){} }); unsubs = []; }
+function listen(ref, ev, fn, onErr){ ref.on(ev, fn, onErr); unsubs.push(function(){ ref.off(ev, fn); }); }
+// 연결이 안 되면 끝없이 기다리지 않고 ms 뒤에 실패로 처리해요
+function withTimeout(p, ms){
+  return Promise.race([p, new Promise(function(_, rej){ setTimeout(function(){ rej(new Error("timeout")); }, ms); })]);
+}
+function netErr(e){
+  if(e && e.message === "timeout") return "연결이 너무 느려요. 잠시 뒤 다시 해 보세요.";
+  return "연결에 문제가 생겼어요. (" + ((e && (e.code || e.message)) || "") + ")";
+}
 
 function esc(t){ return String(t == null ? "" : t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 function show(id){ ["home","lobby","game"].forEach(function(s){ $(s).classList.toggle("hidden", s !== id); }); }
@@ -1004,17 +1019,23 @@ $("btnMake").onclick = async function(){
   app.name = myName(); app.mode = "host";
   $("btnMake").disabled = true; $("homeMsg").textContent = "방을 만드는 중…";
   try{
-    for(var tries=0; tries<8; tries++){
-      app.code = String(Math.floor(1000 + Math.random()*9000));
-      var snap = await roomRef().get();
-      if(!snap.exists || Date.now() - (snap.data().at || 0) > 3*3600*1000) break;
-    }
     var players = {}; players[app.pid] = { n:app.name, j:Date.now() };
-    await roomRef().set({ game:"foodchain", st:"lobby", host:app.pid, players:players, at:Date.now() });
+    var made = false;
+    for(var tries=0; tries<8 && !made; tries++){
+      app.code = String(Math.floor(1000 + Math.random()*9000));
+      // 비어 있거나 3시간 넘게 지난 번호만 차지해요
+      var r = await withTimeout(roomRef().transaction(function(cur){
+        if(cur && Date.now() - (cur.at || 0) < 3*3600*1000) return;
+        return { game:"foodchain", st:"lobby", host:app.pid, players:players, at:Date.now() };
+      }), 12000);
+      made = r.committed;
+    }
+    if(!made) throw new Error("빈 방 번호를 찾지 못했어요.");
+    await withTimeout(Promise.all([worldRef().remove(), cmdsRef().remove()]), 12000);   // 예전 게임 흔적 지우기
     $("homeMsg").textContent = "";
     enterLobby();
   }catch(e){
-    $("homeMsg").textContent = "방을 만들지 못했어요. 혼자 하기로 놀아 보세요! (" + (e.code || e.message || "") + ")";
+    $("homeMsg").textContent = "방을 만들지 못했어요. " + netErr(e) + " 혼자 하기는 바로 할 수 있어요!";
   }
   $("btnMake").disabled = false;
 };
@@ -1025,20 +1046,23 @@ $("btnJoin").onclick = async function(){
   app.code = code; app.name = myName(); app.mode = "guest";
   $("btnJoin").disabled = true; $("homeMsg").textContent = "방을 찾는 중…";
   try{
-    await db.runTransaction(async function(tx){
-      var s = await tx.get(roomRef());
-      if(!s.exists || s.data().game !== "foodchain") throw new Error("방을 찾을 수 없어요.");
-      var d = s.data();
-      if(d.st !== "lobby") throw new Error("이미 게임이 시작된 방이에요.");
-      var n = Object.keys(d.players || {}).length;
-      if(n >= 4 && !(d.players || {})[app.pid]) throw new Error("방이 꽉 찼어요. (최대 4명)");
-      var up = {}; up["players." + app.pid] = { n:app.name, j:Date.now() };
-      tx.update(roomRef(), up);
-    });
+    var why = "";
+    var r = await withTimeout(roomRef().transaction(function(d){
+      why = "";
+      if(d === null) return null;   // 아직 서버 값을 모를 때예요. 서버 값으로 다시 불려요
+      if(d.game !== "foodchain"){ why = "방을 찾을 수 없어요."; return; }
+      if(d.st !== "lobby"){ why = "이미 게임이 시작된 방이에요."; return; }
+      var pl = d.players || {};
+      if(Object.keys(pl).length >= 4 && !pl[app.pid]){ why = "방이 꽉 찼어요. (최대 4명)"; return; }
+      pl[app.pid] = { n:app.name, j:Date.now() };
+      d.players = pl;
+      return d;
+    }), 12000);
+    if(!r.committed || !r.snapshot.exists()) throw new Error(why || "방을 찾을 수 없어요.");
     $("homeMsg").textContent = "";
     enterLobby();
   }catch(e){
-    $("homeMsg").textContent = e.message && e.message.length < 40 ? e.message : "방에 들어가지 못했어요.";
+    $("homeMsg").textContent = e.message === "timeout" ? netErr(e) : (e.message && e.message.length < 40 ? e.message : "방에 들어가지 못했어요.");
   }
   $("btnJoin").disabled = false;
 };
@@ -1050,9 +1074,9 @@ function enterLobby(){
   $("btnStart").classList.toggle("hidden", app.mode !== "host");
   $("lobbyNote").textContent = app.mode === "host" ? "친구가 다 들어오면 시작을 눌러요. 혼자서도 시작할 수 있어요!" : "방장이 시작하기를 기다리는 중…";
   stopListen();
-  unsubs.push(roomRef().onSnapshot(function(s){
-    if(!s.exists){ return; }
-    var d = s.data(); app.roomData = d;
+  listen(roomRef(), "value", function(s){
+    if(!s.exists()){ return; }
+    var d = s.val(); app.roomData = d;
     renderSeats(d);
     if(d.st === "closed" && app.mode === "guest" && !app.started){
       leaveToHome("방장이 방을 닫았어요.");
@@ -1065,7 +1089,7 @@ function enterLobby(){
       app.names = {}; Object.keys(d.players || {}).forEach(function(k){ app.names[k] = d.players[k].n; });
       beginReveal();
     }
-  }, function(){ $("lobbyMsg").textContent = "연결이 끊겼어요."; }));
+  }, function(){ $("lobbyMsg").textContent = "연결이 끊겼어요."; });
 }
 function renderSeats(d){
   var ids = Object.keys(d.players || {}).sort(function(a,b){ return d.players[a].j - d.players[b].j; });
@@ -1085,14 +1109,14 @@ $("btnStart").onclick = async function(){
   ids.forEach(function(id, i){ map[id] = roles[i]; });
   $("btnStart").disabled = true;
   try{
-    await roomRef().update({ st:"playing", roles:map, seed:Math.floor(Math.random()*1e9), startAt:Date.now() });
+    await withTimeout(roomRef().update({ st:"playing", roles:map, seed:Math.floor(Math.random()*1e9), startAt:Date.now() }), 12000);
   }catch(e){ $("lobbyMsg").textContent = "시작하지 못했어요. 다시 눌러 주세요."; }
   $("btnStart").disabled = false;
 };
 $("btnLeave").onclick = function(){
   if(db && app.code){
-    if(app.mode === "host") roomRef().update({ st:"closed" }).catch(function(){});
-    else { var up = {}; up["players." + app.pid] = firebase.firestore.FieldValue.delete(); roomRef().update(up).catch(function(){}); }
+    if(app.mode === "host") closeRoom();
+    else roomRef().child("players/" + app.pid).remove().catch(function(){});
   }
   leaveToHome("");
 };
@@ -1172,51 +1196,54 @@ function simTick(){
 function publish(){
   pubK++;
   var s = FC.snapshot(world);
-  subRef("_w" + (pubK % 2)).set({ k:pubK, s:JSON.stringify(s) }).catch(function(){});
+  worldRef().set({ k:pubK, s:JSON.stringify(s) }).catch(function(){});
   if(world.over) roomRef().update({ st:"ended" }).catch(function(){});
 }
 var lastCmdN = {};
 function listenCommands(){
-  unsubs.push(roomRef().collection("students").onSnapshot(function(qs){
-    qs.docChanges().forEach(function(ch){
-      var id = ch.doc.id;
-      if(id.charAt(0) === "_" || !world) return;
-      var d = ch.doc.data(), list = (d.c || []).slice().sort(function(a,b){ return a.n - b.n; });
-      list.forEach(function(c){
-        if(c.n > (lastCmdN[id] || 0)){ lastCmdN[id] = c.n; FC.command(world, id, c); }
-      });
+  function onCmds(snap){
+    var id = snap.key, d = snap.val() || {}, list;
+    if(!world) return;
+    try{ list = JSON.parse(d.c || "[]"); }catch(e){ return; }
+    list.sort(function(a,b){ return a.n - b.n; }).forEach(function(c){
+      if(c.n > (lastCmdN[id] || 0)){ lastCmdN[id] = c.n; FC.command(world, id, c); }
     });
-  }));
+  }
+  listen(cmdsRef(), "child_added", onCmds);
+  listen(cmdsRef(), "child_changed", onCmds);
+}
+function closeRoom(){
+  roomRef().update({ st:"closed" }).catch(function(){});
+  worldRef().remove().catch(function(){});
+  cmdsRef().remove().catch(function(){});
 }
 
 /* ---------------- 손님: 세상 받아오기 ---------------- */
 function listenWorld(){
-  ["_w0","_w1"].forEach(function(id){
-    unsubs.push(subRef(id).onSnapshot(function(s){
-      if(!s.exists) return;
-      var d = s.data(), sn;
-      try{ sn = JSON.parse(d.s); }catch(e){ return; }
-      if(snaps.length && sn.tm <= snaps[snaps.length-1].tm) return;   // 지난 게임이나 늦게 온 것
-      if(!sn.p[app.pid]) return;
-      sn.A = FC.parseAnimals(sn.a);
-      snaps.push(sn);
-      if(snaps.length > 8) snaps.shift();
-      var o = sn.tm - performance.now()/1000;
-      if(offEst === null || o > offEst) offEst = o; else offEst += (o - offEst)*0.05;
-      lastSnapAt = performance.now();
-      $("waitNet").classList.add("hidden");
-      // 내 생물 위치 맞추기
-      var mp = sn.p[app.pid], mine = sn.A[mp.eid.toString(36)];
-      if(mine){
-        if(!me){ me = { x:mine.x, y:mine.y, tx:mine.x, ty:mine.y, face:0, air:null, sprint:0, cd:0, idle:0 }; }
-        else {
-          var dx = mine.x - me.x, dy = mine.y - me.y;
-          if(dx*dx + dy*dy > 170*170 && !me.air){ me.x = mine.x; me.y = mine.y; }
-          me.srv = mine;
-        }
+  listen(worldRef(), "value", function(s){
+    if(!s.exists()) return;
+    var d = s.val(), sn;
+    try{ sn = JSON.parse(d.s); }catch(e){ return; }
+    if(snaps.length && sn.tm <= snaps[snaps.length-1].tm) return;   // 지난 게임이나 늦게 온 것
+    if(!sn.p[app.pid]) return;
+    sn.A = FC.parseAnimals(sn.a);
+    snaps.push(sn);
+    if(snaps.length > 8) snaps.shift();
+    var o = sn.tm - performance.now()/1000;
+    if(offEst === null || o > offEst) offEst = o; else offEst += (o - offEst)*0.05;
+    lastSnapAt = performance.now();
+    $("waitNet").classList.add("hidden");
+    // 내 생물 위치 맞추기
+    var mp = sn.p[app.pid], mine = sn.A[mp.eid.toString(36)];
+    if(mine){
+      if(!me){ me = { x:mine.x, y:mine.y, tx:mine.x, ty:mine.y, face:0, air:null, sprint:0, cd:0, idle:0 }; }
+      else {
+        var dx = mine.x - me.x, dy = mine.y - me.y;
+        if(dx*dx + dy*dy > 170*170 && !me.air){ me.x = mine.x; me.y = mine.y; }
+        me.srv = mine;
       }
-      if(sn.ov && !ended) onGameOver(sn.res, sn.c, sn.p);
-    }));
+    }
+    if(sn.ov && !ended) onGameOver(sn.res, sn.c, sn.p);
   });
 }
 function sendCmd(c){
@@ -1232,7 +1259,7 @@ function flushCmds(){
   if(now - lastCmdWrite < 160) return;
   lastCmdWrite = now;
   cmdRecent = cmdRecent.concat(cmdPending).slice(-14); cmdPending = [];
-  subRef(app.pid).set({ c:cmdRecent, n:app.name }).catch(function(){});
+  cmdsRef().child(app.pid).set({ c:JSON.stringify(cmdRecent), n:app.name }).catch(function(){});
 }
 
 /* ===================================================================
@@ -2079,7 +2106,7 @@ $("btnAgain").onclick = function(){
   else quitToHome();
 };
 function quitToHome(){
-  if(app.mode === "host" && db && app.code && !ended) roomRef().update({ st:"closed" }).catch(function(){});
+  if(app.mode === "host" && db && app.code) closeRoom();
   leaveToHome("");
 }
 
