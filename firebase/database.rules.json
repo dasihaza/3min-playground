@@ -1,0 +1,29 @@
+{
+  "rules": {
+    "foodchain": {
+      "rooms": {
+        "$code": {
+          ".read": true,
+          ".write": "$code.matches(/^[0-9]{4}$/)",
+          ".validate": "newData.child('game').val() === 'foodchain'"
+        }
+      },
+      "world": {
+        "$code": {
+          ".read": true,
+          ".write": "$code.matches(/^[0-9]{4}$/)",
+          ".validate": "newData.child('s').isString() && newData.child('s').val().length < 300000"
+        }
+      },
+      "cmds": {
+        "$code": {
+          ".read": true,
+          ".write": "$code.matches(/^[0-9]{4}$/)",
+          "$pid": {
+            ".validate": "newData.child('c').isString() && newData.child('c').val().length < 20000"
+          }
+        }
+      }
+    }
+  }
+}
