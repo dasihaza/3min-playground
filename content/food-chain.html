@@ -166,7 +166,20 @@
   .pad{position:absolute;bottom:calc(16px + env(safe-area-inset-bottom));display:flex;align-items:flex-end;gap:12px;z-index:5;}
   .pad.left{left:calc(16px + env(safe-area-inset-left));}
   .pad.right{right:calc(16px + env(safe-area-inset-right));flex-direction:column;align-items:flex-end;}
-  .pad .col{display:flex;gap:12px;align-items:flex-end;}
+  .skills{display:grid;grid-template-columns:auto auto;grid-template-rows:auto auto;gap:12px;align-items:end;justify-items:end;}
+  .a-top{grid-column:2;grid-row:1;} .a-left{grid-column:1;grid-row:2;align-self:center;} .a-main{grid-column:2;grid-row:2;}
+  .sk.a-main{width:120px;height:120px;} .sk.a-main .ic{font-size:44px;}
+  .sk .key{position:absolute;top:8px;right:16px;font-size:12px;background:#fff;border:2px solid var(--ink);border-radius:7px;padding:0 5px;line-height:16px;display:none;}
+  .joy{position:relative;width:150px;height:150px;border-radius:50%;touch-action:none;
+       background:radial-gradient(circle, rgba(255,255,255,.55) 0 55%, rgba(255,255,255,.35) 56% 100%);
+       border:4px solid var(--ink);box-shadow:0 6px 0 rgba(74,64,56,.55);}
+  .joy-ring{position:absolute;inset:22px;border-radius:50%;border:3px dashed rgba(74,64,56,.35);pointer-events:none;}
+  .joy-knob{position:absolute;left:50%;top:50%;width:66px;height:66px;margin:-33px 0 0 -33px;border-radius:50%;
+            background:var(--sun);border:4px solid var(--ink);box-shadow:0 4px 0 var(--ink);display:grid;place-items:center;font-size:28px;pointer-events:none;}
+  .joy.on .joy-knob{background:#FFE58A;}
+  .joy-hint{font-family:'Jua',sans-serif;font-size:13px;text-align:center;margin-top:6px;background:rgba(255,255,255,.85);border:2px solid var(--ink);border-radius:999px;padding:1px 8px;display:none;}
+  .pad.left{flex-direction:column;align-items:center;}
+  @media (hover:hover) and (pointer:fine){ .sk .key, .joy-hint{display:block;} }
   .sk{position:relative;width:104px;height:104px;border-radius:50%;border:4px solid var(--ink);box-shadow:0 6px 0 var(--ink);
       background:var(--sun);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;touch-action:none;
       font-size:19px;line-height:1.1;padding:0;overflow:hidden;}
@@ -191,11 +204,15 @@
   .wait-net{position:absolute;inset:0;display:grid;place-items:center;font-family:'Jua',sans-serif;font-size:24px;pointer-events:none;}
 
   @media (max-width:640px){
-    .hud-tl{top:calc(64px + env(safe-area-inset-top));width:min(230px,58vw);}
+    .hud-tl{top:calc(76px + env(safe-area-inset-top));width:min(230px,58vw);}
+    .ripe-l{display:none;}
     .roles{grid-template-columns:1fr;}
     .seats{grid-template-columns:repeat(2,1fr);}
     .sk{width:84px;height:84px;} .sk .ic{font-size:30px;} .sk .lb{font-size:15px;}
     .sk.stash,.sk.cook{width:74px;height:74px;}
+    .sk.a-main{width:96px;height:96px;} .sk.a-main .ic{font-size:36px;}
+    .joy{width:124px;height:124px;} .joy-knob{width:56px;height:56px;margin:-28px 0 0 -28px;font-size:24px;}
+    .skills{gap:8px;}
     .slot{width:46px;height:46px;font-size:23px;}
     .cnt{font-size:15px;min-width:62px;}
     .timer{font-size:22px;min-width:80px;}
@@ -205,6 +222,8 @@
     .goals{display:none;}
     .sk{width:80px;height:80px;} .sk .ic{font-size:28px;}
     .sk.stash,.sk.cook{width:70px;height:70px;}
+    .sk.a-main{width:90px;height:90px;}
+    .joy{width:116px;height:116px;}
   }
 </style>
 </head>
@@ -249,8 +268,8 @@
     <h2>📜 어떻게 해요?</h2>
     <ul class="rules-more">
       <li>유저는 <b>메뚜기, 개구리, 뱀, 사람</b> 중 하나로 <b>무작위</b>로 정해져요. 같은 역할을 맡는 유저는 없어요.</li>
-      <li>내 생물이 늘 화면 <b>가운데</b>에 있어요. 가고 싶은 곳을 <b>터치</b>하면 그쪽으로 움직여요.</li>
-      <li>왼쪽 버튼은 <b>먹기</b>, 오른쪽 버튼은 <b>특별 기술</b>이에요.</li>
+      <li>내 생물이 늘 화면 <b>가운데</b>에 있어요. <b>왼쪽 아래 조이스틱</b>을 끌어서 움직여요. 컴퓨터는 <b>WASD</b>나 방향키로 움직여요.</li>
+      <li><b>먹기와 모든 기술 버튼</b>은 오른쪽 아래에 있어요. 컴퓨터는 <b>J</b>(먹기), <b>K</b>(기술·담기), <b>L</b>(굽기) 키를 써요.</li>
       <li>에너지는 100%에서 시작해서 <b>5초마다 10%씩</b> 줄어요. 0%가 되면 쓰러져요.</li>
       <li>맵에는 벼 200포기, 메뚜기 70마리, 개구리 20마리, 뱀 5마리, 사람 2명이 살아요. 유저가 누구인지는 <b>아무도 몰라요</b>.</li>
       <li>배부른 생물은 가끔 새끼를 낳고, 먹힌 벼는 25초 뒤에 다시 자라요.</li>
@@ -335,18 +354,22 @@
 
   <div class="toast" id="toast"></div>
 
+  <!-- 왼쪽 아래: 움직이기 -->
   <div class="pad left">
-    <button class="sk eat" id="bEat"><span class="ic">😋</span><span class="lb">먹기</span><span class="cs" id="eatCs">+20%</span><span class="cool"></span></button>
+    <div class="joy" id="joy"><div class="joy-ring"></div><div class="joy-knob" id="joyKnob">🐾</div></div>
+    <div class="joy-hint">WASD · 방향키</div>
   </div>
+  <!-- 오른쪽 아래: 모든 기술 -->
   <div class="pad right" id="padR">
     <div id="basketBox" class="hidden">
       <div class="basket" id="basket"></div>
       <div class="basket-l">🧺 칸을 누르면 바로 먹어요</div>
     </div>
-    <div class="col">
-      <button class="sk stash hidden" id="bStash"><span class="ic">🧺</span><span class="lb">담기</span><span class="cool"></span></button>
-      <button class="sk cook hidden" id="bCook"><span class="ic">🔥</span><span class="lb">굽기</span><span class="cs">−10%</span><span class="cool"></span></button>
-      <button class="sk skill" id="bSkill"><span class="ic" id="skIc">🪽</span><span class="lb" id="skLb">날기</span><span class="cs" id="skCs">−5%</span><span class="cool" id="skCool"></span></button>
+    <div class="skills">
+      <button class="sk stash a-top hidden" id="bStash"><span class="ic">🧺</span><span class="lb">담기</span><span class="key">K</span><span class="cool"></span></button>
+      <button class="sk skill a-left" id="bSkill"><span class="ic" id="skIc">🪽</span><span class="lb" id="skLb">날기</span><span class="cs" id="skCs">−5%</span><span class="key">K</span><span class="cool" id="skCool"></span></button>
+      <button class="sk cook a-left hidden" id="bCook"><span class="ic">🔥</span><span class="lb">굽기</span><span class="cs">−10%</span><span class="key">L</span><span class="cool"></span></button>
+      <button class="sk eat a-main" id="bEat"><span class="ic">😋</span><span class="lb">먹기</span><span class="cs" id="eatCs">+20%</span><span class="key">J</span><span class="cool"></span></button>
     </div>
   </div>
 </div>
@@ -554,7 +577,7 @@ var FC = (function(){
     var R = w.R;
     var a = { id:w.nid++, t:t, x:pos.x, y:pos.y, tx:pos.x, ty:pos.y, e:100, alive:true,
               pid:null, face:R()*Math.PI*2, think:R()*0.5, air:null, sprint:0, cd:0,
-              prey:null, chase:0, rest:0, wander:0, mode:"wander", born:w.time };
+              prey:null, chase:0, rest:0, wander:0, mode:"wander", born:w.time, jx:0, jy:0 };
     w.animals.push(a); w.byId[a.id] = a;
     return a;
   }
@@ -616,6 +639,7 @@ var FC = (function(){
     if(a.e <= S.cost) return false;
     if(a.t === "hopper" || a.t === "frog"){
       var dx = a.tx - a.x, dy = a.ty - a.y, ang = (dx*dx+dy*dy > 64) ? Math.atan2(dy,dx) : a.face;
+      if(a.pid) ang = (a.jx*a.jx + a.jy*a.jy > 0.02) ? Math.atan2(a.jy, a.jx) : a.face;   // 유저는 조이스틱 방향으로
       var ex = clamp(a.x + Math.cos(ang)*S.dist, 20, W-20), ey = clamp(a.y + Math.sin(ang)*S.dist, 20, H-20);
       a.e -= S.cost;
       a.air = { t:0, dur:a.t === "frog" ? 0.5 : 0.45, sx:a.x, sy:a.y, ex:ex, ey:ey };
@@ -639,8 +663,11 @@ var FC = (function(){
     if(!p || !p.alive || w.over) return;
     var a = w.byId[p.eid];
     if(!a) return;
-    if(c.k === "move"){
-      a.tx = clamp(c.x, 20, W-20); a.ty = clamp(c.y, 20, H-20);
+    if(c.k === "dir"){
+      // 조이스틱 / 키보드 방향 (길이 0~1)
+      var jx = +c.x || 0, jy = +c.y || 0, jl = Math.sqrt(jx*jx + jy*jy);
+      if(jl > 1){ jx /= jl; jy /= jl; }
+      a.jx = jx; a.jy = jy;
     } else if(c.k === "eat"){
       if(a.air) return;
       var f = reachable(w, a, a.t === "human" ? 34 : 24);
@@ -831,12 +858,23 @@ var FC = (function(){
         if(a.think <= 0) think(w, a);
         else if(a.prey && a.prey.t && a.prey.alive){ a.tx = a.prey.x; a.ty = a.prey.y; }
       }
-      var dx = a.tx - a.x, dy = a.ty - a.y, dist = Math.sqrt(dx*dx + dy*dy);
-      var sp = SPEC[a.t].sp * (a.sprint > 0 ? 2 : 1) * (a.mode === "wander" && !a.pid ? 0.55 : 1);
-      if(dist > 1){
-        var m = Math.min(dist, sp*dt);
-        a.x += dx/dist*m; a.y += dy/dist*m;
-        a.face = Math.atan2(dy, dx);
+      if(a.pid){
+        // 유저 생물은 조이스틱 방향으로 움직여요
+        var jl2 = Math.sqrt(a.jx*a.jx + a.jy*a.jy);
+        if(jl2 > 0.12){
+          var js = SPEC[a.t].sp * (a.sprint > 0 ? 2 : 1) * Math.min(1, jl2) * dt;
+          a.x = clamp(a.x + a.jx/jl2*js, 20, W-20); a.y = clamp(a.y + a.jy/jl2*js, 20, H-20);
+          a.face = Math.atan2(a.jy, a.jx);
+        }
+        a.tx = a.x; a.ty = a.y;
+      } else {
+        var dx = a.tx - a.x, dy = a.ty - a.y, dist = Math.sqrt(dx*dx + dy*dy);
+        var sp = SPEC[a.t].sp * (a.sprint > 0 ? 2 : 1) * (a.mode === "wander" ? 0.55 : 1);
+        if(dist > 1){
+          var m = Math.min(dist, sp*dt);
+          a.x += dx/dist*m; a.y += dy/dist*m;
+          a.face = Math.atan2(dy, dx);
+        }
       }
       // 새끼 낳기
       var B = BREED[a.t];
@@ -1155,6 +1193,7 @@ function startGame(){
   prepDecor();
   ended = false; deadShown = false; watching = false; gameOn = true;
   trails = {}; faces = {}; pops = []; lastEvI = 0; pendingEv = []; marker = null; airAnim = {};
+  keys = {}; joyEnd(); sentDir = { x:0, y:0 };
   camPan.x = 0; camPan.y = 0; lastMePos = null;
   setupHud(role);
   show("game");
@@ -1249,7 +1288,7 @@ function listenWorld(){
 function sendCmd(c){
   if(app.mode !== "guest"){ if(world) FC.command(world, app.pid, c); return; }
   c.n = ++cmdSeq;
-  if(c.k === "move") cmdPending = cmdPending.filter(function(x){ return x.k !== "move"; });
+  if(c.k === "dir") cmdPending = cmdPending.filter(function(x){ return x.k !== "dir"; });
   cmdPending.push(c);
   flushCmds();
 }
@@ -1333,12 +1372,14 @@ function stepMe(dt, mp){
     if(k >= 1) me.air = null;
     return;
   }
-  var dx = me.tx - me.x, dy = me.ty - me.y, d = Math.sqrt(dx*dx + dy*dy);
-  var sp = S.sp * (me.sprint > 0 ? 2 : 1);
-  if(d > 1){ var m = Math.min(d, sp*dt); me.x += dx/d*m; me.y += dy/d*m; me.face = Math.atan2(dy, dx); me.idle = 0; }
-  else {
+  var jl = Math.sqrt(input.x*input.x + input.y*input.y);
+  if(jl > 0.12){
+    var m = S.sp * (me.sprint > 0 ? 2 : 1) * Math.min(1, jl) * dt;
+    me.x = Math.max(20, Math.min(W-20, me.x + input.x/jl*m)); me.y = Math.max(20, Math.min(H-20, me.y + input.y/jl*m));
+    me.face = Math.atan2(input.y, input.x); me.idle = 0;
+  } else {
     me.idle += dt;
-    if(me.idle > 1 && me.srv){ me.x += (me.srv.x - me.x)*0.08; me.y += (me.srv.y - me.y)*0.08; me.tx = me.x; me.ty = me.y; }
+    if(me.idle > 0.8 && me.srv){ me.x += (me.srv.x - me.x)*0.08; me.y += (me.srv.y - me.y)*0.08; }
   }
 }
 
@@ -1360,41 +1401,68 @@ window.addEventListener("orientationchange", function(){ setTimeout(resize, 200)
 document.addEventListener("gesturestart", function(e){ e.preventDefault(); });
 
 function toWorld(sx, sy){ return { x: cam.x + (sx - vw/2)/zoom, y: cam.y + (sy - vh/2)/zoom }; }
-var touching = false, lastMoveSent = 0, panStart = null;
-function pointerAt(e){
-  var p = toWorld(e.clientX, e.clientY);
-  var v = lastView;
-  if(!v || !v.mine || !v.mine.alive || ended){
-    // 관전 중에는 화면을 끌어서 둘러봐요
-    if(panStart){ camPan.x = panStart.px - (e.clientX - panStart.x)/zoom; camPan.y = panStart.py - (e.clientY - panStart.y)/zoom; }
-    return;
-  }
-  p.x = Math.max(20, Math.min(W-20, p.x)); p.y = Math.max(20, Math.min(H-20, p.y));
-  marker = { x:p.x, y:p.y, t:performance.now() };
-  if(me){ me.tx = p.x; me.ty = p.y; }
-  var now = performance.now();
-  if(now - lastMoveSent > 90 || e.type === "pointerdown"){ lastMoveSent = now; sendCmd({ k:"move", x:Math.round(p.x), y:Math.round(p.y) }); }
-}
+/* ---------- 관전할 때는 화면을 끌어서 둘러봐요 ---------- */
+var panStart = null;
 cv.addEventListener("pointerdown", function(e){
-  e.preventDefault(); touching = true;
+  e.preventDefault();
   panStart = { x:e.clientX, y:e.clientY, px:camPan.x, py:camPan.y };
   try{ cv.setPointerCapture(e.pointerId); }catch(er){}
-  pointerAt(e);
 });
-cv.addEventListener("pointermove", function(e){ if(touching){ e.preventDefault(); pointerAt(e); } });
-function endTouch(e){
-  if(!touching) return;
-  touching = false; panStart = null;
+cv.addEventListener("pointermove", function(e){
   var v = lastView;
-  if(v && v.mine && v.mine.alive && !ended){
-    var p = toWorld(e.clientX, e.clientY);
-    p.x = Math.max(20, Math.min(W-20, p.x)); p.y = Math.max(20, Math.min(H-20, p.y));
-    if(me){ me.tx = p.x; me.ty = p.y; }
-    sendCmd({ k:"move", x:Math.round(p.x), y:Math.round(p.y) });
+  if(!panStart || (v && v.mine && v.mine.alive && !ended)) return;
+  camPan.x = panStart.px - (e.clientX - panStart.x)/zoom; camPan.y = panStart.py - (e.clientY - panStart.y)/zoom;
+});
+cv.addEventListener("pointerup", function(){ panStart = null; });
+cv.addEventListener("pointercancel", function(){ panStart = null; });
+
+/* ---------- 왼쪽 아래 조이스틱 + WASD ---------- */
+var input = { x:0, y:0 };              // 지금 움직이려는 방향 (길이 0~1)
+var joyVec = { x:0, y:0 }, joyId = null, keys = {};
+var sentDir = { x:0, y:0 }, lastDirSent = 0;
+var joy = $("joy"), knob = $("joyKnob");
+function joyAt(e){
+  var r = joy.getBoundingClientRect(), R = r.width/2;
+  var dx = e.clientX - (r.left + R), dy = e.clientY - (r.top + R), d = Math.sqrt(dx*dx + dy*dy), lim = R*0.62;
+  if(d > lim){ dx = dx/d*lim; dy = dy/d*lim; }
+  knob.style.transform = "translate(" + dx + "px," + dy + "px)";
+  joyVec.x = dx/lim; joyVec.y = dy/lim;
+}
+function joyEnd(){
+  joyId = null; joyVec.x = 0; joyVec.y = 0;
+  knob.style.transform = ""; joy.classList.remove("on");
+}
+joy.addEventListener("pointerdown", function(e){
+  e.preventDefault(); e.stopPropagation();
+  joyId = e.pointerId; joy.classList.add("on");
+  try{ joy.setPointerCapture(e.pointerId); }catch(er){}
+  joyAt(e);
+});
+joy.addEventListener("pointermove", function(e){ if(e.pointerId === joyId){ e.preventDefault(); joyAt(e); } });
+joy.addEventListener("pointerup", function(e){ if(e.pointerId === joyId) joyEnd(); });
+joy.addEventListener("pointercancel", function(e){ if(e.pointerId === joyId) joyEnd(); });
+joy.addEventListener("lostpointercapture", function(e){ if(e.pointerId === joyId) joyEnd(); });
+
+var MOVE_KEYS = { KeyW:[0,-1], ArrowUp:[0,-1], KeyS:[0,1], ArrowDown:[0,1], KeyA:[-1,0], ArrowLeft:[-1,0], KeyD:[1,0], ArrowRight:[1,0] };
+window.addEventListener("blur", function(){ keys = {}; joyEnd(); });
+
+// 매 장면마다 방향을 모아서, 바뀌었을 때만 방장에게 보내요
+function updateInput(){
+  var kx = 0, ky = 0;
+  for(var k in keys){ if(keys[k] && MOVE_KEYS[k]){ kx += MOVE_KEYS[k][0]; ky += MOVE_KEYS[k][1]; } }
+  if(joyId !== null){ input.x = joyVec.x; input.y = joyVec.y; }
+  else if(kx || ky){ var kl = Math.sqrt(kx*kx + ky*ky); input.x = kx/kl; input.y = ky/kl; }
+  else { input.x = 0; input.y = 0; }
+  if(!canAct()) { input.x = 0; input.y = 0; }
+  var qx = Math.round(input.x*10)/10, qy = Math.round(input.y*10)/10;
+  var moving = qx*qx + qy*qy > 0.0144, wasMoving = sentDir.x*sentDir.x + sentDir.y*sentDir.y > 0.0144;
+  var now = performance.now();
+  var changed = Math.abs(qx - sentDir.x) > 0.15 || Math.abs(qy - sentDir.y) > 0.15 || moving !== wasMoving;
+  if(changed && (now - lastDirSent > 90 || moving !== wasMoving)){
+    sentDir.x = qx; sentDir.y = qy; lastDirSent = now;
+    if(gameOn && !ended) sendCmd({ k:"dir", x:qx, y:qy });
   }
 }
-cv.addEventListener("pointerup", endTouch);
-cv.addEventListener("pointercancel", endTouch);
 document.addEventListener("touchmove", function(e){ if(gameOn) e.preventDefault(); }, { passive:false });
 
 function bindBtn(id, fn){
@@ -1419,7 +1487,7 @@ bindBtn("bSkill", function(){
   if(app.mode === "guest" && me && !me.air){
     var S = SPEC[m.role];
     if(m.role === "hopper" || m.role === "frog"){
-      var dx = me.tx - me.x, dy = me.ty - me.y, ang = (dx*dx + dy*dy > 64) ? Math.atan2(dy, dx) : me.face;
+      var ang = (input.x*input.x + input.y*input.y > 0.02) ? Math.atan2(input.y, input.x) : me.face;
       var ex = Math.max(20, Math.min(W-20, me.x + Math.cos(ang)*S.dist)), ey = Math.max(20, Math.min(H-20, me.y + Math.sin(ang)*S.dist));
       me.air = { t:0, dur:m.role === "frog" ? 0.5 : 0.45, sx:me.x, sy:me.y, ex:ex, ey:ey };
       me.cd = 1.2;
@@ -1427,13 +1495,20 @@ bindBtn("bSkill", function(){
   }
   sendCmd({ k:"skill" });
 });
+// 한글 입력 상태에서도 되도록 e.code(자판 위치)로 읽어요
 document.addEventListener("keydown", function(e){
   if(!gameOn) return;
-  if(e.key === " " || e.key === "1"){ e.preventDefault(); $("bEat").dispatchEvent(new PointerEvent("pointerdown")); }
-  if(e.key === "2"){ var r = lastView && lastView.mine && lastView.mine.role; $(r === "human" ? "bStash" : "bSkill").dispatchEvent(new PointerEvent("pointerdown")); }
-  if(e.key === "3"){ $("bCook").dispatchEvent(new PointerEvent("pointerdown")); }
+  if(MOVE_KEYS[e.code]){ e.preventDefault(); keys[e.code] = true; return; }
+  if(e.repeat) return;
+  var r = lastView && lastView.mine && lastView.mine.role;
+  if(e.code === "KeyJ" || e.code === "Space" || e.code === "Digit1"){ e.preventDefault(); $("bEat").dispatchEvent(new PointerEvent("pointerdown")); }
+  if(e.code === "KeyK" || e.code === "Digit2"){ $(r === "human" ? "bStash" : "bSkill").dispatchEvent(new PointerEvent("pointerdown")); }
+  if((e.code === "KeyL" || e.code === "Digit3") && r === "human"){ $("bCook").dispatchEvent(new PointerEvent("pointerdown")); }
 });
-document.addEventListener("keyup", function(){ ["bEat","bStash","bCook","bSkill"].forEach(function(id){ $(id).classList.remove("press"); }); });
+document.addEventListener("keyup", function(e){
+  if(MOVE_KEYS[e.code]){ keys[e.code] = false; return; }
+  ["bEat","bStash","bCook","bSkill"].forEach(function(id){ $(id).classList.remove("press"); });
+});
 function canAct(){ var v = lastView; return gameOn && !ended && v && v.mine && v.mine.alive; }
 
 /* ===================================================================
@@ -1563,6 +1638,7 @@ function frame(){
   if(!gameOn) return;
   var now = performance.now();
   var fdt = Math.min(0.05, (now - lastFrame)/1000); lastFrame = now;
+  updateInput();
   var v = (app.mode === "guest") ? viewFromSnaps(fdt) : (world ? viewFromWorld() : null);
   if(app.mode === "guest" && !ended && now - lastSnapAt > 9000 && snaps.length){
     toast("방장과 연결이 끊긴 것 같아요…");
