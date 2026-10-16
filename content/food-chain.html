@@ -126,6 +126,21 @@
   .res-list .who b{font-family:'Jua',sans-serif;font-weight:400;font-size:18px;display:block;}
   .res-list .who span{font-size:13px;color:#7a6d62;}
   .res-list .badge{font-family:'Jua',sans-serif;font-size:16px;padding:4px 10px;border-radius:999px;border:2px solid var(--ink);background:#fff;white-space:nowrap;}
+  .revive-box{display:flex;align-items:center;justify-content:center;gap:8px;margin:10px auto 0;padding:10px 14px;width:fit-content;
+              background:#FFF6D6;border:2.5px solid var(--ink);border-radius:18px;font-family:'Jua',sans-serif;font-size:18px;}
+  .revive-box .rv-num{font-size:34px;color:var(--orange-d);min-width:34px;text-align:center;}
+  .mission-l{font-family:'Jua',sans-serif;font-size:16px;margin:8px 0 -4px;color:var(--orange-d);}
+  .mission-fail{display:inline-block;margin:8px 0 0;padding:6px 14px;border-radius:999px;background:#FFE1D8;border:2.5px solid var(--ink);font-family:'Jua',sans-serif;font-size:17px;}
+  .mis-list{list-style:none;padding:0;margin:0 0 10px;}
+  .mis-list li{display:flex;align-items:center;gap:8px;padding:6px 10px;margin:5px 0;border-radius:12px;border:2px solid var(--line);background:#fff;font-size:14.5px;font-weight:700;}
+  .mis-list li .ck{font-family:'Jua',sans-serif;font-size:13px;margin-left:auto;padding:2px 8px;border-radius:999px;border:2px solid var(--ink);white-space:nowrap;}
+  .mis-list li.ok .ck{background:#CFEFBF;} .mis-list li.no{background:#FFF1EE;} .mis-list li.no .ck{background:#FFD0C6;}
+  .my-stats{margin:12px 0 0;padding:12px;border:2.5px solid var(--ink);border-radius:18px;background:#F3FBEA;text-align:left;}
+  .my-stats h3{font-family:'Jua',sans-serif;font-weight:400;font-size:18px;margin:0 0 8px;}
+  .my-stats .row{display:flex;gap:8px;flex-wrap:wrap;}
+  .my-stats .st{background:#fff;border:2px solid var(--line);border-radius:14px;padding:6px 10px;font-weight:700;font-size:14px;}
+  .my-stats .st b{font-family:'Jua',sans-serif;font-weight:400;font-size:20px;color:var(--orange-d);}
+  .res-list .stat{display:block;font-size:12.5px;color:#5c6b4a;margin-top:2px;}
   .final-counts{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:12px;}
   .final-counts span{background:var(--cream);border:2px solid var(--line);border-radius:999px;padding:4px 10px;font-weight:700;font-size:14px;}
 
@@ -271,39 +286,41 @@
       <li>내 생물이 늘 화면 <b>가운데</b>에 있어요. <b>왼쪽 아래 조이스틱</b>을 끌어서 움직여요. 컴퓨터는 <b>WASD</b>나 방향키로 움직여요.</li>
       <li><b>먹기와 모든 기술 버튼</b>은 오른쪽 아래에 있어요. 컴퓨터는 <b>J</b>(먹기), <b>K</b>(기술·담기), <b>L</b>(굽기) 키를 써요.</li>
       <li>에너지는 100%에서 시작해서 <b>5초마다 10%씩</b> 줄어요. 0%가 되면 쓰러져요.</li>
+      <li>먹히거나 쓰러지면 <b>미션 실패</b>예요. 그래도 <b>10초 뒤에 같은 생물로 다시 태어나</b> 끝까지 계속 놀 수 있어요.</li>
+      <li>끝나면 <b>부활한 횟수</b>와 <b>내가 먹은 먹이</b>를 결과 화면에서 볼 수 있어요.</li>
       <li>맵에는 벼 200포기, 메뚜기 70마리, 개구리 20마리, 뱀 5마리, 사람 2명이 살아요. 유저가 누구인지는 <b>아무도 몰라요</b>.</li>
       <li>배부른 생물은 가끔 새끼를 낳고, 먹힌 벼는 25초 뒤에 다시 자라요.</li>
-      <li>3분이 지나면 벼가 익고 생물들이 다 자라요. 그때 승리 조건을 확인해요.</li>
+      <li>3분이 지나면 벼가 익고 생물들이 다 자라요. 그때 미션을 확인해요. <b>미션 3가지를 모두 달성하면 승리</b>예요!</li>
     </ul>
   </div>
 
   <div class="card">
-    <h2>🏆 역할별 승리 조건과 기술</h2>
+    <h2>🏆 역할별 미션 조건과 기술</h2>
     <div class="roles">
       <div class="role r-hopper">
         <h3><span class="em">🦗</span>메뚜기<span class="cnt">70마리</span></h3>
-        <h4>승리 조건</h4>
+        <h4>미션 조건</h4>
         <ul><li>3분이 끝날 때까지 살아남기</li><li>벼가 익을 때까지 벼를 모두 먹지 않기</li><li>굶지 않기 (에너지 &gt; 0)</li></ul>
         <h4>기술</h4>
         <ul><li>🍚 먹기: 벼를 먹으면 +20%</li><li>🪽 날기: 2m 날아가요 (−5%)</li></ul>
       </div>
       <div class="role r-frog">
         <h3><span class="em">🐸</span>개구리<span class="cnt">20마리</span></h3>
-        <h4>승리 조건</h4>
+        <h4>미션 조건</h4>
         <ul><li>3분이 끝날 때까지 살아남기</li><li>메뚜기가 다 자랄 때까지 메뚜기를 모두 먹지 않기</li><li>굶지 않기 (에너지 &gt; 0)</li></ul>
         <h4>기술</h4>
         <ul><li>🍚 먹기: 메뚜기를 먹으면 +40%</li><li>💨 점프: 3m 뛰어올라요 (−5%)</li></ul>
       </div>
       <div class="role r-snake">
         <h3><span class="em">🐍</span>뱀<span class="cnt">5마리</span></h3>
-        <h4>승리 조건</h4>
+        <h4>미션 조건</h4>
         <ul><li>3분이 끝날 때까지 살아남기</li><li>개구리가 다 자랄 때까지 개구리를 모두 먹지 않기</li><li>굶지 않기 (에너지 &gt; 0)</li></ul>
         <h4>기술</h4>
         <ul><li>🍚 먹기: 개구리를 먹으면 +60%</li><li>⚡ 빠르게 기어가기: 5초 동안 2배 속도 (−10%)</li></ul>
       </div>
       <div class="role r-human">
         <h3><span class="em">🧑‍🌾</span>사람<span class="cnt">2명</span></h3>
-        <h4>승리 조건</h4>
+        <h4>미션 조건</h4>
         <ul><li>3분이 끝날 때까지 살아남기</li><li>벼·메뚜기·개구리·뱀이 모두 2마리 이상 남아 있게 하기</li><li>굶지 않기 (에너지 &gt; 0)</li></ul>
         <h4>기술</h4>
         <ul><li>🍚 먹기: 벼 +10%, 메뚜기 +20%, 개구리 +30%, 뱀 +50%</li><li>🧺 담기: 잡은 생물을 장바구니에 3개까지 (50초 뒤엔 썩어요)</li><li>🔥 굽기: 장바구니 속 생물을 구우면 2배 에너지 (−10%)</li><li>장바구니 칸을 누르면 날로 먹을 수 있어요</li></ul>
@@ -380,6 +397,7 @@
     <div class="sub">두구두구… 나는 바로!</div>
     <div class="big-em" id="rvEm">🦗</div>
     <h2 id="rvNm">메뚜기</h2>
+    <div class="mission-l">🎯 나의 미션 (모두 달성하면 승리!)</div>
     <ul class="goal-list" id="rvGoals"></ul>
     <div class="sub" id="rvTip"></div>
     <div class="count-down" id="rvCount">3초 뒤에 시작해요</div>
@@ -392,8 +410,10 @@
     <div class="big-em" id="deadEm">😵</div>
     <h2 id="deadTitle">앗, 먹혀 버렸어요!</h2>
     <div class="sub" id="deadSub"></div>
+    <div class="mission-fail">🎯 미션 실패! 하지만 게임은 계속돼요</div>
+    <div class="revive-box" id="reviveBox"><span class="rv-num" id="reviveNum">10</span><span id="reviveTxt">초 뒤에 같은 생물로 다시 태어나요!</span></div>
     <div class="row-btns">
-      <button class="bbtn join" id="btnWatch">👀 끝까지 지켜보기</button>
+      <button class="bbtn join" id="btnWatch">👀 둘러보기</button>
       <button class="bbtn make" id="btnHome1">🏠 처음으로</button>
     </div>
   </div>
@@ -405,6 +425,7 @@
     <div class="big-em" id="resEm">🏆</div>
     <h2 id="resTitle">승리!</h2>
     <div class="sub" id="resSub"></div>
+    <div class="my-stats" id="myStats"></div>
     <ul class="res-list" id="resList"></ul>
     <div class="final-counts" id="resCounts"></div>
     <div class="row-btns">
@@ -424,6 +445,7 @@ var FC = (function(){
   var DRAIN_EVERY = 5, DRAIN = 10; // 5초마다 10%
   var REGROW = 25;                 // 먹힌 벼가 다시 자라는 시간
   var ROT_TIME = 50;               // 장바구니 보관 시간
+  var RESPAWN = 10;                // 유저가 쓰러지면 10초 뒤에 같은 생물로 다시 태어나요
   var ROLES = ["hopper","frog","snake","human"];
 
   var SPEC = {
@@ -567,7 +589,8 @@ var FC = (function(){
       if(role === "human"){ best.x = W/2; best.y = H/2; best.tx = best.x; best.ty = best.y; }
       best.pid = pid;
       w.players[pid] = { pid:pid, name:players[pid].name || "", role:role, eid:best.id,
-                         alive:true, reason:"", basket:[], fail:"" };
+                         alive:true, reason:"", basket:[], fail:"",
+                         respawn:0, rv:0, ate:{}, gained:0 };
     });
     count(w);
     return w;
@@ -593,8 +616,33 @@ var FC = (function(){
     delete w.byId[a.id];
     if(a.pid && w.players[a.pid]){
       var p = w.players[a.pid];
-      p.alive = false; p.reason = reason;
+      p.alive = false; p.reason = reason; p.basket = [];
+      if(reason === "starve") p.starved = true;
+      // 게임이 끝나기 전에 다시 태어날 수 있으면 10초 뒤에
+      p.respawn = (w.time + RESPAWN < GAME_TIME) ? RESPAWN : 0;
     }
+  }
+
+  // 유저가 먹은 먹이를 세요 (결과 화면에 보여 줘요)
+  function noteEat(w, a, type, before){
+    if(!a.pid || !w.players[a.pid]) return;
+    var p = w.players[a.pid];
+    p.ate[type] = (p.ate[type] || 0) + 1;
+    p.gained += Math.max(0, a.e - before);
+  }
+
+  // 포식자에게서 가장 먼 곳을 골라 다시 태어나요
+  function respawnPlayer(w, p){
+    var R = w.R, best = null, bestD = -1, fl = FLEE[p.role];
+    for(var k=0;k<16;k++){
+      var pos = { x: 80 + R()*(W-160), y: 80 + R()*(H-160) }, nd = 1e12;
+      for(var i=0;i<w.animals.length;i++){ var b = w.animals[i]; if(b.alive && fl[b.t]) nd = Math.min(nd, d2(pos, b)); }
+      if(nd > bestD){ bestD = nd; best = pos; }
+    }
+    var a = spawn(w, p.role, best);
+    a.pid = p.pid; a.born = 0;
+    p.eid = a.id; p.alive = true; p.reason = ""; p.respawn = 0; p.rv++;
+    addEv(w, "revive", a.x, a.y, "", a.id);
   }
 
   function gain(a, v){ a.e = Math.min(100, a.e + v); }
@@ -621,14 +669,17 @@ var FC = (function(){
 
   function eat(w, a, f){
     var S = SPEC[a.t];
+    var before = a.e;
     if(f.t === undefined){  // 벼
       f.g = 0; f.re = REGROW;
       gain(a, S.food.rice);
+      noteEat(w, a, "rice", before);
       addEv(w, "eat", f.x, f.y, "+" + S.food.rice + "%", a.id);
     } else {
       var v = S.food[f.t];
       kill(w, f, a.t);
       gain(a, v);
+      noteEat(w, a, f.t, before);
       addEv(w, "eat", f.x, f.y, "+" + v + "%", a.id);
     }
   }
@@ -688,13 +739,20 @@ var FC = (function(){
       if(a.e <= 10){ addEv(w, "miss", a.x, a.y - 30, "힘이 모자라요", a.id); return; }
       var sum = 0;
       p.basket.forEach(function(b){ sum += SPEC.human.food[b.t] * 2; });
-      a.e -= 10; gain(a, sum); p.basket = [];
+      a.e -= 10;
+      var cb = a.e;
+      gain(a, sum);
+      p.basket.forEach(function(b){ p.ate[b.t] = (p.ate[b.t] || 0) + 1; });
+      p.gained += Math.max(0, a.e - cb);
+      p.basket = [];
       addEv(w, "cook", a.x, a.y, "+" + sum + "%", a.id);
     } else if(c.k === "eatb" && a.t === "human"){
       var b = p.basket[c.i | 0];
       if(!b) return;
       p.basket.splice(c.i | 0, 1);
+      var eb = a.e;
       gain(a, SPEC.human.food[b.t]);
+      noteEat(w, a, b.t, eb);
       addEv(w, "eat", a.x, a.y, "+" + SPEC.human.food[b.t] + "%", a.id);
     }
   }
@@ -795,12 +853,15 @@ var FC = (function(){
     w.results = {};
     Object.keys(w.players).forEach(function(pid){
       var p = w.players[pid], a = w.byId[p.eid];
-      var why = "", win = false;
-      if(!p.alive) why = p.reason === "starve" ? "배고파서 쓰러졌어요" : (SPEC[p.reason] ? SPEC[p.reason].name + "에게 먹혔어요" : "살아남지 못했어요");
-      else if(!a || a.e <= 0) why = "배고파서 쓰러졌어요";
-      else if(condFail(w, p.role)) why = condFail(w, p.role);
-      else { win = true; why = "끝까지 살아남고 먹이사슬을 지켰어요!"; }
-      w.results[pid] = { win:win, why:why };
+      // 미션 3가지: ① 한 번도 쓰러지지 않고 끝까지 살아남기 ② 역할별 먹이사슬 지키기 ③ 굶어 쓰러지지 않기
+      var m1 = p.alive && p.rv === 0;
+      var m2 = !condFail(w, p.role);
+      var m3 = !p.starved && !!a && a.e > 0;
+      var win = m1 && m2 && m3, why;
+      if(win) why = "미션을 모두 달성했어요!";
+      else if(!m1) why = p.rv > 0 ? (p.rv + "번 쓰러졌다가 다시 태어났어요") : (p.reason === "starve" ? "배고파서 쓰러졌어요" : (SPEC[p.reason] ? SPEC[p.reason].name + "에게 먹혔어요" : "살아남지 못했어요"));
+      else why = !m2 ? condFail(w, p.role) : "배고파서 쓰러졌어요";
+      w.results[pid] = { win:win, why:why, ms:[m1?1:0, m2?1:0, m3?1:0], rv:p.rv, ate:p.ate, gn:Math.round(p.gained) };
     });
   }
 
@@ -898,6 +959,14 @@ var FC = (function(){
     if(w.animals.some(function(x){ return !x.alive; })){
       w.animals = w.animals.filter(function(x){ return x.alive; });
     }
+    // 쓰러진 유저는 10초 뒤에 같은 생물로 다시 태어나요
+    Object.keys(w.players).forEach(function(pid){
+      var p = w.players[pid];
+      if(!p.alive && p.respawn > 0){
+        p.respawn -= dt;
+        if(p.respawn <= 0) respawnPlayer(w, p);
+      }
+    });
     count(w);
     Object.keys(w.players).forEach(function(pid){
       var p = w.players[pid];
@@ -929,7 +998,8 @@ var FC = (function(){
       pl[pid] = { r:p.role, n:p.name, eid:p.eid, al:p.alive ? 1 : 0, rs:p.reason, f:p.fail,
                   e: a ? Math.round(a.e) : 0, cd: a ? Math.max(0, +a.cd.toFixed(1)) : 0,
                   sp: a ? Math.max(0, +a.sprint.toFixed(1)) : 0,
-                  b: p.basket.map(function(b){ return b.t + ":" + Math.ceil(b.left); }).join("|") };
+                  b: p.basket.map(function(b){ return b.t + ":" + Math.ceil(b.left); }).join("|"),
+                  rsp: Math.max(0, Math.ceil(p.respawn)), rv:p.rv, sv:p.starved ? 1 : 0 };
     });
     return { tm:+w.time.toFixed(2), a:parts.join(";"), r:rice, p:pl,
              ev:w.ev.slice(-20), c:w.counts, ov:w.over ? 1 : 0, res:w.results || null };
@@ -962,16 +1032,16 @@ var SPEC = FC.SPEC, W = FC.W, H = FC.H;
 
 var ROLE_INFO = {
   hopper:{ name:"메뚜기", emo:"🦗", food:["rice"],
-    goals:["⏱ 3분 동안 살아남기", "🌾 벼를 모두 먹지 않기", "🍚 굶지 않기"],
+    goals:["⏱ 끝까지 살아남기", "🌾 벼를 모두 먹지 않기", "🍚 굶어 쓰러지지 않기"],
     tip:"벼 🌾 를 먹고, 개구리와 사람을 피해요!", skill:{ ic:"🪽", lb:"날기", cs:"−5%" }, eat:"+20%" },
   frog:{ name:"개구리", emo:"🐸", food:["hopper"],
-    goals:["⏱ 3분 동안 살아남기", "🦗 메뚜기를 모두 먹지 않기", "🍚 굶지 않기"],
+    goals:["⏱ 끝까지 살아남기", "🦗 메뚜기를 모두 먹지 않기", "🍚 굶어 쓰러지지 않기"],
     tip:"메뚜기 🦗 를 잡아먹고, 뱀과 사람을 피해요!", skill:{ ic:"💨", lb:"점프", cs:"−5%" }, eat:"+40%" },
   snake:{ name:"뱀", emo:"🐍", food:["frog"],
-    goals:["⏱ 3분 동안 살아남기", "🐸 개구리를 모두 먹지 않기", "🍚 굶지 않기"],
+    goals:["⏱ 끝까지 살아남기", "🐸 개구리를 모두 먹지 않기", "🍚 굶어 쓰러지지 않기"],
     tip:"개구리 🐸 를 잡아먹고, 사람을 피해요!", skill:{ ic:"⚡", lb:"빠르게", cs:"−10%" }, eat:"+60%" },
   human:{ name:"사람", emo:"🧑‍🌾", food:["rice","hopper","frog","snake"],
-    goals:["⏱ 3분 동안 살아남기", "🌾🦗🐸🐍 모두 2마리 이상 지키기", "🍚 굶지 않기"],
+    goals:["⏱ 끝까지 살아남기", "🌾🦗🐸🐍 모두 2마리 이상 지키기", "🍚 굶어 쓰러지지 않기"],
     tip:"무엇이든 먹을 수 있지만, 너무 많이 먹으면 생물이 사라져요!", skill:null, eat:"+10~50%" }
 };
 var EMO = { rice:"🌾", hopper:"🦗", frog:"🐸", snake:"🐍", human:"🧑‍🌾" };
@@ -1275,7 +1345,7 @@ function listenWorld(){
     // 내 생물 위치 맞추기
     var mp = sn.p[app.pid], mine = sn.A[mp.eid.toString(36)];
     if(mine){
-      if(!me){ me = { x:mine.x, y:mine.y, tx:mine.x, ty:mine.y, face:0, air:null, sprint:0, cd:0, idle:0 }; }
+      if(!me || me.eid !== mp.eid){ me = { eid:mp.eid, x:mine.x, y:mine.y, tx:mine.x, ty:mine.y, face:0, air:null, sprint:0, cd:0, idle:0 }; }
       else {
         var dx = mine.x - me.x, dy = mine.y - me.y;
         if(dx*dx + dy*dy > 170*170 && !me.air){ me.x = mine.x; me.y = mine.y; }
@@ -1317,7 +1387,8 @@ function viewFromWorld(){
   var p = w.players[app.pid], a2 = p && w.byId[p.eid];
   var mine = p ? { role:p.role, eid:p.eid, alive:p.alive, reason:p.reason, fail:p.fail,
                    e: a2 ? a2.e : 0, cd: a2 ? Math.max(0, a2.cd) : 0, sp: a2 ? Math.max(0, a2.sprint) : 0,
-                   basket: p.basket.map(function(b){ return { t:b.t, left:b.left }; }) } : null;
+                   basket: p.basket.map(function(b){ return { t:b.t, left:b.left }; }),
+                   rsp: Math.max(0, Math.ceil(p.respawn)), rv:p.rv, sv:!!p.starved } : null;
   return { time:w.time, counts:w.counts, ents:ents, rice:rice, mine:mine, ev:w.ev,
            meX: a2 ? a2.x : null, meY: a2 ? a2.y : null, renderT:w.time };
 }
@@ -1356,7 +1427,8 @@ function viewFromSnaps(fdt){
   }
   var rice = []; for(i=0;i<last.r.length;i++) rice.push(+last.r.charAt(i));
   var mine = mp ? { role:mp.r, eid:mp.eid, alive:!!mp.al, reason:mp.rs, fail:mp.f, e:mp.e, cd:Math.max(mp.cd, me ? me.cd : 0), sp:mp.sp,
-                    basket: mp.b ? mp.b.split("|").filter(Boolean).map(function(s){ var q = s.split(":"); return { t:q[0], left:+q[1] }; }) : [] } : null;
+                    basket: mp.b ? mp.b.split("|").filter(Boolean).map(function(s){ var q = s.split(":"); return { t:q[0], left:+q[1] }; }) : [],
+                    rsp: mp.rsp || 0, rv: mp.rv || 0, sv: !!mp.sv } : null;
   return { time:last.tm, counts:last.c, ents:ents, rice:rice, mine:mine, ev:last.ev,
            meX: me ? me.x : null, meY: me ? me.y : null, renderT:rt };
 }
@@ -1544,7 +1616,11 @@ function updateHud(v){
     $("ebar").className = "ebar" + (e <= 30 ? " low" : e <= 60 ? " mid" : "");
   }
   var nextDrain = 5 - (v.time % 5);
-  setText("drainTxt", m.alive ? Math.ceil(nextDrain) + "초 뒤 −10%" : "쓰러졌어요");
+  setText("drainTxt", m.alive ? Math.ceil(nextDrain) + "초 뒤 −10%" : (m.rsp > 0 ? m.rsp + "초 뒤에 다시 태어나요" : "쓰러졌어요"));
+  if(!m.alive){
+    setText("reviveNum", m.rsp > 0 ? String(m.rsp) : "");
+    setText("reviveTxt", m.rsp > 0 ? "초 뒤에 같은 생물로 다시 태어나요!" : "곧 게임이 끝나요. 결과를 기다려요!");
+  }
   var left = Math.max(0, FC.GAME_TIME - v.time);
   setText("timer", Math.floor(left/60) + ":" + String(Math.floor(left % 60)).padStart(2, "0"));
   $("timer").classList.toggle("hurry", left < 20);
@@ -1560,9 +1636,9 @@ function updateHud(v){
     }).join("");
   }
   // 목표
-  var g0 = m.alive, g1 = !m.fail, g2 = m.alive && m.e > 0;
+  var g0 = m.alive && !m.rv, g1 = !m.fail, g2 = !m.sv;
   [g0, g1, g2].forEach(function(ok, i){ var el = $("goal" + i); if(el) el.className = ok ? "ok" : "bad"; });
-  if(m.fail && hudCache.fail !== m.fail){ hudCache.fail = m.fail; toast("😢 " + m.fail); }
+  if(m.fail && hudCache.fail !== m.fail){ hudCache.fail = m.fail; toast("😢 미션 실패: " + m.fail); }
   // 버튼
   var S = SPEC[m.role];
   var cdMax = m.role === "snake" ? 5 : 1.2;
@@ -1656,6 +1732,11 @@ function frame(){
   draw(v, now/1000);
   updateHud(v);
   if(v.mine && !v.mine.alive && !deadShown && !ended) showDead(v.mine);
+  if(v.mine && v.mine.alive && deadShown && !ended){
+    deadShown = false; watching = false;
+    $("dead").classList.add("hidden");
+    toast("🐣 다시 태어났어요! 이번엔 조심해요");
+  }
 }
 requestAnimationFrame(frame);
 
@@ -1687,6 +1768,7 @@ function handleEvents(v){
     else if(ev.k === "starve") addPop(ev.x, ev.y - 16, "💫", "#9C9087", 0.9, "heart");
     else if(ev.k === "rot" && mineE) { addPop(ev.x, ev.y, ev.txt, "#7FA34A", 1, "eat"); toast("🤢 장바구니 속 생물이 썩어 버렸어요"); }
     else if(ev.k === "miss" && mineE) toast(ev.txt);
+    else if(ev.k === "revive") addPop(ev.x, ev.y - 26, "🐣 짠!", "#E8B22F", 1.1, "eat");
     else if(ev.k === "dash") addPop(ev.x, ev.y - 20, "슝슝!", "#8B6FD8", 0.9, "eat");
   }
   if(pendingEv.length > 60) pendingEv.splice(0, pendingEv.length - 60);
@@ -2172,9 +2254,10 @@ function showDead(m){
   var reason = m.reason;
   if(reason === "starve"){ $("deadEm").textContent = "😵"; $("deadTitle").textContent = "배가 고파 쓰러졌어요"; $("deadSub").textContent = "에너지가 0%가 되었어요. 다음엔 더 부지런히 먹어요!"; }
   else { $("deadEm").textContent = EMO[reason] || "😢"; $("deadTitle").textContent = "앗, " + (SPEC[reason] ? SPEC[reason].name : "누군가") + "에게 먹혔어요!"; $("deadSub").textContent = "혹시 그게 친구였을까요? 끝나면 알 수 있어요."; }
+  $("reviveBox").classList.toggle("hidden", false);
   $("dead").classList.remove("hidden");
 }
-$("btnWatch").onclick = function(){ $("dead").classList.add("hidden"); watching = true; toast("화면을 끌어서 둘러볼 수 있어요"); };
+$("btnWatch").onclick = function(){ $("dead").classList.add("hidden"); watching = true; toast("화면을 끌어서 둘러볼 수 있어요. 시간이 되면 다시 태어나요!"); };
 $("btnHome1").onclick = function(){ quitToHome(); };
 $("btnHome2").onclick = function(){ quitToHome(); };
 $("btnAgain").onclick = function(){
@@ -2184,6 +2267,30 @@ $("btnAgain").onclick = function(){
 function quitToHome(){
   if(app.mode === "host" && db && app.code) closeRoom();
   leaveToHome("");
+}
+
+// 미션 달성 여부
+function missionsHtml(r, role){
+  if(!role || !r.ms) return "";
+  var goals = ROLE_INFO[role].goals;
+  return '<h3>🎯 나의 미션 (' + r.ms.filter(Boolean).length + '/3)</h3><ul class="mis-list">' + goals.map(function(g, i){
+    var ok = !!r.ms[i];
+    return '<li class="' + (ok ? "ok" : "no") + '">' + g + '<span class="ck">' + (ok ? "✓ 달성" : "✗ 실패") + '</span></li>';
+  }).join("") + '</ul>';
+}
+
+// 부활 횟수와 먹은 먹이 정리
+function statsHtml(r, big){
+  var ate = r.ate || {}, total = 0, parts = [];
+  ["rice","hopper","frog","snake"].forEach(function(k){ if(ate[k]){ total += ate[k]; parts.push(EMO[k] + " " + ate[k]); } });
+  var rv = r.rv || 0, gn = r.gn || 0;
+  var ms = r.ms || [], done = ms.filter(Boolean).length;
+  if(!big) return "🎯 미션 " + done + "/3 · 🐣 부활 " + rv + "번 · 🍽 먹이 " + total + "개" + (parts.length ? " (" + parts.join(" ") + ")" : "") + " · ⚡ +" + gn + "%";
+  return '<h3>📊 나의 기록</h3><div class="row">' +
+    '<span class="st">🐣 부활 <b>' + rv + '</b>번</span>' +
+    '<span class="st">🍽 먹은 먹이 <b>' + total + '</b>개</span>' +
+    '<span class="st">⚡ 얻은 에너지 <b>+' + gn + '</b>%</span>' +
+    '</div>' + (parts.length ? '<div class="row" style="margin-top:6px;">' + parts.map(function(t){ return '<span class="st">' + t + '</span>'; }).join("") + '</div>' : '');
 }
 
 function onGameOver(res, counts, plist){
@@ -2196,14 +2303,16 @@ function onGameOver(res, counts, plist){
   var mineR = res[app.pid];
   var win = mineR && mineR.win;
   $("resEm").textContent = win ? "🏆" : "🌱";
-  $("resTitle").textContent = win ? "승리! 먹이사슬을 지켰어요" : "아쉬워요!";
+  $("resTitle").textContent = win ? "승리! 미션을 모두 달성했어요" : "미션 실패! 아쉬워요";
   $("resSub").textContent = mineR ? mineR.why : "";
+  var myRole = players[app.pid] ? players[app.pid].role : null;
+  $("myStats").innerHTML = mineR ? missionsHtml(mineR, myRole) + statsHtml(mineR, true) : "";
   var order = FC.ROLES.slice();
   var ids = Object.keys(players).sort(function(a, b){ return order.indexOf(players[a].role) - order.indexOf(players[b].role); });
   $("resList").innerHTML = ids.map(function(id){
     var p = players[id], r = res[id] || { win:false, why:"" }, R = ROLE_INFO[p.role];
     return '<li class="' + (r.win ? "win" : "lose") + '"><span class="em">' + R.emo + '</span><div class="who"><b>' + esc(p.name || "친구") + (id === app.pid ? " (나)" : "") +
-           ' · ' + R.name + '</b><span>' + esc(r.why) + '</span></div><span class="badge">' + (r.win ? "승리 🎉" : "실패") + '</span></li>';
+           ' · ' + R.name + '</b><span>' + esc(r.why) + '</span><span class="stat">' + statsHtml(r, false) + '</span></div><span class="badge">' + (r.win ? "미션 성공 🎉" : "미션 실패") + '</span></li>';
   }).join("") + (ids.length < 4 ? '<li><span class="em">🤖</span><div class="who"><b>나머지 생물</b><span>모두 컴퓨터가 움직였어요</span></div></li>' : "");
   counts = counts || {};
   $("resCounts").innerHTML = ["rice","hopper","frog","snake","human"].map(function(k){ return "<span>" + EMO[k] + " " + (counts[k] || 0) + "</span>"; }).join("");
