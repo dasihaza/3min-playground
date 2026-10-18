@@ -1,0 +1,1792 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>갯벌을 지키자! | 3분 놀이터</title>
+<meta name="description" content="내려오는 갯벌 생물 이름을 타자로 쳐서 갯벌을 넓히고, 갯벌을 지키는 팻말로 개발 악당을 물리치는 초등학생용 2단계 타자 게임.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
+<style>
+  :root{
+    --sky:#E4F5FF; --cream:#FFF9EF; --card:#FFFFFF;
+    --ink:#3F3A52; --ink-soft:#8E879E; --line:#EEE5D6;
+    --mud:#8B6650; --mud-d:#6A4A38; --mud-dk:#4E3527;
+    --sea:#45B4CF; --sea-d:#2B8FAD;
+    --marsh:#E5576E; --marsh-d:#C23A53;
+    --reed:#E9C46A; --reed-d:#C9A243;
+    --leaf:#6CC07A; --leaf-d:#46A058;
+    --sun:#FFD45E; --sun-d:#E8B22F;
+    --pink:#FF9BB3; --pink-d:#E06B88;
+    --gray:#9AA0A8; --gray-d:#707784;
+    --villain:#F08A3C; --villain-d:#C9651F;
+    --shadow:0 3px 0 rgba(63,58,82,.10);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 8% 6%, rgba(255,212,94,.30) 0 120px, transparent 121px),
+      radial-gradient(circle at 92% 12%, rgba(69,180,207,.18) 0 110px, transparent 111px),
+      radial-gradient(circle at 88% 92%, rgba(229,87,110,.12) 0 130px, transparent 131px),
+      linear-gradient(180deg, var(--sky) 0%, var(--cream) 40%, var(--cream) 100%);
+    background-attachment:fixed;
+    color:var(--ink); font-family:'Noto Sans KR',sans-serif; min-height:100vh;
+    overflow-x:hidden;
+  }
+  img{-webkit-user-drag:none;user-select:none;}
+  .hidden{display:none !important;}
+
+  /* ===== 위쪽 띠 ===== */
+  .topbar{max-width:980px;margin:0 auto;padding:13px 16px 0;display:flex;align-items:center;justify-content:space-between;}
+  .topbar a{text-decoration:none;color:var(--ink);}
+  .topbar .brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;}
+  .topbar .back{font-size:12.5px;font-weight:700;color:var(--ink-soft);background:#fff;
+    padding:6px 12px;border-radius:999px;box-shadow:var(--shadow);}
+  .shell{max-width:980px;margin:0 auto;padding:12px 16px 54px;}
+
+  .card{background:var(--card);border-radius:26px;padding:20px;
+    box-shadow:var(--shadow),0 8px 24px rgba(63,58,82,.08);margin-bottom:14px;}
+
+  /* ===== 버튼 ===== */
+  .btn{font-family:'Jua',sans-serif;border:none;cursor:pointer;font-size:18px;padding:15px 30px;
+    border-radius:18px;background:var(--leaf);color:#fff;box-shadow:0 5px 0 var(--leaf-d);
+    transition:transform .08s;}
+  .btn:active{transform:translateY(5px);box-shadow:none;}
+  .btn.sea{background:var(--sea);box-shadow:0 5px 0 var(--sea-d);}
+  .btn.marsh{background:var(--marsh);box-shadow:0 5px 0 var(--marsh-d);}
+  .btn.ghost{background:#fff;color:var(--ink);box-shadow:0 5px 0 var(--line);}
+  .btn.sm{font-size:15px;padding:12px 20px;border-radius:14px;}
+  .btn.big{font-size:22px;padding:17px 42px;}
+
+  /* ===== 시작 화면 ===== */
+  .poster{position:relative;border-radius:30px;overflow:hidden;aspect-ratio:16/9;
+    box-shadow:0 6px 0 rgba(78,53,39,.18),0 18px 40px rgba(63,58,82,.16);margin-bottom:16px;
+    background:#FFE7C2 url(../assets/getbeol/title.webp) center/cover no-repeat;}
+  .poster::after{content:"";position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(255,255,255,.18) 0%,transparent 35%,transparent 70%,rgba(78,53,39,.18) 100%);pointer-events:none;}
+  .poster h1{position:absolute;left:0;right:0;top:5%;margin:0;text-align:center;z-index:2;
+    font-family:'Jua',sans-serif;font-weight:400;font-size:clamp(34px,8.4vw,74px);line-height:1.05;color:#fff;
+    -webkit-text-stroke:2px var(--mud-dk);paint-order:stroke fill;
+    text-shadow:0 4px 0 var(--mud-dk),0 9px 0 rgba(78,53,39,.25);letter-spacing:1px;}
+  .poster h1 span{display:inline-block;animation:hop 2.4s ease-in-out infinite;}
+  .poster h1 span:nth-child(2){animation-delay:.12s;} .poster h1 span:nth-child(3){animation-delay:.24s;}
+  .poster h1 span:nth-child(4){animation-delay:.36s;} .poster h1 span:nth-child(5){animation-delay:.48s;}
+  .poster h1 span:nth-child(6){animation-delay:.60s;} .poster h1 span:nth-child(7){animation-delay:.72s;}
+  .poster .sub{position:absolute;left:50%;top:calc(5% + clamp(44px,10vw,90px));transform:translateX(-50%);z-index:2;
+    background:rgba(255,255,255,.92);border-radius:999px;padding:6px 16px;white-space:nowrap;
+    font-family:'Gaegu',cursive;font-weight:700;font-size:clamp(14px,2.6vw,20px);color:var(--mud-d);
+    box-shadow:0 3px 0 rgba(78,53,39,.15);}
+  @keyframes hop{0%,100%{transform:translateY(0) rotate(0);}50%{transform:translateY(-7px) rotate(-3deg);}}
+
+  .parade{overflow:hidden;border-radius:22px;background:#FFFCF4;border:2.5px dashed #F2DCBA;margin-bottom:16px;padding:8px 0;}
+  .parade-track{display:flex;gap:10px;width:max-content;animation:parade 70s linear infinite;}
+  .parade-track figure{margin:0;width:78px;text-align:center;flex:0 0 auto;}
+  .parade-track img{width:60px;height:60px;object-fit:contain;display:block;margin:0 auto;}
+  .parade-track figcaption{font-family:'Jua',sans-serif;font-size:12px;color:var(--mud-d);white-space:nowrap;}
+  @keyframes parade{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+  .how{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:2px 0 16px;}
+  .how-item{display:flex;align-items:flex-start;gap:12px;background:#FFFCF4;border:2.5px dashed #F2DCBA;
+    border-radius:20px;padding:13px 14px;}
+  .how-item .ic{flex:0 0 auto;width:56px;height:56px;border-radius:18px;display:flex;align-items:center;
+    justify-content:center;font-size:28px;background:#fff;box-shadow:0 3px 0 var(--line);}
+  .how-item .ic img{width:46px;height:46px;object-fit:contain;}
+  .how-item > div > b{font-family:'Jua',sans-serif;font-size:17px;color:var(--mud-d);display:block;margin-bottom:3px;}
+  .how-item > div > span{font-size:13.5px;color:var(--ink-soft);line-height:1.55;}
+  .how-item.wide{grid-column:1 / -1;}
+
+  .best{text-align:center;font-family:'Gaegu',cursive;font-weight:700;font-size:18px;color:var(--sun-d);margin:0 0 14px;}
+
+  /* ===== 순위 팻말 ===== */
+  .board-sign{position:relative;background:linear-gradient(180deg,#D7A574 0%,#C38E5E 100%);border-radius:22px;
+    padding:20px 16px 16px;margin:4px 0 18px;box-shadow:0 5px 0 #9C6B42,0 10px 22px rgba(78,53,39,.15);}
+  .board-sign .nails{position:absolute;top:9px;left:14px;right:14px;display:flex;justify-content:space-between;}
+  .board-sign .nails i{width:9px;height:9px;border-radius:50%;background:#8C5C3A;box-shadow:inset 0 -2px 0 rgba(0,0,0,.2);}
+  .board-sign h3{margin:0 0 12px;text-align:center;font-family:'Jua',sans-serif;font-weight:400;font-size:20px;color:#fff;
+    text-shadow:0 2px 0 rgba(78,53,39,.45);}
+  .rank-list{display:grid;gap:7px;}
+  .rank-row{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.78);border-radius:14px;padding:9px 13px;}
+  .rank-row .pos{flex:0 0 auto;width:30px;text-align:center;font-family:'Jua',sans-serif;font-size:19px;color:var(--mud-d);}
+  .rank-row .who{flex:1;min-width:0;font-family:'Jua',sans-serif;font-size:16px;color:var(--ink);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .rank-row .amt{flex:0 0 auto;font-family:'Jua',sans-serif;font-size:16px;color:var(--sea-d);}
+  .rank-row.first{background:linear-gradient(180deg,#FFF3CF 0%,#FFE9A8 100%);}
+  .rank-row.me{outline:2.5px dashed var(--marsh);outline-offset:1px;}
+  .rank-empty{text-align:center;font-family:'Gaegu',cursive;font-weight:700;font-size:16px;color:#fff;
+    padding:10px 4px;line-height:1.5;text-shadow:0 1px 0 rgba(78,53,39,.4);}
+
+  /* ===== 단계 안내 ===== */
+  .lv-card{text-align:center;padding:26px 20px 26px;}
+  .lv-card .num{display:inline-block;font-family:'Jua',sans-serif;font-size:15px;color:#fff;background:var(--sea);
+    padding:6px 16px;border-radius:999px;box-shadow:0 3px 0 var(--sea-d);}
+  .lv-card.s2 .num{background:var(--marsh);box-shadow:0 3px 0 var(--marsh-d);}
+  .lv-card h2{font-family:'Jua',sans-serif;font-weight:400;font-size:clamp(26px,5vw,34px);color:var(--mud-dk);margin:14px 0 8px;}
+  .lv-card p{font-size:15px;line-height:1.7;color:var(--ink-soft);margin:0 auto 16px;max-width:30em;word-break:keep-all;}
+  .lv-card p b{color:var(--ink);}
+  .lv-art{display:flex;justify-content:center;align-items:flex-end;gap:4px;margin:16px 0 4px;min-height:96px;}
+  .lv-art img{width:84px;height:84px;object-fit:contain;animation:hop 2.2s ease-in-out infinite;}
+  .lv-art img:nth-child(2n){animation-delay:.3s;} .lv-art img:nth-child(3n){animation-delay:.6s;}
+  .lv-art .vs{font-family:'Jua',sans-serif;font-size:30px;color:var(--marsh);margin:0 10px 26px;}
+  .chips{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:0 auto 18px;max-width:640px;}
+  .chips span{font-family:'Jua',sans-serif;font-size:13.5px;padding:5px 11px;border-radius:999px;background:#F3FBFD;
+    color:var(--sea-d);border:2px solid #D5EEF5;}
+  .lv-card.s2 .chips span{background:#FFF4EC;color:#B86A3A;border-color:#F8DCC6;}
+
+  /* ===== 게임 화면 ===== */
+  #game{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;
+    height:100vh;height:100dvh;padding:8px 10px 10px;gap:8px;
+    background:linear-gradient(180deg,#DDF2FB 0%,#FFF6E8 100%);}
+  #game.hidden{display:none;}
+  .hud{display:flex;gap:7px;align-items:stretch;max-width:1000px;width:100%;margin:0 auto;}
+  .hb{background:#fff;border-radius:16px;padding:6px 10px 7px;text-align:center;box-shadow:var(--shadow),0 4px 12px rgba(63,58,82,.06);
+    display:flex;flex-direction:column;justify-content:center;min-width:0;}
+  .hb .lab{font-size:11px;font-weight:700;color:var(--ink-soft);white-space:nowrap;}
+  .hb .val{font-family:'Jua',sans-serif;font-size:20px;line-height:1.15;color:var(--mud-d);white-space:nowrap;}
+  .hb.lvl .val{color:var(--sea-d);}
+  .hb.score .val{color:var(--sun-d);}
+  .hb.time{flex:1.6;}
+  .hb.time .val{color:var(--sea-d);}
+  .tbar{height:8px;border-radius:99px;background:var(--line);margin-top:4px;overflow:hidden;}
+  .tbar i{display:block;height:100%;width:100%;border-radius:99px;background:linear-gradient(90deg,var(--leaf),var(--sun));}
+  .tbar.warn i{background:linear-gradient(90deg,var(--marsh),var(--pink));}
+  .pips{display:flex;gap:2px;justify-content:center;margin-top:3px;}
+  .pips i{width:7px;height:9px;border-radius:3px;background:var(--line);}
+  .pips i.on{background:linear-gradient(180deg,#FFB36B,#F0743C);}
+  .pips i.on.hot{background:linear-gradient(180deg,#FF8FA6,#E0475F);}
+  .hearts{font-size:17px;letter-spacing:-1px;line-height:1.3;}
+  .hearts .off{filter:grayscale(1);opacity:.28;}
+  .grow-name{font-family:'Jua',sans-serif;font-size:13.5px;color:var(--leaf-d);white-space:nowrap;}
+  .gbar{height:7px;border-radius:99px;background:var(--line);margin-top:3px;overflow:hidden;}
+  .gbar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#7FD6C2,#6CC07A,#FFD45E,#FF9BB3);
+    transition:width .6s cubic-bezier(.3,1.4,.5,1);}
+
+  .stage{position:relative;flex:1;min-height:0;max-width:1000px;width:100%;margin:0 auto;border-radius:24px;overflow:hidden;
+    box-shadow:0 5px 0 rgba(78,53,39,.18),0 12px 28px rgba(63,58,82,.14);background:#CFC6B4;
+    user-select:none;-webkit-user-select:none;}
+  .layer{position:absolute;inset:0;}
+  #scene1{width:100%;height:100%;display:block;transition:filter 1.6s ease;}
+  #words,#fx{pointer-events:none;}
+
+  /* 1단계 장면 : 레벨에 따라 켜지고 꺼지는 조각들 */
+  #scene1 .lv{opacity:0;transition:opacity 1.8s ease;}
+  #scene1 .lv.on{opacity:1;}
+  #mud{transform-origin:500px 640px;transition:transform 1.8s cubic-bezier(.3,1.35,.45,1);}
+  .drift{animation:drift 26s ease-in-out infinite alternate;}
+  .drift2{animation:drift 34s ease-in-out infinite alternate-reverse;}
+  @keyframes drift{from{transform:translateX(-40px);}to{transform:translateX(60px);}}
+  .spin{transform-box:fill-box;transform-origin:center;animation:spin 30s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .tw{animation:tw 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center;}
+  @keyframes tw{0%,100%{opacity:.15;transform:scale(.6);}50%{opacity:1;transform:scale(1.1);}}
+  .shimmer{stroke-dasharray:14 22;animation:shim 3s linear infinite;}
+  @keyframes shim{to{stroke-dashoffset:-72;}}
+  .sway{transform-box:fill-box;transform-origin:50% 100%;animation:sway 3.2s ease-in-out infinite;}
+  @keyframes sway{0%,100%{transform:rotate(-3deg);}50%{transform:rotate(4deg);}}
+  .flyby{animation:flyby 22s linear infinite;}
+  @keyframes flyby{from{transform:translateX(-220px);}to{transform:translateX(1220px);}}
+  .rise{animation:rise 5s linear infinite;transform-box:fill-box;}
+  @keyframes rise{0%{transform:translateY(0);opacity:0;}15%{opacity:1;}100%{transform:translateY(-220px);opacity:0;}}
+  .bob{transform-box:fill-box;transform-origin:50% 100%;animation:bobS 2.6s ease-in-out infinite;}
+  @keyframes bobS{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+
+  /* 갯벌에 자리 잡은 생물들 */
+  .res{transform-box:fill-box;transform-origin:50% 100%;}
+  .res.pop{animation:resPop .7s cubic-bezier(.3,1.6,.5,1) both;}
+  @keyframes resPop{0%{transform:scale(0);}100%{transform:scale(1);}}
+  .res .act{transform-box:fill-box;transform-origin:50% 100%;}
+  .act.crab{animation:scuttle 3.4s ease-in-out infinite;}
+  .act.shell{animation:breathe 2.8s ease-in-out infinite;}
+  .act.octo{animation:wobble 2.2s ease-in-out infinite;}
+  .act.fish{animation:skip 2.6s ease-in-out infinite;}
+  .act.worm{animation:wobble 1.8s ease-in-out infinite;}
+  .act.bird{animation:peck 3s ease-in-out infinite;}
+  .act.plant{animation:sway 3.6s ease-in-out infinite;}
+  @keyframes scuttle{0%,100%{transform:translateX(0);}25%{transform:translateX(-10px) rotate(-3deg);}50%{transform:translateX(0);}75%{transform:translateX(10px) rotate(3deg);}}
+  @keyframes breathe{0%,100%{transform:scale(1,1);}50%{transform:scale(1.05,.95);}}
+  @keyframes wobble{0%,100%{transform:rotate(-5deg);}50%{transform:rotate(5deg);}}
+  @keyframes skip{0%,60%,100%{transform:translateY(0);}75%{transform:translateY(-16px) rotate(-6deg);}}
+  @keyframes peck{0%,70%,100%{transform:rotate(0);}80%{transform:rotate(12deg);}90%{transform:rotate(0);}}
+
+  /* 2단계 장면 */
+  #scene2{background:#CFE9F2 url(../assets/getbeol/battle.webp) center/cover no-repeat;}
+  #scene2::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(90deg,rgba(108,192,122,.12) 0%,transparent 40%,transparent 60%,rgba(80,80,90,.18) 100%);}
+  .tug{position:absolute;left:12px;right:12px;top:10px;z-index:5;}
+  .tug-labels{display:flex;justify-content:space-between;font-family:'Jua',sans-serif;font-size:14px;margin-bottom:4px;}
+  .tug-labels span{background:rgba(255,255,255,.92);padding:3px 10px;border-radius:999px;box-shadow:var(--shadow);white-space:nowrap;}
+  .tug-labels .h{color:var(--leaf-d);} .tug-labels .v{color:var(--villain-d);}
+  .tug-bar{position:relative;height:24px;border-radius:999px;background:linear-gradient(180deg,#9AA0A8,#6D737E);
+    border:3px solid #fff;box-shadow:0 3px 0 rgba(63,58,82,.2);overflow:hidden;}
+  .tug-bar::before{content:"";position:absolute;inset:0;
+    background:repeating-linear-gradient(-45deg,rgba(255,170,60,.55) 0 10px,rgba(70,70,80,.0) 10px 20px);}
+  .tug-hero{position:absolute;left:0;top:0;bottom:0;width:50%;border-radius:999px 0 0 999px;
+    background:linear-gradient(180deg,#9BE38E 0%,#57B865 100%);transition:width .25s ease-out;}
+  .tug-hero::after{content:"";position:absolute;left:8px;right:8px;top:3px;height:6px;border-radius:99px;background:rgba(255,255,255,.45);}
+  .tug-knot{position:absolute;top:50%;width:34px;height:34px;margin:-17px 0 0 -17px;left:50%;border-radius:50%;
+    background:#fff;border:3px solid var(--mud-d);display:flex;align-items:center;justify-content:center;font-size:17px;
+    transition:left .25s ease-out;box-shadow:0 2px 0 rgba(0,0,0,.15);z-index:2;}
+  .tug-wrap{position:relative;}
+  .tug.danger .tug-bar{animation:pulseRed 1s ease-in-out infinite;}
+  @keyframes pulseRed{0%,100%{box-shadow:0 3px 0 rgba(63,58,82,.2),0 0 0 0 rgba(229,87,110,.0);}50%{box-shadow:0 3px 0 rgba(63,58,82,.2),0 0 0 6px rgba(229,87,110,.35);}}
+
+  .team{position:absolute;bottom:4%;display:flex;align-items:flex-end;transition:transform .4s ease-out;z-index:2;}
+  .team.hero{left:1%;}
+  .team.villain{right:1%;}
+  .team .m{position:relative;width:clamp(40px,10vw,104px);margin:0 -6px;}
+  .team .m img{width:100%;display:block;transform-origin:50% 100%;}
+  .team.hero .m img{animation:hop 1.9s ease-in-out infinite;}
+  .team.hero .m:nth-child(2) img{animation-delay:.25s;} .team.hero .m:nth-child(3) img{animation-delay:.5s;}
+  .team.hero .m:nth-child(4) img{animation-delay:.75s;} .team.hero .m:nth-child(5) img{animation-delay:1s;}
+  .team.villain .m{width:clamp(46px,12vw,124px);}
+  .team.villain .m img{animation:rumble 1.1s ease-in-out infinite;}
+  .team.villain .m:nth-child(2) img{animation-delay:.2s;} .team.villain .m:nth-child(3) img{animation-delay:.4s;}
+  @keyframes rumble{0%,100%{transform:translateY(0) rotate(0);}50%{transform:translateY(-2px) rotate(-1.5deg);}}
+  .team.villain.hurt .m img{animation:hurt .5s ease-out;}
+  @keyframes hurt{0%{transform:translateX(0) rotate(0);}30%{transform:translateX(16px) rotate(8deg);filter:brightness(1.4);}100%{transform:translateX(0) rotate(0);}}
+  .team.villain.charge .m img{animation:charge .7s ease-out;}
+  @keyframes charge{0%{transform:translateX(0);}40%{transform:translateX(-26px) rotate(-4deg);}100%{transform:translateX(0);}}
+  .team.hero.cheer .m img{animation:cheer .6s ease-out;}
+  @keyframes cheer{0%{transform:translateY(0) scale(1);}40%{transform:translateY(-24px) scale(1.08);}100%{transform:translateY(0) scale(1);}}
+  .team.hero.hurt .m img{animation:shiver .5s ease-out;}
+  @keyframes shiver{0%,100%{transform:translateX(0);}25%{transform:translateX(-7px);}75%{transform:translateX(7px);}}
+  .vsay,.hsay{position:absolute;bottom:100%;margin-bottom:6px;background:#fff;border-radius:16px;padding:7px 12px;
+    font-family:'Gaegu',cursive;font-weight:700;font-size:clamp(14px,2.2vw,17px);white-space:nowrap;
+    box-shadow:0 3px 0 rgba(63,58,82,.15);opacity:0;transform:translateY(8px) scale(.9);transition:all .25s;pointer-events:none;}
+  .vsay{right:6%;color:var(--villain-d);border:2.5px solid #F8C9A4;}
+  .hsay{left:6%;color:var(--leaf-d);border:2.5px solid #C6EBC2;}
+  .vsay.show,.hsay.show{opacity:1;transform:none;}
+  .bigsign{position:absolute;left:50%;bottom:100%;transform:translate(-50%,10px) scale(.6);opacity:0;pointer-events:none;
+    transition:all .3s cubic-bezier(.3,1.6,.5,1);text-align:center;}
+  .bigsign.show{opacity:1;transform:translate(-50%,-10px) scale(1);}
+  .bigsign .bd{display:inline-block;background:linear-gradient(180deg,#FFF6DD,#F8E2B0);border:3px solid #B98552;border-radius:12px;
+    padding:6px 14px;font-family:'Jua',sans-serif;font-size:clamp(16px,2.6vw,22px);color:var(--mud-dk);white-space:nowrap;
+    box-shadow:0 3px 0 #9C6B42;}
+  .bigsign .st{width:8px;height:26px;margin:0 auto;background:#B98552;border-radius:0 0 4px 4px;}
+
+  /* 떨어지는 단어 */
+  .word{position:absolute;left:0;top:0;display:flex;align-items:center;gap:6px;padding:5px 14px 5px 6px;border-radius:999px;
+    background:#fff;box-shadow:0 4px 0 rgba(78,53,39,.22),0 8px 18px rgba(63,58,82,.16);border:3px solid #fff;
+    font-family:'Jua',sans-serif;font-size:clamp(17px,2.6vw,23px);color:var(--ink);white-space:nowrap;will-change:transform;}
+  .word img{width:clamp(30px,4.4vw,42px);height:clamp(30px,4.4vw,42px);object-fit:contain;}
+  .word.low{border-color:#FFC3CD;background:#FFF4F6;}
+  .word.match{border-color:var(--leaf);background:#F1FFF0;}
+  .word.sign{flex-direction:column;gap:0;padding:0;border:none;background:none;box-shadow:none;}
+  .word.sign .bd{background:linear-gradient(180deg,#FFF8E6,#F7E0AE);border:3px solid #B98552;border-radius:12px;padding:6px 14px;
+    box-shadow:0 4px 0 #9C6B42,0 8px 16px rgba(63,58,82,.18);color:var(--mud-dk);}
+  .word.sign .st{width:7px;height:16px;background:#B98552;border-radius:0 0 4px 4px;}
+  .word.sign.low .bd{background:linear-gradient(180deg,#FFEDEF,#FFD3D9);border-color:#D9677B;}
+  .word.sign.match .bd{border-color:var(--leaf-d);background:linear-gradient(180deg,#F3FFF0,#D6F5CF);}
+
+  .fx-text{position:absolute;font-family:'Jua',sans-serif;font-size:24px;color:#fff;-webkit-text-stroke:1.5px var(--leaf-d);paint-order:stroke fill;
+    text-shadow:0 3px 0 var(--leaf-d);animation:fxUp 1s ease-out forwards;white-space:nowrap;transform:translate(-50%,-50%);}
+  .fx-text.bad{-webkit-text-stroke-color:var(--marsh-d);text-shadow:0 3px 0 var(--marsh-d);}
+  .fx-text.combo{font-size:20px;-webkit-text-stroke-color:#D9822B;text-shadow:0 3px 0 #D9822B;}
+  @keyframes fxUp{0%{opacity:0;transform:translate(-50%,-30%) scale(.6);}20%{opacity:1;transform:translate(-50%,-60%) scale(1.15);}100%{opacity:0;transform:translate(-50%,-160%) scale(1);}}
+  .spark{position:absolute;width:10px;height:10px;border-radius:50%;pointer-events:none;animation:spark .7s ease-out forwards;}
+  @keyframes spark{to{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0;}}
+  .flyer{position:absolute;width:48px;height:48px;object-fit:contain;pointer-events:none;z-index:6;
+    transition:transform .75s cubic-bezier(.45,-0.3,.4,1),opacity .2s .65s;}
+  .splash{position:absolute;bottom:0;width:70px;height:22px;margin-left:-35px;border-radius:50%;background:rgba(106,74,56,.55);
+    animation:splash .7s ease-out forwards;pointer-events:none;}
+  @keyframes splash{0%{transform:scale(.3);opacity:1;}100%{transform:scale(1.6);opacity:0;}}
+  .ground-line{position:absolute;left:0;right:0;bottom:0;height:5px;background:repeating-linear-gradient(90deg,rgba(229,87,110,.55) 0 14px,transparent 14px 24px);z-index:3;}
+
+  .toast{position:absolute;left:50%;top:16%;transform:translate(-50%,-10px) scale(.8);opacity:0;z-index:8;pointer-events:none;
+    background:linear-gradient(180deg,#FFFFFF,#F2FFF2);border:3px solid var(--leaf);border-radius:20px;padding:10px 20px;text-align:center;
+    font-family:'Jua',sans-serif;font-size:clamp(17px,3vw,24px);color:var(--leaf-d);white-space:nowrap;
+    box-shadow:0 5px 0 rgba(70,160,88,.35),0 14px 28px rgba(63,58,82,.18);transition:all .35s cubic-bezier(.3,1.6,.5,1);}
+  .toast small{display:block;font-family:'Gaegu',cursive;font-weight:700;font-size:clamp(14px,2.2vw,17px);color:var(--ink-soft);}
+  .toast.show{opacity:1;transform:translate(-50%,0) scale(1);}
+  .toast.bad{border-color:var(--marsh);color:var(--marsh-d);background:linear-gradient(180deg,#fff,#FFF0F2);box-shadow:0 5px 0 rgba(194,58,83,.3),0 14px 28px rgba(63,58,82,.18);}
+
+  .count{position:absolute;inset:0;z-index:9;display:flex;align-items:center;justify-content:center;pointer-events:none;
+    background:rgba(255,255,255,.18);}
+  .count span{font-family:'Jua',sans-serif;font-size:min(30vw,170px);color:#fff;-webkit-text-stroke:4px var(--mud-dk);paint-order:stroke fill;
+    text-shadow:0 8px 0 var(--mud-dk);animation:countPop .9s ease-out both;}
+  @keyframes countPop{0%{transform:scale(2);opacity:0;}30%{transform:scale(1);opacity:1;}100%{transform:scale(.9);opacity:.9;}}
+  .banner{position:absolute;inset:0;z-index:9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+    background:radial-gradient(circle,rgba(255,255,255,.55),rgba(255,255,255,.1));pointer-events:none;}
+  .banner b{font-family:'Jua',sans-serif;font-weight:400;font-size:clamp(40px,9vw,82px);color:#fff;-webkit-text-stroke:3px var(--leaf-d);paint-order:stroke fill;
+    text-shadow:0 6px 0 var(--leaf-d);animation:countPop 1.2s ease-out both;}
+  .banner.fail b{-webkit-text-stroke-color:var(--marsh-d);text-shadow:0 6px 0 var(--marsh-d);}
+  .banner small{font-family:'Gaegu',cursive;font-weight:700;font-size:clamp(17px,3vw,24px);color:var(--mud-dk);background:#fff;border-radius:999px;padding:5px 16px;}
+
+  .typebar{display:flex;gap:8px;max-width:1000px;width:100%;margin:0 auto;}
+  #typing{flex:1;min-width:0;font-family:'Jua',sans-serif;font-size:clamp(20px,3.4vw,26px);padding:12px 18px;border-radius:18px;
+    border:3px solid #D5EEF5;background:#fff;color:var(--ink);outline:none;box-shadow:0 4px 0 #BFE2EC;}
+  #typing:focus{border-color:var(--sea);}
+  #typing::placeholder{color:#B9C3CB;font-size:.8em;}
+  #typing.ok{border-color:var(--leaf);box-shadow:0 4px 0 #A9DDB0;}
+  #typing.bad{border-color:var(--marsh);box-shadow:0 4px 0 #F2B4BF;animation:shake .35s;}
+  @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-7px);}75%{transform:translateX(7px);}}
+  .typebar .btn{padding:0 20px;font-size:18px;border-radius:18px;}
+  .xbtn{position:absolute;right:8px;bottom:12px;z-index:7;border:none;background:rgba(255,255,255,.85);border-radius:999px;
+    font-size:12px;font-weight:700;color:var(--ink-soft);padding:5px 10px;cursor:pointer;}
+
+  /* ===== 승리 영상 ===== */
+  .movie{position:fixed;inset:0;z-index:50;background:#14121C;display:flex;align-items:center;justify-content:center;}
+  .film{position:relative;width:min(100vw,calc(100dvh * 16 / 9));aspect-ratio:16/9;overflow:hidden;background:#000;}
+  .shot{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.1s ease;will-change:transform;}
+  .shot.on{opacity:1;}
+  .film canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+  .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;}
+  .flash.go{animation:flash .5s ease-out;}
+  @keyframes flash{0%{opacity:0;}10%{opacity:.85;}30%{opacity:.1;}40%{opacity:.6;}100%{opacity:0;}}
+  .film.shake{animation:fshake .35s linear infinite;}
+  @keyframes fshake{0%,100%{transform:translate(0,0);}25%{transform:translate(-3px,2px);}50%{transform:translate(3px,-2px);}75%{transform:translate(-2px,-3px);}}
+  .props{position:absolute;inset:0;pointer-events:none;}
+  .cap{position:absolute;left:50%;bottom:7%;transform:translateX(-50%);width:max-content;max-width:88%;text-align:center;
+    background:rgba(255,255,255,.94);border-radius:22px;padding:.55em 1.2em;font-family:'Jua',sans-serif;
+    font-size:clamp(15px,2.9vw,30px);line-height:1.35;color:var(--ink);box-shadow:0 5px 0 rgba(0,0,0,.18);
+    opacity:0;transition:opacity .4s, transform .4s;word-break:keep-all;}
+  .cap.show{opacity:1;}
+  .cap em{font-style:normal;color:var(--sea-d);}
+  .badge{position:absolute;left:3%;top:5%;font-family:'Jua',sans-serif;font-size:clamp(13px,2.2vw,22px);color:#fff;padding:.35em .9em;border-radius:999px;
+    background:var(--marsh);box-shadow:0 4px 0 var(--marsh-d);animation:badgeIn .5s cubic-bezier(.3,1.6,.5,1) both;}
+  .badge.good{background:var(--leaf);box-shadow:0 4px 0 var(--leaf-d);}
+  @keyframes badgeIn{from{transform:scale(0) rotate(-10deg);}to{transform:scale(1) rotate(-3deg);}}
+  .mbar{position:absolute;left:0;right:0;top:0;height:5px;background:rgba(255,255,255,.2);}
+  .mbar i{display:block;height:100%;width:0;background:var(--sun);}
+  .skip{position:absolute;right:2.5%;top:4%;border:none;cursor:pointer;background:rgba(255,255,255,.88);border-radius:999px;
+    font-family:'Jua',sans-serif;font-size:clamp(12px,1.8vw,16px);padding:.4em 1em;color:var(--ink);z-index:3;}
+  .gauge{position:absolute;right:4%;top:18%;width:11%;min-width:70px;background:rgba(255,255,255,.93);border-radius:16px;padding:8px;text-align:center;
+    font-family:'Jua',sans-serif;font-size:clamp(11px,1.6vw,16px);color:var(--ink);box-shadow:0 4px 0 rgba(0,0,0,.15);animation:badgeIn .4s both;}
+  .gauge .tube{position:relative;height:clamp(70px,14vw,150px);width:42%;margin:6px auto;border-radius:12px;border:3px solid #B9C9D3;overflow:hidden;background:#F2F7FA;}
+  .gauge .tube i{position:absolute;left:0;right:0;bottom:0;height:85%;background:linear-gradient(180deg,#FF8FA6,#E0475F);transition:height 2.6s ease, background 2.6s;}
+  .gauge.down .tube i{height:22%;background:linear-gradient(180deg,#7FD6E8,#45B4CF);}
+  .gauge .lbl{font-size:.85em;color:var(--ink-soft);}
+  .drop{position:absolute;font-size:clamp(18px,3vw,32px);animation:dropIn 1.1s ease-in forwards;}
+  @keyframes dropIn{0%{transform:translateY(-120%);opacity:0;}20%{opacity:1;}80%{transform:translateY(0);opacity:1;}100%{transform:translateY(0) scale(.2);opacity:0;}}
+  .gulp{position:absolute;font-family:'Jua',sans-serif;font-size:clamp(13px,2.2vw,22px);color:var(--sea-d);background:#fff;border-radius:999px;padding:.2em .7em;
+    box-shadow:0 3px 0 rgba(0,0,0,.15);animation:gulp 1.2s ease-out forwards;}
+  @keyframes gulp{0%{transform:scale(0);}30%{transform:scale(1.15);}60%{transform:scale(1);opacity:1;}100%{transform:translateY(-30px);opacity:0;}}
+  .wave{position:absolute;font-size:clamp(34px,7vw,80px);animation:waveGo 2.6s ease-in forwards;}
+  @keyframes waveGo{0%{transform:translateX(0) scale(1.3);opacity:0;}15%{opacity:1;}55%{transform:translateX(36vw) scale(1);opacity:1;}100%{transform:translateX(48vw) scale(.25);opacity:0;}}
+  .shield{position:absolute;left:50%;top:22%;width:30%;height:70%;border-radius:40% 40% 46% 46%;
+    border:4px solid rgba(255,255,255,.9);background:radial-gradient(ellipse at center,rgba(255,236,150,.35),rgba(108,192,122,.2));
+    box-shadow:0 0 40px rgba(255,236,150,.8), inset 0 0 30px rgba(255,255,255,.5);animation:shieldIn 1s ease-out both, shieldGlow 1.4s ease-in-out 1s infinite;}
+  @keyframes shieldIn{from{transform:scale(.4);opacity:0;}to{transform:scale(1);opacity:1;}}
+  @keyframes shieldGlow{0%,100%{box-shadow:0 0 30px rgba(255,236,150,.6), inset 0 0 30px rgba(255,255,255,.4);}50%{box-shadow:0 0 70px rgba(255,236,150,1), inset 0 0 40px rgba(255,255,255,.7);}}
+  .shield span{position:absolute;left:50%;top:-14%;transform:translateX(-50%);font-family:'Jua',sans-serif;font-size:clamp(12px,2vw,20px);
+    background:#fff;color:var(--leaf-d);border-radius:999px;padding:.2em .8em;white-space:nowrap;box-shadow:0 3px 0 rgba(0,0,0,.15);}
+  .crew{position:absolute;left:0;right:0;bottom:17%;display:flex;justify-content:center;align-items:flex-end;gap:1%;}
+  .crew img{width:11%;animation:crewIn .6s cubic-bezier(.3,1.6,.5,1) both, hop 1.2s ease-in-out .6s infinite;}
+  @keyframes crewIn{from{transform:translateY(80%) scale(.4);opacity:0;}to{transform:none;opacity:1;}}
+  .helper{position:absolute;width:12%;animation:crewIn .6s cubic-bezier(.3,1.6,.5,1) both;}
+  .helper img{width:100%;animation:hop 1.4s ease-in-out infinite;}
+  .helper b{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);white-space:nowrap;background:#fff;border-radius:14px;padding:.2em .7em;
+    font-family:'Gaegu',cursive;font-size:clamp(12px,2vw,20px);color:var(--sea-d);box-shadow:0 3px 0 rgba(0,0,0,.15);}
+
+  /* ===== 결과 창 ===== */
+  .veil{position:fixed;inset:0;z-index:60;background:rgba(63,58,82,.42);display:none;align-items:flex-start;justify-content:center;
+    padding:22px 14px;overflow-y:auto;}
+  .veil.show{display:flex;}
+  .modal{width:100%;max-width:470px;background:var(--cream);border-radius:30px;padding:24px 20px 22px;text-align:center;
+    box-shadow:0 10px 0 rgba(63,58,82,.15),0 22px 50px rgba(0,0,0,.2);animation:modalIn .45s cubic-bezier(.3,1.5,.5,1) both;}
+  @keyframes modalIn{from{transform:translateY(30px) scale(.9);opacity:0;}to{transform:none;opacity:1;}}
+  .modal .mi{width:110px;height:110px;margin:-6px auto 4px;display:flex;align-items:center;justify-content:center;font-size:62px;}
+  .modal .mi img{width:100%;height:100%;object-fit:contain;animation:hop 2s ease-in-out infinite;}
+  .modal h2{font-family:'Jua',sans-serif;font-weight:400;font-size:32px;margin:2px 0 4px;color:var(--mud-dk);}
+  .modal .stars{font-size:28px;letter-spacing:3px;margin-bottom:4px;}
+  .modal .big{font-family:'Jua',sans-serif;font-size:44px;color:var(--sun-d);text-shadow:0 3px 0 #fff;margin:2px 0 8px;}
+  .modal .big small{font-size:20px;}
+  .modal p{font-size:14.5px;line-height:1.65;color:var(--ink-soft);margin:0 0 14px;word-break:keep-all;}
+  .breakdown{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 14px;}
+  .breakdown > div{background:#fff;border-radius:16px;padding:9px 6px;box-shadow:var(--shadow);}
+  .breakdown .k{font-size:12px;font-weight:700;color:var(--ink-soft);}
+  .breakdown .v{font-family:'Jua',sans-serif;font-size:21px;color:var(--mud-d);}
+  .breakdown .v.ok{color:var(--leaf-d);} .breakdown .v.no{color:var(--marsh-d);}
+  .name-box{background:#FFF5E6;border:2.5px dashed #F2CF95;border-radius:18px;padding:12px;margin-bottom:14px;}
+  .name-box p{margin:0 0 9px;font-family:'Gaegu',cursive;font-weight:700;font-size:17px;color:var(--mud-d);}
+  .name-row{display:flex;gap:8px;}
+  .name-row input{flex:1;min-width:0;font-family:'Jua',sans-serif;font-size:17px;padding:10px 14px;border-radius:14px;border:2.5px solid var(--line);outline:none;}
+  .name-row input:focus{border-color:var(--sea);}
+  .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+
+  .bulb-wrap{text-align:center;padding:14px 0 6px;}
+  .bulb{background:none;border:none;cursor:pointer;padding:8px;line-height:0;color:var(--ink-soft);opacity:.45;transition:all .2s;}
+  .bulb:hover{color:#F0B429;opacity:1;filter:drop-shadow(0 0 8px rgba(240,180,41,.7));transform:scale(1.15);}
+  .bulb.on{color:#F0B429;opacity:1;filter:drop-shadow(0 0 10px rgba(240,180,41,.85));}
+  .foot{text-align:center;font-size:12.5px;color:var(--ink-soft);margin-top:6px;}
+  .foot a{color:inherit;}
+
+  @media (max-width:640px){
+    .how{grid-template-columns:1fr;}
+    .hb{padding:5px 6px 6px;border-radius:13px;}
+    .hb .val{font-size:17px;}
+    .hb .lab{font-size:10px;}
+    .hb.hide-m{display:none;}
+    .typebar .btn{padding:0 14px;font-size:16px;}
+    .tug-labels{font-size:12px;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.01ms !important;animation-iteration-count:1 !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="../index.html">🦀 3분 놀이터</a>
+  <a class="back" href="../index.html">← 놀이터로</a>
+</div>
+
+<div class="shell" id="home-wrap">
+  <!-- ============ 시작 화면 ============ -->
+  <div id="home">
+    <div class="poster" role="img" aria-label="갯벌 생물들이 손을 흔드는 그림">
+      <h1><span>갯</span><span>벌</span><span>을</span> <span>지</span><span>키</span><span>자</span><span>!</span></h1>
+      <div class="sub">⌨️ 타자로 갯벌 친구들을 지키는 2단계 미션</div>
+    </div>
+
+    <div class="parade" aria-hidden="true"><div class="parade-track" id="parade"></div></div>
+
+    <div class="card">
+      <div class="how">
+        <div class="how-item">
+          <div class="ic"><img src="../assets/getbeol/c0.webp" alt=""></div>
+          <div><b>1단계 · 갯벌을 넓혀요</b><span>위에서 갯벌 생물 이름이 내려와요. 바닥에 닿기 전에 똑같이 치고 <b>Enter</b>! 맞힐수록 작은 갯벌이 넓고 화려해져요.</span></div>
+        </div>
+        <div class="how-item">
+          <div class="ic"><img src="../assets/getbeol/v1.webp" alt=""></div>
+          <div><b>2단계 · 개발 악당을 막아요</b><span>갯벌을 지키는 팻말 말이 내려와요. 맞힐 때마다 갯벌 생물팀 막대가 길어져요. 악당팀에게 밀리지 마세요!</span></div>
+        </div>
+        <div class="how-item wide">
+          <div class="ic">⏱️</div>
+          <div><b>각 단계 1분 30초를 버티면 미션 성공!</b><span>시간이 갈수록 단어가 점점 빨리 내려와요. 1단계에서 단어를 5번 놓치면, 2단계에서 막대를 모두 빼앗기면 미션 실패예요. 띄어쓰기는 틀려도 괜찮아요 😊</span></div>
+        </div>
+      </div>
+
+      <div class="board-sign">
+        <div class="nails"><i></i><i></i></div>
+        <h3>🏆 갯벌 수호대 순위</h3>
+        <div class="rank-list" id="rank-home"><div class="rank-empty">순위표를 불러오는 중이에요… 🦀</div></div>
+      </div>
+
+      <p class="best" id="best-line">아직 기록이 없어요. 갯벌을 지키러 가 볼까요? 🦀</p>
+      <div style="text-align:center;">
+        <button class="btn big" id="btn-start">🦀 갯벌 지키러 가기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 단계 안내 ============ -->
+  <div class="card lv-card hidden" id="intro">
+    <div class="num" id="lv-num">1단계</div>
+    <div class="lv-art" id="lv-art"></div>
+    <h2 id="lv-title">갯벌을 넓혀요</h2>
+    <p id="lv-desc"></p>
+    <div class="chips" id="lv-chips"></div>
+    <button class="btn big" id="btn-go">시작! ⌨️</button>
+  </div>
+
+  <div class="bulb-wrap">
+    <button class="bulb" id="bulb" onclick="adminReset()" aria-label=" ">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" aria-hidden="true">
+        <path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.5.4.8 1 .8 1.6v.5h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0 0 12 3z"
+              stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+  <div class="foot">🦀 갯벌을 지키자! · <a href="../index.html">3분 놀이터</a>에서 더 많은 놀이를 만나요<br>그림: Higgsfield로 만들었어요</div>
+</div>
+
+<!-- ============ 게임 화면 ============ -->
+<div id="game" class="hidden">
+  <div class="hud">
+    <div class="hb lvl"><div class="lab">단계</div><div class="val"><span id="d-stage">1</span>/2</div></div>
+    <div class="hb score"><div class="lab">점수</div><div class="val" id="d-score">0</div></div>
+    <div class="hb time"><div class="lab">남은 시간 <b id="d-time">90</b>초</div><div class="tbar" id="tbar"><i id="tbar-i"></i></div></div>
+    <div class="hb speed"><div class="lab">속도 <b id="d-speed">1</b>단계</div><div class="pips" id="pips"></div></div>
+    <div class="hb hide-m" id="hb-grow"><div class="grow-name" id="d-grow">메마른 갯벌</div><div class="gbar"><i id="gbar-i"></i></div></div>
+    <div class="hb" id="hb-life"><div class="lab">기회</div><div class="hearts" id="d-hearts"></div></div>
+  </div>
+
+  <div class="stage" id="stage">
+    <!-- 1단계 : 점점 화려해지는 갯벌 -->
+    <div class="layer" id="scene1wrap">
+      <svg id="scene1" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+        <defs>
+          <linearGradient id="gSkyDull" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#A9AFB6"/><stop offset="1" stop-color="#D8D3C8"/></linearGradient>
+          <linearGradient id="gSkyBlue" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86C9EE"/><stop offset=".7" stop-color="#CBEBFA"/><stop offset="1" stop-color="#F4F1E2"/></linearGradient>
+          <linearGradient id="gSkyWarm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5DBDF2"/><stop offset=".6" stop-color="#B9E6FF"/><stop offset="1" stop-color="#FFE9C4"/></linearGradient>
+          <linearGradient id="gSkyMagic" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7FB2F5"/><stop offset=".45" stop-color="#C9D8FF"/><stop offset=".75" stop-color="#FFD3DE"/><stop offset="1" stop-color="#FFE4A6"/></linearGradient>
+          <radialGradient id="gSun"><stop offset="0" stop-color="#FFFBD9"/><stop offset=".35" stop-color="#FFE68A" stop-opacity=".9"/><stop offset="1" stop-color="#FFD45E" stop-opacity="0"/></radialGradient>
+          <linearGradient id="gSeaDull" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8E9DA6"/><stop offset="1" stop-color="#A9B1B0"/></linearGradient>
+          <linearGradient id="gSea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2FA6CF"/><stop offset="1" stop-color="#8FE3EC"/></linearGradient>
+          <linearGradient id="gGround" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D8CFBE"/><stop offset="1" stop-color="#BFB39C"/></linearGradient>
+          <linearGradient id="gMudDull" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9C9083"/><stop offset="1" stop-color="#7C7064"/></linearGradient>
+          <linearGradient id="gMud" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9A735A"/><stop offset=".5" stop-color="#7C5843"/><stop offset="1" stop-color="#5E4232"/></linearGradient>
+          <linearGradient id="gSheen" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+          <linearGradient id="gRay" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF6D2" stop-opacity=".55"/><stop offset="1" stop-color="#FFF6D2" stop-opacity="0"/></linearGradient>
+          <g id="star"><path d="M0-10 L2.6-2.6 10 0 2.6 2.6 0 10 -2.6 2.6 -10 0 -2.6-2.6Z" fill="#fff"/></g>
+          <g id="reed">
+            <path d="M0 0 Q-4 -60 -10 -120" stroke="#B89A4A" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M0 0 Q6 -70 14 -140" stroke="#C9A75A" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M0 0 Q2 -50 2 -100" stroke="#A7924C" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <ellipse cx="-11" cy="-132" rx="7" ry="17" fill="#F1DDA8" transform="rotate(-12 -11 -132)"/>
+            <ellipse cx="16" cy="-153" rx="8" ry="19" fill="#F6E6BA" transform="rotate(10 16 -153)"/>
+            <ellipse cx="2" cy="-112" rx="6" ry="15" fill="#EBD195"/>
+            <path d="M-2 -20 Q-26 -50 -34 -46" stroke="#8DBB63" stroke-width="5" fill="none" stroke-linecap="round"/>
+            <path d="M3 -30 Q28 -62 38 -56" stroke="#9CCB6E" stroke-width="5" fill="none" stroke-linecap="round"/>
+          </g>
+          <g id="aster">
+            <g fill="#C7B5F5"><circle cx="0" cy="-7" r="6"/><circle cx="6.6" cy="-2" r="6"/><circle cx="4" cy="6" r="6"/><circle cx="-4" cy="6" r="6"/><circle cx="-6.6" cy="-2" r="6"/></g>
+            <circle r="4" fill="#FFD45E"/>
+          </g>
+          <g id="marsh">
+            <circle cx="0" cy="0" r="16" fill="#C93D58"/><circle cx="18" cy="-4" r="13" fill="#E05A72"/><circle cx="-17" cy="-2" r="12" fill="#D84B66"/>
+            <circle cx="8" cy="-12" r="10" fill="#EE7186"/><circle cx="-6" cy="-13" r="9" fill="#F28B9C"/><circle cx="30" cy="3" r="9" fill="#B9314C"/>
+            <circle cx="-28" cy="4" r="9" fill="#C13A55"/>
+          </g>
+        </defs>
+
+        <!-- 하늘 -->
+        <rect width="1000" height="320" fill="url(#gSkyDull)"/>
+        <rect class="lv" data-lv="1" width="1000" height="320" fill="url(#gSkyBlue)"/>
+        <rect class="lv" data-lv="3" width="1000" height="320" fill="url(#gSkyWarm)"/>
+        <rect class="lv" data-lv="5" width="1000" height="320" fill="url(#gSkyMagic)"/>
+
+        <!-- 무지개 -->
+        <g class="lv" data-lv="5" fill="none" stroke-width="13" opacity=".55">
+          <circle cx="300" cy="300" r="250" stroke="#FF8FA6"/><circle cx="300" cy="300" r="237" stroke="#FFB36B"/>
+          <circle cx="300" cy="300" r="224" stroke="#FFE07A"/><circle cx="300" cy="300" r="211" stroke="#9BE38E"/>
+          <circle cx="300" cy="300" r="198" stroke="#7FCBF2"/><circle cx="300" cy="300" r="185" stroke="#B9A3F2"/>
+        </g>
+
+        <!-- 햇살 줄기 -->
+        <g class="lv" data-lv="5">
+          <polygon points="820,90 560,320 640,320" fill="url(#gRay)"/>
+          <polygon points="820,90 700,320 780,320" fill="url(#gRay)"/>
+          <polygon points="820,90 860,320 940,320" fill="url(#gRay)"/>
+        </g>
+
+        <!-- 해 -->
+        <g class="lv" data-lv="4"><g class="spin" style="transform-origin:820px 90px">
+          <g stroke="#FFD45E" stroke-width="7" stroke-linecap="round" opacity=".8">
+            <line x1="820" y1="18" x2="820" y2="0"/><line x1="820" y1="162" x2="820" y2="180"/>
+            <line x1="748" y1="90" x2="730" y2="90"/><line x1="892" y1="90" x2="910" y2="90"/>
+            <line x1="769" y1="39" x2="756" y2="26"/><line x1="871" y1="141" x2="884" y2="154"/>
+            <line x1="871" y1="39" x2="884" y2="26"/><line x1="769" y1="141" x2="756" y2="154"/>
+          </g></g></g>
+        <g class="lv" data-lv="2">
+          <circle cx="820" cy="90" r="110" fill="url(#gSun)"/>
+          <circle cx="820" cy="90" r="46" fill="#FFD966" stroke="#F2B93B" stroke-width="5"/>
+          <circle cx="805" cy="86" r="4.5" fill="#6A4A38"/><circle cx="835" cy="86" r="4.5" fill="#6A4A38"/>
+          <path d="M808 101 Q820 111 832 101" stroke="#6A4A38" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+          <ellipse cx="796" cy="99" rx="6" ry="3.5" fill="#FF9BB3" opacity=".8"/><ellipse cx="844" cy="99" rx="6" ry="3.5" fill="#FF9BB3" opacity=".8"/>
+        </g>
+
+        <!-- 먹구름 (처음에만) -->
+        <g class="lv on" data-until="1" fill="#8E949C">
+          <g class="drift2"><circle cx="160" cy="80" r="42"/><circle cx="215" cy="64" r="52"/><circle cx="275" cy="82" r="40"/><rect x="140" y="80" width="160" height="40" rx="20"/></g>
+          <g class="drift"><circle cx="620" cy="70" r="40"/><circle cx="680" cy="52" r="52"/><circle cx="745" cy="70" r="44"/><circle cx="810" cy="84" r="34"/><rect x="600" y="70" width="230" height="44" rx="22"/></g>
+          <g fill="#A3A9B0" class="drift2"><circle cx="430" cy="120" r="30"/><circle cx="470" cy="108" r="38"/><circle cx="515" cy="122" r="28"/><rect x="410" y="118" width="125" height="30" rx="15"/></g>
+        </g>
+        <!-- 흰 구름 -->
+        <g class="lv" data-lv="1" fill="#fff">
+          <g class="drift" opacity=".95"><circle cx="140" cy="86" r="30"/><circle cx="180" cy="70" r="38"/><circle cx="222" cy="88" r="28"/><rect x="118" y="86" width="128" height="30" rx="15"/></g>
+          <g class="drift2" opacity=".9"><circle cx="520" cy="60" r="24"/><circle cx="552" cy="48" r="30"/><circle cx="588" cy="62" r="22"/><rect x="500" y="60" width="106" height="24" rx="12"/></g>
+        </g>
+        <g class="lv" data-lv="3" fill="#fff" opacity=".9">
+          <g class="drift"><circle cx="340" cy="150" r="20"/><circle cx="366" cy="140" r="26"/><circle cx="394" cy="152" r="18"/><rect x="324" y="150" width="88" height="20" rx="10"/></g>
+        </g>
+
+        <!-- 하늘을 나는 새들 -->
+        <g class="lv" data-lv="3" fill="none" stroke="#4E4458" stroke-width="3.5" stroke-linecap="round">
+          <g class="flyby"><path d="M0 140 q10 -11 20 0 q10 -11 20 0"/><path d="M34 118 q8 -9 16 0 q8 -9 16 0"/><path d="M-30 122 q8 -9 16 0 q8 -9 16 0"/></g>
+        </g>
+        <g class="lv" data-lv="5" fill="none" stroke="#4E4458" stroke-width="3" stroke-linecap="round">
+          <g class="flyby" style="animation-duration:30s;animation-delay:-12s"><path d="M0 70 q9 -10 18 0 q9 -10 18 0"/><path d="M30 52 q7 -8 14 0 q7 -8 14 0"/><path d="M60 80 q7 -8 14 0 q7 -8 14 0"/><path d="M-28 58 q7 -8 14 0 q7 -8 14 0"/></g>
+        </g>
+
+        <!-- 먼 섬 -->
+        <path d="M0 262 Q60 214 130 240 Q190 200 260 246 L260 268 L0 268Z" fill="#A1AAA2"/>
+        <path d="M700 264 Q770 222 840 246 Q900 226 1000 252 L1000 268 L700 268Z" fill="#A6AEA5"/>
+        <g class="lv" data-lv="1">
+          <path d="M0 262 Q60 214 130 240 Q190 200 260 246 L260 268 L0 268Z" fill="#7FB98A"/>
+          <path d="M700 264 Q770 222 840 246 Q900 226 1000 252 L1000 268 L700 268Z" fill="#86C194"/>
+          <path d="M40 246 Q70 228 100 240" stroke="#A9D9B1" stroke-width="4" fill="none" stroke-linecap="round"/>
+        </g>
+
+        <!-- 바다 -->
+        <rect y="258" width="1000" height="36" fill="url(#gSeaDull)"/>
+        <rect class="lv" data-lv="2" y="258" width="1000" height="36" fill="url(#gSea)"/>
+        <g class="lv" data-lv="3" stroke="#fff" stroke-width="3" stroke-linecap="round">
+          <line class="tw" x1="120" y1="272" x2="150" y2="272"/><line class="tw" x1="330" y1="280" x2="352" y2="280" style="animation-delay:.6s"/>
+          <line class="tw" x1="560" y1="270" x2="596" y2="270" style="animation-delay:1.1s"/><line class="tw" x1="760" y1="282" x2="786" y2="282" style="animation-delay:1.7s"/>
+          <line class="tw" x1="900" y1="268" x2="930" y2="268" style="animation-delay:.3s"/>
+        </g>
+
+        <!-- 메마른 땅 -->
+        <path d="M0 290 Q250 280 500 288 T1000 286 L1000 600 L0 600Z" fill="url(#gGround)"/>
+        <g class="lv on" data-until="2" stroke="#A89C85" stroke-width="2.5" fill="none" stroke-linecap="round">
+          <path d="M40 360 l30 18 l-8 26 l24 14"/><path d="M90 470 l26 -10 l14 22 l30 -6"/><path d="M850 380 l-22 20 l12 18 l-26 16"/>
+          <path d="M900 500 l-30 -8 l-10 24"/><path d="M180 540 l24 10 l-6 22"/><path d="M780 540 l26 -14 l16 20"/>
+        </g>
+        <!-- 버려진 쓰레기 (갯벌이 넓어지면 사라져요) -->
+        <g class="lv on" data-until="1">
+          <g transform="translate(110 520) rotate(-20)"><rect x="-12" y="-20" width="24" height="40" rx="4" fill="#D9534F"/><rect x="-12" y="-14" width="24" height="10" fill="#fff" opacity=".7"/></g>
+          <g transform="translate(880 470) rotate(25)"><rect x="-9" y="-28" width="18" height="44" rx="7" fill="#BFE3EE" opacity=".9"/><rect x="-5" y="-36" width="10" height="9" rx="2" fill="#4DA3EE"/></g>
+          <path d="M820 560 q20 -30 46 -6 q14 18 -8 26 q-26 8 -38 -20z" fill="#EDEDED" opacity=".85"/>
+        </g>
+
+        <!-- 갯벌 (점수에 따라 넓어져요) -->
+        <g id="mud" style="transform:scale(.42)">
+          <path d="M-60 640 L-60 340 Q40 300 160 316 Q260 296 380 306 Q500 286 620 304 Q740 292 860 310 Q960 298 1060 330 L1060 640Z" fill="url(#gMudDull)"/>
+          <path class="lv" data-lv="1" d="M-60 640 L-60 340 Q40 300 160 316 Q260 296 380 306 Q500 286 620 304 Q740 292 860 310 Q960 298 1060 330 L1060 640Z" fill="url(#gMud)"/>
+          <!-- 물결 자국 -->
+          <g class="lv" data-lv="1" stroke="#A88066" stroke-width="3" fill="none" stroke-linecap="round" opacity=".7">
+            <path d="M200 420 q20 -8 40 0 q20 8 40 0"/><path d="M640 400 q20 -8 40 0 q20 8 40 0"/><path d="M420 520 q20 -8 40 0 q20 8 40 0"/>
+            <path d="M760 520 q16 -7 32 0 q16 7 32 0"/><path d="M110 520 q16 -7 32 0 q16 7 32 0"/>
+          </g>
+          <!-- 물기 반짝 -->
+          <g class="lv" data-lv="2">
+            <ellipse cx="300" cy="380" rx="140" ry="10" fill="url(#gSheen)"/><ellipse cx="700" cy="450" rx="170" ry="12" fill="url(#gSheen)"/>
+            <ellipse cx="480" cy="560" rx="200" ry="12" fill="url(#gSheen)"/>
+          </g>
+          <!-- 갯골 -->
+          <g class="lv" data-lv="2" fill="none" stroke-linecap="round">
+            <path d="M520 300 Q470 360 530 410 Q600 470 520 540 Q460 590 500 640" stroke="#5FB8CF" stroke-width="20"/>
+            <path d="M520 300 Q470 360 530 410 Q600 470 520 540 Q460 590 500 640" stroke="#A8E6F0" stroke-width="5" class="shimmer"/>
+          </g>
+          <g class="lv" data-lv="4" fill="none" stroke-linecap="round">
+            <path d="M300 310 Q260 360 300 400 Q340 440 280 500" stroke="#5FB8CF" stroke-width="12"/>
+            <path d="M300 310 Q260 360 300 400 Q340 440 280 500" stroke="#B9EEF5" stroke-width="3.5" class="shimmer"/>
+            <path d="M760 312 Q800 360 760 410 Q720 460 780 520" stroke="#5FB8CF" stroke-width="12"/>
+            <path d="M760 312 Q800 360 760 410 Q720 460 780 520" stroke="#B9EEF5" stroke-width="3.5" class="shimmer"/>
+          </g>
+          <!-- 게 구멍 -->
+          <g class="lv" data-lv="1" fill="#4A3226">
+            <ellipse cx="380" cy="450" rx="8" ry="4"/><ellipse cx="620" cy="500" rx="8" ry="4"/><ellipse cx="250" cy="560" rx="8" ry="4"/>
+            <ellipse cx="700" cy="380" rx="7" ry="3.5"/>
+          </g>
+          <g class="lv" data-lv="3" fill="#4A3226">
+            <ellipse cx="160" cy="430" rx="7" ry="3.5"/><ellipse cx="860" cy="470" rx="8" ry="4"/><ellipse cx="560" cy="380" rx="7" ry="3.5"/>
+            <ellipse cx="420" cy="590" rx="8" ry="4"/><ellipse cx="820" cy="580" rx="8" ry="4"/><ellipse cx="90" cy="600" rx="8" ry="4"/>
+          </g>
+          <!-- 칠면초 붉은 들판 -->
+          <g class="lv" data-lv="2">
+            <use href="#marsh" x="80" y="360"/><use href="#marsh" x="940" y="380"/><use href="#marsh" x="170" y="330"/>
+          </g>
+          <g class="lv" data-lv="4">
+            <use href="#marsh" x="30" y="460"/><use href="#marsh" x="980" y="500"/><use href="#marsh" x="880" y="340"/>
+            <use href="#marsh" x="110" y="560" /><use href="#marsh" x="920" y="600"/><use href="#marsh" x="650" y="330" transform="scale(.8)" transform-origin="650 330"/>
+          </g>
+        </g>
+
+        <!-- 갯벌 친구들이 모이는 곳 -->
+        <g id="residents"></g>
+
+        <!-- 양옆 갈대숲 -->
+        <g class="lv" data-lv="3">
+          <use href="#reed" x="18" y="610" class="sway"/><use href="#reed" x="60" y="620" class="sway" style="animation-delay:.6s"/>
+          <use href="#reed" x="950" y="612" class="sway" style="animation-delay:.3s"/><use href="#reed" x="990" y="626" class="sway" style="animation-delay:.9s"/>
+        </g>
+        <g class="lv" data-lv="5">
+          <use href="#reed" x="105" y="630" class="sway" style="animation-delay:1.2s"/><use href="#reed" x="905" y="632" class="sway" style="animation-delay:1.5s"/>
+        </g>
+        <!-- 갯개미취 꽃 -->
+        <g class="lv" data-lv="4">
+          <use href="#aster" x="40" y="520" class="bob"/><use href="#aster" x="66" y="540" class="bob" style="animation-delay:.4s"/>
+          <use href="#aster" x="956" y="540" class="bob" style="animation-delay:.8s"/><use href="#aster" x="930" y="566" class="bob" style="animation-delay:1.2s"/>
+          <use href="#aster" x="140" y="590" class="bob" style="animation-delay:.2s"/>
+        </g>
+        <!-- 반짝반짝 -->
+        <g class="lv" data-lv="4">
+          <use href="#star" x="220" y="200" class="tw"/><use href="#star" x="660" y="170" class="tw" style="animation-delay:.8s"/>
+          <use href="#star" x="420" y="400" class="tw" style="animation-delay:1.4s"/><use href="#star" x="780" y="440" class="tw" style="animation-delay:.4s"/>
+          <use href="#star" x="120" y="300" class="tw" style="animation-delay:2s"/>
+        </g>
+        <g class="lv" data-lv="5">
+          <circle cx="200" cy="560" r="5" fill="#FFF3B0" class="rise"/><circle cx="380" cy="590" r="4" fill="#FFE0EA" class="rise" style="animation-delay:1s"/>
+          <circle cx="560" cy="570" r="5" fill="#FFF3B0" class="rise" style="animation-delay:2s"/><circle cx="740" cy="600" r="4" fill="#E2FBFF" class="rise" style="animation-delay:3s"/>
+          <circle cx="860" cy="560" r="5" fill="#FFE0EA" class="rise" style="animation-delay:4s"/><circle cx="300" cy="600" r="3.5" fill="#E2FBFF" class="rise" style="animation-delay:2.6s"/>
+          <use href="#star" x="520" y="120" class="tw" style="animation-delay:.2s"/><use href="#star" x="900" y="220" class="tw" style="animation-delay:1.1s"/>
+        </g>
+      </svg>
+    </div>
+
+    <!-- 2단계 : 갯벌 생물팀 vs 개발 악당팀 -->
+    <div class="layer hidden" id="scene2">
+      <div class="tug" id="tug">
+        <div class="tug-labels"><span class="h">🦀 갯벌 생물팀 <b id="d-hero">50</b>%</span><span class="v"><b id="d-vil">50</b>% 개발 악당팀 🚜</span></div>
+        <div class="tug-wrap">
+          <div class="tug-bar"><div class="tug-hero" id="tug-hero"></div></div>
+          <div class="tug-knot" id="tug-knot">⚡</div>
+        </div>
+      </div>
+      <div class="team hero" id="team-hero">
+        <div class="hsay" id="hsay">갯벌을 지키자!</div>
+        <div class="bigsign" id="bigsign"><div class="bd" id="bigsign-t">생명의 요람</div><div class="st"></div></div>
+      </div>
+      <div class="team villain" id="team-vil">
+        <div class="vsay" id="vsay">갯벌을 메워 버리자!</div>
+      </div>
+    </div>
+
+    <div class="layer" id="words"></div>
+    <div class="layer" id="fx"></div>
+    <div class="ground-line"></div>
+    <div class="toast" id="toast"></div>
+    <div class="count hidden" id="count"><span id="count-n">3</span></div>
+    <div class="banner hidden" id="banner"><b id="banner-t">미션 성공!</b><small id="banner-s"></small></div>
+    <button class="xbtn" id="btn-quit">그만하기</button>
+  </div>
+
+  <div class="typebar">
+    <input id="typing" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="여기에 단어를 치고 Enter!" enterkeyhint="done">
+    <button class="btn sea" id="btn-send">확인</button>
+  </div>
+</div>
+
+<!-- ============ 승리 영상 ============ -->
+<div class="movie hidden" id="movie">
+  <div class="film" id="film">
+    <div class="shot" id="shotA"></div>
+    <div class="shot" id="shotB"></div>
+    <canvas id="fxc"></canvas>
+    <div class="props" id="props"></div>
+    <div class="flash" id="flash"></div>
+    <div class="cap" id="cap"></div>
+    <div class="mbar"><i id="mbar-i"></i></div>
+    <button class="skip" id="btn-skip">건너뛰기 ▶</button>
+  </div>
+</div>
+
+<!-- ============ 결과 창 ============ -->
+<div class="veil" id="veil">
+  <div class="modal">
+    <div class="mi" id="r-icon"></div>
+    <h2 id="r-title">갯벌 수호대장!</h2>
+    <div class="stars" id="r-stars">⭐⭐⭐</div>
+    <div class="big" id="r-score">0<small>점</small></div>
+    <div class="breakdown">
+      <div><div class="k">1단계 · 갯벌 넓히기</div><div class="v" id="r-s1">-</div></div>
+      <div><div class="k">2단계 · 악당 막기</div><div class="v" id="r-s2">-</div></div>
+      <div><div class="k">맞힌 단어</div><div class="v" id="r-hit">0개</div></div>
+      <div><div class="k">놓친 단어</div><div class="v" id="r-miss">0개</div></div>
+    </div>
+    <p id="r-desc"></p>
+
+    <div class="name-box hidden" id="name-box">
+      <p id="name-why">🎉 순위표에 올릴 수 있어요! 이름을 적어 주세요.</p>
+      <div class="name-row">
+        <input id="name-input" type="text" maxlength="8" placeholder="이름 (최대 8글자)" autocomplete="off">
+        <button class="btn sm" id="btn-save">올리기</button>
+      </div>
+    </div>
+
+    <div class="board-sign" style="margin-bottom:16px;">
+      <div class="nails"><i></i><i></i></div>
+      <h3>🏆 갯벌 수호대 순위</h3>
+      <div class="rank-list" id="rank-result"><div class="rank-empty">불러오는 중이에요… 🦀</div></div>
+    </div>
+
+    <div class="row">
+      <button class="btn sea sm" id="btn-again">🔁 한 번 더</button>
+      <button class="btn ghost sm" id="btn-home">🏠 처음으로</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===================================================================
+   🦀 갯벌을 지키자!  ( 3분 놀이터 · 초등학생용 타자 게임 )
+   - 1단계 : 내려오는 갯벌 생물 이름을 쳐서 작은 갯벌을 넓고 화려하게 키워요.
+   - 2단계 : 갯벌을 지키는 팻말 말을 쳐서 개발 악당팀을 막아요.
+   - 각 단계 1분 30초를 버티면 미션 성공! 승리하면 짧은 영상이 나와요.
+   =================================================================== */
+
+var $ = function(id){ return document.getElementById(id); };
+var IMG = "../assets/getbeol/";
+
+/* ---------- 갯벌 생물 (이름 · 그림 · 움직임) ---------- */
+var CREATURES = [
+  ["농게","crab"],["칠게","crab"],["엽낭게","crab"],["밤게","crab"],["쏙","crab"],["방게","crab"],
+  ["세스랑게","crab"],["길게","crab"],["딱총새우","crab"],["맛조개","shell"],["바지락","shell"],["낙지","octo"],
+  ["주꾸미","octo"],["서해비단고둥","shell"],["동죽","shell"],["꼬막","shell"],["백합","shell"],["가무락조개","shell"],
+  ["피뿔고둥","shell"],["갯고둥","shell"],["짱뚱어","fish"],["말뚝망둥어","fish"],["갯지렁이","worm"],["저어새","bird"],
+  ["도요새","bird"],["물떼새","bird"],["알락꼬리마도요","bird"],["흰물떼새","bird"],["검은머리물떼새","bird"],["칠면초","plant"],
+  ["퉁퉁마디","plant"],["해홍나물","plant"],["갯개미취","plant"],["나문재","plant"],["갈대","plant"]
+];
+var SIGNS = ["생명의 요람","보물창고","바다의 필터","자연 스펀지","생명 한가득","지키자","보호하자","보전하자","철새 쉼터","보금자리",
+  "아끼자","보존하자","개발 금지","개발 반대","생명의 땅","생물들의 집","바다의 심장","바다의 허파","생태적 가치","천연 방패"];
+
+var STAGE_TIME = 90;
+var SPEED_RANGE = { 1:[1,5], 2:[3,7] };      /* 속도 1~10단계 중 단계별 범위 */
+var LIVES = 5;
+var GROW_AT = [0, 3, 7, 12, 18, 25];          /* 맞힌 생물 수에 따라 갯벌이 자라요 */
+var GROW_NAMES = ["메마른 갯벌","촉촉한 갯벌","반짝이는 갯벌","북적이는 갯벌","알록달록 갯벌","눈부신 생명의 갯벌"];
+var MUD_SCALE = [0.42, 0.56, 0.70, 0.83, 0.94, 1.06];
+var BEST_KEY = "getbeol-best";
+
+/* ---------- 상태 ---------- */
+var stageNo = 1, running = false, rafId = 0, lastTs = 0;
+var T = 0, words = [], spawnAcc = 0, bag = [];
+var score = 0, stageScore = [0, 0], hits = 0, misses = 0, combo = 0;
+var lives = LIVES, caught = 0, growLv = 0;
+var hero = 50, nextVillainEvt = 6;
+var cleared = [false, false];
+var stageEl = $("stage"), wordsEl = $("words"), fxEl = $("fx"), input = $("typing");
+
+/* ---------- 소리 ---------- */
+var actx = null;
+function wake(){
+  if(!actx){
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if(AC) actx = new AC();
+  }
+  if(actx && actx.state === "suspended") actx.resume();
+}
+function tone(f1, f2, dur, type, vol, delay){
+  if(!actx) return;
+  var n = actx.currentTime + (delay || 0);
+  var o = actx.createOscillator(), g = actx.createGain();
+  o.connect(g); g.connect(actx.destination);
+  o.type = type || "sine";
+  o.frequency.setValueAtTime(f1, n);
+  if(f2) o.frequency.exponentialRampToValueAtTime(f2, n + dur);
+  g.gain.setValueAtTime(vol || 0.22, n);
+  g.gain.exponentialRampToValueAtTime(0.001, n + dur);
+  o.start(n); o.stop(n + dur + 0.02);
+}
+function beep(type){
+  if(!actx) return;
+  if(type === "hit"){ tone(660,0,.08,"sine",.24); tone(990,0,.12,"sine",.22,.07); }
+  else if(type === "wrong"){ tone(220,165,.18,"square",.12); }
+  else if(type === "miss"){ tone(420,140,.4,"triangle",.2); }
+  else if(type === "grow"){ [523,659,784,1047].forEach(function(f,i){ tone(f,0,.18,"sine",.2,i*.08); }); }
+  else if(type === "count"){ tone(700,0,.12,"sine",.2); }
+  else if(type === "go"){ tone(1050,0,.25,"sine",.24); }
+  else if(type === "win"){ [660,830,990,1320,1570].forEach(function(f,i){ tone(f,0,.24,"sine",.22,i*.11); }); }
+  else if(type === "lose"){ [520,440,370,300].forEach(function(f,i){ tone(f,0,.28,"triangle",.2,i*.16); }); }
+  else if(type === "rumble"){ tone(90,60,.45,"sawtooth",.1); }
+  else if(type === "thunder"){ tone(80,40,.9,"sawtooth",.14); }
+}
+
+/* ---------- 화면 전환 ---------- */
+function showHome(){
+  $("home").classList.remove("hidden");
+  $("intro").classList.add("hidden");
+  $("game").classList.add("hidden");
+  window.scrollTo(0, 0);
+}
+function showIntro(n){
+  stageNo = n;
+  $("home").classList.add("hidden");
+  $("game").classList.add("hidden");
+  var c = $("intro");
+  c.classList.remove("hidden");
+  c.classList.toggle("s2", n === 2);
+  $("lv-num").textContent = n + "단계";
+  var art = "", chips = "";
+  if(n === 1){
+    [0, 20, 23, 11, 29].forEach(function(i){ art += '<img src="' + IMG + 'c' + i + '.webp" alt="">'; });
+    $("lv-title").textContent = "갯벌을 넓혀요 🌱";
+    $("lv-desc").innerHTML = "위에서 <b>갯벌 생물 이름</b>이 내려와요. 바닥에 닿기 전에 똑같이 치고 <b>Enter</b>!<br>" +
+      "맞힌 생물은 갯벌로 이사 와요. 많이 맞힐수록 작은 갯벌이 <b>넓고 화려하게</b> 바뀌어요.<br>단어를 <b>5번</b> 놓치면 실패! 1분 30초를 버텨 보세요.";
+    CREATURES.forEach(function(c){ chips += "<span>" + c[0] + "</span>"; });
+    $("btn-go").textContent = "1단계 시작! ⌨️";
+  } else {
+    art = '<img src="' + IMG + 'c0.webp" alt=""><img src="' + IMG + 'c20.webp" alt=""><img src="' + IMG + 'c23.webp" alt="">' +
+          '<span class="vs">VS</span>' +
+          '<img src="' + IMG + 'v1.webp" alt=""><img src="' + IMG + 'v0.webp" alt="">';
+    $("lv-title").textContent = "개발 악당을 막아요 🚧";
+    $("lv-desc").innerHTML = "갯벌 생물팀과 개발 악당팀이 맞서고 있어요! <b>갯벌을 지키는 팻말 말</b>을 쳐서 막대를 늘려요.<br>" +
+      "가만히 있으면 악당팀 막대가 <b>점점 빠르게</b> 길어져요. 막대를 모두 빼앗기면 실패!";
+    SIGNS.forEach(function(s){ chips += "<span>" + s + "</span>"; });
+    $("btn-go").textContent = "2단계 시작! ⌨️";
+  }
+  $("lv-art").innerHTML = art;
+  $("lv-chips").innerHTML = chips;
+  window.scrollTo(0, 0);
+}
+
+/* ---------- 단계 시작 ---------- */
+function startStage(){
+  $("intro").classList.add("hidden");
+  $("game").classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+  clearWords();
+  T = 0; spawnAcc = 0; combo = 0; bag = [];
+  stageScore[stageNo - 1] = 0;
+  $("d-stage").textContent = stageNo;
+  $("scene1wrap").classList.toggle("hidden", stageNo !== 1);
+  $("scene2").classList.toggle("hidden", stageNo !== 2);
+  $("hb-grow").classList.toggle("hidden", stageNo !== 1);
+  $("hb-life").classList.toggle("hidden", stageNo !== 1);
+  if(stageNo === 1){
+    lives = LIVES; caught = 0; growLv = 0;
+    $("residents").innerHTML = "";
+    setGrow(0, true);
+    paintHearts();
+  } else {
+    hero = 50; nextVillainEvt = 5;
+    buildTeams();
+    paintTug();
+  }
+  $("d-speed").textContent = "";
+  paintHud();
+  input.value = "";
+  input.className = "";
+  countdown(function(){
+    running = true;
+    lastTs = performance.now();
+    rafId = requestAnimationFrame(loop);
+    input.focus();
+  });
+  setTimeout(function(){ input.focus(); }, 50);
+}
+
+function countdown(done){
+  var box = $("count"), n = 3;
+  box.classList.remove("hidden");
+  function step(){
+    if(n === 0){
+      $("count-n").textContent = "시작!";
+      restartAnim($("count-n"));
+      beep("go");
+      setTimeout(function(){ box.classList.add("hidden"); done(); }, 600);
+      return;
+    }
+    $("count-n").textContent = n;
+    restartAnim($("count-n"));
+    beep("count");
+    n--;
+    setTimeout(step, 800);
+  }
+  step();
+}
+function restartAnim(el){ el.style.animation = "none"; void el.offsetWidth; el.style.animation = ""; }
+
+/* ---------- 속도 ---------- */
+function speedLevel(){
+  var r = SPEED_RANGE[stageNo], steps = r[1] - r[0] + 1;
+  return Math.min(r[1], r[0] + Math.floor(T / STAGE_TIME * steps));
+}
+function fallTime(lv){ return 14 - 1.1 * lv; }            /* 1단계 12.9초 ~ 10단계 3초 */
+function spawnGap(lv){ return Math.max(0.9, 3.4 - 0.27 * lv); }
+
+/* ---------- 단어 만들기 ---------- */
+function nextText(){
+  if(!bag.length){
+    var src = stageNo === 1 ? CREATURES.map(function(c, i){ return i; }) : SIGNS.map(function(s, i){ return i; });
+    for(var i = src.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var t = src[i]; src[i] = src[j]; src[j] = t; }
+    bag = src;
+  }
+  var idx = bag.pop();
+  /* 같은 단어가 화면에 이미 있으면 다른 걸로 */
+  for(var k = 0; k < 3 && bag.length; k++){
+    var txt = stageNo === 1 ? CREATURES[idx][0] : SIGNS[idx];
+    if(!words.some(function(w){ return w.text === txt; })) break;
+    bag.unshift(idx); idx = bag.pop();
+  }
+  return idx;
+}
+function spawn(){
+  var idx = nextText(), el = document.createElement("div"), w;
+  if(stageNo === 1){
+    var c = CREATURES[idx];
+    el.className = "word";
+    el.innerHTML = '<img src="' + IMG + 'c' + idx + '.webp" alt=""><span class="t"></span>';
+    el.querySelector(".t").textContent = c[0];
+    w = { el:el, text:c[0], idx:idx };
+  } else {
+    el.className = "word sign";
+    el.innerHTML = '<div class="bd"><span class="t"></span></div><div class="st"></div>';
+    el.querySelector(".t").textContent = SIGNS[idx];
+    w = { el:el, text:SIGNS[idx], idx:idx };
+  }
+  wordsEl.appendChild(el);
+  var W = stageEl.clientWidth;
+  w.w = el.offsetWidth; w.h = el.offsetHeight;
+  /* 2단계는 양 팀 사이 가운데 길로, 1단계는 넓게 */
+  var lo = stageNo === 1 ? 0.03 : 0.16, hi = stageNo === 1 ? 0.97 : 0.84;
+  var minX = W * lo, maxX = Math.max(minX, W * hi - w.w);
+  var best = minX, bestD = -1;
+  for(var t = 0; t < 8; t++){
+    var x = minX + Math.random() * (maxX - minX), d = 9999;
+    words.forEach(function(o){ if(o.y < 160){ d = Math.min(d, Math.abs((o.x + o.w / 2) - (x + w.w / 2))); } });
+    if(d > bestD){ bestD = d; best = x; }
+  }
+  w.x = best; w.y = -w.h - 4;
+  place(w);
+  words.push(w);
+}
+function place(w){ w.el.style.transform = "translate(" + w.x.toFixed(1) + "px," + w.y.toFixed(1) + "px)"; }
+function clearWords(){ words = []; wordsEl.innerHTML = ""; fxEl.innerHTML = ""; }
+
+/* ---------- 게임 루프 ---------- */
+function loop(ts){
+  if(!running) return;
+  var dt = Math.min(0.1, (ts - lastTs) / 1000);
+  lastTs = ts;
+  T += dt;
+  var lv = speedLevel(), H = stageEl.clientHeight;
+
+  spawnAcc += dt;
+  var limit = stageNo === 1 ? 6 : 7;
+  if((spawnAcc >= spawnGap(lv) || (words.length === 0 && spawnAcc > 0.5)) && words.length < limit){
+    spawnAcc = 0; spawn();
+  }
+
+  var v = H / fallTime(lv);
+  for(var i = words.length - 1; i >= 0; i--){
+    var w = words[i];
+    w.y += v * dt;
+    place(w);
+    var low = w.y + w.h > H * 0.72;
+    if(low !== !!w.low){ w.low = low; w.el.classList.toggle("low", low); }
+    if(w.y + w.h >= H - 4){ dropWord(w); if(!running) return; }
+  }
+
+  if(stageNo === 2){
+    /* 시간이 갈수록 악당팀이 점점 빠르게 밀고 들어와요 */
+    hero -= (0.30 + 0.0115 * T) * dt;
+    if(T >= nextVillainEvt){ villainEvent(); nextVillainEvt = T + Math.max(3.5, 8 - T * 0.05) + Math.random() * 2; }
+    paintTug();
+    if(hero <= 0){ hero = 0; paintTug(); loseStage("개발 악당이 갯벌을 차지했어요…"); return; }
+  }
+
+  paintHud();
+  if(T >= STAGE_TIME){ winStage(); return; }
+  rafId = requestAnimationFrame(loop);
+}
+
+/* ---------- 입력 ---------- */
+var pendingSubmit = false;
+function norm(s){ return String(s || "").replace(/\s+/g, ""); }
+function submit(){
+  pendingSubmit = false;
+  if(!running) return;
+  var v = norm(input.value);
+  input.value = "";
+  markTyping();
+  if(!v) return;
+  var target = null;
+  words.forEach(function(w){ if(!w.dead && norm(w.text) === v && (!target || w.y > target.y)) target = w; });
+  if(target) hitWord(target);
+  else {
+    combo = 0;
+    beep("wrong");
+    input.classList.remove("bad"); void input.offsetWidth; input.classList.add("bad");
+  }
+}
+input.addEventListener("keydown", function(e){
+  if(e.key !== "Enter") return;
+  e.preventDefault();
+  if(e.isComposing){ pendingSubmit = true; return; }   /* 한글 조합 중이면 조합이 끝난 뒤에 */
+  submit();
+});
+input.addEventListener("compositionend", function(){ if(pendingSubmit) setTimeout(submit, 0); });
+input.addEventListener("input", markTyping);
+$("btn-send").addEventListener("click", function(){ submit(); input.focus(); });
+stageEl.addEventListener("pointerdown", function(){ if(running) setTimeout(function(){ input.focus(); }, 0); });
+
+/* 치고 있는 글자와 맞는 단어를 살짝 표시해요 */
+function markTyping(){
+  var v = norm(input.value);
+  input.classList.remove("bad");
+  var any = false;
+  words.forEach(function(w){
+    var m = v.length > 0 && norm(w.text).indexOf(v) === 0;
+    if(m) any = true;
+    if(m !== !!w.match){ w.match = m; w.el.classList.toggle("match", m); }
+  });
+  input.classList.toggle("ok", any);
+}
+
+/* ---------- 맞혔을 때 ---------- */
+function hitWord(w){
+  w.dead = true;
+  words.splice(words.indexOf(w), 1);
+  hits++; combo++;
+  var gain = (stageNo === 1 ? 10 : 15) + norm(w.text).length * 2 + (combo >= 3 ? Math.min(10, combo) : 0);
+  score += gain; stageScore[stageNo - 1] += gain;
+  beep("hit");
+
+  var cx = w.x + w.w / 2, cy = w.y + w.h / 2;
+  burst(cx, cy, stageNo === 1 ? ["#FFD45E","#6CC07A","#45B4CF","#FF9BB3"] : ["#FFD45E","#6CC07A","#B98552","#fff"]);
+  floatText(cx, cy, "+" + gain);
+  if(combo >= 3) floatText(cx, cy - 34, combo + " 콤보!", "combo");
+
+  w.el.style.transition = "opacity .25s, transform .25s";
+  w.el.style.opacity = "0";
+  w.el.style.transform += " scale(1.3)";
+  setTimeout(function(){ w.el.remove(); }, 260);
+
+  if(stageNo === 1){
+    caught++;
+    addResident(w.idx, cx, cy);
+    var lv = 0;
+    for(var i = 0; i < GROW_AT.length; i++){ if(caught >= GROW_AT[i]) lv = i; }
+    if(lv > growLv) setGrow(lv);
+    paintGrowBar();
+  } else {
+    hero = Math.min(96, hero + 4.5 + (combo >= 5 ? 1 : 0));
+    heroCheer(w.text);
+    paintTug();
+  }
+  markTyping();
+  paintHud();
+}
+
+/* ---------- 놓쳤을 때 ---------- */
+function dropWord(w){
+  w.dead = true;
+  words.splice(words.indexOf(w), 1);
+  misses++; combo = 0;
+  beep("miss");
+  var sp = document.createElement("div");
+  sp.className = "splash";
+  sp.style.left = (w.x + w.w / 2) + "px";
+  fxEl.appendChild(sp);
+  setTimeout(function(){ sp.remove(); }, 750);
+  floatText(w.x + w.w / 2, stageEl.clientHeight - 40, "놓쳤어요!", "bad");
+  w.el.style.transition = "opacity .3s";
+  w.el.style.opacity = "0";
+  setTimeout(function(){ w.el.remove(); }, 320);
+
+  if(stageNo === 1){
+    lives--;
+    paintHearts();
+    if(lives <= 0) loseStage("단어를 5번 놓쳤어요…");
+  } else {
+    hero -= 4;
+    pulse($("team-hero"), "hurt", 550);
+    paintTug();
+    if(hero <= 0){ hero = 0; paintTug(); loseStage("개발 악당이 갯벌을 차지했어요…"); }
+  }
+}
+
+/* ---------- 효과 ---------- */
+function burst(x, y, colors){
+  for(var i = 0; i < 12; i++){
+    var s = document.createElement("i");
+    s.className = "spark";
+    var a = Math.PI * 2 * i / 12, r = 40 + Math.random() * 30;
+    s.style.left = (x - 5) + "px"; s.style.top = (y - 5) + "px";
+    s.style.background = colors[i % colors.length];
+    s.style.setProperty("--dx", (Math.cos(a) * r).toFixed(0) + "px");
+    s.style.setProperty("--dy", (Math.sin(a) * r).toFixed(0) + "px");
+    fxEl.appendChild(s);
+    (function(el){ setTimeout(function(){ el.remove(); }, 720); })(s);
+  }
+}
+function floatText(x, y, t, cls){
+  var d = document.createElement("div");
+  d.className = "fx-text" + (cls ? " " + cls : "");
+  d.textContent = t;
+  d.style.left = x + "px"; d.style.top = y + "px";
+  fxEl.appendChild(d);
+  setTimeout(function(){ d.remove(); }, 1000);
+}
+var toastTimer = null;
+function toast(html, bad){
+  var t = $("toast");
+  t.innerHTML = html;
+  t.classList.toggle("bad", !!bad);
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.classList.remove("show"); }, 2000);
+}
+
+/* ---------- HUD ---------- */
+function paintHud(){
+  $("d-score").textContent = score.toLocaleString("ko-KR");
+  var left = Math.max(0, Math.ceil(STAGE_TIME - T));
+  $("d-time").textContent = left;
+  $("tbar-i").style.width = Math.max(0, (STAGE_TIME - T) / STAGE_TIME * 100) + "%";
+  $("tbar").classList.toggle("warn", left <= 15);
+  var lv = speedLevel();
+  if($("d-speed").textContent !== String(lv)){
+    var old = +$("d-speed").textContent;
+    $("d-speed").textContent = lv;
+    var h = "";
+    for(var i = 1; i <= 10; i++) h += '<i class="' + (i <= lv ? "on" + (i >= 6 ? " hot" : "") : "") + '"></i>';
+    $("pips").innerHTML = h;
+    if(running && lv > old) toast("💨 속도 " + lv + "단계!<small>단어가 더 빨리 내려와요</small>");
+  }
+}
+function paintHearts(){
+  var h = "";
+  for(var i = 0; i < LIVES; i++) h += '<span class="' + (i < lives ? "" : "off") + '">💚</span>';
+  $("d-hearts").innerHTML = h;
+}
+function paintGrowBar(){
+  var lo = GROW_AT[growLv], hi = GROW_AT[growLv + 1];
+  var p = hi ? (growLv + (caught - lo) / (hi - lo)) / (GROW_AT.length - 1) : 1;
+  $("gbar-i").style.width = (p * 100).toFixed(1) + "%";
+  $("d-grow").textContent = GROW_NAMES[growLv];
+}
+
+/* ===================================================================
+   🌱 1단계 갯벌 꾸미기
+   =================================================================== */
+function setGrow(lv, silent){
+  growLv = lv;
+  var svg = $("scene1");
+  svg.querySelectorAll(".lv").forEach(function(el){
+    var from = el.getAttribute("data-lv"), until = el.getAttribute("data-until"), on = true;
+    if(from !== null && lv < +from) on = false;
+    if(until !== null && lv > +until) on = false;
+    el.classList.toggle("on", on);
+  });
+  $("mud").style.transform = "scale(" + MUD_SCALE[lv] + ")";
+  svg.style.filter = "saturate(" + (0.5 + lv * 0.13).toFixed(2) + ") brightness(" + (0.94 + lv * 0.022).toFixed(3) + ")";
+  paintGrowBar();
+  if(!silent){
+    beep("grow");
+    toast("🌱 갯벌이 넓어졌어요! · " + GROW_NAMES[lv] + "<small>" +
+      ["", "촉촉한 갯벌에 생물들이 찾아와요", "갯골에 바닷물이 반짝반짝 흘러요", "갈대숲이 자라고 철새가 날아와요",
+       "붉은 칠면초와 꽃이 활짝 피었어요", "무지개가 뜬 최고의 갯벌이 되었어요!"][lv] + "</small>");
+  }
+}
+
+/* 맞힌 생물이 갯벌로 날아가 자리를 잡아요 */
+var RES_MAX = 30;
+function addResident(idx, fromX, fromY){
+  var kind = CREATURES[idx][1];
+  var s = MUD_SCALE[Math.max(growLv, 0)];
+  /* 갯벌 안쪽의 빈 자리 고르기 (화면 좌표: viewBox 1000×600) */
+  var u = (Math.random() * 2 - 1) * 0.86;
+  var topY = 640 - (640 - 300) * s;          /* 지금 갯벌의 윗선 근처 */
+  var y = topY + 40 + Math.random() * Math.max(40, 560 - topY - 40);
+  var x = 500 + u * 540 * s;
+  if(kind === "plant") x = 500 + (u < 0 ? -1 : 1) * (0.55 + Math.random() * 0.33) * 540 * s;
+  var size = (kind === "bird" ? 92 : kind === "plant" ? 84 : 70) * (0.8 + (y - 300) / 300 * 0.45);
+
+  var NS = "http://www.w3.org/2000/svg";
+  var g = document.createElementNS(NS, "g");
+  g.setAttribute("class", "res pop");
+  g.setAttribute("data-y", y.toFixed(0));
+  var a = document.createElementNS(NS, "g");
+  a.setAttribute("class", "act " + kind);
+  a.style.animationDelay = (-Math.random() * 3).toFixed(2) + "s";
+  var sh = document.createElementNS(NS, "ellipse");
+  sh.setAttribute("cx", x); sh.setAttribute("cy", y - 2);
+  sh.setAttribute("rx", size * 0.36); sh.setAttribute("ry", size * 0.07);
+  sh.setAttribute("fill", "rgba(60,40,30,.28)");
+  var im = document.createElementNS(NS, "image");
+  im.setAttribute("href", IMG + "c" + idx + ".webp");
+  im.setAttribute("x", (x - size / 2).toFixed(1));
+  im.setAttribute("y", (y - size).toFixed(1));
+  im.setAttribute("width", size.toFixed(1));
+  im.setAttribute("height", size.toFixed(1));
+  if(Math.random() < 0.5 && kind !== "plant") im.setAttribute("transform", "translate(" + (2 * x).toFixed(1) + " 0) scale(-1 1)");
+  a.appendChild(im);
+  g.appendChild(sh); g.appendChild(a);
+
+  /* 아래쪽에 있을수록 앞에 보이도록 순서 맞추기 */
+  var box = $("residents"), kids = box.children, before = null;
+  for(var i = 0; i < kids.length; i++){ if(+kids[i].getAttribute("data-y") > y){ before = kids[i]; break; } }
+  g.style.opacity = "0";
+  g.dataset.t = Date.now();
+  box.insertBefore(g, before);
+  if(box.children.length > RES_MAX){
+    /* 가장 오래된 친구는 살짝 굴 속으로 */
+    var oldest = null, ot = Infinity;
+    for(var k = 0; k < box.children.length; k++){ var tt = +(box.children[k].dataset.t || 0); if(tt < ot){ ot = tt; oldest = box.children[k]; } }
+    if(oldest){ oldest.style.transition = "opacity .6s"; oldest.style.opacity = "0"; setTimeout(function(){ oldest.remove(); }, 650); }
+  }
+
+  /* 단어 자리에서 갯벌 자리까지 날아가는 그림 */
+  var p = svgToPx(x, y - size / 2);
+  var f = document.createElement("img");
+  f.className = "flyer";
+  f.src = IMG + "c" + idx + ".webp";
+  f.style.left = (fromX - 24) + "px"; f.style.top = (fromY - 24) + "px";
+  fxEl.appendChild(f);
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      f.style.transform = "translate(" + (p.x - fromX).toFixed(0) + "px," + (p.y - fromY).toFixed(0) + "px) scale(" + (size * p.k / 48).toFixed(2) + ")";
+      f.style.opacity = "0";
+    });
+  });
+  setTimeout(function(){ f.remove(); g.style.opacity = ""; g.classList.remove("pop"); void g.offsetWidth; g.classList.add("pop"); }, 760);
+}
+function svgToPx(x, y){
+  var W = stageEl.clientWidth, H = stageEl.clientHeight;
+  var k = Math.max(W / 1000, H / 600);
+  return { x: (W - 1000 * k) / 2 + x * k, y: H - 600 * k + y * k, k: k };
+}
+
+/* ===================================================================
+   🚧 2단계 갯벌 생물팀 vs 개발 악당팀
+   =================================================================== */
+var HERO_TEAM = [29, 0, 20, 23, 11];
+var VIL_TEAM = ["v3", "v1", "v0", "v2"];
+var VIL_LINES = ["갯벌을 메워 버리자!","여기에 공장을 지을 거야!","빌딩이 최고야~!","흙을 와르르 부어라!","갯벌은 쓸모없어!","주차장을 만들자!"];
+var HERO_LINES = ["갯벌을 지키자!","우리 집을 지켜 줘!","힘내자, 친구들!","절대 못 비켜!","갯벌은 소중해!"];
+function buildTeams(){
+  var h = $("team-hero"), v = $("team-vil");
+  h.querySelectorAll(".m").forEach(function(e){ e.remove(); });
+  v.querySelectorAll(".m").forEach(function(e){ e.remove(); });
+  HERO_TEAM.forEach(function(i){
+    var m = document.createElement("div"); m.className = "m";
+    m.innerHTML = '<img src="' + IMG + 'c' + i + '.webp" alt="">';
+    h.appendChild(m);
+  });
+  VIL_TEAM.forEach(function(n){
+    var m = document.createElement("div"); m.className = "m";
+    m.innerHTML = '<img src="' + IMG + n + '.webp" alt="">';
+    v.appendChild(m);
+  });
+}
+function paintTug(){
+  var p = Math.max(0, Math.min(100, hero));
+  $("tug-hero").style.width = p + "%";
+  $("tug-knot").style.left = p + "%";
+  $("d-hero").textContent = Math.round(p);
+  $("d-vil").textContent = 100 - Math.round(p);
+  $("tug").classList.toggle("danger", p < 25);
+  /* 막대만큼 두 팀이 앞으로 나오거나 밀려나요 */
+  var W = stageEl.clientWidth, shift = (p - 50) / 50 * W * 0.07;
+  $("team-hero").style.transform = "translateX(" + shift.toFixed(0) + "px)";
+  $("team-vil").style.transform = "translateX(" + shift.toFixed(0) + "px)";
+}
+var saySignTimer = null, hsayTimer = null, vsayTimer = null;
+function heroCheer(text){
+  var h = $("team-hero"), v = $("team-vil");
+  pulse(h, "cheer", 650);
+  pulse(v, "hurt", 550);
+  $("bigsign-t").textContent = text;
+  $("bigsign").classList.add("show");
+  clearTimeout(saySignTimer);
+  saySignTimer = setTimeout(function(){ $("bigsign").classList.remove("show"); }, 1300);
+  if(Math.random() < 0.3){
+    var vs = $("vsay"); vs.textContent = ["으악!","앗, 밀린다!","끄응…","안 돼~!"][Math.floor(Math.random() * 4)];
+    vs.classList.add("show"); clearTimeout(vsayTimer); vsayTimer = setTimeout(function(){ vs.classList.remove("show"); }, 1100);
+  }
+}
+/* 잠깐만 움직이는 몸짓 (끝나면 원래 콩콩 뛰기로 돌아가요) */
+function pulse(el, cls, ms){
+  el.classList.remove("cheer", "hurt", "charge");
+  void el.offsetWidth;
+  el.classList.add(cls);
+  clearTimeout(el._pt);
+  el._pt = setTimeout(function(){ el.classList.remove(cls); }, ms);
+}
+function villainEvent(){
+  var v = $("team-vil"), vs = $("vsay");
+  pulse(v, "charge", 750);
+  vs.textContent = VIL_LINES[Math.floor(Math.random() * VIL_LINES.length)];
+  vs.classList.add("show");
+  clearTimeout(vsayTimer); vsayTimer = setTimeout(function(){ vs.classList.remove("show"); }, 1800);
+  hero -= 2.5 + T * 0.03;
+  beep("rumble");
+  if(Math.random() < 0.6){
+    var hs = $("hsay");
+    setTimeout(function(){
+      hs.textContent = HERO_LINES[Math.floor(Math.random() * HERO_LINES.length)];
+      hs.classList.add("show"); clearTimeout(hsayTimer);
+      hsayTimer = setTimeout(function(){ hs.classList.remove("show"); }, 1500);
+    }, 700);
+  }
+}
+
+/* ===================================================================
+   단계 끝
+   =================================================================== */
+function stopLoop(){ running = false; cancelAnimationFrame(rafId); input.blur(); }
+function winStage(){
+  stopLoop();
+  cleared[stageNo - 1] = true;
+  T = STAGE_TIME; paintHud();
+  words.forEach(function(w){ burst(w.x + w.w / 2, w.y + w.h / 2, ["#FFD45E","#fff","#6CC07A"]); w.el.remove(); });
+  words = [];
+  if(stageNo === 1 && growLv < 5) setGrow(Math.max(growLv, 3), true);   /* 버텨 낸 갯벌은 더 반짝여요 */
+  if(stageNo === 2){ hero = Math.max(hero, 60); paintTug(); }
+  showBanner("미션 성공!", stageNo === 1 ? "갯벌을 지켜 냈어요 🌱" : "개발 악당을 막아 냈어요 🚧", false);
+  beep("win");
+  setTimeout(function(){
+    hideBanner();
+    playMovie(stageNo === 1 ? "flood" : "typhoon", function(){
+      if(stageNo === 1){ showIntro(2); $("game").classList.add("hidden"); document.body.style.overflow = ""; }
+      else finish();
+    });
+  }, 2000);
+}
+function loseStage(msg){
+  stopLoop();
+  showBanner("미션 실패", msg, true);
+  beep("lose");
+  setTimeout(function(){ hideBanner(); finish(); }, 2200);
+}
+function showBanner(t, s, fail){
+  $("banner-t").textContent = t;
+  $("banner-s").textContent = s;
+  $("banner").classList.toggle("fail", !!fail);
+  $("banner").classList.remove("hidden");
+  restartAnim($("banner-t"));
+}
+function hideBanner(){ $("banner").classList.add("hidden"); }
+
+$("btn-quit").addEventListener("click", function(){
+  if(!running) return;
+  if(!confirm("게임을 그만할까요? 지금까지 점수로 결과를 보여 줘요.")) { input.focus(); return; }
+  stopLoop();
+  finish();
+});
+
+/* ===================================================================
+   🎬 승리 영상 (약 10초)
+   =================================================================== */
+var movieTimers = [], movieDone = null, fxMode = "none", fxRaf = 0, movieStart = 0, MOVIE_LEN = 10.5;
+function at(sec, fn){ movieTimers.push(setTimeout(fn, sec * 1000)); }
+function cap(html){
+  var c = $("cap");
+  c.classList.remove("show");
+  setTimeout(function(){ c.innerHTML = html; c.classList.add("show"); }, 180);
+}
+function shot(id, img, from, to, dur){
+  var s = $(id);
+  s.style.backgroundImage = "url(" + IMG + img + ")";
+  s.style.transition = "none";
+  s.style.transform = from;
+  void s.offsetWidth;
+  s.style.transition = "opacity 1.1s ease, transform " + dur + "s ease-in-out";
+  s.classList.add("on");
+  s.style.transform = to;
+}
+function moveShot(id, to, dur){
+  var s = $(id);
+  s.style.transition = "opacity 1.1s ease, transform " + dur + "s ease-in-out";
+  s.style.transform = to;
+}
+function flash(){ var f = $("flash"); f.classList.remove("go"); void f.offsetWidth; f.classList.add("go"); beep("thunder"); }
+function prop(html){ var d = document.createElement("div"); d.innerHTML = html; var el = d.firstChild; $("props").appendChild(el); return el; }
+
+function playMovie(kind, done){
+  movieDone = done;
+  movieTimers.forEach(clearTimeout); movieTimers = [];
+  $("game").classList.add("hidden");
+  $("movie").classList.remove("hidden");
+  $("props").innerHTML = "";
+  $("cap").classList.remove("show");
+  ["shotA","shotB"].forEach(function(id){ $(id).classList.remove("on"); });
+  $("film").classList.remove("shake");
+  movieStart = performance.now();
+  startFx();
+  if(kind === "flood") floodMovie(); else typhoonMovie();
+  at(MOVIE_LEN, endMovie);
+}
+function endMovie(){
+  movieTimers.forEach(clearTimeout); movieTimers = [];
+  fxMode = "none"; cancelAnimationFrame(fxRaf);
+  $("movie").classList.add("hidden");
+  $("film").classList.remove("shake");
+  var d = movieDone; movieDone = null;
+  if(d) d();
+}
+$("btn-skip").addEventListener("click", endMovie);
+
+function floodMovie(){
+  /* 1) 큰비가 쏟아져요 */
+  shot("shotA", "flood1.webp", "scale(1.05)", "scale(1.18)", 3.2);
+  fxMode = "rain";
+  prop('<div class="badge">☔ 집중호우 경보!</div>');
+  cap("앗! 며칠 동안 <em>엄청난 비</em>가 쏟아졌어요 ☔");
+  at(0.7, flash); at(2.1, flash);
+  /* 2) 갯벌이 스펀지처럼 빗물을 머금어요 */
+  at(3.2, function(){
+    moveShot("shotA", "scale(1.65) translate(-6%,-12%)", 3.3);
+    cap("넓게 지켜 낸 갯벌이 <em>자연 스펀지</em>처럼 빗물을 꿀꺽꿀꺽 머금어요!");
+    var g = prop('<div class="gauge">마을로 가는 물<div class="tube"><i></i></div><div class="lbl">홍수 위험</div></div>');
+    setTimeout(function(){ g.classList.add("down"); g.querySelector(".lbl").textContent = "안전해요"; }, 900);
+    var spots = [[18,58],[34,70],[52,62],[28,82],[62,78],[44,52],[12,74]];
+    spots.forEach(function(p, i){
+      setTimeout(function(){
+        var d = prop('<div class="drop" style="left:' + p[0] + '%;top:' + p[1] + '%">💧</div>');
+        setTimeout(function(){
+          d.remove();
+          var t = prop('<div class="gulp" style="left:' + p[0] + '%;top:' + p[1] + '%">' + (i % 2 ? "꿀꺽!" : "쏙!") + '</div>');
+          setTimeout(function(){ t.remove(); }, 1250);
+        }, 1050);
+      }, i * 330);
+    });
+    var hp = prop('<div class="helper" style="left:6%;top:42%"><b>물을 머금어요!</b><img src="' + IMG + 'c29.webp" alt=""></div>');
+    var hp2 = prop('<div class="helper" style="left:62%;top:46%;animation-delay:.4s"><b>나도 도울게!</b><img src="' + IMG + 'c20.webp" alt=""></div>');
+  });
+  /* 3) 비가 그치고 마을이 무사해요 */
+  at(6.6, function(){
+    fxMode = "sparkle";
+    $("props").innerHTML = "";
+    shot("shotB", "flood2.webp", "scale(1.12)", "scale(1.0)", 4);
+    prop('<div class="badge good">🌈 홍수 피해 크게 줄었어요!</div>');
+    var crew = '<div class="crew">';
+    [0, 23, 20, 11, 2, 22].forEach(function(i, k){ crew += '<img src="' + IMG + 'c' + i + '.webp" alt="" style="animation-delay:' + (k * .12) + 's,' + (.6 + k * .12) + 's">'; });
+    prop(crew + "</div>");
+    cap("갯벌을 잘 지킨 덕분에 <em>홍수 피해를 크게 줄일 수 있었어요!</em> 🌈");
+  });
+  at(7.4, function(){ $("shotA").classList.remove("on"); });
+}
+
+function typhoonMovie(){
+  /* 1) 거대한 태풍이 몰려와요 */
+  shot("shotA", "typhoon1.webp", "scale(1.2) translate(4%,3%)", "scale(1.05)", 3.2);
+  fxMode = "wind";
+  $("film").classList.add("shake");
+  prop('<div class="badge">🌀 태풍 경보!</div>');
+  cap("으앗! <em>거대한 태풍</em>이 마을 쪽으로 몰려와요! 🌀");
+  at(1.2, function(){ beep("rumble"); });
+  /* 2) 갯벌과 갈대숲이 천연 방패가 되어요 */
+  at(3.2, function(){
+    $("film").classList.remove("shake");
+    moveShot("shotA", "scale(1.3) translate(-4%,-6%)", 3.3);
+    cap("넓은 갯벌과 갈대숲이 <em>천연 방패</em>가 되어 큰 파도의 힘을 줄여 주었어요!");
+    prop('<div class="shield"><span>🛡️ 천연 방패</span></div>');
+    [0, 0.8, 1.6].forEach(function(d, i){
+      setTimeout(function(){ prop('<div class="wave" style="left:2%;top:' + (40 + i * 14) + '%">🌊</div>'); }, d * 1000);
+    });
+    prop('<div class="helper" style="left:70%;top:50%"><b>파도야 멈춰라!</b><img src="' + IMG + 'c34.webp" alt=""></div>');
+  });
+  /* 3) 태풍이 지나가고 마을이 무사해요 */
+  at(6.6, function(){
+    fxMode = "sparkle";
+    $("props").innerHTML = "";
+    shot("shotB", "typhoon2.webp", "scale(1.12)", "scale(1.0)", 4);
+    prop('<div class="badge good">🎉 태풍 피해 크게 줄었어요!</div>');
+    var crew = '<div class="crew">';
+    [23, 28, 0, 20, 12, 26].forEach(function(i, k){ crew += '<img src="' + IMG + 'c' + i + '.webp" alt="" style="animation-delay:' + (k * .12) + 's,' + (.6 + k * .12) + 's">'; });
+    prop(crew + "</div>");
+    cap("갯벌을 잘 지킨 덕분에 <em>태풍 피해를 크게 줄일 수 있었어요!</em> 🎉");
+  });
+  at(7.4, function(){ $("shotA").classList.remove("on"); });
+}
+
+/* 영상 위에 비 · 바람 · 반짝이를 그려요 */
+function startFx(){
+  var cv = $("fxc"), ctx = cv.getContext("2d"), parts = [];
+  function size(){ cv.width = cv.clientWidth * (window.devicePixelRatio > 1 ? 1.5 : 1); cv.height = cv.clientHeight * (window.devicePixelRatio > 1 ? 1.5 : 1); }
+  size();
+  cancelAnimationFrame(fxRaf);
+  var last = performance.now();
+  function frame(now){
+    if($("movie").classList.contains("hidden")) return;
+    var dt = Math.min(0.05, (now - last) / 1000); last = now;
+    var W = cv.width, H = cv.height;
+    if(cv.clientWidth && Math.abs(cv.width - cv.clientWidth * (window.devicePixelRatio > 1 ? 1.5 : 1)) > 2) size();
+    ctx.clearRect(0, 0, W, H);
+    var want = fxMode === "rain" ? 220 : fxMode === "wind" ? 70 : fxMode === "sparkle" ? 60 : 0;
+    while(parts.length < want){
+      parts.push({ x: Math.random() * W, y: Math.random() * H, v: 0.6 + Math.random() * 0.8, s: Math.random(), kind: fxMode, ph: Math.random() * 6 });
+    }
+    parts = parts.filter(function(p){ return p.kind === fxMode; }).slice(0, Math.max(want, 0));
+    parts.forEach(function(p){
+      if(p.kind === "rain"){
+        p.y += H * 1.6 * p.v * dt; p.x -= H * 0.25 * p.v * dt;
+        if(p.y > H){ p.y = -20; p.x = Math.random() * W * 1.2; }
+        ctx.strokeStyle = "rgba(220,235,255," + (0.35 + p.s * 0.4) + ")"; ctx.lineWidth = 1.5 + p.s;
+        ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - H * 0.012, p.y + H * 0.045); ctx.stroke();
+      } else if(p.kind === "wind"){
+        p.x += W * 0.9 * p.v * dt;
+        if(p.x > W + 100){ p.x = -200; p.y = Math.random() * H; }
+        ctx.strokeStyle = "rgba(255,255,255," + (0.25 + p.s * 0.35) + ")"; ctx.lineWidth = 2 + p.s * 2; ctx.lineCap = "round";
+        ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.quadraticCurveTo(p.x + 60, p.y - 10, p.x + 120 + p.s * 80, p.y); ctx.stroke();
+      } else if(p.kind === "sparkle"){
+        p.ph += dt * 3; p.y -= H * 0.03 * p.v * dt;
+        var a = (Math.sin(p.ph) + 1) / 2, r = (3 + p.s * 5) * (0.5 + a * 0.6);
+        ctx.fillStyle = ["rgba(255,244,180,","rgba(255,214,226,","rgba(220,250,255,"][Math.floor(p.s * 3)] + (0.3 + a * 0.7) + ")";
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y - r * 2); ctx.lineTo(p.x + r * .5, p.y - r * .5); ctx.lineTo(p.x + r * 2, p.y);
+        ctx.lineTo(p.x + r * .5, p.y + r * .5); ctx.lineTo(p.x, p.y + r * 2); ctx.lineTo(p.x - r * .5, p.y + r * .5);
+        ctx.lineTo(p.x - r * 2, p.y); ctx.lineTo(p.x - r * .5, p.y - r * .5); ctx.closePath(); ctx.fill();
+      }
+    });
+    $("mbar-i").style.width = Math.min(100, (now - movieStart) / (MOVIE_LEN * 1000) * 100) + "%";
+    fxRaf = requestAnimationFrame(frame);
+  }
+  fxRaf = requestAnimationFrame(frame);
+}
+
+/* ===================================================================
+   결과
+   =================================================================== */
+function finish(){
+  $("game").classList.add("hidden");
+  $("intro").classList.add("hidden");
+  $("home").classList.remove("hidden");
+  document.body.style.overflow = "";
+  var both = cleared[0] && cleared[1];
+  var r;
+  if(both) r = { icon:"c23", title:"갯벌 수호대장!", stars:"⭐⭐⭐",
+    desc:"홍수도 태풍도 막아 낸 진짜 갯벌 수호대장이에요! 갯벌은 생명의 요람이자 자연 스펀지, 천연 방패랍니다. 우리 함께 갯벌을 아껴요 💚" };
+  else if(cleared[0]) r = { icon:"c0", title:"갯벌 지킴이", stars:"⭐⭐☆",
+    desc:"갯벌을 넓게 지켜 홍수를 막아 냈어요! 2단계에서는 팻말 말을 빠르게 쳐서 악당팀 막대를 밀어내 보세요. 다음엔 꼭 수호대장!" };
+  else r = { icon:"c20", title:"갯벌 새싹 지킴이", stars:"⭐☆☆",
+    desc:"괜찮아요, 연습하면 금방 빨라져요! 아래쪽에 가까운 단어부터 먼저 치면 놓치지 않아요. 다시 갯벌을 지키러 가 볼까요?" };
+  $("r-icon").innerHTML = '<img src="' + IMG + r.icon + '.webp" alt="">';
+  $("r-title").textContent = r.title;
+  $("r-stars").textContent = r.stars;
+  $("r-score").innerHTML = score.toLocaleString("ko-KR") + "<small>점</small>";
+  $("r-s1").textContent = cleared[0] ? "성공 · " + stageScore[0] + "점" : "실패 · " + stageScore[0] + "점";
+  $("r-s1").className = "v " + (cleared[0] ? "ok" : "no");
+  if(cleared[0]){
+    $("r-s2").textContent = cleared[1] ? "성공 · " + stageScore[1] + "점" : (stageNo === 2 ? "실패 · " + stageScore[1] + "점" : "-");
+    $("r-s2").className = "v " + (cleared[1] ? "ok" : "no");
+  } else { $("r-s2").textContent = "도전 전"; $("r-s2").className = "v"; }
+  $("r-hit").textContent = hits + "개";
+  $("r-miss").textContent = misses + "개";
+
+  var best = readBest(), extra = "";
+  if(score > best){ extra = " 🎊 새로운 최고 기록이에요!"; try{ localStorage.setItem(BEST_KEY, String(score)); }catch(e){} }
+  else if(best > 0){ extra = " (내 최고 기록 " + best.toLocaleString("ko-KR") + "점)"; }
+  $("r-desc").textContent = r.desc + extra;
+
+  var box = $("name-box");
+  if(makesTop(score)){
+    box.classList.remove("hidden");
+    $("name-why").textContent = topList.length ? "🎉 순위 " + TOP_N + "등 안에 들었어요! 이름을 적어 주세요." : "🎉 첫 번째 기록이에요! 이름을 적어 주세요.";
+    var saved = "";
+    try{ saved = localStorage.getItem("getbeol-name") || ""; }catch(e){}
+    $("name-input").value = saved;
+    $("btn-save").disabled = false;
+    $("btn-save").textContent = "올리기";
+  } else box.classList.add("hidden");
+  renderRanks();
+  $("veil").classList.add("show");
+  paintBest();
+}
+function readBest(){ var b = 0; try{ b = parseInt(localStorage.getItem(BEST_KEY) || "0", 10) || 0; }catch(e){} return b; }
+function paintBest(){
+  var b = readBest();
+  $("best-line").textContent = b > 0 ? "🏆 내 최고 기록 : " + b.toLocaleString("ko-KR") + "점" : "아직 기록이 없어요. 갯벌을 지키러 가 볼까요? 🦀";
+}
+
+/* ---------- 버튼 ---------- */
+function newGame(){
+  stageNo = 1; score = 0; stageScore = [0, 0]; hits = 0; misses = 0; cleared = [false, false];
+  $("veil").classList.remove("show");
+  showIntro(1);
+}
+$("btn-start").addEventListener("click", function(){ wake(); newGame(); });
+$("btn-go").addEventListener("click", function(){ wake(); startStage(); });
+$("btn-again").addEventListener("click", function(){ newGame(); });
+$("btn-home").addEventListener("click", function(){ $("veil").classList.remove("show"); showHome(); });
+$("btn-save").addEventListener("click", submitRank);
+$("name-input").addEventListener("keydown", function(e){ if(e.key === "Enter" && !e.isComposing) submitRank(); });
+window.addEventListener("resize", function(){ if(stageNo === 2 && running) paintTug(); });
+
+/* 시작 화면의 갯벌 친구들 행진 */
+(function(){
+  var h = "";
+  for(var r = 0; r < 2; r++) CREATURES.forEach(function(c, i){
+    h += '<figure><img src="' + IMG + 'c' + i + '.webp" alt="" loading="lazy"><figcaption>' + c[0] + '</figcaption></figure>';
+  });
+  $("parade").innerHTML = h;
+})();
+paintBest();
+
+/* ===================================================================
+   🏆 갯벌 수호대 순위 (모든 방문자가 함께 보는 순위표, 5등까지)
+   =================================================================== */
+var RANK_COL = "farm_rankings", RANK_DOC = "getbeol_top5", TOP_N = 5;
+var topList = [], myRowKey = "", rankReady = false;
+
+var fdb = null;
+try{
+  firebase.initializeApp({
+    apiKey: "AIzaSyAqXsG8npxettrCRH3MbZwFZGLg5aehxdw",
+    authDomain: "min-playground.firebaseapp.com",
+    projectId: "min-playground",
+    storageBucket: "min-playground.firebasestorage.app",
+    messagingSenderId: "472071492052",
+    appId: "1:472071492052:web:00263046925133e55a4641"
+  });
+  fdb = firebase.firestore();
+}catch(e){ fdb = null; }
+
+function esc(t){
+  return String(t == null ? "" : t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function listenRanks(){
+  if(!fdb){ renderRanks(); return; }
+  fdb.collection(RANK_COL).doc(RANK_DOC).onSnapshot(function(doc){
+    topList = (doc.exists && doc.data().top5) ? doc.data().top5 : [];
+    rankReady = true;
+    renderRanks();
+  }, function(){ rankReady = true; renderRanks(); });
+}
+function rankHtml(){
+  if(!fdb) return '<div class="rank-empty">순위표를 불러올 수 없어요.<br>인터넷 연결을 확인해 주세요 🌐</div>';
+  if(!rankReady) return '<div class="rank-empty">순위표를 불러오는 중이에요… 🦀</div>';
+  if(!topList.length) return '<div class="rank-empty">아직 기록이 없어요.<br>첫 번째 갯벌 수호대장이 되어 보세요! 👑</div>';
+  var pos = ["👑","🥈","🥉","4","5"], h = "";
+  for(var i = 0; i < Math.min(topList.length, TOP_N); i++){
+    var r = topList[i];
+    var mine = (r.key && r.key === myRowKey) ? " me" : "";
+    h += '<div class="rank-row' + (i === 0 ? " first" : "") + mine + '">' +
+           '<span class="pos">' + pos[i] + '</span>' +
+           '<span class="who">' + esc(r.name) + '</span>' +
+           '<span class="amt">' + (Number(r.score) || 0).toLocaleString("ko-KR") + '점</span>' +
+         '</div>';
+  }
+  return h;
+}
+function renderRanks(){
+  var h = rankHtml();
+  $("rank-home").innerHTML = h;
+  $("rank-result").innerHTML = h;
+}
+function makesTop(amount){
+  if(!fdb || amount <= 0) return false;
+  if(topList.length < TOP_N) return true;
+  return amount > (Number(topList[topList.length - 1].score) || 0);
+}
+function saveRank(nick, amount){
+  if(!fdb) return Promise.resolve(false);
+  var ref = fdb.collection(RANK_COL).doc(RANK_DOC);
+  var key = String(Date.now()) + "-" + Math.floor(Math.random() * 10000);
+  return ref.get().then(function(doc){
+    var arr = (doc.exists && doc.data().top5) ? doc.data().top5.slice() : [];
+    arr.push({ name: nick, score: amount, key: key, at: Date.now() });
+    arr.sort(function(a, b){ return (Number(b.score) || 0) - (Number(a.score) || 0); });
+    arr = arr.slice(0, TOP_N);
+    myRowKey = key;
+    return ref.set({ top5: arr }).then(function(){ return true; });
+  }).catch(function(){ return false; });
+}
+function submitRank(){
+  var inp = $("name-input");
+  var nick = (inp.value || "").trim().slice(0, 8);
+  if(!nick){ alert("이름을 적어 주세요!"); inp.focus(); return; }
+  var btn = $("btn-save");
+  btn.disabled = true; btn.textContent = "올리는 중…";
+  saveRank(nick, score).then(function(ok){
+    btn.disabled = false; btn.textContent = "올리기";
+    if(ok){
+      $("name-box").classList.add("hidden");
+      try{ localStorage.setItem("getbeol-name", nick); }catch(e){}
+    } else {
+      alert("순위표에 올리지 못했어요.\n인터넷을 확인하고 다시 눌러 주세요.");
+    }
+  });
+}
+
+/* ===== 관리자용 순위 초기화 (페이지 맨 아래 전구) ===== */
+var ADMIN_PW = "3min";
+function adminReset(){
+  var bulb = $("bulb");
+  var pw = prompt("관리자 비밀번호를 입력하세요.");
+  if(pw === null) return;
+  if(pw !== ADMIN_PW){ alert("비밀번호가 달라요."); return; }
+  if(!confirm("'갯벌을 지키자!' 순위를 모두 지울까요?\n지우면 되돌릴 수 없어요.")) return;
+  if(!fdb){ alert("순위 서버에 연결되어 있지 않아요."); return; }
+  if(bulb) bulb.classList.add("on");
+  fdb.collection(RANK_COL).doc(RANK_DOC).set({ top5: [] }).then(function(){
+    myRowKey = "";
+    alert("✅ 순위를 초기화했어요.");
+  }).catch(function(e){
+    alert("초기화하지 못했어요.\n" + (e && e.message ? e.message : ""));
+  }).then(function(){ if(bulb) bulb.classList.remove("on"); });
+}
+
+listenRanks();
+</script>
+</body>
+</html>
