@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
 <title>갯벌을 지키자! | 3분 놀이터</title>
 <meta name="description" content="내려오는 갯벌 생물 이름을 타자로 쳐서 갯벌을 넓히고, 갯벌을 지키는 팻말로 개발 악당을 물리치는 초등학생용 2단계 타자 게임.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -136,8 +136,8 @@
   .lv-card.s2 .chips span{background:#FFF4EC;color:#B86A3A;border-color:#F8DCC6;}
 
   /* ===== 게임 화면 ===== */
-  #game{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;
-    height:100vh;height:100dvh;padding:8px 10px 10px;gap:8px;
+  #game{position:fixed;left:0;right:0;top:0;z-index:20;display:flex;flex-direction:column;
+    height:100vh;height:100dvh;padding:8px 10px 10px;gap:8px;overflow:hidden;
     background:linear-gradient(180deg,#DDF2FB 0%,#FFF6E8 100%);}
   #game.hidden{display:none;}
   .hud{display:flex;gap:7px;align-items:stretch;max-width:1000px;width:100%;margin:0 auto;}
@@ -168,7 +168,7 @@
     user-select:none;-webkit-user-select:none;}
   .layer{position:absolute;inset:0;}
   #scene1{width:100%;height:100%;display:block;transition:filter 1.6s ease;}
-  #words,#fx{pointer-events:none;}
+  #words,#fx{pointer-events:none;z-index:6;}   /* 2단계 막대 위로도 단어가 바로 보이게 */
 
   /* 1단계 장면 : 레벨에 따라 켜지고 꺼지는 조각들 */
   #scene1 .lv{opacity:0;transition:opacity 1.8s ease;}
@@ -235,12 +235,12 @@
   .team{position:absolute;bottom:4%;display:flex;align-items:flex-end;transition:transform .4s ease-out;z-index:2;}
   .team.hero{left:1%;}
   .team.villain{right:1%;}
-  .team .m{position:relative;width:clamp(40px,10vw,104px);margin:0 -6px;}
+  .team .m{position:relative;width:clamp(36px,min(10vw,calc(var(--sh,600px) * .2)),104px);margin:0 -6px;}
   .team .m img{width:100%;display:block;transform-origin:50% 100%;}
   .team.hero .m img{animation:hop 1.9s ease-in-out infinite;}
   .team.hero .m:nth-child(2) img{animation-delay:.25s;} .team.hero .m:nth-child(3) img{animation-delay:.5s;}
   .team.hero .m:nth-child(4) img{animation-delay:.75s;} .team.hero .m:nth-child(5) img{animation-delay:1s;}
-  .team.villain .m{width:clamp(46px,12vw,124px);}
+  .team.villain .m{width:clamp(42px,min(12vw,calc(var(--sh,600px) * .24)),124px);}
   .team.villain .m img{animation:rumble 1.1s ease-in-out infinite;}
   .team.villain .m:nth-child(2) img{animation-delay:.2s;} .team.villain .m:nth-child(3) img{animation-delay:.4s;}
   @keyframes rumble{0%,100%{transform:translateY(0) rotate(0);}50%{transform:translateY(-2px) rotate(-1.5deg);}}
@@ -269,8 +269,8 @@
   /* 떨어지는 단어 */
   .word{position:absolute;left:0;top:0;display:flex;align-items:center;gap:6px;padding:5px 14px 5px 6px;border-radius:999px;
     background:#fff;box-shadow:0 4px 0 rgba(78,53,39,.22),0 8px 18px rgba(63,58,82,.16);border:3px solid #fff;
-    font-family:'Jua',sans-serif;font-size:clamp(17px,2.6vw,23px);color:var(--ink);white-space:nowrap;will-change:transform;}
-  .word img{width:clamp(30px,4.4vw,42px);height:clamp(30px,4.4vw,42px);object-fit:contain;}
+    font-family:'Jua',sans-serif;font-size:clamp(15px,min(2.6vw,calc(var(--sh,600px) * .05)),23px);color:var(--ink);white-space:nowrap;will-change:transform;}
+  .word img{--wi:clamp(24px,min(4.4vw,calc(var(--sh,600px) * .085)),42px);width:var(--wi);height:var(--wi);object-fit:contain;}
   .word.low{border-color:#FFC3CD;background:#FFF4F6;}
   .word.match{border-color:var(--leaf);background:#F1FFF0;}
   .word.sign{flex-direction:column;gap:0;padding:0;border:none;background:none;box-shadow:none;}
@@ -304,7 +304,7 @@
 
   .count{position:absolute;inset:0;z-index:9;display:flex;align-items:center;justify-content:center;pointer-events:none;
     background:rgba(255,255,255,.18);}
-  .count span{font-family:'Jua',sans-serif;font-size:min(30vw,170px);color:#fff;-webkit-text-stroke:4px var(--mud-dk);paint-order:stroke fill;
+  .count span{font-family:'Jua',sans-serif;font-size:min(30vw,170px,calc(var(--sh,600px) * .45));color:#fff;-webkit-text-stroke:4px var(--mud-dk);paint-order:stroke fill;
     text-shadow:0 8px 0 var(--mud-dk);animation:countPop .9s ease-out both;}
   @keyframes countPop{0%{transform:scale(2);opacity:0;}30%{transform:scale(1);opacity:1;}100%{transform:scale(.9);opacity:.9;}}
   .banner{position:absolute;inset:0;z-index:9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
@@ -412,6 +412,30 @@
   .bulb.on{color:#F0B429;opacity:1;filter:drop-shadow(0 0 10px rgba(240,180,41,.85));}
   .foot{text-align:center;font-size:12.5px;color:var(--ink-soft);margin-top:6px;}
   .foot a{color:inherit;}
+
+  /* 화면 자판이 올라와 높이가 낮을 때 : 위아래 띠를 얇게 줄여 놀이판을 넓혀요 */
+  #game.compact{padding:4px 6px 6px;gap:4px;}
+  #game.compact .hud{gap:4px;}
+  #game.compact .hb{padding:3px 7px 4px;border-radius:11px;}
+  #game.compact .hb .val{font-size:15px;line-height:1.1;}
+  #game.compact .hb .lab{font-size:9.5px;}
+  #game.compact .hearts{font-size:12px;line-height:1.1;}
+  #game.compact .tbar{height:6px;margin-top:3px;}
+  #game.compact .pips{margin-top:2px;}
+  #game.compact .pips i{width:5px;height:7px;}
+  #game.compact .stage{border-radius:16px;}
+  #game.compact #typing{padding:6px 12px;font-size:18px;border-radius:14px;box-shadow:0 3px 0 #BFE2EC;}
+  #game.compact .typebar .btn{padding:0 14px;font-size:15px;border-radius:14px;box-shadow:0 3px 0 var(--sea-d);}
+  #game.compact .tug{top:5px;left:8px;right:8px;}
+  #game.compact .tug-labels{font-size:11px;margin-bottom:2px;}
+  #game.compact .tug-labels span{padding:1px 8px;}
+  #game.compact .tug-bar{height:16px;border-width:2px;}
+  #game.compact .tug-knot{width:24px;height:24px;margin:-12px 0 0 -12px;font-size:12px;border-width:2px;}
+  #game.compact .toast{top:10%;padding:6px 14px;font-size:16px;}
+  #game.compact .toast small{font-size:13px;}
+  #game.compact .xbtn{bottom:8px;padding:3px 8px;}
+  #game.tiny .hb.lvl,#game.tiny #hb-grow,#game.tiny .pips,#game.tiny .toast small{display:none;}
+  #game.tiny .hb .lab{font-size:9px;}
 
   @media (max-width:640px){
     .how{grid-template-columns:1fr;}
@@ -939,8 +963,40 @@ function startStage(){
     rafId = requestAnimationFrame(loop);
     input.focus();
   });
-  setTimeout(function(){ input.focus(); }, 50);
+  /* 버튼을 누른 그 순간에 바로 포커스해야 휴대폰 자판이 열려요.
+     자판이 먼저 올라오고 화면 크기가 맞춰진 뒤에 단어가 내려오기 시작해요. */
+  input.focus();
+  fitGame();
 }
+
+/* ---------- 휴대폰 · 태블릿 화면 자판에 맞춰 게임 화면 크기 맞추기 ---------- */
+var lastStageH = 0;
+function fitGame(){
+  var g = $("game");
+  if(g.classList.contains("hidden")) return;
+  var vv = window.visualViewport;
+  var h = vv ? vv.height : window.innerHeight;
+  /* 자판이 가린 부분을 빼고, 실제로 보이는 높이에만 게임을 그려요 */
+  g.style.height = h + "px";
+  g.style.top = (vv ? vv.offsetTop : 0) + "px";
+  if(window.scrollY && !vv) window.scrollTo(0, 0);
+  g.classList.toggle("compact", h < 600);
+  g.classList.toggle("tiny", h < 430);
+  var sh = stageEl.clientHeight;
+  g.style.setProperty("--sh", sh + "px");
+  /* 놀이판 높이가 바뀌면 내려오던 단어도 같은 비율 위치로 옮겨요 (갑자기 바닥에 닿지 않도록) */
+  if(lastStageH && sh && Math.abs(sh - lastStageH) > 1){
+    var r = sh / lastStageH;
+    words.forEach(function(w){ w.y = w.y < 0 ? w.y : w.y * r; place(w); });
+  }
+  lastStageH = sh;
+  if(stageNo === 2) paintTug();
+}
+if(window.visualViewport){
+  window.visualViewport.addEventListener("resize", fitGame);
+  window.visualViewport.addEventListener("scroll", fitGame);
+}
+window.addEventListener("resize", fitGame);
 
 function countdown(done){
   var box = $("count"), n = 3;
@@ -1670,7 +1726,6 @@ $("btn-again").addEventListener("click", function(){ newGame(); });
 $("btn-home").addEventListener("click", function(){ $("veil").classList.remove("show"); showHome(); });
 $("btn-save").addEventListener("click", submitRank);
 $("name-input").addEventListener("keydown", function(e){ if(e.key === "Enter" && !e.isComposing) submitRank(); });
-window.addEventListener("resize", function(){ if(stageNo === 2 && running) paintTug(); });
 
 /* 시작 화면의 갯벌 친구들 행진 */
 (function(){
