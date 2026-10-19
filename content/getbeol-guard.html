@@ -98,6 +98,21 @@
   .how-item > div > span{font-size:13.5px;color:var(--ink-soft);line-height:1.55;}
   .how-item.wide{grid-column:1 / -1;}
 
+  .modes{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:560px;margin:0 auto;}
+  .mode{font-family:inherit;cursor:pointer;border:none;border-radius:22px;padding:14px 12px 15px;color:#fff;text-align:center;
+    display:flex;flex-direction:column;align-items:center;gap:3px;transition:transform .08s;}
+  .mode:active{transform:translateY(5px);box-shadow:none !important;}
+  .mode .mi{font-size:34px;line-height:1.1;}
+  .mode b{font-family:'Jua',sans-serif;font-weight:400;font-size:23px;}
+  .mode small{font-size:12.5px;font-weight:700;opacity:.95;line-height:1.4;word-break:keep-all;}
+  .mode.easy{background:linear-gradient(180deg,#8FDDB0,#5FC48B);box-shadow:0 5px 0 #3FA36C;}
+  .mode.normal{background:linear-gradient(180deg,#6CCBE2,#3FAECB);box-shadow:0 5px 0 var(--sea-d);}
+  .rank-tabs{display:flex;justify-content:center;gap:6px;margin:-2px 0 10px;}
+  .rank-tabs button{font-family:'Jua',sans-serif;font-size:14px;border:none;cursor:pointer;border-radius:999px;padding:5px 14px;
+    background:rgba(255,255,255,.35);color:#fff;}
+  .rank-tabs button.on{background:#fff;color:var(--mud-d);box-shadow:0 2px 0 rgba(78,53,39,.25);}
+  .mode-tag{display:inline-block;font-family:'Jua',sans-serif;font-size:14px;padding:3px 12px;border-radius:999px;margin-bottom:6px;}
+  .mode-tag.easy{background:#E3F8EC;color:#3FA36C;} .mode-tag.normal{background:#E2F4FA;color:var(--sea-d);}
   .best{text-align:center;font-family:'Gaegu',cursive;font-weight:700;font-size:18px;color:var(--sun-d);margin:0 0 14px;}
 
   /* ===== 순위 팻말 ===== */
@@ -439,6 +454,7 @@
 
   @media (max-width:640px){
     .how{grid-template-columns:1fr;}
+    .mode small{font-size:11.5px;}
     .hb{padding:5px 6px 6px;border-radius:13px;}
     .hb .val{font-size:17px;}
     .hb .lab{font-size:10px;}
@@ -480,19 +496,21 @@
         </div>
         <div class="how-item wide">
           <div class="ic">⏱️</div>
-          <div><b>각 단계 1분 30초를 버티면 미션 성공!</b><span>시간이 갈수록 단어가 점점 빨리 내려와요. 1단계에서 단어를 5번 놓치면, 2단계에서 막대를 모두 빼앗기면 미션 실패예요. 띄어쓰기는 틀려도 괜찮아요 😊</span></div>
+          <div><b>각 단계 1분 30초를 버티면 미션 성공!</b><span>시간이 갈수록 단어가 점점 빨리 내려와요. <b>🐣 쉬움</b>은 단어가 천천히 내려오고 실패 없이 끝까지 갈 수 있어요. <b>🦀 보통</b>은 1단계에서 단어를 5번 놓치거나 2단계에서 막대를 모두 빼앗기면 미션 실패예요. 띄어쓰기는 틀려도 괜찮아요 😊</span></div>
         </div>
       </div>
 
       <div class="board-sign">
         <div class="nails"><i></i><i></i></div>
         <h3>🏆 갯벌 수호대 순위</h3>
+        <div class="rank-tabs" id="rank-tabs"><button data-mode="easy">🐣 쉬움</button><button data-mode="normal" class="on">🦀 보통</button></div>
         <div class="rank-list" id="rank-home"><div class="rank-empty">순위표를 불러오는 중이에요… 🦀</div></div>
       </div>
 
       <p class="best" id="best-line">아직 기록이 없어요. 갯벌을 지키러 가 볼까요? 🦀</p>
-      <div style="text-align:center;">
-        <button class="btn big" id="btn-start">🦀 갯벌 지키러 가기</button>
+      <div class="modes">
+        <button class="mode easy" data-mode="easy"><span class="mi">🐣</span><b>쉬움</b><small>단어가 천천히 내려와요<br>실패 없이 결말까지!</small></button>
+        <button class="mode normal" data-mode="normal"><span class="mi">🦀</span><b>보통</b><small>단어가 점점 빨라져요<br>놓치면 실패할 수 있어요</small></button>
       </div>
     </div>
   </div>
@@ -521,7 +539,7 @@
 <!-- ============ 게임 화면 ============ -->
 <div id="game" class="hidden">
   <div class="hud">
-    <div class="hb lvl"><div class="lab">단계</div><div class="val"><span id="d-stage">1</span>/2</div></div>
+    <div class="hb lvl"><div class="lab">단계 · <span id="d-mode">보통</span></div><div class="val"><span id="d-stage">1</span>/2</div></div>
     <div class="hb score"><div class="lab">점수</div><div class="val" id="d-score">0</div></div>
     <div class="hb time"><div class="lab">남은 시간 <b id="d-time">90</b>초</div><div class="tbar" id="tbar"><i id="tbar-i"></i></div></div>
     <div class="hb speed"><div class="lab">속도 <b id="d-speed">1</b>단계</div><div class="pips" id="pips"></div></div>
@@ -786,6 +804,7 @@
   <div class="modal">
     <div class="mi" id="r-icon"></div>
     <h2 id="r-title">갯벌 수호대장!</h2>
+    <div class="mode-tag normal" id="r-mode">🦀 보통</div>
     <div class="stars" id="r-stars">⭐⭐⭐</div>
     <div class="big" id="r-score">0<small>점</small></div>
     <div class="breakdown">
@@ -806,7 +825,7 @@
 
     <div class="board-sign" style="margin-bottom:16px;">
       <div class="nails"><i></i><i></i></div>
-      <h3>🏆 갯벌 수호대 순위</h3>
+      <h3 id="rank-result-h">🏆 갯벌 수호대 순위</h3>
       <div class="rank-list" id="rank-result"><div class="rank-empty">불러오는 중이에요… 🦀</div></div>
     </div>
 
@@ -847,6 +866,13 @@ var GROW_AT = [0, 3, 7, 12, 18, 25];          /* 맞힌 생물 수에 따라 갯
 var GROW_NAMES = ["메마른 갯벌","촉촉한 갯벌","반짝이는 갯벌","북적이는 갯벌","알록달록 갯벌","눈부신 생명의 갯벌"];
 var MUD_SCALE = [0.42, 0.56, 0.70, 0.83, 0.94, 1.06];
 var BEST_KEY = "getbeol-best";
+/* 난이도 : 쉬움은 단어가 천천히 내려오고 실패하지 않아요 */
+var MODES = {
+  easy:   { name:"쉬움", icon:"🐣", slow:1.6, gap:1.35, noFail:true,  push:0.6, missHit:2, floor:10 },
+  normal: { name:"보통", icon:"🦀", slow:1,   gap:1,    noFail:false, push:1,   missHit:4, floor:0 }
+};
+var mode = "normal";
+function M(){ return MODES[mode]; }
 
 /* ---------- 상태 ---------- */
 var stageNo = 1, running = false, rafId = 0, lastTs = 0;
@@ -906,13 +932,15 @@ function showIntro(n){
   var c = $("intro");
   c.classList.remove("hidden");
   c.classList.toggle("s2", n === 2);
-  $("lv-num").textContent = n + "단계";
+  $("lv-num").textContent = n + "단계 · " + M().icon + " " + M().name;
   var art = "", chips = "";
   if(n === 1){
     [0, 20, 23, 11, 29].forEach(function(i){ art += '<img src="' + IMG + 'c' + i + '.webp" alt="">'; });
     $("lv-title").textContent = "갯벌을 넓혀요 🌱";
     $("lv-desc").innerHTML = "위에서 <b>갯벌 생물 이름</b>이 내려와요. 바닥에 닿기 전에 똑같이 치고 <b>Enter</b>!<br>" +
-      "맞힌 생물은 갯벌로 이사 와요. 많이 맞힐수록 작은 갯벌이 <b>넓고 화려하게</b> 바뀌어요.<br>단어를 <b>5번</b> 놓치면 실패! 1분 30초를 버텨 보세요.";
+      "맞힌 생물은 갯벌로 이사 와요. 많이 맞힐수록 작은 갯벌이 <b>넓고 화려하게</b> 바뀌어요.<br>" +
+      (M().noFail ? "🐣 <b>쉬움</b> : 단어가 천천히 내려오고, 놓쳐도 실패하지 않아요. 끝까지 가 보세요!"
+                  : "단어를 <b>5번</b> 놓치면 실패! 1분 30초를 버텨 보세요.");
     CREATURES.forEach(function(c){ chips += "<span>" + c[0] + "</span>"; });
     $("btn-go").textContent = "1단계 시작! ⌨️";
   } else {
@@ -921,7 +949,8 @@ function showIntro(n){
           '<img src="' + IMG + 'v1.webp" alt=""><img src="' + IMG + 'v0.webp" alt="">';
     $("lv-title").textContent = "개발 악당을 막아요 🚧";
     $("lv-desc").innerHTML = "갯벌 생물팀과 개발 악당팀이 맞서고 있어요! <b>갯벌을 지키는 팻말 말</b>을 쳐서 막대를 늘려요.<br>" +
-      "가만히 있으면 악당팀 막대가 <b>점점 빠르게</b> 길어져요. 막대를 모두 빼앗기면 실패!";
+      (M().noFail ? "🐣 <b>쉬움</b> : 악당팀이 천천히 밀고 들어오고, 막대를 다 빼앗기지 않아요. 끝까지 가서 결말을 보세요!"
+                  : "가만히 있으면 악당팀 막대가 <b>점점 빠르게</b> 길어져요. 막대를 모두 빼앗기면 실패!");
     SIGNS.forEach(function(s){ chips += "<span>" + s + "</span>"; });
     $("btn-go").textContent = "2단계 시작! ⌨️";
   }
@@ -942,7 +971,8 @@ function startStage(){
   $("scene1wrap").classList.toggle("hidden", stageNo !== 1);
   $("scene2").classList.toggle("hidden", stageNo !== 2);
   $("hb-grow").classList.toggle("hidden", stageNo !== 1);
-  $("hb-life").classList.toggle("hidden", stageNo !== 1);
+  $("hb-life").classList.toggle("hidden", stageNo !== 1 || M().noFail);
+  $("d-mode").textContent = M().name;
   if(stageNo === 1){
     lives = LIVES; caught = 0; growLv = 0;
     $("residents").innerHTML = "";
@@ -1024,8 +1054,8 @@ function speedLevel(){
   var r = SPEED_RANGE[stageNo], steps = r[1] - r[0] + 1;
   return Math.min(r[1], r[0] + Math.floor(T / STAGE_TIME * steps));
 }
-function fallTime(lv){ return 14 - 1.1 * lv; }            /* 1단계 12.9초 ~ 10단계 3초 */
-function spawnGap(lv){ return Math.max(0.9, 3.4 - 0.27 * lv); }
+function fallTime(lv){ return (14 - 1.1 * lv) * M().slow; }   /* 보통: 1단계 12.9초 ~ 10단계 3초 */
+function spawnGap(lv){ return Math.max(0.9, 3.4 - 0.27 * lv) * M().gap; }
 
 /* ---------- 단어 만들기 ---------- */
 function nextText(){
@@ -1102,7 +1132,8 @@ function loop(ts){
 
   if(stageNo === 2){
     /* 시간이 갈수록 악당팀이 점점 빠르게 밀고 들어와요 */
-    hero -= (0.30 + 0.0115 * T) * dt;
+    hero -= (0.30 + 0.0115 * T) * dt * M().push;
+    if(M().noFail) hero = Math.max(M().floor, hero);
     if(T >= nextVillainEvt){ villainEvent(); nextVillainEvt = T + Math.max(3.5, 8 - T * 0.05) + Math.random() * 2; }
     paintTug();
     if(hero <= 0){ hero = 0; paintTug(); loseStage("개발 악당이 갯벌을 차지했어요…"); return; }
@@ -1208,11 +1239,13 @@ function dropWord(w){
   setTimeout(function(){ w.el.remove(); }, 320);
 
   if(stageNo === 1){
+    if(M().noFail) return;          /* 쉬움 : 놓쳐도 괜찮아요 */
     lives--;
     paintHearts();
     if(lives <= 0) loseStage("단어를 5번 놓쳤어요…");
   } else {
-    hero -= 4;
+    hero -= M().missHit;
+    if(M().noFail) hero = Math.max(M().floor, hero);
     pulse($("team-hero"), "hurt", 550);
     paintTug();
     if(hero <= 0){ hero = 0; paintTug(); loseStage("개발 악당이 갯벌을 차지했어요…"); }
@@ -1433,7 +1466,8 @@ function villainEvent(){
   vs.textContent = VIL_LINES[Math.floor(Math.random() * VIL_LINES.length)];
   vs.classList.add("show");
   clearTimeout(vsayTimer); vsayTimer = setTimeout(function(){ vs.classList.remove("show"); }, 1800);
-  hero -= 2.5 + T * 0.03;
+  hero -= (2.5 + T * 0.03) * M().push;
+  if(M().noFail) hero = Math.max(M().floor, hero);
   beep("rumble");
   if(Math.random() < 0.6){
     var hs = $("hsay");
@@ -1678,6 +1712,9 @@ function finish(){
     desc:"괜찮아요, 연습하면 금방 빨라져요! 아래쪽에 가까운 단어부터 먼저 치면 놓치지 않아요. 다시 갯벌을 지키러 가 볼까요?" };
   $("r-icon").innerHTML = '<img src="' + IMG + r.icon + '.webp" alt="">';
   $("r-title").textContent = r.title;
+  $("r-mode").textContent = M().icon + " " + M().name + " 난이도";
+  $("r-mode").className = "mode-tag " + mode;
+  if(mode === "easy" && both) r.desc += " 이번엔 🦀 보통 난이도에도 도전해 볼까요?";
   $("r-stars").textContent = r.stars;
   $("r-score").innerHTML = score.toLocaleString("ko-KR") + "<small>점</small>";
   $("r-s1").textContent = cleared[0] ? "성공 · " + stageScore[0] + "점" : "실패 · " + stageScore[0] + "점";
@@ -1689,29 +1726,34 @@ function finish(){
   $("r-hit").textContent = hits + "개";
   $("r-miss").textContent = misses + "개";
 
-  var best = readBest(), extra = "";
-  if(score > best){ extra = " 🎊 새로운 최고 기록이에요!"; try{ localStorage.setItem(BEST_KEY, String(score)); }catch(e){} }
+  var best = readBest(mode), extra = "";
+  if(score > best){ extra = " 🎊 새로운 최고 기록이에요!"; try{ localStorage.setItem(bestKey(mode), String(score)); }catch(e){} }
   else if(best > 0){ extra = " (내 최고 기록 " + best.toLocaleString("ko-KR") + "점)"; }
   $("r-desc").textContent = r.desc + extra;
 
   var box = $("name-box");
   if(makesTop(score)){
     box.classList.remove("hidden");
-    $("name-why").textContent = topList.length ? "🎉 순위 " + TOP_N + "등 안에 들었어요! 이름을 적어 주세요." : "🎉 첫 번째 기록이에요! 이름을 적어 주세요.";
+    $("name-why").textContent = ranks[mode].length ? "🎉 " + M().name + " 순위 " + TOP_N + "등 안에 들었어요! 이름을 적어 주세요." : "🎉 " + M().name + " 난이도 첫 번째 기록이에요! 이름을 적어 주세요.";
     var saved = "";
     try{ saved = localStorage.getItem("getbeol-name") || ""; }catch(e){}
     $("name-input").value = saved;
     $("btn-save").disabled = false;
     $("btn-save").textContent = "올리기";
   } else box.classList.add("hidden");
+  boardMode = mode;
   renderRanks();
   $("veil").classList.add("show");
   paintBest();
 }
-function readBest(){ var b = 0; try{ b = parseInt(localStorage.getItem(BEST_KEY) || "0", 10) || 0; }catch(e){} return b; }
+/* 보통은 예전 기록 이름을 그대로 써요 */
+function bestKey(m){ return m === "easy" ? BEST_KEY + "-easy" : BEST_KEY; }
+function readBest(m){ var b = 0; try{ b = parseInt(localStorage.getItem(bestKey(m)) || "0", 10) || 0; }catch(e){} return b; }
 function paintBest(){
-  var b = readBest();
-  $("best-line").textContent = b > 0 ? "🏆 내 최고 기록 : " + b.toLocaleString("ko-KR") + "점" : "아직 기록이 없어요. 갯벌을 지키러 가 볼까요? 🦀";
+  var e = readBest("easy"), n = readBest("normal"), parts = [];
+  if(e > 0) parts.push("🐣 쉬움 " + e.toLocaleString("ko-KR") + "점");
+  if(n > 0) parts.push("🦀 보통 " + n.toLocaleString("ko-KR") + "점");
+  $("best-line").textContent = parts.length ? "🏆 내 최고 기록 : " + parts.join(" · ") : "아직 기록이 없어요. 난이도를 골라 갯벌을 지키러 가 볼까요? 🦀";
 }
 
 /* ---------- 버튼 ---------- */
@@ -1720,7 +1762,12 @@ function newGame(){
   $("veil").classList.remove("show");
   showIntro(1);
 }
-$("btn-start").addEventListener("click", function(){ wake(); newGame(); });
+document.querySelectorAll(".mode").forEach(function(b){
+  b.addEventListener("click", function(){ wake(); mode = b.getAttribute("data-mode"); newGame(); });
+});
+document.querySelectorAll("#rank-tabs button").forEach(function(b){
+  b.addEventListener("click", function(){ boardMode = b.getAttribute("data-mode"); renderRanks(); });
+});
 $("btn-go").addEventListener("click", function(){ wake(); startStage(); });
 $("btn-again").addEventListener("click", function(){ newGame(); });
 $("btn-home").addEventListener("click", function(){ $("veil").classList.remove("show"); showHome(); });
@@ -1740,8 +1787,9 @@ paintBest();
 /* ===================================================================
    🏆 갯벌 수호대 순위 (모든 방문자가 함께 보는 순위표, 5등까지)
    =================================================================== */
-var RANK_COL = "farm_rankings", RANK_DOC = "getbeol_top5", TOP_N = 5;
-var topList = [], myRowKey = "", rankReady = false;
+/* 난이도마다 따로 순위를 매겨요 (보통은 예전 순위표를 그대로 이어서 써요) */
+var RANK_COL = "farm_rankings", RANK_DOCS = { easy:"getbeol_easy_top5", normal:"getbeol_top5" }, TOP_N = 5;
+var ranks = { easy:[], normal:[] }, rankReady = { easy:false, normal:false }, myRowKey = "", boardMode = "normal";
 
 var fdb = null;
 try{
@@ -1761,16 +1809,19 @@ function esc(t){
 }
 function listenRanks(){
   if(!fdb){ renderRanks(); return; }
-  fdb.collection(RANK_COL).doc(RANK_DOC).onSnapshot(function(doc){
-    topList = (doc.exists && doc.data().top5) ? doc.data().top5 : [];
-    rankReady = true;
-    renderRanks();
-  }, function(){ rankReady = true; renderRanks(); });
+  ["easy", "normal"].forEach(function(m){
+    fdb.collection(RANK_COL).doc(RANK_DOCS[m]).onSnapshot(function(doc){
+      ranks[m] = (doc.exists && doc.data().top5) ? doc.data().top5 : [];
+      rankReady[m] = true;
+      renderRanks();
+    }, function(){ rankReady[m] = true; renderRanks(); });
+  });
 }
-function rankHtml(){
+function rankHtml(m){
+  var topList = ranks[m];
   if(!fdb) return '<div class="rank-empty">순위표를 불러올 수 없어요.<br>인터넷 연결을 확인해 주세요 🌐</div>';
-  if(!rankReady) return '<div class="rank-empty">순위표를 불러오는 중이에요… 🦀</div>';
-  if(!topList.length) return '<div class="rank-empty">아직 기록이 없어요.<br>첫 번째 갯벌 수호대장이 되어 보세요! 👑</div>';
+  if(!rankReady[m]) return '<div class="rank-empty">순위표를 불러오는 중이에요… 🦀</div>';
+  if(!topList.length) return '<div class="rank-empty">아직 ' + MODES[m].name + ' 기록이 없어요.<br>첫 번째 갯벌 수호대장이 되어 보세요! 👑</div>';
   var pos = ["👑","🥈","🥉","4","5"], h = "";
   for(var i = 0; i < Math.min(topList.length, TOP_N); i++){
     var r = topList[i];
@@ -1784,18 +1835,20 @@ function rankHtml(){
   return h;
 }
 function renderRanks(){
-  var h = rankHtml();
-  $("rank-home").innerHTML = h;
-  $("rank-result").innerHTML = h;
+  $("rank-home").innerHTML = rankHtml(boardMode);
+  $("rank-result").innerHTML = rankHtml(mode);
+  $("rank-result-h").textContent = "🏆 갯벌 수호대 순위 · " + MODES[mode].icon + " " + MODES[mode].name;
+  document.querySelectorAll("#rank-tabs button").forEach(function(b){ b.classList.toggle("on", b.getAttribute("data-mode") === boardMode); });
 }
 function makesTop(amount){
+  var topList = ranks[mode];
   if(!fdb || amount <= 0) return false;
   if(topList.length < TOP_N) return true;
   return amount > (Number(topList[topList.length - 1].score) || 0);
 }
 function saveRank(nick, amount){
   if(!fdb) return Promise.resolve(false);
-  var ref = fdb.collection(RANK_COL).doc(RANK_DOC);
+  var ref = fdb.collection(RANK_COL).doc(RANK_DOCS[mode]);
   var key = String(Date.now()) + "-" + Math.floor(Math.random() * 10000);
   return ref.get().then(function(doc){
     var arr = (doc.exists && doc.data().top5) ? doc.data().top5.slice() : [];
@@ -1830,10 +1883,10 @@ function adminReset(){
   var pw = prompt("관리자 비밀번호를 입력하세요.");
   if(pw === null) return;
   if(pw !== ADMIN_PW){ alert("비밀번호가 달라요."); return; }
-  if(!confirm("'갯벌을 지키자!' 순위를 모두 지울까요?\n지우면 되돌릴 수 없어요.")) return;
+  if(!confirm("'갯벌을 지키자!' 순위(쉬움·보통 모두)를 지울까요?\n지우면 되돌릴 수 없어요.")) return;
   if(!fdb){ alert("순위 서버에 연결되어 있지 않아요."); return; }
   if(bulb) bulb.classList.add("on");
-  fdb.collection(RANK_COL).doc(RANK_DOC).set({ top5: [] }).then(function(){
+  Promise.all(["easy", "normal"].map(function(m){ return fdb.collection(RANK_COL).doc(RANK_DOCS[m]).set({ top5: [] }); })).then(function(){
     myRowKey = "";
     alert("✅ 순위를 초기화했어요.");
   }).catch(function(e){
