@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         연수 자동 넘김 도우미
 // @namespace    https://3min-playground.com/
-// @version      1.0.0
+// @version      1.1.0
 // @description  연수 영상·음성이 끝나면 '다음' 버튼을 대신 눌러 줍니다. 확장 메뉴에서 사이트별로 켜고 끕니다.
 // @match        *://*/*
 // @grant        GM_getValue
@@ -186,6 +186,9 @@
     if (media.some(function (o) { return o !== st && isPlaying(o); })) return; // 다른 소리가 아직 나는 중
     signal('media');
   }
+  function anyMediaPlaying() {
+    return Array.prototype.some.call(document.querySelectorAll('video,audio'), function (m) { return !m.paused && !m.ended; });
+  }
   function scanMedia() {
     media = media.filter(function (st) { return st.el.isConnected; });
     localDocs().forEach(function (doc) {
@@ -300,6 +303,9 @@
   if (!IS_TOP) {
     var childTimer = null, lastHello = 0, ticks = 0;
     signal = function (kind) { toTop({ type: 'signal', kind: kind }); };
+    // 아직 꺼진 사이트라도 영상이 재생되면 맨 위 창에 알려서 '켤까요?'를 물어보게 함
+    document.addEventListener('play', function () { toTop({ type: 'seen' }); }, true);
+    if (anyMediaPlaying()) toTop({ type: 'seen' });
     var childTick = function () {
       if (Date.now() - lastHello > 10000) { clearInterval(childTimer); childTimer = null; return; }
       scanMedia();
@@ -397,7 +403,9 @@
 
   window.addEventListener('message', function (e) {
     var d = e.data;
-    if (!active || !d || d.__an !== 1 || d.role === 'top' || !d.fid) return;
+    if (!d || d.__an !== 1 || d.role === 'top' || !d.fid) return;
+    if (d.type === 'seen') { offer(); return; }
+    if (!active) return;
     if (d.type === 'state') remote[d.fid] = { state: d, t: Date.now() };
     else if (d.type === 'signal') signal(d.kind);
     else if (d.type === 'found' && finds[d.req]) finds[d.req].push({ fid: d.fid, score: d.score, disabled: d.disabled });
@@ -572,12 +580,42 @@
 
   if (!HAS_GM) { start(); return; }
 
-  // 유저스크립트: 확장 메뉴에서 켠 사이트에서만 동작
-  var hosts = store.get('hosts', []);
-  if (hosts.indexOf(location.host) >= 0) start();
+  // 유저스크립트: 켠 사이트에서만 동작. 꺼진 사이트에서 영상이 재생되면 켤지 한 번 물어봄
+  function setHost(key, on) {
+    var list = store.get(key, []), i = list.indexOf(location.host);
+    if (on && i < 0) list.push(location.host);
+    if (!on && i >= 0) list.splice(i, 1);
+    store.set(key, list);
+  }
+  function enableHere() { setHost('hosts', true); setHost('never', false); removeOffer(); start(); }
+
+  var offerHost = null;
+  function removeOffer() { if (offerHost) { offerHost.remove(); offerHost = null; } }
+  function offer() {
+    if (active || offerHost || store.get('never', []).indexOf(location.host) >= 0) return;
+    offerHost = document.createElement('div');
+    offerHost.setAttribute('data-auto-next', '');
+    var root = offerHost.attachShadow({ mode: 'open' });
+    root.innerHTML =
+      '<style>:host{all:initial}' +
+      '.pill{position:fixed;right:16px;bottom:16px;z-index:2147483647;display:flex;align-items:center;gap:8px;flex-wrap:wrap;' +
+      'max-width:calc(100vw - 32px);padding:10px 12px;background:#fff;color:#26304F;border:2px solid #D6E4F5;border-radius:16px;' +
+      'box-shadow:0 10px 30px rgba(38,48,79,.18);font:13px/1.5 "Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif}' +
+      'button{font:inherit;cursor:pointer;border:none;border-radius:10px;padding:6px 10px;background:#EEF6FF;color:#26304F}' +
+      'button.yes{background:#3FBF95;color:#fff;font-weight:700}</style>' +
+      '<div class="pill"><span>연수 자동 넘김을 이 사이트에서 켤까요?</span>' +
+      '<button class="yes">켜기</button><button class="no">이 사이트는 안 함</button></div>';
+    root.querySelector('.yes').addEventListener('click', enableHere);
+    root.querySelector('.no').addEventListener('click', function () { setHost('never', true); removeOffer(); });
+    (document.body || document.documentElement).appendChild(offerHost);
+  }
+
+  if (store.get('hosts', []).indexOf(location.host) >= 0) start();
+  else {
+    document.addEventListener('play', offer, true);
+    if (anyMediaPlaying()) offer();
+  }
   GM_registerMenuCommand('이 사이트에서 켜기 / 끄기 (' + location.host + ')', function () {
-    var list = store.get('hosts', []), i = list.indexOf(location.host);
-    if (i >= 0) { list.splice(i, 1); stop(); } else { list.push(location.host); start(); }
-    store.set('hosts', list);
+    if (active) { setHost('hosts', false); stop(); } else enableHere();
   });
 })();
