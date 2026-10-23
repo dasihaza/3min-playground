@@ -524,11 +524,16 @@ kbd { font-family: var(--f-display); font-size: 13px; border-radius: 7px; paddin
 
   // ---------- input ----------
   const keyMap = { ArrowLeft: "l", KeyA: "l", ArrowRight: "r", KeyD: "r", ArrowUp: "u", KeyW: "u", ArrowDown: "d", KeyS: "d" };
+  // Game keys never fire while someone is typing (the ranking nickname box) or holding a modifier.
+  const typing = el => !!el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName));
   addEventListener("keydown", e => {
-    if (keyMap[e.code]) { keys[keyMap[e.code]] = true; if (state === "play") e.preventDefault(); }
+    if (typing(e.target) || e.isComposing || e.ctrlKey || e.metaKey || e.altKey) return;
+    // finish/crash animations and the all-cleared screen ignore game keys; only the on-screen buttons move on
+    if (state === "done" || state === "cheer" || state === "popping") return;
+    if (keyMap[e.code] && state === "play") { keys[keyMap[e.code]] = true; e.preventDefault(); }
     if (e.code === "KeyR") restart();
     if (e.code === "KeyP" || e.code === "Escape") togglePause();
-    if (e.code === "Enter" || e.code === "Space") {
+    if ((e.code === "Enter" || e.code === "Space") && !e.target.closest?.("button")) {
       const b = $("ovRow").querySelector("button.primary");
       if (!$("ov").hidden && b) { e.preventDefault(); b.click(); }
     }
@@ -612,7 +617,10 @@ kbd { font-family: var(--f-display); font-size: 13px; border-radius: 7px; paddin
     for (let k = 0; k < 4; k++) burst(gx, gy - 20, 18, ["#FF6F91", "#4B8DFF", "#FFB13D", "#3FC496", "#B892FF"], 320, 1.6, true);
   }
   function showWin() {
-    state = "win";
+    const last = li === LEVELS.length - 1;
+    state = last ? "done" : "win";
+    for (const k in keys) keys[k] = false;
+    pointer = null;
     const pct = battery / 100;
     const stars = pct >= 0.5 ? 3 : pct >= 0.2 ? 2 : 1;
     const pts = Math.round(battery);
@@ -623,13 +631,12 @@ kbd { font-family: var(--f-display); font-size: 13px; border-radius: 7px; paddin
     progress.unlocked = Math.max(progress.unlocked, Math.min(LEVELS.length, li + 2));
     saveProgress(); renderLevelButtons(); renderRank();
     for (let k = 0; k < stars; k++) Sound.star(k);
-    const last = li === LEVELS.length - 1;
     const allDone = LEVELS.every((_, i) => progress.stars[i] > 0);
     const text = `+${pts}점! ${prevBest != null && pts > prevBest ? "최고 기록 경신! " : ""}${time.toFixed(1)}초 비행. ` +
       (last && allDone ? `8단계를 모두 깼어요. 총점 ${totalScore()}점으로 랭킹에 등록해 보세요! ` : "") +
       (stars < 3 ? "배터리를 절반 넘게 남기면 별 셋! 바람에 더 맡겨 봐요." : "바람만으로 길을 찾았어요. 최고예요!");
     overlay({ no: `${li + 1}단계 클리어`, title: last ? "모든 관측소 도착!" : "관측소 도착!", text, stars, img: "goal",
-      buttons: last ? [["랭킹 등록하러 가기", goRank, true], ["다시 하기", restart]]
+      buttons: last ? [["랭킹 등록하러 가기", goRank, true], ["8단계 다시", restart], ["1단계부터", () => loadLevel(0)]]
                     : [["다음 단계", () => loadLevel(li + 1), true], ["다시 하기", restart]] });
   }
 
@@ -1095,7 +1102,7 @@ kbd { font-family: var(--f-display); font-size: 13px; border-radius: 7px; paddin
   let last = performance.now(), hudT = 0;
   function frame(now) {
     const dt = Math.min(0.033, (now - last) / 1000); last = now;
-    const live = state === "play" || state === "intro" || state === "popping" || state === "cheer" || state === "win" || state === "fail";
+    const live = state === "play" || state === "intro" || state === "popping" || state === "cheer" || state === "win" || state === "done" || state === "fail";
     if (live) clock += dt;
     if (state === "play") step(dt);
     if (state === "popping" || state === "cheer") {
