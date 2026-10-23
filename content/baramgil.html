@@ -26,6 +26,7 @@
   --sun: #FFB13D;
   --mint: #3FC496;
   --line: #D6E3F6;
+  --red: #E5383B;
   --f-display: "Jua", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   --f-body: "Gowun Dodum", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   color-scheme: light;
@@ -73,6 +74,7 @@ button:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--line); }
 button:focus-visible { outline: 3px solid var(--high); outline-offset: 2px; }
 button.primary { background: var(--sun); color: #fff; box-shadow: 0 4px 0 #E08F1C; font-size: 19px; padding: 10px 26px; }
 button.primary:active { box-shadow: 0 1px 0 #E08F1C; }
+button.danger { color: var(--red); }
 
 .stage { position: relative; border-radius: 26px; overflow: hidden; background: #CDE9FF;
   box-shadow: 0 0 0 6px #fff, 0 10px 0 6px var(--line), 0 24px 40px rgba(80, 100, 170, .18); margin: 6px; }
@@ -188,6 +190,7 @@ kbd { font-family: var(--f-display); font-size: 13px; border-radius: 7px; paddin
       <button id="sfxBtn" class="tog" type="button" aria-pressed="true">효과음 켬</button>
       <button id="pauseBtn" type="button">일시정지</button>
       <button id="restartBtn" type="button">다시</button>
+      <button id="fromStartBtn" class="danger" type="button" title="1단계부터 다시 시작해요. 별과 점수 기록은 그대로 남아요.">처음부터</button>
     </div>
   </div>
 
@@ -1124,6 +1127,7 @@ kbd { font-family: var(--f-display); font-size: 13px; border-radius: 7px; paddin
   }
 
   $("restartBtn").onclick = restart;
+  $("fromStartBtn").onclick = () => loadLevel(0);
   $("pauseBtn").onclick = () => { if (state === "play" || state === "paused") togglePause(); };
 
   function boot(data) {
