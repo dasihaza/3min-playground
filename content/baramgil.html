@@ -251,7 +251,7 @@ kbd { font-family: var(--f-display); font-size: 13px; border-radius: 7px; paddin
       </form>
     </div>
     <div class="rank-board">
-      <h3>순위표</h3>
+      <h3>순위표 TOP 5</h3>
       <ol class="board" id="board"><li class="empty">순위표를 불러오는 중이에요…</li></ol>
     </div>
   </section>
@@ -954,6 +954,7 @@ kbd { font-family: var(--f-display); font-size: 13px; border-radius: 7px; paddin
   }
 
   // ---------- ranking (shared db: everyone reads, each player writes only their own row) ----------
+  const TOP_N = 5;   // the board shows only the top five players
   const Rank = { db: null, user: null, uid: null, rows: [], status: "loading", readOnly: false };
   const totalScore = () => LEVELS.reduce((a, _, i) => a + ((progress.scores || [])[i] || 0), 0);
   const clearedCount = () => LEVELS.filter((_, i) => progress.stars[i] > 0).length;
@@ -1001,7 +1002,8 @@ kbd { font-family: var(--f-display); font-size: 13px; border-radius: 7px; paddin
       return;
     }
     const rows = Rank.rows.filter(r => cleanNick(r.nick))
-      .sort((a, b) => cleanScore(b.score) - cleanScore(a.score) || String(a.at).localeCompare(String(b.at)));
+      .sort((a, b) => cleanScore(b.score) - cleanScore(a.score) || String(a.at).localeCompare(String(b.at)))
+      .slice(0, TOP_N);
     if (!rows.length) { board.innerHTML = `<li class="empty">아직 아무도 등록하지 않았어요.<br>8단계를 모두 깨고 첫 번째 주인공이 되어 보세요!</li>`; return; }
     const seq = ++boardSeq;
     let ps = {};
