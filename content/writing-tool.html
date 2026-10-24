@@ -23,8 +23,10 @@
   body{
     background:var(--bg);color:var(--ink);
     font-family:'Noto Sans KR',sans-serif;
-    display:flex;flex-direction:column;height:100vh;overflow:hidden;
   }
+  /* 도구 화면은 한 화면 꽉, 그 아래로 스크롤하면 활용 안내가 나와요 */
+  .wt-app{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;}
+  .guide-jump{pointer-events:auto;display:inline-block;margin-top:10px;padding:4px 12px;border-radius:999px;background:#DCEBFF;color:#2B5FA8;font-weight:700;font-size:13px;text-decoration:none;}
 
   /* ===== 도구 막대 ===== */
   .toolbar{
@@ -123,9 +125,11 @@
     .tool{height:38px;min-width:40px;padding:0 8px;font-size:13px;}
   }
 </style>
+<link rel="stylesheet" href="../assets/guide.css">
 </head>
 <body>
 
+<div class="wt-app">
 <div class="toolbar">
   <a class="brand" href="../index.html">
     <svg width="22" height="22" viewBox="0 0 34 34" fill="none">
@@ -191,11 +195,13 @@
         <span style="white-space:nowrap;">그런 다음 <kbd>Ctrl</kbd> + <kbd>V</kbd> 로 붙여 넣으세요.</span><br>
         <br>
         이미지를 이 영역에 끌어다 놓아도 돼요.<br>
-        그냥 이대로 <b>빈 화이트보드</b>처럼 써도 좋아요!
+        그냥 이대로 <b>빈 화이트보드</b>처럼 써도 좋아요!<br>
+        <a class="guide-jump" href="#pg-guide">📖 활용 안내는 아래에 있어요 ↓</a>
       </p>
     </div>
   </div>
 </div>
+</div><!-- /wt-app -->
 
 <script>
 const COLORS = ["#E8382B","#2B6BE8","#1E9E63","#F5A623","#8B4FD8","#1D1B16"];
@@ -501,5 +507,59 @@ document.addEventListener("keydown", e=>{
 resizeCanvas();
 setTool("pen");
 </script>
+
+<!-- 활용 안내 시작 -->
+<section class="pgd" id="pg-guide" aria-labelledby="pgd-title" style="--pgd-accent:#5B9BE8;--pgd-soft:#DCEBFF;">
+  <div class="pgd__box">
+    <span class="pgd__ribbon">📖 활용 안내</span>
+    <span class="pgd__deco pgd__deco--a" aria-hidden="true">✏️</span>
+    <span class="pgd__deco pgd__deco--b" aria-hidden="true">⭐</span>
+    <span class="pgd__deco pgd__deco--c" aria-hidden="true">✨</span>
+    <div class="pgd__head">
+      <div class="pgd__mascot"><img src="../assets/guide/writing-tool.webp" alt="웃는 연필과 지우개가 작은 화이트보드에 별을 그리는 그림" width="150" height="150" loading="lazy" decoding="async"></div>
+      <div>
+        <h2 class="pgd__title" id="pgd-title"><mark>슥삭슥삭 필기도구</mark>, 이렇게 활용해요</h2>
+        <p class="pgd__lead">캡처한 화면 위에 <b>밑줄 · 별표 · 글자</b>를 바로 써요. 아무것도 붙이지 않으면 깨끗한 <b>화이트보드</b>로 변신! 설치 없이 전자칠판·교실 TV 어디서나 써요.</p>
+      </div>
+    </div>
+    <ul class="pgd__chips" aria-label="한눈에 보기">
+      <li>🎒 1~6학년</li>
+      <li>📚 모든 교과</li>
+      <li>🖥️ 전자칠판 · TV</li>
+      <li>💾 판서 저장</li>
+    </ul>
+    <div class="pgd__grid">
+      <div class="pgd__card pgd__card--how">
+        <h3><span class="pgd__ico" aria-hidden="true">🛠️</span>이렇게 써요</h3>
+        <ol>
+        <li>보여 줄 화면을 <b>Windows + Shift + S</b>로 캡처한 뒤 <b>Ctrl + V</b>로 붙여 넣어요. 그림 파일을 끌어다 놓아도 돼요.</li>
+        <li><b>P 펜 · T 글자 · E 지우개</b>를 고르고 색깔과 굵기를 정해요.</li>
+        <li>실수했다면 <b>Ctrl + Z</b>로 되돌려요.</li>
+        <li><b>💾 저장</b>으로 판서를 그림으로 남기고, <b>🧹 전체지우기</b>로 새로 시작해요.</li>
+        </ol>
+      </div>
+      <div class="pgd__card pgd__card--learn">
+        <h3><span class="pgd__ico" aria-hidden="true">🌱</span>이런 점이 좋아요</h3>
+        <ul>
+        <li>교과서·자료 위에 바로 표시해 <b>아이들의 시선이 한곳에 모여요.</b></li>
+        <li>아이들이 직접 나와 쓰며 <b>참여하는 수업</b>이 돼요.</li>
+        <li>저장한 판서는 <b>복습 자료</b>나 결석한 친구 안내로 다시 써요.</li>
+        <li>핵심에 밑줄을 그어 보며 <b>중요한 것을 골라내는 힘</b>이 자라요.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="pgd__card pgd__card--class">
+      <h3><span class="pgd__ico" aria-hidden="true">🏫</span>교실에서 이렇게 써 보세요</h3>
+      <ul>
+        <li>수학 문제를 캡처해 아이들이 나와 풀이 과정을 써요.</li>
+        <li>국어 지문에서 중심 문장에 함께 밑줄을 그어요.</li>
+        <li>지도·그림을 띄우고 ‘숨은 것 동그라미 찾기’ 놀이를 해요.</li>
+        <li>빈 화이트보드로 빙고·초성 퀴즈를 즉석에서 열어요.</li>
+      </ul>
+    </div>
+    <p class="pgd__tip"><span><b>선생님 한마디</b> 전자칠판에서는 손가락이나 터치펜으로 바로 쓸 수 있어요. 학생이 쓸 때는 굵은 펜을 골라 주면 뒷자리까지 잘 보여요.</span></p>
+  </div>
+</section>
+<!-- 활용 안내 끝 -->
 </body>
 </html>
