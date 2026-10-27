@@ -142,6 +142,11 @@ kbd { font-family: var(--f-display); font-size: 13px; border-radius: 7px; paddin
 .board .nm { font-family: var(--f-display); font-size: 17px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .board .nm small { font-family: var(--f-body); font-size: 12px; color: var(--sun); margin-left: 6px; }
 .board .sc { font-family: var(--f-display); font-size: 18px; color: var(--high); font-variant-numeric: tabular-nums; }
+.bulb-wrap { text-align: center; padding: 6px 0 0; }
+.bulb { background: none; border: 0; box-shadow: none; cursor: pointer; padding: 8px; line-height: 0; color: var(--muted); opacity: .45; transition: all .2s; }
+.bulb:hover { color: #F0B429; opacity: 1; filter: drop-shadow(0 0 8px rgba(240, 180, 41, .7)); transform: scale(1.15); }
+.bulb:active { box-shadow: none; }
+.bulb.on { color: #F0B429; opacity: 1; filter: drop-shadow(0 0 10px rgba(240, 180, 41, .85)); }
 @keyframes bob { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-6px) rotate(3deg); } }
 @keyframes pop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .mascot, .card, .card img, .stars span.on { animation: none; } }
@@ -256,6 +261,15 @@ kbd { font-family: var(--f-display); font-size: 13px; border-radius: 7px; paddin
       <ol class="board" id="board"><li class="empty">순위표를 불러오는 중이에요…</li></ol>
     </div>
   </section>
+
+  <div class="bulb-wrap" id="bulbWrap" hidden>
+    <button class="bulb" id="bulb" type="button" aria-label=" ">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" aria-hidden="true">
+        <path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.5.4.8 1 .8 1.6v.5h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0 0 12 3z"
+              stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
 </div>
 
 <script>
@@ -1072,10 +1086,25 @@ kbd { font-family: var(--f-display); font-size: 13px; border-radius: 7px; paddin
       arr.sort((a, b) => cleanScore(b.score) - cleanScore(a.score));
       await ref.set({ top: arr.slice(0, 30) });
     };
+    // admin reset (lightbulb at the bottom), same as the site's other games
+    $("bulbWrap").hidden = false;
+    $("bulb").onclick = () => adminReset(() => ref.set({ top: [] }));
     ref.onSnapshot(doc => {
       Rank.rows = ((doc.exists && doc.data().top) || []).map(r => ({ id: r.key, nick: r.name, score: r.score, at: r.at }));
       Rank.status = "ready"; renderRank();
     }, () => { Rank.status = "off"; renderRank(); });
+  }
+
+  const ADMIN_PW = "3min";
+  function adminReset(clear) {
+    const pw = prompt("관리자 비밀번호를 입력하세요.");
+    if (pw === null) return;
+    if (pw !== ADMIN_PW) { alert("비밀번호가 달라요."); return; }
+    if (!confirm("'바람길' 순위를 지울까요?\n지우면 되돌릴 수 없어요.")) return;
+    const bulb = $("bulb"); bulb.classList.add("on");
+    clear().then(() => alert("✅ 순위를 초기화했어요."))
+      .catch(e => alert("초기화하지 못했어요.\n" + (e && e.message ? e.message : "")))
+      .then(() => bulb.classList.remove("on"));
   }
 
   (async () => {
