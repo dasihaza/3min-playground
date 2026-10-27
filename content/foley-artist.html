@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7592272420796389"
+     crossorigin="anonymous"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>꼬마 폴리 아티스트 | 3분 놀이터</title>
+<meta name="description" content="휴지를 구기면 삼겹살 굽는 소리가 나요! 12가지 도구 소리를 들어 보고, 소리 없는 장면 10개에 어울리는 효과음을 찾아 녹음하는 초등학생용 폴리 아티스트 체험 게임.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<style>
+/* Layout: 장난감 녹음 스튜디오 — 위쪽은 필름 스크린(무성 장면), 옆/아래는 나무 도구 선반. 밝은 단일 테마로 고정. */
+:root{
+  color-scheme: light;
+  --bg:#e6f4ff;          /* 하늘색 스튜디오 벽 */
+  --dot:#d2e9fb;
+  --ink:#3b2a4a;         /* 자두빛 갈색 글씨 */
+  --ink-soft:#6d5a7d;
+  --panel:#ffffff;
+  --coral:#ff6f86;       /* 녹음 버튼, 강조 */
+  --coral-deep:#e24f69;
+  --sun:#ffd257;         /* 별, 칭찬 */
+  --mint:#4fcfa8;        /* 정답 */
+  --sky:#6cb8ff;
+  --grape:#9f86ff;
+  --wood:#f4c992;        /* 도구 선반 */
+  --wood-deep:#d99c5c;
+  --film:#2d2340;        /* 필름 테두리 */
+  --line:#ead9ff;
+  --font-display:"Jua","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --font-body:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --r:22px;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{min-height:100%}
+body{
+  background-color:var(--bg);
+  background-image:radial-gradient(var(--dot) 2px, transparent 2.5px);
+  background-size:26px 26px;
+  color:var(--ink);
+  font-family:var(--font-body);
+  font-size:16px;
+  line-height:1.55;
+}
+.wrap{
+  max-width:1120px;margin:0 auto;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+  padding-block:18px 40px;
+}
+h1,h2,h3,.disp{font-family:var(--font-display);font-weight:400;text-wrap:balance;margin:0}
+button{font-family:var(--font-display);cursor:pointer;color:var(--ink)}
+button:focus-visible,input:focus-visible{outline:4px solid var(--grape);outline-offset:3px}
+
+.btn{
+  border:0;border-radius:999px;padding:14px 26px;font-size:1.25rem;
+  background:var(--coral);color:#fff;box-shadow:0 6px 0 var(--coral-deep);
+  transition:transform .1s, box-shadow .1s, opacity .2s;
+  display:inline-flex;align-items:center;gap:8px;justify-content:center;
+}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 var(--coral-deep)}
+.btn.alt{background:var(--panel);color:var(--ink);box-shadow:0 6px 0 var(--line)}
+.btn.mint{background:var(--mint);box-shadow:0 6px 0 #2fa984}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.btn.small{font-size:1rem;padding:9px 16px;box-shadow:0 4px 0 var(--line)}
+
+.bear{width:100%;height:100%;display:block;object-fit:cover;border-radius:50%;background:#fff}
+.ico{background:#fff;box-shadow:0 0 0 4px var(--c,var(--bg));overflow:hidden}
+.ico img{width:100%;height:100%;object-fit:cover;display:block}
+.sceneimg{position:absolute;inset:0;background-size:cover;background-position:center;animation:kb 14s ease-in-out infinite alternate;z-index:-1}
+@keyframes kb{from{transform:scale(1)}to{transform:scale(1.08) translate(-1%,-1%)}}
+
+/* ---------- 시작 화면 ---------- */
+.intro{display:grid;grid-template-columns:1.1fr .9fr;gap:28px;align-items:center;padding-top:20px}
+.intro .tag{display:inline-block;background:var(--sun);border-radius:999px;padding:4px 14px;font-family:var(--font-display);font-size:1rem;letter-spacing:.04em}
+.intro h1{font-size:clamp(2.6rem,7vw,4.6rem);line-height:1.05;margin:14px 0 12px;color:var(--ink)}
+.intro h1 span{color:var(--coral)}
+.intro p.lead{font-size:1.15rem;max-width:34em;margin:0 0 22px;color:var(--ink-soft)}
+.intro .lead b{color:var(--ink)}
+.cta{display:flex;flex-wrap:wrap;gap:14px}
+.hero-art{position:relative;aspect-ratio:1/1;max-width:420px;width:100%;justify-self:center}
+.hero-art .disc{position:absolute;inset:6%;border-radius:50%;background:var(--panel);box-shadow:0 0 0 14px var(--wood),0 0 0 22px var(--wood-deep)}
+.hero-art .b{position:absolute;inset:10%;animation:bob 2.6s ease-in-out infinite}
+.hero-art .float{position:absolute;width:clamp(64px,16vw,96px);border-radius:50%;background:#fff;box-shadow:0 4px 0 var(--line);animation:bob 3s ease-in-out infinite}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:34px;grid-column:1/-1}
+.step{background:var(--panel);border-radius:var(--r);padding:18px;display:flex;gap:12px;align-items:flex-start}
+.step .n{flex:none;width:38px;height:38px;border-radius:50%;background:var(--sky);color:#fff;font-family:var(--font-display);font-size:1.3rem;display:grid;place-items:center}
+.step h3{font-size:1.2rem;margin-bottom:2px}
+.step p{margin:0;color:var(--ink-soft);font-size:.98rem}
+
+/* ---------- 공통 상단 ---------- */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.topbar h2{font-size:1.9rem}
+.topbar .sub{color:var(--ink-soft);margin:2px 0 0}
+
+/* ---------- 도구 선반 ---------- */
+.shelf{
+  background:var(--wood);border-radius:var(--r);padding:16px;
+  box-shadow:inset 0 -8px 0 var(--wood-deep);
+}
+.shelf h3{font-size:1.25rem;margin:0 0 10px 4px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.shelf h3 small{font-family:var(--font-body);font-size:.95rem;color:var(--ink-soft);align-self:center}
+.tools{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.tool{
+  position:relative;border:0;background:var(--panel);border-radius:18px;padding:10px 6px 10px;
+  display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;
+  box-shadow:0 5px 0 rgba(0,0,0,.08);transition:transform .12s;
+}
+.tool:hover{transform:translateY(-3px)}
+.tool .ico{width:62px;height:62px;border-radius:50%;display:grid;place-items:center;font-size:2.2rem;line-height:1}
+.tool .ico svg{width:46px;height:46px}
+.tool .nm{font-size:1rem;line-height:1.15;text-align:center}
+.tool .act{font-family:var(--font-body);font-size:.82rem;color:var(--ink-soft)}
+.tool.sel{box-shadow:0 0 0 4px var(--coral),0 5px 0 rgba(0,0,0,.08)}
+.tool.heard::after{content:"✓";position:absolute;top:6px;right:8px;font-size:.9rem;color:var(--mint)}
+.tool.playing .ico{animation:wob .25s ease-in-out infinite alternate}
+.tool.nope{animation:shake .4s}
+
+/* ---------- 연습실 ---------- */
+.practice{display:grid;grid-template-columns:.85fr 1.15fr;gap:20px;align-items:start}
+.info{background:var(--panel);border-radius:var(--r);padding:22px;display:flex;flex-direction:column;gap:12px;min-height:100%}
+.info .big{display:flex;align-items:center;gap:14px}
+.info .big .ico{width:92px;height:92px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:3.4rem}
+.info .big .ico svg{width:68px;height:68px}
+.info h3{font-size:1.7rem}
+.word{font-family:var(--font-display);font-size:2rem;color:var(--coral);line-height:1.1}
+.info .how{background:var(--bg);border-radius:14px;padding:12px 14px;margin:0}
+.info .how b{font-family:var(--font-display);font-weight:400}
+.info .think{margin:0;color:var(--ink-soft)}
+.bear-tip{display:flex;gap:12px;align-items:center}
+.bear-tip .bb{width:76px;height:76px;flex:none}
+.bubble{position:relative;background:var(--panel);border-radius:18px;padding:12px 16px;font-size:1.05rem;box-shadow:0 4px 0 var(--line);min-width:0}
+.info .bubble{background:var(--bg);box-shadow:none}
+.count{font-family:var(--font-display);font-size:1.05rem}
+.meter{height:12px;border-radius:999px;background:var(--bg);overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:var(--mint);border-radius:999px;transition:width .3s}
+
+/* ---------- 게임 ---------- */
+.game{display:grid;grid-template-columns:1.25fr .95fr;gap:20px;align-items:start}
+.stage-col{display:flex;flex-direction:column;gap:14px;min-width:0}
+.progress{display:flex;gap:6px;flex-wrap:wrap;list-style:none;margin:0;padding:0}
+.progress li{width:34px;height:34px;border-radius:50%;background:var(--panel);display:grid;place-items:center;font-family:var(--font-display);font-size:.95rem;color:var(--ink-soft);box-shadow:0 3px 0 var(--line)}
+.progress li.now{background:var(--coral);color:#fff;box-shadow:0 3px 0 var(--coral-deep)}
+.progress li.done{background:var(--sun);color:var(--ink);box-shadow:0 3px 0 var(--wood-deep)}
+
+.screen{background:var(--film);border-radius:var(--r);padding:30px 14px;position:relative}
+.screen::before,.screen::after{
+  content:"";position:absolute;left:14px;right:14px;height:12px;
+  background:repeating-linear-gradient(90deg,var(--bg) 0 16px,transparent 16px 34px);
+  border-radius:3px;opacity:.85;
+}
+.screen::before{top:9px}.screen::after{bottom:9px}
+.scene-head{display:flex;justify-content:space-between;align-items:center;gap:10px;color:#fff;margin:0 2px 10px}
+.scene-head .disp{font-size:1.35rem;line-height:1.2}
+.scene-head .num{font-family:var(--font-display);font-size:.95rem;color:var(--sun);letter-spacing:.06em}
+.lamp{flex:none;font-family:var(--font-display);font-size:.9rem;border-radius:999px;padding:4px 12px;background:rgba(255,255,255,.14);color:#fff;white-space:nowrap}
+.lamp.on{background:var(--coral);animation:pulse .8s ease-in-out infinite alternate}
+
+.scene{position:relative;width:100%;aspect-ratio:16/9;max-width:100%;overflow:hidden;border-radius:14px;container-type:inline-size;isolation:isolate}
+.scene .e{position:absolute;line-height:1;display:inline-flex;align-items:center;user-select:none}
+.scene .e > span{display:inline-block}
+.scene i{position:absolute;display:block}
+.scene.live{animation:zoom .5s ease-out}
+.scene .waves{position:absolute;right:3%;bottom:5%;display:none;gap:.8cqw;align-items:flex-end;height:7cqw;z-index:5}
+.scene .waves b{width:1.4cqw;border-radius:1cqw;background:#fff;box-shadow:0 0 0 .3cqw rgba(0,0,0,.15);animation:eq .35s ease-in-out infinite alternate}
+.scene.live .waves{display:flex}
+
+.recbar{background:var(--panel);border-radius:var(--r);padding:14px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.recbar .picked{display:flex;align-items:center;gap:10px;min-width:0;flex:1 1 220px}
+.recbar .picked .ico{width:48px;height:48px;flex:none;border-radius:50%;display:grid;place-items:center;font-size:1.7rem;background:var(--bg)}
+.recbar .picked .ico svg{width:36px;height:36px}
+.recbar .picked p{margin:0;line-height:1.3}
+.recbar .picked .disp{font-size:1.15rem}
+.recbar .btns{display:flex;gap:10px;flex-wrap:wrap}
+.mascot{display:flex;gap:12px;align-items:flex-end}
+.mascot .bb{width:84px;height:84px;flex:none}
+.mascot .bubble::before{content:"";position:absolute;left:-10px;bottom:18px;border:10px solid transparent;border-right-color:var(--panel);border-left:0}
+.hintline{background:#fff6d6;border:2px dashed var(--sun);border-radius:14px;padding:10px 14px;margin:0}
+.side-col{display:flex;flex-direction:column;gap:14px;min-width:0}
+
+/* 결과 팝업 */
+.overlay{position:fixed;inset:0;background:rgba(59,42,74,.45);display:grid;place-items:center;z-index:30;
+  padding:max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px))}
+.card{background:var(--panel);border-radius:28px;padding:26px 24px;max-width:460px;width:100%;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center;animation:popin .35s cubic-bezier(.2,1.6,.4,1)}
+.card h2{font-size:2.4rem;color:var(--mint)}
+.card .stars{font-size:2.6rem;letter-spacing:.1em;line-height:1}
+.card .stars .off{filter:grayscale(1);opacity:.25}
+.card .pair{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-size:1.15rem;background:var(--bg);border-radius:999px;padding:6px 16px}
+.card .pair .ico{font-size:1.6rem;display:inline-grid;place-items:center}
+.card .pair .ico svg{width:30px;height:30px}
+.card p{margin:0;color:var(--ink-soft)}
+
+/* 인증서 */
+.cert{background:var(--panel);border-radius:30px;padding:30px 26px;max-width:760px;margin:10px auto 0;text-align:center;
+  box-shadow:0 0 0 10px var(--sun),0 0 0 18px var(--wood);position:relative}
+.cert .bb{width:120px;height:120px;margin:0 auto}
+.cert .eyebrow{font-family:var(--font-display);color:var(--coral);letter-spacing:.12em;font-size:1rem}
+.cert h2{font-size:clamp(2rem,6vw,3rem);margin:4px 0}
+.cert .name{display:flex;justify-content:center;align-items:baseline;gap:8px;flex-wrap:wrap;font-family:var(--font-display);font-size:1.4rem;margin:10px 0}
+.cert input{font-family:var(--font-display);font-size:1.5rem;color:var(--ink);text-align:center;border:0;border-bottom:3px dashed var(--grape);background:transparent;width:min(260px,70vw);padding:2px 6px}
+.cert .total{font-family:var(--font-display);font-size:2.2rem;color:var(--ink)}
+.cert .total span{color:var(--coral)}
+.cert .rank{font-family:var(--font-display);font-size:1.3rem;background:var(--bg);display:inline-block;border-radius:999px;padding:6px 18px}
+.log{list-style:none;padding:0;margin:20px 0 0;display:grid;grid-template-columns:repeat(2,1fr);gap:8px;text-align:left}
+.log li{display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:14px;padding:8px 12px;min-width:0}
+.log .ico{font-size:1.5rem;flex:none;width:34px;display:grid;place-items:center}
+.log .ico svg{width:30px;height:30px}
+.log .t{flex:1;min-width:0;line-height:1.25;font-size:.95rem}
+.log .t b{font-family:var(--font-display);font-weight:400;font-size:1rem;display:block}
+.log .s{flex:none;font-size:.85rem;letter-spacing:-.1em}
+.cert .cta{justify-content:center;margin-top:22px}
+
+/* 색종이 */
+.confetti{position:fixed;top:-20px;width:12px;height:16px;border-radius:3px;z-index:40;pointer-events:none;animation:conf var(--t) linear forwards}
+
+/* ---------- 장면 소품 ---------- */
+.grill{left:10%;top:47%;width:80%;height:42%;border-radius:50%;
+  background:repeating-linear-gradient(90deg,#5c4742 0 4cqw,#352826 4cqw 5.2cqw);border:1.6cqw solid #2a1f1d;box-shadow:0 1.5cqw 0 rgba(0,0,0,.18)}
+.steam{width:7cqw;height:7cqw;border-radius:50%;background:rgba(255,255,255,.8);filter:blur(.7cqw)}
+.spark{width:1.5cqw;height:1.5cqw;border-radius:50%;background:#fff6b0;box-shadow:0 0 1.2cqw #ffd257}
+.ember{width:1.2cqw;height:1.2cqw;border-radius:50%;background:#ffb347;box-shadow:0 0 1cqw #ff7a2f}
+.drop{width:.6cqw;height:3.6cqw;border-radius:1cqw;background:#3f7ccc;opacity:.75;top:0}
+.puddle{left:28%;top:84%;width:44%;height:8%;border-radius:50%;background:#7fa6cf;opacity:.7}
+.ripple{left:45%;top:85%;width:10%;height:5%;border-radius:50%;border:.4cqw solid #e8f2ff}
+.flake{width:1.6cqw;height:1.6cqw;border-radius:50%;background:#fff;box-shadow:0 0 0 .3cqw #b7dafa;top:0}
+.foot{width:3.2cqw;height:1.7cqw;border-radius:50%;background:#9fbfdf;opacity:0}
+.flashbg{inset:0;background:#fff;opacity:0;z-index:4;pointer-events:none}
+.wline{left:0;height:.7cqw;width:24cqw;border-radius:1cqw;background:rgba(255,255,255,.95)}
+.bub{border:.45cqw solid rgba(255,255,255,.9);border-radius:50%;background:rgba(255,255,255,.18)}
+.ray{top:-10%;width:12%;height:90%;background:linear-gradient(rgba(255,255,255,.35),transparent);transform:skewX(-12deg)}
+.frame{left:37%;top:16%;width:26%;height:62%;background:#140c26;border:1.3cqw solid #8a6440;border-bottom:0;border-radius:14cqw 14cqw 0 0;perspective:60cqw;overflow:visible}
+.door{inset:0;background:repeating-linear-gradient(90deg,#b98150 0 4.4cqw,#9d6a41 4.4cqw 5cqw);border-radius:12.5cqw 12.5cqw 0 0;transform-origin:0 50%;animation:door 4.2s ease-in-out infinite;z-index:2}
+.knob{right:14%;top:56%;width:2.4cqw;height:2.4cqw;border-radius:50%;background:#ffd257}
+.ghost{position:absolute;left:16%;top:24%;font-size:13cqw;line-height:1;z-index:1;animation:bob 1.8s ease-in-out infinite}
+.ground{left:0;right:0;bottom:0}
+
+/* 애니메이션 */
+.jig{animation:jig .16s ease-in-out infinite alternate}
+.rise{animation:rise var(--t,2.4s) ease-out infinite;animation-delay:var(--d,0s)}
+.pop{animation:pop .9s ease-out infinite;animation-delay:var(--d,0s)}
+.fall{animation:fall var(--t,.8s) linear infinite;animation-delay:var(--d,0s)}
+.flick{animation:flick .5s ease-in-out infinite}
+.tw{animation:tw var(--t,1.8s) ease-in-out infinite;animation-delay:var(--d,0s)}
+.bob{animation:bob var(--t,2s) ease-in-out infinite;animation-delay:var(--d,0s)}
+.sway{transform-origin:50% 100%;animation:sway var(--t,2s) ease-in-out infinite}
+.drift{animation:drift var(--t,6s) ease-in-out infinite alternate;animation-delay:var(--d,0s)}
+.across{left:0;animation:across var(--t,4s) linear infinite;animation-delay:var(--d,0s)}
+.hop{animation:hop .3s ease-in-out infinite}
+.waddle{animation:waddle .45s ease-in-out infinite}
+.flap{animation:flap .2s ease-in-out infinite}
+.flyup{left:0;top:42%;animation:flyup var(--t,4.5s) linear infinite;animation-delay:var(--d,0s)}
+.blow{left:0;animation:blow var(--t,2.4s) linear infinite;animation-delay:var(--d,0s)}
+.wmove{animation:wmove var(--t,1.6s) linear infinite;animation-delay:var(--d,0s)}
+.bubup{animation:bubup var(--t,3s) ease-in infinite;animation-delay:var(--d,0s)}
+.shiver{animation:shiver .12s linear infinite}
+.flash{animation:flash 3.2s linear infinite}
+.print{animation:print 5s linear infinite}
+.spin{animation:spin 14s linear infinite}
+
+@keyframes jig{0%{transform:rotate(-3deg) translateY(0)}100%{transform:rotate(3deg) translateY(-3%)}}
+@keyframes rise{0%{transform:translateY(0) scale(.5);opacity:0}25%{opacity:.9}100%{transform:translateY(-38cqw) scale(1.5);opacity:0}}
+@keyframes pop{0%,55%{transform:scale(0);opacity:0}65%{transform:scale(1.5) translateY(-2cqw);opacity:1}100%{transform:scale(.4) translateY(-7cqw);opacity:0}}
+@keyframes fall{0%{transform:translateY(-12cqw)}100%{transform:translateY(64cqw)}}
+@keyframes flick{0%,100%{transform:scale(1) rotate(-2deg)}25%{transform:scale(1.08,.95) rotate(2deg)}50%{transform:scale(.95,1.08)}75%{transform:scale(1.04) rotate(-3deg)}}
+@keyframes tw{0%,100%{opacity:.35;transform:scale(.75)}50%{opacity:1;transform:scale(1.1)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7%)}}
+@keyframes sway{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+@keyframes drift{from{transform:translateX(-4cqw)}to{transform:translateX(5cqw)}}
+@keyframes across{from{transform:translateX(var(--from,110cqw))}to{transform:translateX(var(--to,-40cqw))}}
+@keyframes hop{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-14%) rotate(-7deg)}}
+@keyframes waddle{0%,100%{transform:rotate(-9deg)}50%{transform:rotate(9deg) translateY(-4%)}}
+@keyframes flap{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.5)}}
+@keyframes flyup{from{transform:translate(-25cqw,26cqw)}to{transform:translate(112cqw,-26cqw)}}
+@keyframes blow{0%{transform:translate(-15cqw,0) rotate(0)}50%{transform:translate(45cqw,-6cqw) rotate(320deg)}100%{transform:translate(115cqw,3cqw) rotate(640deg)}}
+@keyframes wmove{0%{transform:translateX(-30cqw);opacity:0}20%{opacity:1}80%{opacity:1}100%{transform:translateX(110cqw);opacity:0}}
+@keyframes bubup{0%{transform:translate(0,0) scale(.6);opacity:0}10%{opacity:1}50%{transform:translate(2cqw,-25cqw) scale(1)}100%{transform:translate(-1cqw,-52cqw) scale(1.2);opacity:0}}
+@keyframes shiver{0%{transform:translateX(-2%)}50%{transform:translateX(2%)}100%{transform:translateX(-2%)}}
+@keyframes flash{0%,54%,100%{opacity:0}56%{opacity:.9}58%{opacity:.1}61%{opacity:.75}70%{opacity:0}}
+@keyframes print{0%{opacity:0}2%{opacity:.95}85%{opacity:.95}100%{opacity:0}}
+@keyframes door{0%,12%{transform:rotateY(0)}48%,66%{transform:rotateY(-64deg)}100%{transform:rotateY(0)}}
+@keyframes candle{0%,100%{opacity:.15}50%{opacity:.35}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes eq{from{height:2cqw}to{height:7cqw}}
+@keyframes zoom{0%{transform:scale(1)}40%{transform:scale(1.03)}100%{transform:scale(1)}}
+@keyframes pulse{from{opacity:.65}to{opacity:1}}
+@keyframes wob{from{transform:rotate(-10deg) scale(1.05)}to{transform:rotate(10deg) scale(1.12)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+@keyframes popin{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes conf{to{transform:translate(var(--x),110vh) rotate(var(--r));}}
+
+@media (max-width:860px){
+  .intro,.practice,.game{grid-template-columns:1fr}
+  .hero-art{max-width:300px;grid-row:1}
+  .steps{grid-template-columns:1fr}
+  .log{grid-template-columns:1fr}
+}
+@media (max-width:480px){
+  .tools{grid-template-columns:repeat(3,1fr)}
+  .tool .ico{width:54px;height:54px;font-size:1.9rem}
+  .btn{font-size:1.1rem;padding:12px 20px}
+  .scene-head .disp{font-size:1.1rem}
+}
+@media (prefers-reduced-motion:reduce){
+  .confetti,.tool.nope,.scene.live,.hero-art .b,.hero-art .float{animation:none}
+  .scene *{animation-duration:6s !important}
+}
+.sitebar{max-width:1120px;margin:0 auto 4px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sitebar a{color:var(--ink);text-decoration:none}
+.sitebar .brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px}
+.sitebar .back{font-size:12.5px;font-weight:700;color:var(--ink-soft);background:#fff;padding:6px 12px;border-radius:999px;box-shadow:0 3px 0 var(--line)}
+</style>
+<link rel="stylesheet" href="../assets/guide.css">
+</head>
+<body>
+<div class="wrap">
+<div class="sitebar">
+  <a class="brand" href="../index.html">
+    <svg width="26" height="26" viewBox="0 0 34 34" fill="none">
+      <circle cx="17" cy="18" r="14" fill="#fff" stroke="#3B4655" stroke-width="2"/>
+      <path d="M17 9 L17 18 L23 21" stroke="#FF90B3" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="13" y="2" width="8" height="4" rx="1.5" fill="#3B4655"/>
+    </svg>
+    <span>3분 놀이터</span>
+  </a>
+  <a class="back" href="../index.html">← 다른 콘텐츠 보기</a>
+</div>
+
+  <!-- 시작 화면 -->
+  <section id="intro" class="intro">
+    <div>
+      <span class="tag">🎬 소리 만드는 사람</span>
+      <h1>꼬마 <span>폴리</span><br>아티스트</h1>
+      <p class="lead">영화 속 발소리, 빗소리, 문 삐걱 소리는 사실 스튜디오에서 <b>물건으로 직접 만든 소리</b>가 많아요. 이렇게 소리를 만드는 사람을 <b>폴리 아티스트</b>라고 불러요. 휴지를 구기면 삼겹살 굽는 소리가 난다는 거 알고 있었나요?</p>
+      <div class="cta">
+        <button class="btn" id="goPractice">🎧 소리 연습실 가기</button>
+        <button class="btn alt" id="goGame">🎬 바로 게임 시작</button>
+      </div>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <div class="disc"></div>
+      <img class="b bear" src="../assets/foley-artist/bear.webp" alt="">
+      <img class="float" style="left:-2%;top:8%" src="../assets/foley-artist/t_tissue.webp" alt="">
+      <img class="float" style="right:-2%;top:14%;animation-delay:-1s" src="../assets/foley-artist/t_coconut.webp" alt="">
+      <img class="float" style="left:0;bottom:6%;animation-delay:-2s" src="../assets/foley-artist/t_balloon.webp" alt="">
+      <img class="float" style="right:2%;bottom:2%;animation-delay:-.5s" src="../assets/foley-artist/t_umbrella.webp" alt="">
+    </div>
+    <div class="steps">
+      <div class="step"><span class="n">1</span><div><h3>소리 들어 보기</h3><p>연습실에서 12가지 도구를 하나씩 눌러 소리를 들어요.</p></div></div>
+      <div class="step"><span class="n">2</span><div><h3>장면 보기</h3><p>소리가 없는 장면이 나와요. 어떤 소리가 어울릴지 생각해요.</p></div></div>
+      <div class="step"><span class="n">3</span><div><h3>녹음해서 통과!</h3><p>알맞은 도구를 골라 녹음하면 통과! 10단계까지 도전해요.</p></div></div>
+    </div>
+  </section>
+
+  <!-- 연습실 -->
+  <section id="practice" hidden>
+    <div class="topbar">
+      <div>
+        <h2>🎧 소리 연습실</h2>
+        <p class="sub">도구를 눌러 소리를 들어 보세요. 무슨 소리랑 닮았는지 상상해 봐요!</p>
+      </div>
+      <button class="btn" id="practiceStart">🎬 게임 시작!</button>
+    </div>
+    <div class="practice">
+      <div class="info" id="info"></div>
+      <div class="shelf">
+        <h3>폴리 도구 상자 <small class="count" id="heardCount"></small></h3>
+        <div class="tools" id="practiceTools"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 게임 -->
+  <section id="game" hidden>
+    <div class="topbar">
+      <ol class="progress" id="progress" aria-label="단계"></ol>
+      <button class="btn small alt" id="toPractice">🎧 연습실 다녀오기</button>
+    </div>
+    <div class="game">
+      <div class="stage-col">
+        <div class="screen">
+          <div class="scene-head">
+            <div><div class="num" id="sceneNum"></div><div class="disp" id="sceneTitle"></div></div>
+            <span class="lamp" id="lamp">🔇 소리 없음</span>
+          </div>
+          <div class="scene" id="scene"></div>
+        </div>
+        <div class="mascot">
+          <img class="bb bear" src="../assets/foley-artist/bear.webp" alt="">
+          <div class="bubble" id="say"></div>
+        </div>
+      </div>
+      <div class="side-col">
+        <div class="recbar">
+          <div class="picked" id="picked"></div>
+          <div class="btns">
+            <button class="btn small alt" id="hintBtn">💡 힌트</button>
+            <button class="btn" id="recBtn" disabled>🎙️ 이 소리로 녹음!</button>
+          </div>
+        </div>
+        <p class="hintline" id="hint" hidden></p>
+        <div class="shelf">
+          <h3>폴리 도구 상자 <small>눌러서 소리 듣기</small></h3>
+          <div class="tools" id="gameTools"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 결과 -->
+  <section id="end" hidden>
+    <div class="cert">
+      <img class="bb bear" src="../assets/foley-artist/bear.webp" alt="">
+      <div class="eyebrow">CERTIFICATE · 인증서</div>
+      <h2>꼬마 폴리 아티스트</h2>
+      <div class="name"><label for="kidName">이름</label><input id="kidName" maxlength="12" placeholder="이름을 써 주세요" autocomplete="off"></div>
+      <p>위 어린이는 10개의 장면에 꼭 맞는 소리를 만들어 넣었기에 이 인증서를 드립니다.</p>
+      <div class="total">⭐ <span id="total">0</span> / 30</div>
+      <div class="rank" id="rank"></div>
+      <ul class="log" id="log"></ul>
+      <div class="cta">
+        <button class="btn" id="again">🔁 다시 도전하기</button>
+        <button class="btn alt" id="endPractice">🎧 연습실 가기</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="card" role="dialog" aria-modal="true" aria-labelledby="ovTitle">
+    <h2 id="ovTitle">통과!</h2>
+    <div class="stars" id="ovStars"></div>
+    <div class="pair" id="ovPair"></div>
+    <p id="ovText"></p>
+    <button class="btn mint" id="nextBtn">다음 장면 ▶</button>
+  </div>
+</div>
+
+
+
+<!-- 활용 안내 시작 -->
+<section class="pgd" id="pg-guide" aria-labelledby="pgd-title" style="--pgd-accent:#FF6F86;--pgd-soft:#FFE0E6;">
+  <div class="pgd__box">
+    <span class="pgd__ribbon">📖 활용 안내</span>
+    <span class="pgd__deco pgd__deco--a" aria-hidden="true">🎬</span>
+    <span class="pgd__deco pgd__deco--b" aria-hidden="true">🎧</span>
+    <span class="pgd__deco pgd__deco--c" aria-hidden="true">✨</span>
+    <div class="pgd__head">
+      <div class="pgd__mascot"><img src="../assets/guide/foley-artist.webp" alt="분홍 헤드폰을 쓰고 마이크를 든 꼬마 곰 그림" width="150" height="150" loading="lazy" decoding="async"></div>
+      <div>
+        <h2 class="pgd__title" id="pgd-title"><mark>꼬마 폴리 아티스트</mark>, 이렇게 활용해요</h2>
+        <p class="pgd__lead">영화 속 소리를 물건으로 직접 만드는 <b>폴리 아티스트</b>가 되어, 소리 없는 장면에 꼭 맞는 효과음을 찾아 넣는 소리 탐구 놀이예요.</p>
+      </div>
+    </div>
+    <ul class="pgd__chips" aria-label="한눈에 보기">
+      <li>🎒 1~4학년 추천</li>
+      <li>🎵 음악 · 과학 · 소리 탐구</li>
+      <li>⏱️ 10단계 5~10분</li>
+      <li>👤 혼자 · 모둠 · 전체 함께</li>
+    </ul>
+    <div class="pgd__grid">
+      <div class="pgd__card pgd__card--how">
+        <h3><span class="pgd__ico" aria-hidden="true">🎮</span>이렇게 놀아요</h3>
+        <ol>
+        <li><b>소리 연습실</b>에서 휴지, 코코넛, 풍선 같은 12가지 도구 소리를 들어 봐요.</li>
+        <li>게임을 시작하면 <b>소리 없는 장면</b> 10개가 무작위로 나와요.</li>
+        <li>도구를 눌러 소리를 듣고, 어울리면 <b>🎙️ 녹음</b> 버튼을 눌러요.</li>
+        <li>한 번에 맞히면 별 3개! 마지막에 <b>폴리 아티스트 인증서</b>를 받아요.</li>
+        </ol>
+      </div>
+      <div class="pgd__card pgd__card--learn">
+        <h3><span class="pgd__ico" aria-hidden="true">🌱</span>이런 걸 배워요</h3>
+        <ul>
+        <li>서로 다른 물건도 <b>비슷한 소리</b>를 낼 수 있다는 걸 알아요.</li>
+        <li>소리를 <b>바스락, 따각따각, 보글보글</b> 같은 흉내 내는 말로 표현해요.</li>
+        <li>영화와 만화 속 소리가 <b>사람이 만든 것</b>이라는 미디어 이해가 자라요.</li>
+        <li>귀 기울여 듣고 비교하는 <b>집중해서 듣는 힘</b>을 길러요.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="pgd__card pgd__card--class">
+      <h3><span class="pgd__ico" aria-hidden="true">🏫</span>교실에서 이렇게 써 보세요</h3>
+      <ul>
+        <li>게임 전에 “삼겹살 굽는 소리를 휴지로 만들 수 있을까?” 질문으로 시작해요.</li>
+        <li>진짜 휴지, 비닐, 빨대와 물컵을 준비해 아이들이 직접 소리를 내 봐요.</li>
+        <li>소리를 끈 짧은 만화 장면에 모둠별로 효과음을 입혀 발표해요.</li>
+        <li>교실 물건으로 새로운 효과음을 만들어 ‘우리 반 소리 사전’을 꾸며요.</li>
+      </ul>
+    </div>
+    <p class="pgd__tip"><span><b>선생님 한마디</b> 게임 속 효과음은 실제 물건 소리처럼 만든 소리예요. 놀이 뒤에 진짜 물건으로 소리를 내 보면 “정말 비슷하다!” 하는 감탄이 더 커져요.</span></p>
+  </div>
+</section>
+<!-- 활용 안내 끝 -->
+
+<script>
+/* ================= 소리 엔진 (Web Audio로 직접 합성) ================= */
+let AC=null, master=null, noiseBuf=null, bus=null;
+function audio(){
+  if(!AC){
+    AC=new (window.AudioContext||window.webkitAudioContext)();
+    const comp=AC.createDynamicsCompressor();
+    master=AC.createGain(); master.gain.value=.9;
+    master.connect(comp); comp.connect(AC.destination);
+    const len=AC.sampleRate*2; noiseBuf=AC.createBuffer(1,len,AC.sampleRate);
+    const d=noiseBuf.getChannelData(0); for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
+    Object.keys(sfxRaw).forEach(decodeSfx);
+  }
+  if(AC.state==='suspended') AC.resume();
+  return AC;
+}
+// 힉스필드로 만든 실제 효과음 (불러오지 못하면 합성음으로 대신 재생)
+const SFX={}, sfxRaw={};
+function decodeSfx(id){
+  const b=sfxRaw[id]; if(!AC||!b||SFX[id]) return;
+  delete sfxRaw[id];
+  AC.decodeAudioData(b).then(buf=>{SFX[id]=buf;}).catch(()=>{});
+}
+const R=Math.random;
+function src(t,dur){const s=AC.createBufferSource(); s.buffer=noiseBuf; s.loop=true; s.start(t,R()*1.5); s.stop(t+dur+.05); return s;}
+function filt(type,f,q=1){const b=AC.createBiquadFilter(); b.type=type; b.frequency.value=f; b.Q.value=q; return b;}
+function env(g,t,dur,peak,a,r){
+  const hold=Math.max(t+a,t+dur-r);
+  g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(peak,t+a);
+  g.gain.setValueAtTime(peak,hold); g.gain.linearRampToValueAtTime(0,t+dur);
+}
+// 짧게 튀는 잡음 (톡, 탁, 바스락)
+function burst(t,dur,o,{type='bandpass',f=1000,f2=0,q=1,g=.3,a=.0008}={}){
+  const s=src(t,dur), b=filt(type,f,q), gn=AC.createGain();
+  b.frequency.setValueAtTime(f,t); if(f2) b.frequency.exponentialRampToValueAtTime(f2,t+dur);
+  gn.gain.setValueAtTime(.0001,t); gn.gain.exponentialRampToValueAtTime(g,t+a); gn.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  s.connect(b).connect(gn).connect(o);
+}
+// 길게 깔리는 잡음
+function bed(t,dur,o,{type='lowpass',f=800,q=1,g=.1,a=.2,r=.4}={}){
+  const s=src(t,dur), b=filt(type,f,q), gn=AC.createGain(); env(gn,t,dur,g,a,r);
+  s.connect(b).connect(gn).connect(o);
+}
+function tone(t,dur,o,{type='sine',f=440,f2=0,g=.3,a=.005}={}){
+  const os=AC.createOscillator(), gn=AC.createGain(); os.type=type;
+  os.frequency.setValueAtTime(f,t); if(f2) os.frequency.exponentialRampToValueAtTime(f2,t+dur);
+  gn.gain.setValueAtTime(.0001,t); gn.gain.exponentialRampToValueAtTime(g,t+a); gn.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  os.connect(gn).connect(o); os.start(t); os.stop(t+dur+.05);
+}
+function smooth(n,lo,hi,k=.7){const a=new Float32Array(n); let v=(lo+hi)/2; for(let i=0;i<n;i++){v=v*k+(lo+R()*(hi-lo))*(1-k); a[i]=v;} return a;}
+function clop(t,o,lv,p){
+  tone(t,.09,o,{f:900*p,f2:380*p,g:.55*lv});
+  tone(t,.04,o,{type:'triangle',f:1900*p,f2:900*p,g:.18*lv});
+  burst(t,.025,o,{f:2400,q:1.5,g:.35*lv});
+}
+function flap(t,o,lv){
+  burst(t,.13,o,{f:450,f2:1600,q:.9,g:.55*lv,a:.03});
+  burst(t,.09,o,{type:'lowpass',f:260,g:.45*lv,a:.01});
+}
+function squeak(t,d,o,f1,f2){
+  const os=AC.createOscillator(); os.type='sawtooth';
+  os.frequency.setValueAtTime(f1,t); os.frequency.linearRampToValueAtTime((f1+f2)/2+35,t+d*.5); os.frequency.linearRampToValueAtTime(f2,t+d);
+  const bp=filt('bandpass',1100,3), pk=filt('peaking',2400,2); pk.gain.value=8;
+  const am=AC.createGain(); am.gain.value=.5;
+  const lfo=AC.createOscillator(); lfo.type='square'; lfo.frequency.setValueAtTime(26,t); lfo.frequency.linearRampToValueAtTime(46,t+d);
+  const lg=AC.createGain(); lg.gain.value=.5; lfo.connect(lg).connect(am.gain);
+  const g=AC.createGain(); env(g,t,d,.55,.08,.25);
+  os.connect(bp).connect(pk).connect(am).connect(g).connect(o);
+  os.start(t); lfo.start(t); os.stop(t+d+.05); lfo.stop(t+d+.05);
+}
+
+const SND={
+  tissue(t,o){ // 지글지글
+    bed(t,3,o,{type:'highpass',f:3500,g:.07,a:.3,r:.6});
+    for(let i=0;i<220;i++) burst(t+R()*2.9,.003+R()*.01,o,{type:'highpass',f:2000+R()*5000,g:.08+R()*.3});
+    for(let i=0;i<14;i++) burst(t+R()*2.8,.012,o,{f:1500+R()*1500,q:2,g:.35});
+    return 3;
+  },
+  coconut(t,o){ // 따각따각
+    for(let b=0;b<7;b++){
+      const base=t+b*.42, lv=.45+.55*Math.sin(Math.PI*(b+.5)/7);
+      [0,.1,.19].forEach((d,k)=>clop(base+d+R()*.012,o,lv*(k===1?.85:1),[1,.88,1.08][k]));
+    }
+    return 3.1;
+  },
+  wrapper(t,o){ // 타닥타닥
+    bed(t,3.2,o,{type:'lowpass',f:350,g:.1,a:.4,r:.8});
+    bed(t,3.2,o,{type:'bandpass',f:1200,q:.6,g:.025,a:.4,r:.8});
+    for(let c=0;c<26;c++){
+      const ct=t+R()*3, n=1+Math.floor(R()*4);
+      for(let k=0;k<n;k++) burst(ct+k*(.008+R()*.03),.002+R()*.006,o,{f:900+R()*4500,q:1.2,g:.3+R()*.6});
+    }
+    return 3.2;
+  },
+  beans(t,o){ // 후두둑
+    const d=3.4, w=x=>Math.max(.05,Math.min(1,(x-t)/.6,(t+d-x)/.7));
+    bed(t,d,o,{type:'bandpass',f:2500,q:.4,g:.08,a:.5,r:.8});
+    bed(t,d,o,{type:'lowpass',f:600,g:.05,a:.5,r:.8});
+    for(let i=0;i<350;i++){const x=t+.05+R()*(d-.1); burst(x,.002+R()*.004,o,{f:1500+R()*4500,q:3,g:(.05+R()*.18)*w(x)});}
+    for(let i=0;i<70;i++){const x=t+.05+R()*(d-.1), f=1200+R()*1800; tone(x,.025,o,{f,f2:f*1.6,g:(.04+R()*.08)*w(x),a:.001});}
+    return d;
+  },
+  starch(t,o){ // 뽀드득
+    for(let s=0;s<4;s++){
+      const st=t+s*.62;
+      bed(st,.38,o,{type:'bandpass',f:1800,q:.8,g:.05,a:.08,r:.2});
+      for(let i=0;i<55;i++) burst(st+.38*(R()+R())/2,.004+R()*.012,o,{f:700+R()*3000,q:2.5,g:.12+R()*.35});
+    }
+    return 2.6;
+  },
+  sheet(t,o){ // 우르르 쾅
+    const d=4.2;
+    const s=src(t,d), f=filt('lowpass',160,1), g=AC.createGain(); env(g,t,d,.9,.04,2.8);
+    const m=AC.createGain(); m.gain.value=.6;
+    const lfo=AC.createOscillator(); lfo.frequency.setValueAtTime(9,t); lfo.frequency.linearRampToValueAtTime(3,t+d);
+    const ld=AC.createGain(); ld.gain.value=.4; lfo.connect(ld).connect(m.gain); lfo.start(t); lfo.stop(t+d+.05);
+    s.connect(f).connect(g).connect(m).connect(o);
+    const s2=src(t,d), f2=filt('bandpass',420,7), l2=AC.createOscillator(), l2g=AC.createGain();
+    l2.frequency.value=5.5; l2g.gain.value=140; l2.connect(l2g).connect(f2.frequency); l2.start(t); l2.stop(t+d+.05);
+    const g2=AC.createGain(); env(g2,t,d-.6,.35,.02,2.2); s2.connect(f2).connect(g2).connect(o);
+    burst(t,.35,o,{type:'highpass',f:1200,g:.35});
+    tone(t,3,o,{f:62,f2:38,g:.35,a:.03});
+    return d;
+  },
+  umbrella(t,o){ // 푸드덕
+    let x=t;
+    for(let i=0;i<12;i++){ flap(x,o,i<6?1:Math.max(.25,1-(i-5)*.13)); x+=i<6?.17:.17+(i-5)*.03; }
+    return x-t+.3;
+  },
+  bottle(t,o){ // 휘이잉
+    const d=3.8, N=48, s=src(t,d), f=filt('bandpass',600,5);
+    f.frequency.setValueCurveAtTime(smooth(N,350,1200,.6),t,d);
+    const shape=smooth(N,.5,1,.6).map((v,i)=>v*Math.pow(Math.max(0,Math.sin(Math.PI*i/(N-1))),.8)*.9);
+    const g=AC.createGain(); g.gain.value=0; g.gain.setValueCurveAtTime(shape,t,d);
+    s.connect(f).connect(g).connect(o);
+    const os=AC.createOscillator(), vib=AC.createOscillator(), vg=AC.createGain(), og=AC.createGain();
+    os.frequency.value=330; vib.frequency.value=5; vg.gain.value=5; vib.connect(vg).connect(os.frequency);
+    og.gain.value=0; og.gain.setValueCurveAtTime(shape.map(v=>v*.08),t,d);
+    os.connect(og).connect(o); os.start(t); vib.start(t); os.stop(t+d+.05); vib.stop(t+d+.05);
+    return d;
+  },
+  straw(t,o){ // 보글보글
+    bed(t,2.8,o,{type:'lowpass',f:450,g:.07,a:.2,r:.4});
+    for(let i=0;i<34;i++){const f=280+R()*650; tone(t+R()*2.6,.05+R()*.05,o,{f,f2:f*(1.8+R()*1.2),g:.18+R()*.22,a:.004});}
+    return 2.8;
+  },
+  balloon(t,o){ // 끼이익
+    squeak(t,1.25,o,150,270); squeak(t+1.45,1,o,240,160);
+    return 2.6;
+  },
+  pan(t,o){ // 댕~
+    [0,.55,1.1].forEach((d,k)=>{
+      const b=t+d, base=430*(k===2?1.12:1);
+      [[1,.35],[2.76,.22],[5.4,.12],[8.93,.06]].forEach(([m,g])=>tone(b,1.1,o,{f:base*m,g,a:.002}));
+      burst(b,.02,o,{type:'highpass',f:3000,g:.3});
+    });
+    return 2.3;
+  },
+  sponge(t,o){ // 철퍽
+    [0,.6,1.2].forEach(d=>{
+      const b=t+d;
+      burst(b,.4,o,{type:'lowpass',f:180,f2:1400,q:9,g:.5,a:.05});
+      burst(b+.15,.25,o,{f:900,f2:300,q:6,g:.25,a:.03});
+      for(let k=0;k<3;k++){const f=150+R()*200; tone(b+.05+R()*.25,.06,o,{f,f2:f*2,g:.15});}
+    });
+    return 1.8;
+  }
+};
+function play(id){
+  audio();
+  if(bus){const b=bus; b.gain.setTargetAtTime(0,AC.currentTime,.03); setTimeout(()=>b.disconnect(),500);}
+  bus=AC.createGain(); bus.connect(master);
+  if(SFX[id]){const s=AC.createBufferSource(); s.buffer=SFX[id]; s.connect(bus); s.start(AC.currentTime+.02); return SFX[id].duration;}
+  return SND[id](AC.currentTime+.03,bus);
+}
+function jingle(){audio(); const t=AC.currentTime+.05; [523,659,784,1047].forEach((f,i)=>tone(t+i*.11,.4,master,{type:'triangle',f,g:.22}));}
+function boing(){audio(); const t=AC.currentTime+.02; tone(t,.45,master,{f:340,f2:130,g:.28}); tone(t,.45,master,{type:'triangle',f:350,f2:140,g:.08});}
+
+/* ================= 도구와 장면 ================= */
+
+const TOOLS=[
+  {id:'tissue', name:'휴지', act:'구기기', icon:'🧻', bg:'#ffe6ee', word:'바스락 지글지글', how:'휴지를 두 손으로 천천히 꾸깃꾸깃 구겨요.', feel:'작은 소리가 잔뜩 튀는 바스락 소리'},
+  {id:'coconut', name:'코코넛 껍데기', act:'두드리기', icon:'🥥', bg:'#f5e6d6', word:'따각따각', how:'반으로 자른 코코넛 껍데기를 바닥에 번갈아 콩콩 두드려요.', feel:'딱딱하고 속이 빈 따각 소리'},
+  {id:'wrapper', name:'사탕 비닐', act:'구기기', icon:'🍬', bg:'#ffeccc', word:'타닥 타닥', how:'반짝이는 셀로판 사탕 비닐을 손으로 꼭꼭 구겨요.', feel:'톡! 탁! 하고 크게 튀는 소리'},
+  {id:'beans', name:'콩 쟁반', act:'굴리기', icon:'🫘', bg:'#ffe1d6', word:'후두둑 토독토독', how:'쟁반에 콩을 올리고 이리저리 기울여 굴려요.', feel:'작은 알갱이가 와르르 쏟아지는 소리'},
+  {id:'starch', name:'녹말 주머니', act:'누르기', icon:'', bg:'#fff4d6', word:'뽀드득 뽀드득', how:'녹말가루를 넣은 주머니를 손으로 꾹꾹 눌러요.', feel:'꾹꾹 눌릴 때 나는 뽀드득 소리'},
+  {id:'sheet', name:'얇은 철판', act:'흔들기', icon:'', bg:'#e3e9f5', word:'우르르르 쾅', how:'매달아 둔 얇은 철판을 잡고 출렁출렁 흔들어요.', feel:'낮고 크게 울리는 우르릉 소리'},
+  {id:'umbrella', name:'우산', act:'폈다 접기', icon:'☂️', bg:'#efe6ff', word:'푸드덕 푸드덕', how:'작은 우산을 빠르게 폈다 접었다 해요.', feel:'펄럭펄럭 공기를 치는 소리'},
+  {id:'bottle', name:'빈 병', act:'입으로 불기', icon:'', bg:'#dcf6ff', word:'휘이이잉', how:'빈 병 입구에 아랫입술을 대고 비스듬히 후~ 불어요.', feel:'길게 이어지는 휘이잉 소리'},
+  {id:'straw', name:'빨대와 물컵', act:'불기', icon:'🥤', bg:'#dff7ef', word:'보글보글', how:'물이 담긴 컵에 빨대를 꽂고 살살 바람을 불어요.', feel:'방울이 퐁퐁 올라오는 소리'},
+  {id:'balloon', name:'풍선', act:'문지르기', icon:'🎈', bg:'#ffe0e4', word:'끼이이익', how:'부푼 풍선을 손가락으로 꾹 누르고 천천히 문질러요.', feel:'길게 삐걱이는 끼익 소리'},
+  {id:'pan', name:'프라이팬', act:'두드리기', icon:'🍳', bg:'#ececf2', word:'댕~ 댕~', how:'프라이팬을 숟가락으로 땡 하고 쳐요.', feel:'맑게 울리는 쇳소리', extra:'종소리나 칼이 부딪히는 소리를 만들 때 써요.'},
+  {id:'sponge', name:'젖은 스펀지', act:'짜기', icon:'🧽', bg:'#fff7c9', word:'철퍽 찌걱', how:'물을 머금은 스펀지를 꾹 쥐어 짜요.', feel:'물기 많은 철퍽 소리', extra:'진흙탕을 걷는 발소리나 젤리 괴물 소리를 만들 때 써요.'}
+];
+const TOOL=Object.fromEntries(TOOLS.map(t=>[t.id,t]));
+
+const E=(ch,st,cls='')=>`<span class="e ${cls}" style="${st}">${ch}</span>`;
+const I=(cls,st)=>`<i class="${cls}" style="${st}"></i>`;
+const rnd=(a,b)=>(a+R()*(b-a)).toFixed(2);
+const WAVES='<div class="waves"><b></b><b style="animation-delay:-.1s"></b><b style="animation-delay:-.2s"></b><b style="animation-delay:-.05s"></b></div>';
+
+const SCENES=[
+  {id:'pork', title:'삼겹살이 지글지글 구워져요', tool:'tissue',
+   hint:'종이처럼 구길 수 있는 부드러운 물건을 찾아봐요.',
+   explain:'휴지를 천천히 구기면 기름이 톡톡 튀는 지글지글 소리와 꼭 닮았어요. 진짜 폴리 아티스트들도 종이나 비닐로 굽는 소리를 만들어요.',
+   img:'../assets/foley-artist/s0.webp',
+   html(){let h='';for(let i=0;i<6;i++) h+=I('steam rise',`left:${18+i*12}%;top:40%;--d:${-i*.45}s;--t:2.6s`);for(let i=0;i<10;i++) h+=I('spark pop',`left:${rnd(15,70)}%;top:${rnd(35,70)}%;--d:${rnd(-1,0)}s`);return h;}},
+  {id:'horse', title:'말이 들판을 달려요', tool:'coconut',
+   hint:'딱딱하고 속이 빈 물건을 바닥에 따각 두드려 봐요.',
+   explain:'반으로 자른 코코넛 껍데기를 두드리면 따각따각 말발굽 소리가 돼요. 옛날 라디오 드라마 때부터 쓰인 아주 유명한 방법이에요!',
+   img:'../assets/foley-artist/s1.webp',
+   html(){let h='';for(let i=0;i<4;i++) h+=I('steam rise',`left:${rnd(22,34)}%;top:72%;--d:${-i*.5}s;--t:1.8s;background:rgba(255,248,230,.85)`);return h;}},
+  {id:'fire', title:'캠프파이어가 타닥타닥 타올라요', tool:'wrapper',
+   hint:'구기면 톡! 탁! 튀는 반짝이 비닐을 찾아봐요.',
+   explain:'셀로판 사탕 비닐을 구기면 장작이 타닥타닥 튀는 소리가 나요. 소리가 크고 날카로워서 불꽃 소리에 딱이에요.',
+   img:'../assets/foley-artist/s2.webp',
+   html(){let h='';for(let i=0;i<12;i++) h+=I('ember rise',`left:${rnd(46,56)}%;top:62%;--t:${rnd(1.2,2)}s;--d:${rnd(-2,0)}s`);return h;}},
+  {id:'rain', title:'후두둑 비가 내려요', tool:'beans',
+   hint:'작은 알갱이가 잔뜩 굴러가는 소리를 찾아봐요.',
+   explain:'쟁반 위에 콩을 굴리면 후두둑 빗소리가 돼요. 쟁반을 기울이는 속도로 비가 세게 오는지, 살살 오는지도 바꿀 수 있어요.',
+   img:'../assets/foley-artist/s3.webp',
+   html(){let h='';for(let i=0;i<45;i++) h+=I('drop fall',`left:${rnd(0,99)}%;--t:${rnd(.55,.9)}s;--d:${rnd(-1,0)}s;background:#e8f2ff;opacity:.6`);return h;}},
+  {id:'snow', title:'펭귄이 눈길을 뽀드득 걸어요', tool:'starch',
+   hint:'꾹꾹 누르면 뽀드득 소리가 나는 가루 주머니!',
+   explain:'녹말가루를 넣은 주머니를 꾹꾹 누르면 뽀드득 눈 밟는 소리가 나요. 영화에서 겨울 장면을 만들 때 실제로 쓰는 방법이에요!',
+   img:'../assets/foley-artist/s4.webp',
+   html(){let h='';for(let i=0;i<28;i++) h+=I('flake fall',`left:${rnd(0,99)}%;--t:${rnd(2.5,4.5)}s;--d:${rnd(-4,0)}s`);return h;}},
+  {id:'thunder', title:'우르릉 쾅! 천둥이 쳐요', tool:'sheet',
+   hint:'흔들면 우르르 울리는 커다란 금속을 찾아봐요.',
+   explain:'얇은 철판을 흔들면 우르르 쾅 천둥소리가 나요. 이 철판을 "천둥판"이라고 부른대요.',
+   img:'../assets/foley-artist/s5.webp',
+   html(){let h=I('flashbg flash','');for(let i=0;i<20;i++) h+=I('drop fall',`left:${rnd(0,99)}%;--t:${rnd(.5,.8)}s;--d:${rnd(-1,0)}s;background:#c9c2ff;opacity:.6`);return h;}},
+  {id:'bird', title:'새가 푸드덕 날아올라요', tool:'umbrella',
+   hint:'펼쳤다 접으면 펄럭이는 물건을 찾아봐요.',
+   explain:'우산을 빠르게 폈다 접으면 푸드덕 새 날갯짓 소리가 돼요. 작은 우산일수록 작은 새 소리가 나요.',
+   img:'../assets/foley-artist/s6.webp',
+   html(){let h='';for(let i=0;i<5;i++) h+=I('wline wmove',`top:${rnd(10,60)}%;width:10cqw;--t:${rnd(1.6,2.4)}s;--d:${rnd(-2,0)}s;opacity:.7`);return h;}},
+  {id:'wind', title:'휘이잉~ 바람이 불어요', tool:'bottle',
+   hint:'입으로 "후~" 불어서 소리 내는 물건을 찾아봐요.',
+   explain:'빈 병 입구에 비스듬히 바람을 불면 휘이잉 바람 소리가 나요. 세게 불면 세찬 바람, 살살 불면 산들바람이 돼요.',
+   img:'../assets/foley-artist/s7.webp',
+   html(){let h='';for(let i=0;i<6;i++) h+=I('wline wmove',`top:${rnd(10,70)}%;--t:${rnd(1.3,2)}s;--d:${rnd(-2,0)}s`);return h;}},
+  {id:'sea', title:'바닷속에서 보글보글 거품이 올라와요', tool:'straw',
+   hint:'물과 바람이 만나면 어떤 소리가 날까요?',
+   explain:'컵 속 물에 빨대로 바람을 불면 보글보글 물속 소리가 나요. 바닷속 장면이나 찌개 끓는 장면에도 쓸 수 있어요.',
+   img:'../assets/foley-artist/s8.webp',
+   html(){let h='';for(let i=0;i<18;i++){const s=rnd(2,5); h+=I('bub bubup',`left:${rnd(5,95)}%;top:85%;width:${s}cqw;height:${s}cqw;--t:${rnd(2.5,4)}s;--d:${rnd(-4,0)}s`);}return h;}},
+  {id:'door', title:'귀신의 집 문이 끼이익 열려요', tool:'balloon',
+   hint:'고무로 된 물건을 문지르면 끼익 소리가 나요.',
+   explain:'풍선을 손가락으로 문지르면 끼이익 문이 삐걱거리는 소리가 나요. 으스스한 장면에 딱 맞는 소리예요!',
+   img:'../assets/foley-artist/s9.webp',
+   html(){return I('flashbg','background:#ffcf7a;animation:candle 1.4s ease-in-out infinite;mix-blend-mode:soft-light');}}
+];
+
+/* ================= 게임 상태 ================= */
+const $=id=>document.getElementById(id);
+const S={order:[],idx:0,sel:null,tries:0,stars:[],heard:new Set(),cleared:false,from:'intro'};
+const icoHTML=t=>`<img src="../assets/foley-artist/t_${t.id}.webp" alt="">`;
+let playTimer=null;
+
+function show(id){['intro','practice','game','end'].forEach(s=>$(s).hidden=s!==id); window.scrollTo({top:0,behavior:'smooth'});}
+
+function buildTools(box,onPick){
+  box.innerHTML=TOOLS.map(t=>`<button class="tool" data-id="${t.id}" aria-label="${t.name} ${t.act}"><span class="ico" style="--c:${t.bg}">${icoHTML(t)}</span><span class="nm">${t.name}</span><span class="act">${t.act}</span></button>`).join('');
+  box.addEventListener('click',e=>{const b=e.target.closest('.tool'); if(b) onPick(b.dataset.id,b);});
+}
+function sound(id){
+  const dur=play(id);
+  S.heard.add(id);
+  document.querySelectorAll('.tool').forEach(b=>{b.classList.toggle('playing',b.dataset.id===id); if(b.dataset.id===id) b.classList.add('heard');});
+  clearTimeout(playTimer); playTimer=setTimeout(()=>document.querySelectorAll('.tool.playing').forEach(b=>b.classList.remove('playing')),dur*1000);
+  return dur;
+}
+
+/* 연습실 */
+function renderInfo(id){
+  const box=$('info');
+  if(!id){
+    box.innerHTML=`<div class="bear-tip"><img class="bb bear" src="../assets/foley-artist/bear.webp" alt=""><div class="bubble">안녕! 나는 소리곰 <b>뽀득이</b>야. 오른쪽 도구를 하나씩 눌러 봐. 어떤 소리가 나는지 같이 들어 보자!</div></div>
+      <p class="how"><b>폴리 아티스트의 비밀</b><br>영화를 찍을 때는 배우 목소리만 녹음되고, 발소리나 바람 소리 같은 건 나중에 스튜디오에서 따로 만들어 넣어요. 그래서 진짜 물건이 아니어도 <b>비슷하게 들리는 물건</b>을 찾는 게 중요해요.</p>`;
+  }else{
+    const t=TOOL[id];
+    box.innerHTML=`<div class="big"><span class="ico" style="--c:${t.bg}">${icoHTML(t)}</span><div><h3>${t.name} ${t.act}</h3><div class="word">"${t.word}"</div></div></div>
+      <p class="how"><b>이렇게 해요</b><br>${t.how}</p>
+      <p class="think">${t.extra?t.extra:'🤔 이 소리는 어떤 장면이랑 닮았을까요? 눈을 감고 다시 들어 봐요.'}</p>
+      <button class="btn small alt" id="replay">🔊 다시 듣기</button>`;
+    $('replay').onclick=()=>sound(id);
+  }
+  const n=S.heard.size;
+  $('heardCount').innerHTML=`들어 본 도구 ${n} / ${TOOLS.length}${n===TOOLS.length?' 🏅':''}`;
+}
+function openPractice(from){S.from=from; $('practiceStart').textContent=from==='game'?'🎬 게임으로 돌아가기':'🎬 게임 시작!'; renderInfo(null); show('practice');}
+
+/* 게임 */
+function shuffle(a){a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(R()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a;}
+function newGame(){S.order=shuffle(SCENES); S.idx=0; S.stars=[]; S.picks=[]; loadStage(); show('game');}
+function renderProgress(){
+  $('progress').innerHTML=S.order.map((_,i)=>{
+    const c=i<S.idx?'done':i===S.idx?'now':''; const lab=i<S.idx?'⭐':i+1;
+    return `<li class="${c}" title="${i+1}단계">${lab}</li>`;}).join('');
+}
+function loadStage(){
+  const sc=S.order[S.idx];
+  S.sel=null; S.tries=0; S.cleared=false;
+  $('sceneNum').textContent=`${S.idx+1}단계 · 장면 ${S.idx+1} / ${S.order.length}`;
+  $('sceneTitle').textContent=sc.title;
+  const el=$('scene'); el.className='scene'; el.style.background='#2d2340'; el.innerHTML=`<div class="sceneimg" style="background-image:url(${sc.img})"></div>`+sc.html()+WAVES;
+  $('lamp').className='lamp'; $('lamp').textContent='🔇 소리 없음';
+  $('hint').hidden=true; $('hint').textContent='💡 힌트: '+sc.hint;
+  say(S.idx===0?'쉿! 이 장면에는 소리가 없어요. 도구를 눌러 소리를 들어 보고, 어울리는 소리를 찾아 녹음해 주세요!':['다음 장면이에요! 어떤 소리가 어울릴까요?','이번 장면도 소리가 없네요. 같이 찾아봐요!','눈을 감고 장면을 상상해 봐요. 어떤 소리가 들리나요?'][S.idx%3]);
+  renderPicked(); renderProgress();
+  document.querySelectorAll('#gameTools .tool').forEach(b=>b.classList.remove('sel'));
+}
+function say(txt){$('say').innerHTML=txt;}
+function renderPicked(){
+  const p=$('picked');
+  if(!S.sel){p.innerHTML=`<span class="ico">👆</span><p><span class="disp">도구를 골라 보세요</span><br>누르면 소리가 나요</p>`; $('recBtn').disabled=true; return;}
+  const t=TOOL[S.sel];
+  p.innerHTML=`<span class="ico" style="--c:${t.bg}">${icoHTML(t)}</span><p><span class="disp">${t.name} ${t.act}</span><br>"${t.word}"</p>`;
+  $('recBtn').disabled=S.cleared;
+}
+function pickInGame(id,btn){
+  if(S.cleared) return;
+  sound(id); S.sel=id;
+  document.querySelectorAll('#gameTools .tool').forEach(b=>b.classList.toggle('sel',b===btn));
+  renderPicked();
+  say(`"${TOOL[id].word}" 소리! 이 장면이랑 어울리면 <b>녹음</b> 버튼을 눌러요.`);
+}
+function record(){
+  if(!S.sel||S.cleared) return;
+  const sc=S.order[S.idx];
+  if(S.sel===sc.tool){
+    S.cleared=true;
+    const st=S.tries===0?3:S.tries===1?2:1; S.stars[S.idx]=st; S.picks[S.idx]=sc;
+    $('recBtn').disabled=true;
+    const el=$('scene'); el.classList.add('live'); $('lamp').className='lamp on'; $('lamp').textContent='● 녹음 중';
+    sound(sc.tool);
+    say('딱 맞는 소리예요! 장면에 소리가 생겼어요 🎉');
+    setTimeout(()=>{jingle(); confetti(); showWin(sc,st);},1300);
+  }else{
+    S.tries++;
+    boing();
+    const btn=document.querySelector(`#gameTools .tool[data-id="${S.sel}"]`); btn.classList.remove('nope'); void btn.offsetWidth; btn.classList.add('nope');
+    const t=TOOL[S.sel];
+    say(`음… <b>${t.name}</b>에서는 ${t.feel}가 났죠? 이 장면이랑은 조금 달라요. 다른 도구도 들어 봐요!`);
+    if(S.tries>=2){$('hint').hidden=false;}
+  }
+}
+function showWin(sc,st){
+  const t=TOOL[sc.tool];
+  $('ovTitle').textContent=['','통과!','잘했어요!','완벽해요!'][st];
+  $('ovStars').innerHTML=[1,2,3].map(i=>`<span class="${i<=st?'':'off'}">⭐</span>`).join('');
+  $('ovPair').innerHTML=`<span class="ico">${icoHTML(t)}</span> ${t.name} ${t.act} → "${t.word}"`;
+  $('ovText').textContent=sc.explain;
+  $('nextBtn').textContent=S.idx===S.order.length-1?'🏆 결과 보기':'다음 장면 ▶';
+  $('overlay').hidden=false; $('nextBtn').focus();
+}
+function next(){
+  $('overlay').hidden=true;
+  if(bus) bus.gain.setTargetAtTime(0,AC.currentTime,.05);
+  S.idx++;
+  if(S.idx>=S.order.length) return showEnd();
+  loadStage();
+}
+function showEnd(){
+  const total=S.stars.reduce((a,b)=>a+b,0);
+  $('total').textContent=total;
+  $('rank').textContent=total>=27?'🏆 최고의 폴리 아티스트':total>=20?'🎖️ 멋진 폴리 아티스트':'🌱 새싹 폴리 아티스트';
+  $('log').innerHTML=S.order.map((sc,i)=>{const t=TOOL[sc.tool]; return `<li><span class="ico">${icoHTML(t)}</span><span class="t"><b>${i+1}. ${sc.title}</b>${t.name} ${t.act}</span><span class="s" aria-label="별 ${S.stars[i]}개">${'⭐'.repeat(S.stars[i])}</span></li>`;}).join('');
+  show('end'); jingle(); confetti();
+}
+function confetti(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const cols=['#ff6f86','#ffd257','#4fcfa8','#6cb8ff','#9f86ff'];
+  for(let i=0;i<46;i++){
+    const c=document.createElement('i'); c.className='confetti';
+    c.style.left=R()*100+'vw'; c.style.background=cols[i%cols.length];
+    c.style.setProperty('--t',(1.6+R()*1.4)+'s'); c.style.setProperty('--x',(R()*120-60)+'px'); c.style.setProperty('--r',(R()*720-360)+'deg');
+    c.style.animationDelay=R()*.3+'s';
+    document.body.appendChild(c); setTimeout(()=>c.remove(),3500);
+  }
+}
+
+/* ================= 연결 ================= */
+buildTools($('practiceTools'),id=>{sound(id); renderInfo(id); document.querySelectorAll('#practiceTools .tool').forEach(b=>b.classList.toggle('sel',b.dataset.id===id));});
+buildTools($('gameTools'),pickInGame);
+$('goPractice').onclick=()=>{audio(); openPractice('intro');};
+$('goGame').onclick=()=>{audio(); newGame();};
+$('practiceStart').onclick=()=>{ if(S.from==='game'){show('game');} else newGame(); };
+$('toPractice').onclick=()=>openPractice('game');
+$('endPractice').onclick=()=>openPractice('intro');
+$('again').onclick=newGame;
+$('recBtn').onclick=record;
+$('hintBtn').onclick=()=>{$('hint').hidden=!$('hint').hidden;};
+$('nextBtn').onclick=next;
+renderInfo(null);
+TOOLS.forEach(t=>fetch(`../assets/foley-artist/sfx/${t.id}.mp3`).then(r=>r.ok?r.arrayBuffer():null).then(b=>{if(b){sfxRaw[t.id]=b; decodeSfx(t.id);}}).catch(()=>{}));
+</script>
+</body>
+</html>
