@@ -139,7 +139,8 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--grape);outline-
 .meter i{display:block;height:100%;width:0;background:var(--mint);border-radius:999px;transition:width .3s}
 
 /* ---------- 게임 ---------- */
-.game{display:grid;grid-template-columns:1.25fr .95fr;gap:20px;align-items:start}
+.game{display:grid;grid-template-columns:1.25fr .95fr;gap:20px;align-items:end}
+.to-practice{align-self:flex-end}
 .stage-col{display:flex;flex-direction:column;gap:14px;min-width:0}
 .progress{display:flex;gap:6px;flex-wrap:wrap;list-style:none;margin:0;padding:0}
 .progress li{width:34px;height:34px;border-radius:50%;background:var(--panel);display:grid;place-items:center;font-family:var(--font-display);font-size:.95rem;color:var(--ink-soft);box-shadow:0 3px 0 var(--line)}
@@ -374,12 +375,9 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--grape);outline-
 
   <!-- 게임 -->
   <section id="game" hidden>
-    <div class="topbar">
-      <ol class="progress" id="progress" aria-label="단계"></ol>
-      <button class="btn small alt" id="toPractice">🎧 연습실 다녀오기</button>
-    </div>
     <div class="game">
       <div class="stage-col">
+        <ol class="progress" id="progress" aria-label="단계"></ol>
         <div class="screen">
           <div class="scene-head">
             <div><div class="num" id="sceneNum"></div><div class="disp" id="sceneTitle"></div></div>
@@ -393,6 +391,7 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--grape);outline-
         </div>
       </div>
       <div class="side-col">
+        <button class="btn small alt to-practice" id="toPractice">🎧 연습실 다녀오기</button>
         <div class="recbar">
           <div class="picked" id="picked"></div>
           <div class="btns">
