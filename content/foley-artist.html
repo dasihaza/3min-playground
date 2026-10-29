@@ -165,6 +165,13 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--grape);outline-
 .scene .e > span{display:inline-block}
 .scene i{position:absolute;display:block}
 .scene.live{animation:zoom .5s ease-out}
+.scenevid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:3;opacity:0;transition:opacity .5s;pointer-events:none}
+.scene.vid .scenevid{opacity:1}
+.scene.vid > i{display:none}
+.reelbar{position:absolute;left:0;bottom:0;height:1.1cqw;width:0;background:var(--sun);z-index:6}
+.scene.movie .reelbar{animation:reel var(--movie,10s) linear forwards}
+@keyframes reel{to{width:100%}}
+.skip{flex:none;border:0;border-radius:999px;padding:4px 12px;font-size:.9rem;background:#fff;color:var(--ink)}
 .scene .waves{position:absolute;right:3%;bottom:5%;display:none;gap:.8cqw;align-items:flex-end;height:7cqw;z-index:5}
 .scene .waves b{width:1.4cqw;border-radius:1cqw;background:#fff;box-shadow:0 0 0 .3cqw rgba(0,0,0,.15);animation:eq .35s ease-in-out infinite alternate}
 .scene.live .waves{display:flex}
@@ -382,6 +389,7 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--grape);outline-
           <div class="scene-head">
             <div><div class="num" id="sceneNum"></div><div class="disp" id="sceneTitle"></div></div>
             <span class="lamp" id="lamp">🔇 소리 없음</span>
+            <button class="skip" id="skipBtn" hidden>건너뛰기 ⏭</button>
           </div>
           <div class="scene" id="scene"></div>
         </div>
@@ -465,7 +473,7 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--grape);outline-
         <ol>
         <li><b>소리 연습실</b>에서 휴지, 코코넛, 풍선 같은 12가지 도구 소리를 들어 봐요.</li>
         <li>게임을 시작하면 <b>소리 없는 장면</b> 10개가 무작위로 나와요.</li>
-        <li>도구를 눌러 소리를 듣고, 어울리면 <b>🎙️ 녹음</b> 버튼을 눌러요.</li>
+        <li>도구를 눌러 소리를 듣고, 어울리면 <b>🎙️ 녹음</b> 버튼을 눌러요. 맞히면 소리를 입힌 장면이 <b>10초 동안 상영</b>돼요.</li>
         <li>한 번에 맞히면 별 3개! 마지막에 <b>폴리 아티스트 인증서</b>를 받아요.</li>
         </ol>
       </div>
@@ -661,12 +669,19 @@ const SND={
     return 1.8;
   }
 };
-function play(id){
+function play(id,hold=0){
   audio();
   if(bus){const b=bus; b.gain.setTargetAtTime(0,AC.currentTime,.03); setTimeout(()=>b.disconnect(),500);}
   bus=AC.createGain(); bus.connect(master);
-  if(SFX[id]){const s=AC.createBufferSource(); s.buffer=SFX[id]; s.connect(bus); s.start(AC.currentTime+.02); return SFX[id].duration;}
-  return SND[id](AC.currentTime+.03,bus);
+  const t0=AC.currentTime+.03;
+  if(hold){ // 장면 상영: hold초 동안 소리를 이어서 반복하고 끝에서 살짝 줄여요
+    bus.gain.setValueAtTime(1,t0+hold-.8); bus.gain.linearRampToValueAtTime(0,t0+hold);
+    if(SFX[id]){const s=AC.createBufferSource(); s.buffer=SFX[id]; s.loop=true; s.connect(bus); s.start(t0); s.stop(t0+hold+.05);}
+    else{let t=t0; while(t<t0+hold) t+=SND[id](t,bus)+.15;}
+    return hold;
+  }
+  if(SFX[id]){const s=AC.createBufferSource(); s.buffer=SFX[id]; s.connect(bus); s.start(t0); return SFX[id].duration;}
+  return SND[id](t0,bus);
 }
 function jingle(){audio(); const t=AC.currentTime+.05; [523,659,784,1047].forEach((f,i)=>tone(t+i*.11,.4,master,{type:'triangle',f,g:.22}));}
 function boing(){audio(); const t=AC.currentTime+.02; tone(t,.45,master,{f:340,f2:130,g:.28}); tone(t,.45,master,{type:'triangle',f:350,f2:140,g:.08});}
@@ -752,6 +767,7 @@ const $=id=>document.getElementById(id);
 const S={order:[],idx:0,sel:null,tries:0,stars:[],heard:new Set(),cleared:false,from:'intro'};
 const icoHTML=t=>`<img src="../assets/foley-artist/t_${t.id}.webp" alt="">`;
 let playTimer=null;
+const MOVIE=10;
 
 function show(id){['intro','practice','game','end'].forEach(s=>$(s).hidden=s!==id); window.scrollTo({top:0,behavior:'smooth'});}
 
@@ -759,8 +775,8 @@ function buildTools(box,onPick){
   box.innerHTML=TOOLS.map(t=>`<button class="tool" data-id="${t.id}" aria-label="${t.name} ${t.act}"><span class="ico" style="--c:${t.bg}">${icoHTML(t)}</span><span class="nm">${t.name}</span><span class="act">${t.act}</span></button>`).join('');
   box.addEventListener('click',e=>{const b=e.target.closest('.tool'); if(b) onPick(b.dataset.id,b);});
 }
-function sound(id){
-  const dur=play(id);
+function sound(id,hold=0){
+  const dur=play(id,hold);
   S.heard.add(id);
   document.querySelectorAll('.tool').forEach(b=>{b.classList.toggle('playing',b.dataset.id===id); if(b.dataset.id===id) b.classList.add('heard');});
   clearTimeout(playTimer); playTimer=setTimeout(()=>document.querySelectorAll('.tool.playing').forEach(b=>b.classList.remove('playing')),dur*1000);
@@ -799,7 +815,10 @@ function loadStage(){
   S.sel=null; S.tries=0; S.cleared=false;
   $('sceneNum').textContent=`${S.idx+1}단계 · 장면 ${S.idx+1} / ${S.order.length}`;
   $('sceneTitle').textContent=sc.title;
-  const el=$('scene'); el.className='scene'; el.style.background='#2d2340'; el.innerHTML=`<div class="sceneimg" style="background-image:url(${sc.img})"></div>`+sc.html()+WAVES;
+  const el=$('scene'); el.className='scene'; el.style.background='#2d2340'; el.innerHTML=`<div class="sceneimg" style="background-image:url(${sc.img})"></div>`+sc.html()
+    +`<video class="scenevid" src="${sc.img.replace(/s(\d)\.webp$/,'v$1.mp4')}" muted playsinline loop preload="auto"></video><div class="reelbar"></div>`+WAVES;
+  el.style.setProperty('--movie',MOVIE+'s');
+  $('skipBtn').hidden=true; $('toPractice').disabled=false;
   $('lamp').className='lamp'; $('lamp').textContent='🔇 소리 없음';
   $('hint').hidden=true; $('hint').textContent='💡 힌트: '+sc.hint;
   say(S.idx===0?'쉿! 이 장면에는 소리가 없어요. 도구를 눌러 소리를 들어 보고, 어울리는 소리를 찾아 녹음해 주세요!':['다음 장면이에요! 어떤 소리가 어울릴까요?','이번 장면도 소리가 없네요. 같이 찾아봐요!','눈을 감고 장면을 상상해 봐요. 어떤 소리가 들리나요?'][S.idx%3]);
@@ -828,10 +847,7 @@ function record(){
     S.cleared=true;
     const st=S.tries===0?3:S.tries===1?2:1; S.stars[S.idx]=st; S.picks[S.idx]=sc;
     $('recBtn').disabled=true;
-    const el=$('scene'); el.classList.add('live'); $('lamp').className='lamp on'; $('lamp').textContent='● 녹음 중';
-    sound(sc.tool);
-    say('딱 맞는 소리예요! 장면에 소리가 생겼어요 🎉');
-    setTimeout(()=>{jingle(); confetti(); showWin(sc,st);},1300);
+    startMovie(sc,st);
   }else{
     S.tries++;
     boing();
@@ -840,6 +856,26 @@ function record(){
     say(`음… <b>${t.name}</b>에서는 ${t.feel}가 났죠? 이 장면이랑은 조금 달라요. 다른 도구도 들어 봐요!`);
     if(S.tries>=2){$('hint').hidden=false;}
   }
+}
+// 정답이면 소리를 입힌 장면을 MOVIE초 동안 상영한 뒤 결과를 보여 줘요
+function startMovie(sc,st){
+  const el=$('scene'); el.classList.add('live','movie');
+  $('lamp').className='lamp on'; $('lamp').textContent='● 상영 중';
+  $('skipBtn').hidden=false; $('toPractice').disabled=true;
+  const v=el.querySelector('video');
+  if(v){v.addEventListener('playing',()=>el.classList.add('vid'),{once:true}); v.currentTime=0; v.play().catch(()=>{});}
+  sound(sc.tool,MOVIE);
+  say('딱 맞는 소리예요! 소리를 입힌 장면을 감상해 봐요 🎬');
+  S.movie={sc,st,timer:setTimeout(endMovie,MOVIE*1000)};
+}
+function endMovie(){
+  if(!S.movie) return;
+  const {sc,st,timer}=S.movie; S.movie=null; clearTimeout(timer);
+  if(bus) bus.gain.setTargetAtTime(0,AC.currentTime,.08);
+  const v=$('scene').querySelector('video'); if(v) v.pause();
+  $('skipBtn').hidden=true; $('toPractice').disabled=false;
+  $('lamp').textContent='✔ 녹음 완료';
+  jingle(); confetti(); showWin(sc,st);
 }
 function showWin(sc,st){
   const t=TOOL[sc.tool];
@@ -888,6 +924,7 @@ $('again').onclick=newGame;
 $('recBtn').onclick=record;
 $('hintBtn').onclick=()=>{$('hint').hidden=!$('hint').hidden;};
 $('nextBtn').onclick=next;
+$('skipBtn').onclick=endMovie;
 renderInfo(null);
 TOOLS.forEach(t=>fetch(`../assets/foley-artist/sfx/${t.id}.mp3`).then(r=>r.ok?r.arrayBuffer():null).then(b=>{if(b){sfxRaw[t.id]=b; decodeSfx(t.id);}}).catch(()=>{}));
 </script>
