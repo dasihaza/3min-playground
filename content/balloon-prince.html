@@ -152,9 +152,16 @@ input[type=range]::-moz-range-thumb { width: 24px; height: 24px; border-radius: 
 .mleg { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
 .noctrl { grid-column: 1 / -1; text-align: center; color: var(--muted); font-family: var(--f-display); font-size: 17px; background: var(--card); border-radius: 22px; padding: 14px; box-shadow: 0 5px 0 var(--line); }
 
-.touch { display: none; gap: 10px; justify-content: space-between; }
-.touch button { font-size: 22px; padding: 14px 26px; touch-action: none; user-select: none; -webkit-user-select: none; }
-@media (pointer: coarse) { .touch { display: flex; } }
+/* 패드·휴대폰: 게임 화면 아래쪽 땅 위에 겹쳐 띄우는 이동·점프 버튼 */
+.touch { display: none; position: absolute; left: 0; right: 0; bottom: 0; padding: 10px; justify-content: space-between; align-items: flex-end; pointer-events: none; }
+.touch .tpad { display: flex; gap: 10px; }
+.touch button { pointer-events: auto; width: clamp(46px, 10vw, 84px); height: clamp(46px, 10vw, 84px); padding: 0; border-radius: 50%;
+  font-size: clamp(20px, 4vw, 30px); color: var(--ink); background: rgba(255, 255, 255, .66); box-shadow: 0 4px 0 rgba(74, 63, 107, .18);
+  touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+.touch button.tjump { width: clamp(56px, 13vw, 104px); height: clamp(56px, 13vw, 104px); font-size: clamp(15px, 3vw, 22px); color: #fff; background: rgba(255, 126, 182, .8); box-shadow: 0 4px 0 rgba(226, 85, 154, .5); }
+.touch button.down { transform: translateY(3px) scale(.94); box-shadow: 0 1px 0 rgba(74, 63, 107, .18); }
+.touch button:hover { transform: none; }
+@media (pointer: coarse), (hover: none) { .touch { display: flex; } }
 
 .below { display: grid; grid-template-columns: 1.1fr 1fr; gap: 16px; }
 .panel { background: var(--card); border-radius: 24px; padding: 18px 20px; min-width: 0; box-shadow: 0 5px 0 var(--line); }
@@ -267,6 +274,10 @@ input[type=range]::-moz-range-thumb { width: 24px; height: 24px; border-radius: 
 
   <div class="stage">
     <canvas id="cv" width="960" height="540" aria-label="게임 화면"></canvas>
+    <div class="touch" aria-label="터치 조작">
+      <div class="tpad"><button type="button" data-k="l" aria-label="왼쪽으로 걷기">◀</button><button type="button" data-k="r" aria-label="오른쪽으로 걷기">▶</button></div>
+      <button type="button" class="tjump" data-k="j" aria-label="점프">점프</button>
+    </div>
     <div class="overlay" id="ov">
       <div class="card" id="card"></div>
     </div>
@@ -293,11 +304,6 @@ input[type=range]::-moz-range-thumb { width: 24px; height: 24px; border-radius: 
       <div class="holdbar"><div id="holdBar"></div></div>
     </div>
     <div class="noctrl" id="noCtrl" hidden>마지막 방에는 장치가 없어요. 부글부글 대왕의 퀴즈를 맞혀 보세요!</div>
-  </div>
-
-  <div class="touch" aria-label="터치 조작">
-    <div class="btns"><button type="button" data-k="l" aria-label="왼쪽">◀</button><button type="button" data-k="r" aria-label="오른쪽">▶</button></div>
-    <button type="button" data-k="j" aria-label="점프">점프</button>
   </div>
 
   <div class="below">
@@ -681,9 +687,14 @@ input[type=range]::-moz-range-thumb { width: 24px; height: 24px; border-radius: 
   addEventListener("blur", () => { for (const k in keys) keys[k] = false; });
   for (const b of document.querySelectorAll(".touch button")) {
     const k = b.dataset.k;
-    b.addEventListener("pointerdown", e => { e.preventDefault(); if (G.mode !== "play") return; if (k === "j") jumpBuf = 0.2; keys[k] = true; });
-    const up = () => { keys[k] = false; };
+    b.addEventListener("pointerdown", e => {
+      e.preventDefault(); Sound.init(); b.classList.add("down");
+      if (G.mode !== "play") return;
+      if (k === "j") jumpBuf = 0.2; keys[k] = true;
+    });
+    const up = () => { keys[k] = false; b.classList.remove("down"); };
     b.addEventListener("pointerup", up); b.addEventListener("pointercancel", up); b.addEventListener("pointerleave", up);
+    b.addEventListener("contextmenu", e => e.preventDefault());
   }
 
   // ---------- 물리 ----------
