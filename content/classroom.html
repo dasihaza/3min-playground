@@ -413,14 +413,69 @@ async function goTeacher(){
   roomCode = String(Math.floor(1000 + Math.random()*9000));
   try{
     await db.collection("rooms").doc(roomCode).set({
-      mode: "write", prompt: "", qcount: 5, open: true, at: Date.now()
+      mode: "write", prompt: "", qcount: 5, open: true, at: Date.now(),
+      beat: Date.now(), beatAt: firebase.firestore.FieldValue.serverTimestamp()
     });
   }catch(e){ alert("방을 만들지 못했어요.\n" + (e.message||"")); return; }
   $("t-code").textContent = roomCode;
   markMode("write");
   show("v-teacher");
   watchStudents();
+  startBeat();
 }
+
+/* ===== 선생님 창이 닫히면 방도 저절로 닫혀요 =====
+   1) 창을 닫는 순간 : '방 닫힘'을 바로 보내요.
+   2) 그래도 못 보냈을 때(전원이 꺼지는 등) : 선생님 화면이 20초마다
+      "아직 있어요" 신호를 보내고, 아이들 화면은 3분 동안 신호가 없으면 방을 끝내요. */
+let beatTimer = null, closingOnPurpose = false;
+const BEAT_MS = 20000, BEAT_LOST_MS = 180000;
+function startBeat(){
+  if(beatTimer) clearInterval(beatTimer);
+  const send = function(){
+    if(role !== "teacher" || !roomCode) return;
+    db.collection("rooms").doc(roomCode).set({
+      beat: Date.now(), beatAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge:true }).catch(function(){});
+  };
+  beatTimer = setInterval(send, BEAT_MS);
+  document.addEventListener("visibilitychange", function(){
+    if(document.visibilityState === "visible") send();   /* 다시 돌아오면 바로 알려요 */
+  });
+}
+/* 창을 닫기 직전에 한 번 더 물어봐요 (실수로 닫는 것을 막아요) */
+window.addEventListener("beforeunload", function(e){
+  if(role === "teacher" && roomCode && !closingOnPurpose){
+    e.preventDefault(); e.returnValue = ""; return "";
+  }
+});
+/* 정말 닫히면 방을 닫아요 */
+function closeRoomOnExit(){
+  if(role !== "teacher" || !roomCode || closingOnPurpose) return;
+  closingOnPurpose = true;
+  const code = roomCode;
+  /* 창이 닫혀도 끝까지 전해지도록 keepalive 요청으로 보내요 */
+  try{
+    const url = "https://firestore.googleapis.com/v1/projects/" + firebaseConfig.projectId
+      + "/databases/(default)/documents/rooms/" + code
+      + "?updateMask.fieldPaths=open&updateMask.fieldPaths=at&key=" + firebaseConfig.apiKey;
+    fetch(url, {
+      method: "PATCH", keepalive: true,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fields: {
+        open: { booleanValue: false },
+        at:   { integerValue: String(Date.now()) }
+      }})
+    }).catch(function(){});
+  }catch(e){}
+  /* 보통 방법으로도 한 번 더 */
+  try{ db.collection("rooms").doc(code).set({ open:false, at:Date.now() }, { merge:true }).catch(function(){}); }catch(e){}
+}
+window.addEventListener("pagehide", closeRoomOnExit);
+/* 뒤로 가기로 다시 돌아온 경우엔 방이 이미 닫혔으니 처음 화면으로 */
+window.addEventListener("pageshow", function(e){
+  if(e.persisted && closingOnPurpose) location.reload();
+});
 
 function markMode(m){
   roomMode = m;
@@ -687,6 +742,8 @@ async function clearAll(){
 }
 async function closeRoom(){
   if(!confirm("방을 닫을까요?\n아이들 화면도 함께 끝나요.")) return;
+  closingOnPurpose = true;
+  if(beatTimer) clearInterval(beatTimer);
   await db.collection("rooms").doc(roomCode).set({ open:false, at:Date.now() }, { merge:true });
   if(unsubStudents) unsubStudents();
   alert("방을 닫았어요.");
@@ -705,7 +762,7 @@ async function joinRoom(){
   let doc;
   try{ doc = await db.collection("rooms").doc(code).get(); }
   catch(e){ $("j-msg").textContent = "연결하지 못했어요. 와이파이를 확인해 주세요."; return; }
-  if(!doc.exists || doc.data().open === false){
+  if(!doc.exists || doc.data().open === false || roomLooksDead(doc.data())){
     $("j-msg").textContent = "그런 방이 없어요. 번호를 다시 확인해 주세요."; return;
   }
   roomCode = code; myName = name;
@@ -735,12 +792,32 @@ function watchMyFeedback(){
     });
 }
 
+/* 선생님 신호가 아주 오래(30분) 끊긴 방 — 기기마다 시계가 조금 달라도 넉넉하게 봐요 */
+function roomLooksDead(r){
+  const t = r.beatAt && r.beatAt.toMillis ? r.beatAt.toMillis() : (r.beat || r.at || 0);
+  return t && (Date.now() - t) > 30*60*1000;
+}
+let lastBeatSeen = null, lastBeatLocal = 0, beatWatch = null, lastRoomKey = "";
 function watchRoom(){
   if(unsubRoom) unsubRoom();
+  lastBeatLocal = Date.now();
+  if(beatWatch) clearInterval(beatWatch);
+  /* 내 기기 시계로 '마지막 신호를 받은 뒤 얼마나 지났나'만 재요 */
+  beatWatch = setInterval(function(){
+    if(Date.now() - lastBeatLocal > BEAT_LOST_MS){
+      clearInterval(beatWatch);
+      alert("선생님 화면이 닫혀서 방이 끝났어요.");
+      leaveRoom();
+    }
+  }, 10000);
   unsubRoom = db.collection("rooms").doc(roomCode).onSnapshot(function(d){
     if(!d.exists) return;
     const r = d.data();
-    if(r.open === false){ alert("선생님이 방을 닫았어요."); leaveRoom(); return; }
+    if(r.open === false){ if(beatWatch) clearInterval(beatWatch); alert("선생님이 방을 닫았어요."); leaveRoom(); return; }
+    if(r.beat !== lastBeatSeen){ lastBeatSeen = r.beat; lastBeatLocal = Date.now(); }
+    const key = JSON.stringify([r.mode, r.prompt, r.qcount]);
+    if(key === lastRoomKey) return;          /* 신호만 왔을 땐 그대로 둬요 */
+    lastRoomKey = key;
     roomMode = r.mode || "write";
     roomPrompt = r.prompt || "";
     roomQCount = r.qcount || 5;
@@ -767,7 +844,11 @@ function buildQuizRows(){
   }
   wrap.innerHTML = h;
 }
+document.addEventListener("visibilitychange", function(){
+  if(document.visibilityState === "visible" && role === "student") lastBeatLocal = Date.now();
+});
 function leaveRoom(){
+  if(beatWatch) clearInterval(beatWatch);
   if(unsubRoom) unsubRoom();
   if(saveTimer) clearInterval(saveTimer);
   location.reload();
