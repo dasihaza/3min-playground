@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>기체 히어로 출동! | 3분 놀이터</title>
-<meta name="description" content="산소, 이산화탄소, 질소, 헬륨, 수소, 천연가스, 네온. 7가지 기체의 성질을 알고, 하늘을 나는 영웅이 되어 위기에 빠진 시민에게 꼭 맞는 기체를 전해 주는 초등학생용 과학 모험 게임.">
+<meta name="description" content="산소, 이산화탄소, 질소, 헬륨, 수소, 뷰테인, 네온. 7가지 기체의 성질을 알고, 하늘을 나는 영웅이 되어 위기에 빠진 시민에게 꼭 맞는 기체를 전해 주는 초등학생용 과학 모험 게임.">
 <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -349,7 +349,7 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
     { id: "n2", name: "질소", sym: "N₂", c: "#3FC49A", feat: "공기 중에 가장 많고, 다른 물질과 잘 섞이거나 변하지 않아요.", use: "과자가 부서지지 않게 채우는 과자 봉지 충전재" },
     { id: "he", name: "헬륨", sym: "He", c: "#FFB648", feat: "공기보다 아주 가볍고, 불이 붙지 않아 안전해요.", use: "하늘로 둥둥 떠오르는 풍선, 커다란 비행선" },
     { id: "h2", name: "수소", sym: "H₂", c: "#9B7BFF", feat: "세상에서 가장 가벼운 기체이며, 탈 때 오염 물질 대신 물이 나와요.", use: "환경을 오염시키지 않는 수소 자동차 연료" },
-    { id: "ng", name: "천연가스", sym: "LNG", c: "#FF8A3D", feat: "불이 아주 잘 붙고, 탈 때 뜨거운 열을 내요.", use: "휴대용 가스버너, 가스레인지, 시내버스 연료" },
+    { id: "bu", name: "뷰테인", sym: "C₄H₁₀", c: "#FF8A3D", feat: "작은 불씨만 닿아도 불이 아주 쉽게 붙고, 활활 타면서 물을 끓이거나 음식을 익힐 수 있는 뜨거운 열을 내요.", use: "가족과 캠핑을 가거나 식당에서 고기를 구울 때 쓰는 휴대용 가스버너" },
     { id: "ne", name: "네온", sym: "Ne", c: "#FF6FAE", feat: "전기를 통하게 하면 아름답고 밝은 색깔의 빛을 내요.", use: "밤거리를 비추는 네온사인" },
   ];
   const GAS = Object.fromEntries(GASES.map(g => [g.id, g]));
@@ -362,7 +362,7 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
       <circle cx="13.5" cy="22" r="1.7" fill="#3E3D6B"/><circle cx="20.5" cy="22" r="1.7" fill="#3E3D6B"/>
       <path d="M14.5 25.5 Q17 28 19.5 25.5" stroke="#3E3D6B" stroke-width="1.4" fill="none" stroke-linecap="round"/>
       <ellipse cx="10.5" cy="25" rx="2" ry="1.2" fill="rgba(255,120,150,.55)"/><ellipse cx="23.5" cy="25" rx="2" ry="1.2" fill="rgba(255,120,150,.55)"/>
-      <text x="17" y="35.5" text-anchor="middle" font-family="Jua, sans-serif" font-size="${g.sym.length > 2 ? 6 : 7}" fill="#fff">${g.sym}</text></svg>`;
+      <text x="17" y="35.5" text-anchor="middle" font-family="Jua, sans-serif" font-size="${g.sym.length > 3 ? 5 : g.sym.length > 2 ? 6 : 7}" fill="#fff">${g.sym}</text></svg>`;
   }
 
   // ---------- 단계 ----------
@@ -389,7 +389,7 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
       say: "과자 봉지가 납작해서 옮기다가 과자가 다 부서졌어요! 봉지를 빵빵하게 채우고 싶은데, 과자 맛이 변하면 안 돼요.",
       hint: "공기 중에 가장 많고, 다른 물질과 잘 변하지 않는 기체를 찾아보세요.",
       done: "과자 봉지에 질소를 빵빵하게 채웠어요! 과자도 안 부서지고 맛도 그대로예요.",
-      wrongWhy: { o2: "산소는 다른 물질과 잘 반응해서 과자 맛이 변할 수 있어요.", ng: "천연가스는 불이 아주 잘 붙어서 과자 봉지에 넣으면 위험해요!", h2: "수소는 불이 붙기 쉬워서 과자 봉지에 넣으면 위험해요!" },
+      wrongWhy: { o2: "산소는 다른 물질과 잘 반응해서 과자 맛이 변할 수 있어요.", bu: "뷰테인은 작은 불씨에도 불이 아주 쉽게 붙어서 과자 봉지에 넣으면 위험해요!", h2: "수소는 불이 붙기 쉬워서 과자 봉지에 넣으면 위험해요!" },
       belt: [280, 620, -95],
       ground: [[0, 400, 960, 140]] },
     { name: "옥상에 불이 났어요", theme: "city", gas: "co2", img: "s4", fly: true, who: "소방관", cit: { x: 860, kind: "fire" }, prop: "fire",
@@ -398,14 +398,14 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
       say: "옥상에 불이 났어요! 그런데 소화기 속이 텅 비었어요. 어서 불을 꺼야 해요!",
       hint: "불을 끄는 성질이 있는 기체를 찾아보세요.",
       done: "소화기에 이산화탄소를 채워 칙칙! 불이 깨끗하게 꺼졌어요.",
-      wrongWhy: { o2: "앗! 산소는 물질이 타는 것을 도와줘서 불이 더 커져요!", ng: "앗! 천연가스는 불이 아주 잘 붙어서 불이 더 커져요!", h2: "앗! 수소는 불이 잘 붙어서 불이 더 커져요!" },
+      wrongWhy: { o2: "앗! 산소는 물질이 타는 것을 도와줘서 불이 더 커져요!", bu: "앗! 뷰테인은 작은 불씨에도 불이 아주 쉽게 붙어서 불이 더 커져요!", h2: "앗! 수소는 불이 잘 붙어서 불이 더 커져요!" },
       ground: [[0, 400, 600, 140], [600, 150, 360, 390, "b"], [210, 300, 120, 240, "b2"]] },
-    { name: "산꼭대기 캠핑장", theme: "night", gas: "ng", img: "s5", fly: true, who: "캠핑하는 친구", cit: { x: 840, kind: "camper" }, prop: "stove",
+    { name: "산꼭대기 캠핑장", theme: "night", gas: "bu", img: "s5", fly: true, who: "캠핑하는 친구", cit: { x: 840, kind: "camper" }, prop: "stove",
       story: "깜깜한 밤, 높은 산꼭대기에서 누군가 덜덜 떨고 있어요. 절벽이 높아서 걸어서는 올라갈 수 없어요.",
       mission: "날아서 절벽을 올라 산꼭대기 캠핑장으로 가요.",
       say: "산꼭대기는 너무 추워요. 휴대용 버너의 가스가 떨어져서 따뜻한 라면을 끓일 수가 없어요.",
-      hint: "불이 아주 잘 붙고, 탈 때 뜨거운 열을 내는 기체를 찾아보세요.",
-      done: "버너에 천연가스를 넣으니 불이 화르륵! 따뜻한 라면이 보글보글 끓어요.",
+      hint: "작은 불씨만 닿아도 불이 쉽게 붙고, 물을 끓이거나 음식을 익힐 수 있는 뜨거운 열을 내는 기체를 찾아보세요.",
+      done: "버너에 뷰테인을 넣으니 작은 불씨에도 불이 화르륵! 뜨거운 열로 라면이 보글보글 끓어요.",
       wrongWhy: { he: "헬륨은 불이 붙지 않아서 버너에 넣어도 불이 켜지지 않아요.", co2: "이산화탄소는 오히려 불을 끄는 성질이 있어요!", n2: "질소는 다른 물질과 잘 변하지 않아서 타지 않아요." },
       ground: [[0, 400, 290, 140], [290, 290, 210, 250], [500, 170, 460, 370]] },
     { name: "깜깜한 간판", theme: "street", gas: "ne", img: "s6", fly: false, who: "간판 가게 사장님", cit: { x: 740, kind: "sign" }, prop: "neon",
@@ -430,7 +430,7 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
       say: "제 자동차는 달려도 공기를 더럽히지 않는 친환경 자동차예요. 그런데 연료가 다 떨어져서 멈췄어요!",
       hint: "탈 때 오염 물질 대신 물이 나오는 기체를 찾아보세요.",
       done: "수소를 가득 채웠어요! 자동차가 부릉부릉, 뒤로는 깨끗한 물방울만 톡톡 떨어져요.",
-      wrongWhy: { ng: "천연가스도 버스 연료로 쓰이지만, 탈 때 물만 나오는 친환경 연료는 따로 있어요!", he: "헬륨은 불이 붙지 않아서 자동차 연료가 될 수 없어요." },
+      wrongWhy: { bu: "뷰테인은 휴대용 가스버너에 쓰는 연료예요. 탈 때 오염 물질 대신 물만 나오는 친환경 자동차 연료는 따로 있어요!", he: "헬륨은 불이 붙지 않아서 자동차 연료가 될 수 없어요." },
       hazard: [[260, 470, 440, 70, "pit"]],
       storms: [{ x: 390, y: 260, ax: 0, ay: 120, sp: 1.6, ph: 0 }, { x: 570, y: 260, ax: 0, ay: 120, sp: 1.6, ph: Math.PI }],
       ground: [[0, 400, 260, 140], [700, 400, 260, 140]] },
@@ -440,7 +440,7 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
       say: "비행선 속 기체가 새어 나가서 자꾸 내려가요! 하늘에 둥둥 떠 있게 채워 주세요. 불이 붙으면 절대 안 돼요!",
       hint: "공기보다 아주 가볍고, 불이 붙지 않아 안전한 기체를 찾아보세요.",
       done: "비행선에 헬륨을 채웠어요! 비행선이 다시 둥실둥실 하늘 높이 떠올라요.",
-      wrongWhy: { h2: "수소도 아주 가볍지만 불이 붙기 쉬워서 사람이 타는 비행선에는 위험해요!", ng: "천연가스는 불이 아주 잘 붙어서 위험해요!" },
+      wrongWhy: { h2: "수소도 아주 가볍지만 불이 붙기 쉬워서 사람이 타는 비행선에는 위험해요!", bu: "뷰테인은 작은 불씨에도 불이 아주 쉽게 붙어서 위험해요!" },
       plat: [[300, 360, 110, 18], [500, 300, 110, 18], [700, 260, 200, 16, "gondola"]],
       storms: [{ x: 460, y: 170, ax: 60, ay: 30, sp: 1.2, ph: 0 }, { x: 640, y: 380, ax: 50, ay: 40, sp: 1.4, ph: 2 }],
       ground: [[0, 400, 220, 140]] },
@@ -457,7 +457,7 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
     { gas: "n2", q: "우리가 마시는 공기 속에 가장 많이 들어 있고, 다른 물질과 잘 변하지 않는 기체는 무엇이냐?" },
     { gas: "he", q: "놀이공원 풍선을 전부 바람 빠지게 했다! 공기보다 아주 가볍고 불이 붙지 않는, 풍선을 둥둥 띄우는 기체는?" },
     { gas: "h2", q: "내가 제일 싫어하는 기체를 맞혀 봐라! 세상에서 가장 가볍고, 탈 때 매연 대신 물만 나오는 기체는?" },
-    { gas: "ng", q: "집집마다 가스레인지를 멈춰 버렸다! 가스레인지와 시내버스 연료로 쓰이고, 탈 때 뜨거운 열을 내는 기체는?" },
+    { gas: "bu", q: "고기 굽는 식당의 휴대용 가스버너를 몽땅 꺼 버렸다! 작은 불씨만 닿아도 불이 아주 쉽게 붙고, 음식을 익힐 만큼 뜨거운 열을 내는 기체는?" },
     { gas: "ne", q: "밤거리 간판을 모두 깜깜하게 만들었다! 전기를 통하면 아름답고 밝은 색깔의 빛을 내는 기체는?" },
   ];
   const BOSS_N = 5;
@@ -1789,7 +1789,7 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
       <div class="pgd__card pgd__card--learn">
         <h3><span class="pgd__ico" aria-hidden="true">🌱</span>이런 걸 배워요</h3>
         <ul>
-        <li><b>산소·이산화탄소·질소·헬륨·수소·천연가스·네온</b>의 성질을 상황 속에서 떠올려요.</li>
+        <li><b>산소·이산화탄소·질소·헬륨·수소·뷰테인·네온</b>의 성질을 상황 속에서 떠올려요.</li>
         <li>소화기, 탄산음료, 과자 봉지, 비행선, 수소 자동차, 네온사인처럼 <b>생활 속 쓰임새</b>와 연결해요.</li>
         <li>틀린 기체를 고르면 그 기체의 성질을 알려 줘서 <b>왜 맞지 않는지</b> 스스로 비교해요.</li>
         <li>기체 도감에 성질과 쓰임새가 하나씩 모여 <b>정리 노트</b>가 돼요.</li>
@@ -1805,7 +1805,7 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
         <li>모둠별로 ‘틀리지 않고 가장 많은 체력을 남기기’ 대결을 열어요.</li>
       </ul>
     </div>
-    <p class="pgd__tip"><span><b>선생님 한마디</b> 휴대용 가스버너에는 실제로 부탄가스를 많이 쓰지만, 이 게임에서는 ‘불이 잘 붙고 뜨거운 열을 내는 연료 기체’를 천연가스로 묶어 소개했어요. 기체는 눈에 보이지 않아서 게임에서는 색깔 통으로 나타냈다는 점도 덧붙여 주세요.</span></p>
+    <p class="pgd__tip"><span><b>선생님 한마디</b> 뷰테인은 흔히 ‘부탄가스’라고 부르는 기체예요. 기체는 눈에 보이지 않아서 게임에서는 색깔 통으로 나타냈다는 점도 덧붙여 주세요.</span></p>
   </div>
 </section>
 <!-- 활용 안내 끝 -->
