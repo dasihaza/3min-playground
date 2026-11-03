@@ -1,0 +1,1785 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>기체 히어로 출동! | 3분 놀이터</title>
+<meta name="description" content="산소, 이산화탄소, 질소, 헬륨, 수소, 천연가스, 네온. 7가지 기체의 성질을 알고, 하늘을 나는 영웅이 되어 위기에 빠진 시민에게 꼭 맞는 기체를 전해 주는 초등학생용 과학 모험 게임.">
+<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<style>
+/* 밝은 하늘색과 히어로 빨강을 중심으로 한 파스텔 장난감 느낌. 어느 테마에서도 같은 밝은 모습을 써요. */
+:root {
+  --bg: #EAF6FF;
+  --bg2: #FFF1F6;
+  --card: #FFFFFF;
+  --ink: #3E3D6B;
+  --muted: #8A88AE;
+  --red: #FF5D6C;
+  --hero: #FF6B6B;
+  --blue: #4FA8FF;
+  --sun: #FFB648;
+  --mint: #3FC49A;
+  --purple: #9B7BFF;
+  --pink: #FF7EB6;
+  --line: #DCE6F6;
+  --f-display: "Jua", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --f-body: "Gowun Dodum", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  background: var(--bg) linear-gradient(165deg, var(--bg) 0%, var(--bg2) 100%) fixed;
+  color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 18px 40px;
+  min-height: 100%;
+}
+.topbar { max-width: 1000px; margin: 0 auto 6px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.topbar a { color: var(--ink); text-decoration: none; }
+.topbar .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; }
+.topbar .back { font-size: 12.5px; font-weight: 700; color: var(--muted); background: #fff; padding: 6px 12px; border-radius: 999px; box-shadow: 0 3px 0 var(--line); }
+.bulb-wrap { text-align: center; padding: 6px 0 0; }
+.bulb { background: none; border: 0; box-shadow: none; cursor: pointer; padding: 8px; line-height: 0; color: var(--muted); opacity: .45; transition: all .2s; }
+.bulb:hover { color: #F0B429; opacity: 1; filter: drop-shadow(0 0 8px rgba(240, 180, 41, .7)); transform: scale(1.15); }
+.bulb:active { box-shadow: none; }
+.bulb.on { color: #F0B429; opacity: 1; filter: drop-shadow(0 0 10px rgba(240, 180, 41, .85)); }
+.wrap { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+
+header { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.logo { width: 76px; height: 76px; flex: none; animation: bob 2.6s ease-in-out infinite; }
+h1 { font-family: var(--f-display); font-weight: 400; font-size: clamp(34px, 6.5vw, 54px); line-height: 1; margin: 0; letter-spacing: .02em;
+  text-shadow: 0 3px 0 #fff, 0 6px 14px rgba(80, 110, 180, .2); }
+h1 .a { color: var(--blue); } h1 .b { color: var(--hero); }
+.tag { margin: 0; color: var(--muted); max-width: 50ch; text-wrap: balance; flex: 1 1 260px; min-width: 0; }
+
+.hud { display: flex; gap: 8px; flex-wrap: wrap; align-items: stretch; }
+.pill { background: var(--card); border-radius: 999px; padding: 6px 16px; display: flex; align-items: center; gap: 10px;
+  box-shadow: 0 3px 0 var(--line), 0 6px 16px rgba(90, 120, 180, .10); min-width: 0; }
+.pill .lab { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.pill .val { font-family: var(--f-display); font-size: 18px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pill.level { flex: 1 1 200px; }
+.pill.level .badge { font-family: var(--f-display); background: var(--hero); color: #fff; border-radius: 999px; padding: 0 10px; font-size: 15px; white-space: nowrap; }
+.pill.level .val { overflow: hidden; text-overflow: ellipsis; }
+.hp { width: 96px; height: 14px; border-radius: 8px; background: #EEF2FA; overflow: hidden; box-shadow: inset 0 1px 2px rgba(70, 90, 140, .15); }
+.hp .fill { height: 100%; width: 100%; border-radius: 8px; background: linear-gradient(90deg, #FF9CA6, var(--hero)); }
+.heart { color: var(--red); font-size: 18px; line-height: 1; }
+.btns { display: flex; gap: 8px; flex-wrap: wrap; }
+button { font: inherit; font-family: var(--f-display); font-size: 16px; color: var(--ink); background: var(--card); border: 0; border-radius: 999px;
+  padding: 8px 18px; cursor: pointer; box-shadow: 0 3px 0 var(--line); transition: transform .08s; }
+button:hover { transform: translateY(-1px); }
+button:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--line); }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+button.primary { background: var(--hero); color: #fff; box-shadow: 0 4px 0 #D9474F; font-size: 19px; padding: 10px 26px; }
+button.primary:active { box-shadow: 0 1px 0 #D9474F; }
+button.tog[aria-pressed="false"] { color: var(--muted); text-decoration: line-through; }
+button.danger { color: var(--red); }
+
+.stage { position: relative; border-radius: 26px; overflow: hidden; background: #CDE9FF;
+  box-shadow: 0 0 0 6px #fff, 0 10px 0 6px var(--line), 0 24px 40px rgba(90, 120, 180, .2); margin: 6px; }
+canvas#cv { display: block; width: 100%; aspect-ratio: 960 / 540; max-width: 100%; touch-action: none; }
+.overlay { position: absolute; inset: 0; display: grid; place-items: center; padding: 12px; background: rgba(220, 238, 255, .5); backdrop-filter: blur(2px); overflow-y: auto; }
+.card { background: var(--card); border-radius: 28px; padding: 16px 22px 18px; max-width: 520px; width: 100%; text-align: center;
+  box-shadow: 0 8px 0 var(--line), 0 20px 50px rgba(70, 100, 170, .25); display: flex; flex-direction: column; align-items: center; gap: 7px;
+  animation: pop .35s cubic-bezier(.2, 1.6, .4, 1); max-height: 100%; overflow-y: auto; }
+.card.wide { max-width: 860px; }
+.card .no { font-family: var(--f-display); font-size: 14px; color: var(--muted); }
+.card h2 { font-family: var(--f-display); font-weight: 400; font-size: 30px; line-height: 1.1; margin: 0; text-wrap: balance; }
+.card p { margin: 0; color: var(--muted); max-width: 46ch; }
+.card .mission { background: #EEF6FF; border-radius: 16px; padding: 8px 14px; color: var(--ink); font-weight: 700; max-width: 46ch; }
+.card img.pic { width: 100%; max-width: 260px; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 18px; box-shadow: 0 4px 0 var(--line); background: #F2F6FC; }
+.card img.pic.sq { max-width: 150px; aspect-ratio: 1; object-fit: contain; box-shadow: none; background: none; }
+.card img.pic.wide { max-width: 360px; aspect-ratio: 16 / 9; }
+.card img.pic.sm { max-width: 170px; }
+.badges { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.cond { font-family: var(--f-display); font-size: 14px; border-radius: 999px; padding: 2px 12px; }
+.cond.fly { background: #FFE3E5; color: #C93A47; } .cond.walk { background: #DDF6EC; color: #1E8A64; } .cond.boss { background: #ECE4FF; color: #5B3FC4; }
+.stars { display: flex; gap: 6px; font-size: 38px; line-height: 1; }
+.stars span { color: #E6ECF5; }
+.stars span.on { color: var(--sun); text-shadow: 0 3px 0 #E09424; animation: pop .4s cubic-bezier(.2, 1.8, .4, 1) both; }
+.stars span.on:nth-child(2) { animation-delay: .12s; } .stars span.on:nth-child(3) { animation-delay: .24s; }
+.result { background: #F5F9FF; border-radius: 16px; padding: 10px 14px; text-align: left; width: 100%; }
+.result b { font-family: var(--f-display); font-weight: 400; color: var(--blue); font-size: 15px; display: block; }
+.result ul { margin: 4px 0 0; padding-left: 18px; display: grid; gap: 4px; }
+.result li { font-weight: 700; font-size: 14.5px; }
+.card .row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 4px; }
+
+/* 기체 고르기 카드 */
+.prob { display: grid; grid-template-columns: 1fr 1.15fr; gap: 16px; width: 100%; text-align: left; align-items: start; }
+.prob-l { display: flex; flex-direction: column; gap: 8px; align-items: center; min-width: 0; }
+.prob-l img.pic { max-width: 100%; }
+.speech { position: relative; background: #FFF6E5; border-radius: 16px; padding: 8px 12px; font-weight: 700; font-size: 14.5px; color: var(--ink); width: 100%; }
+.speech::before { content: ""; position: absolute; top: -8px; left: 28px; border: 8px solid transparent; border-top: 0; border-bottom-color: #FFF6E5; }
+.speech .who { font-family: var(--f-display); font-weight: 400; color: #D9822B; margin-right: 6px; }
+.prob-r { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.ask { font-family: var(--f-display); font-size: 21px; line-height: 1.25; }
+.ask small { display: block; font-family: var(--f-body); font-size: 13px; color: var(--muted); font-weight: 700; }
+.gases { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.gas { display: flex; align-items: center; gap: 8px; text-align: left; border-radius: 16px; padding: 5px 10px 5px 6px; font-size: 17px;
+  background: color-mix(in srgb, var(--c) 16%, #fff); box-shadow: 0 3px 0 color-mix(in srgb, var(--c) 45%, #fff); }
+.gas svg { width: 34px; height: 40px; flex: none; }
+.gas.wrong { background: #FFE3E7; box-shadow: 0 3px 0 #FFC2CA; animation: shake .4s; opacity: .6; }
+.gas.right { background: #DDF6EC; box-shadow: 0 3px 0 #A6E6CA; }
+.gas:disabled { cursor: default; transform: none; }
+.hintbtn { font-size: 14px; padding: 5px 14px; background: #FFF6D8; box-shadow: 0 3px 0 #F3E1A6; align-self: flex-start; }
+.hint { background: #FFF6D8; border-radius: 14px; padding: 6px 12px; font-weight: 700; font-size: 14px; }
+.fb { min-height: 1.4em; font-weight: 700; font-size: 14.5px; }
+.fb.err { color: var(--red); } .fb.ok { color: #1E9A6E; }
+.bossbar { display: flex; gap: 6px; align-items: center; font-family: var(--f-display); font-size: 14px; color: var(--muted); }
+.bossbar i { width: 18px; height: 18px; border-radius: 50%; background: #8E7BC4; display: inline-block; box-shadow: inset 0 -3px 0 rgba(0,0,0,.15); }
+.bossbar i.off { background: #E6E1F2; box-shadow: none; }
+
+.missionbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; background: var(--card); border-radius: 22px; padding: 10px 16px; box-shadow: 0 5px 0 var(--line); }
+.missionbar .mi { font-family: var(--f-display); font-size: 17px; flex: 1 1 260px; min-width: 0; }
+.missionbar .mi b { font-weight: 400; color: var(--hero); margin-right: 4px; }
+.flykey { font-size: 13px; color: var(--muted); font-weight: 700; }
+
+/* 패드·휴대폰: 게임 화면 아래쪽에 겹쳐 띄우는 이동·날기 버튼 */
+.touch { display: none; position: absolute; left: 0; right: 0; bottom: 0; padding: 10px; justify-content: space-between; align-items: flex-end; pointer-events: none; }
+.touch .tpad { display: flex; gap: 10px; }
+.touch button { pointer-events: auto; width: clamp(46px, 10vw, 84px); height: clamp(46px, 10vw, 84px); padding: 0; border-radius: 50%;
+  font-size: clamp(20px, 4vw, 30px); color: var(--ink); background: rgba(255, 255, 255, .66); box-shadow: 0 4px 0 rgba(62, 61, 107, .18);
+  touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+.touch button.tfly { width: clamp(58px, 13vw, 106px); height: clamp(58px, 13vw, 106px); font-size: clamp(15px, 3vw, 22px); color: #fff; background: rgba(255, 107, 107, .82); box-shadow: 0 4px 0 rgba(217, 71, 79, .5); }
+.touch button.down { transform: translateY(3px) scale(.94); box-shadow: 0 1px 0 rgba(62, 61, 107, .18); }
+.touch button:hover { transform: none; }
+@media (pointer: coarse), (hover: none) { .touch { display: flex; } .flykey { display: none; } }
+
+.below { display: grid; grid-template-columns: 1fr 1.1fr; gap: 16px; }
+.panel { background: var(--card); border-radius: 24px; padding: 18px 20px; min-width: 0; box-shadow: 0 5px 0 var(--line); }
+.panel h3 { font-family: var(--f-display); font-weight: 400; font-size: 19px; margin: 0 0 10px; }
+.keys { margin: 0 0 16px; padding: 0; list-style: none; display: grid; gap: 7px; font-size: 14px; color: var(--muted); }
+kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; padding: 0 6px; color: var(--ink); background: #EFF4FB; box-shadow: 0 2px 0 var(--line); }
+.levels { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.levels button { aspect-ratio: 1; padding: 0; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.05; max-width: 64px; width: 100%; justify-self: center; }
+.levels button .n { font-size: 21px; }
+.levels button .s { font-size: 10px; color: var(--sun); letter-spacing: 1px; min-height: 1.1em; }
+.levels button.cur { background: var(--blue); color: #fff; box-shadow: 0 3px 0 #2F86DB; }
+.levels button.cur .s { color: #FFE29A; }
+.levels button:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+.teacher { margin-top: 10px; font-size: 13px; color: var(--muted); padding: 4px 12px; }
+.dex { display: grid; gap: 7px; }
+.dx { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: center; padding: 6px 12px 6px 8px; border-radius: 14px; background: color-mix(in srgb, var(--c) 12%, #fff); font-size: 13.5px; }
+.dx svg { width: 30px; height: 36px; }
+.dx b { font-family: var(--f-display); font-weight: 400; font-size: 16px; margin-right: 6px; }
+.dx .use { display: block; color: var(--muted); font-size: 12.5px; }
+.dx.locked { background: #F5F7FB; color: var(--muted); }
+.dx.locked svg { filter: grayscale(1); opacity: .45; }
+
+.rank { display: grid; grid-template-columns: 1fr 1.1fr; gap: 22px; }
+.rank > div { min-width: 0; }
+.rank .rule { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+.mybox { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.mybox > div { background: #FFF1F2; border-radius: 18px; padding: 10px 14px; }
+.mybox .lab { display: block; font-size: 12px; color: var(--muted); }
+.mybox .big { font-family: var(--f-display); font-size: 32px; line-height: 1.1; color: var(--hero); font-variant-numeric: tabular-nums; }
+.mybox .unit { font-size: 13px; color: var(--muted); margin-left: 4px; }
+.lvscores { list-style: none; margin: 0 0 14px; padding: 0; display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; }
+.lvscores li { text-align: center; background: #F5F8FC; border-radius: 10px; padding: 4px 0; font-family: var(--f-display); font-size: 13px; font-variant-numeric: tabular-nums; }
+.lvscores li small { display: block; font-size: 10px; color: var(--muted); }
+.lvscores li.none { color: #C9D2E0; }
+#rankForm label { display: block; font-family: var(--f-display); font-size: 15px; margin-bottom: 4px; }
+.formrow { display: flex; gap: 8px; flex-wrap: wrap; }
+.formrow input { flex: 1 1 140px; min-width: 0; font: inherit; font-size: 16px; padding: 9px 16px; border-radius: 999px; border: 2px solid var(--line); background: #fff; color: var(--ink); }
+.formrow button:disabled { background: #DFE5EE; box-shadow: 0 3px 0 #CBD3E0; cursor: not-allowed; transform: none; }
+.msg { margin: 8px 0 0; font-size: 14px; color: var(--muted); min-height: 1.4em; }
+.msg.ok { color: var(--mint); } .msg.err { color: var(--red); }
+.board { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.board li { display: grid; grid-template-columns: 30px 30px 1fr auto; gap: 10px; align-items: center; padding: 7px 12px; border-radius: 16px; background: #F6F8FC; }
+.board li.me { background: #FFF1DE; box-shadow: inset 0 0 0 2px var(--sun); }
+.board li.empty { display: block; text-align: center; color: var(--muted); padding: 22px 12px; }
+.board .no { font-family: var(--f-display); font-size: 17px; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: #E7ECF4; color: var(--muted); }
+.board li:nth-child(1) .no { background: #FFC94A; color: #fff; } .board li:nth-child(2) .no { background: #B9C3D6; color: #fff; } .board li:nth-child(3) .no { background: #E3A774; color: #fff; }
+.board img { width: 30px; height: 30px; border-radius: 50%; }
+.board .nm { font-family: var(--f-display); font-size: 17px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.board .nm small { font-family: var(--f-body); font-size: 12px; color: var(--sun); margin-left: 6px; }
+.board .sc { font-family: var(--f-display); font-size: 18px; color: var(--hero); font-variant-numeric: tabular-nums; }
+
+@keyframes bob { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-6px) rotate(3deg); } }
+@keyframes pop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+@media (prefers-reduced-motion: reduce) { .logo, .card, .stars span.on, .gas.wrong { animation: none; } }
+@media (max-width: 820px) {
+  .below, .rank { grid-template-columns: 1fr; }
+  .lvscores { grid-template-columns: repeat(5, 1fr); }
+  .card { padding: 12px 14px 14px; gap: 5px; border-radius: 22px; }
+  .card h2 { font-size: 23px; }
+  .card p, .result li { font-size: 13px; }
+  .card img.pic { max-width: 200px; }
+  .prob { grid-template-columns: 1fr; gap: 8px; }
+  .prob-l { flex-direction: row; align-items: flex-start; }
+  .prob-l img.pic { max-width: 120px; flex: none; }
+  .ask { font-size: 17px; }
+  .gas { font-size: 15px; padding: 3px 8px 3px 4px; }
+  .gas svg { width: 26px; height: 32px; }
+  .stars { font-size: 28px; }
+  .stage { border-radius: 18px; }
+}
+@media (max-width: 700px) {
+  .overlay { position: fixed; inset: 0; z-index: 50; padding-top: max(12px, env(safe-area-inset-top, 0px)); padding-bottom: max(12px, env(safe-area-inset-bottom, 0px)); }
+}
+@media (max-width: 420px) {
+  .prob-l img.pic { display: none; }
+  button.primary { font-size: 16px; padding: 8px 20px; }
+}
+</style>
+<link rel="stylesheet" href="../assets/guide.css">
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="../index.html">
+    <svg width="26" height="26" viewBox="0 0 34 34" fill="none">
+      <circle cx="17" cy="18" r="14" fill="#fff" stroke="#3B4655" stroke-width="2"/>
+      <path d="M17 9 L17 18 L23 21" stroke="#FF90B3" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="13" y="2" width="8" height="4" rx="1.5" fill="#3B4655"/>
+    </svg>
+    <span>3분 놀이터</span>
+  </a>
+  <a class="back" href="../index.html">← 다른 콘텐츠 보기</a>
+</div>
+<div class="wrap">
+  <header>
+    <img class="logo" src="../assets/gas-hero/hero.webp" alt="" width="76" height="76">
+    <h1>기체 <span class="a">히어로</span> <span class="b">출동!</span></h1>
+    <p class="tag">도시 곳곳에서 시민들이 도움을 기다려요! 하늘을 나는 영웅이 되어 7가지 기체 중 딱 맞는 기체를 골라 전해 주고, 마지막에는 스모그 대마왕을 물리쳐요.</p>
+  </header>
+
+  <div class="hud" role="group" aria-label="게임 계기판">
+    <div class="pill level"><span class="badge" id="lvlNo">1단계</span><span class="val" id="lvlName">바닷가 잠수부</span></div>
+    <div class="pill"><span class="heart">♥</span><span class="lab">체력</span><div class="hp"><div class="fill" id="hpFill"></div></div><span class="val" id="hpTxt">100</span></div>
+    <div class="pill"><span class="lab">총점</span><span class="val" id="scoreTxt">0점</span></div>
+    <div class="btns">
+      <button id="musicBtn" class="tog" type="button" aria-pressed="true">음악 켬</button>
+      <button id="sfxBtn" class="tog" type="button" aria-pressed="true">효과음 켬</button>
+      <button id="restartBtn" type="button">다시</button>
+      <button id="fromStartBtn" class="danger" type="button" title="1단계부터 다시 시작해요. 점수 기록은 그대로 남아요.">처음부터</button>
+    </div>
+  </div>
+
+  <div class="stage">
+    <canvas id="cv" width="960" height="540" aria-label="게임 화면"></canvas>
+    <div class="touch" aria-label="터치 조작">
+      <div class="tpad"><button type="button" data-k="l" aria-label="왼쪽으로">◀</button><button type="button" data-k="r" aria-label="오른쪽으로">▶</button></div>
+      <button type="button" class="tfly" data-k="f" aria-label="날기">날기</button>
+    </div>
+    <div class="overlay" id="ov">
+      <div class="card" id="card"></div>
+    </div>
+  </div>
+
+  <div class="missionbar">
+    <span class="mi" id="missionTxt"><b>미션</b>잠수부에게 걸어가요</span>
+    <span class="flykey"><kbd>Space</kbd> <kbd>↑</kbd> 꾹 누르면 날아요 · 날면 체력이 더 빨리 줄어요</span>
+  </div>
+
+  <div class="below">
+    <section class="panel">
+      <h3>조작 방법</h3>
+      <ul class="keys">
+        <li><kbd>←</kbd> <kbd>→</kbd> 또는 <kbd>A</kbd> <kbd>D</kbd> 걷기 · <kbd>Space</kbd> <kbd>↑</kbd> <kbd>W</kbd> 꾹 누르면 날기 · <kbd>↓</kbd> 빨리 내려오기</li>
+        <li>시민에게 닿으면 7가지 기체 중 하나를 골라 도와줘요. 틀리면 체력 -20, 힌트를 보면 체력 -5.</li>
+        <li>♥ 체력은 단계마다 100에서 시작해요. 걸을 때 조금, 날 때 더 많이 줄어요. 물에 빠지거나 번개 구름에 닿아도 줄어요.</li>
+        <li>단계를 통과할 때 남은 체력이 그 단계의 점수예요. <kbd>R</kbd> 다시 · <kbd>Enter</kbd> 시작</li>
+      </ul>
+      <h3>단계 고르기</h3>
+      <div class="levels" id="levels"></div>
+      <button class="teacher" id="unlockAll" type="button">선생님용: 모든 단계 열기</button>
+    </section>
+    <section class="panel">
+      <h3>기체 도감</h3>
+      <div class="dex" id="dex"></div>
+    </section>
+  </div>
+
+  <section class="panel rank" id="rank" aria-labelledby="rankTitle">
+    <div>
+      <h3 id="rankTitle">명예의 전당</h3>
+      <p class="rule">단계를 통과할 때 남은 체력이 그 단계 점수예요. 단계마다 최고 기록만 더해서 최대 1000점! 10단계까지 모두 통과해 스모그 대마왕을 물리치면 랭킹에 이름을 올릴 수 있어요.</p>
+      <div class="mybox">
+        <div><span class="lab">내 총점</span><span class="big" id="myTotal">0</span><span class="unit">/ 1000점</span></div>
+        <div><span class="lab">통과한 단계</span><span class="big" id="myClear">0</span><span class="unit">/ 10개</span></div>
+      </div>
+      <ol class="lvscores" id="lvScores"></ol>
+      <form id="rankForm" autocomplete="off">
+        <label for="nick">랭킹에 쓸 영웅 이름</label>
+        <div class="formrow">
+          <input id="nick" name="nick" maxlength="12" placeholder="예: 번개히어로" required>
+          <button id="rankBtn" class="primary" type="submit">랭킹 등록</button>
+        </div>
+        <p class="msg" id="rankMsg" role="status"></p>
+      </form>
+    </div>
+    <div>
+      <h3>순위표 TOP 5</h3>
+      <ol class="board" id="board"><li class="empty">순위표를 불러오는 중이에요…</li></ol>
+    </div>
+  </section>
+
+  <div class="bulb-wrap" id="bulbWrap" hidden>
+    <button class="bulb" id="bulb" type="button" aria-label=" ">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" aria-hidden="true">
+        <path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.5.4.8 1 .8 1.6v.5h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0 0 12 3z"
+              stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script>
+(() => {
+  const W = 960, H = 540;
+  const GR = 1500, FLY = 2700, SPD = 220, PW = 32, PH = 66, SC = 1.25;
+  const COST = { move: 2, fly: 5, fall: 10, zap: 10, smog: 8, wrong: 20, hint: 5 };
+  const $ = id => document.getElementById(id);
+  const cv = $("cv"), ctx = cv.getContext("2d");
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const ASSET = "../assets/gas-hero/";
+
+  // ---------- 7가지 기체 ----------
+  const GASES = [
+    { id: "o2", name: "산소", sym: "O₂", c: "#5AB4FF", feat: "생물이 숨을 쉴 때 꼭 필요하고, 물질이 타는 것을 도와줘요.", use: "구급차·잠수부의 산소통, 우주선 연료를 태울 때" },
+    { id: "co2", name: "이산화탄소", sym: "CO₂", c: "#9AA3B8", feat: "불을 끄는 성질이 있고, 물에 녹으면 톡 쏘는 맛이 나요.", use: "탄산음료(사이다·콜라), 소화기, 드라이아이스" },
+    { id: "n2", name: "질소", sym: "N₂", c: "#3FC49A", feat: "공기 중에 가장 많고, 다른 물질과 잘 섞이거나 변하지 않아요.", use: "과자가 부서지지 않게 채우는 과자 봉지 충전재" },
+    { id: "he", name: "헬륨", sym: "He", c: "#FFB648", feat: "공기보다 아주 가볍고, 불이 붙지 않아 안전해요.", use: "하늘로 둥둥 떠오르는 풍선, 커다란 비행선" },
+    { id: "h2", name: "수소", sym: "H₂", c: "#9B7BFF", feat: "세상에서 가장 가벼운 기체이며, 탈 때 오염 물질 대신 물이 나와요.", use: "환경을 오염시키지 않는 수소 자동차 연료" },
+    { id: "ng", name: "천연가스", sym: "LNG", c: "#FF8A3D", feat: "불이 아주 잘 붙고, 탈 때 뜨거운 열을 내요.", use: "휴대용 가스버너, 가스레인지, 시내버스 연료" },
+    { id: "ne", name: "네온", sym: "Ne", c: "#FF6FAE", feat: "전기를 통하게 하면 아름답고 밝은 색깔의 빛을 내요.", use: "밤거리를 비추는 네온사인" },
+  ];
+  const GAS = Object.fromEntries(GASES.map(g => [g.id, g]));
+  const josa = (w, a, b) => { const c = w.charCodeAt(w.length - 1); return c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 ? a : b; };
+  function tankSvg(g) {
+    return `<svg viewBox="0 0 34 40" aria-hidden="true">
+      <rect x="13" y="1" width="8" height="5" rx="2" fill="#6B6A8E"/><rect x="10" y="4" width="14" height="4" rx="2" fill="#8C8BB0"/>
+      <rect x="4" y="7" width="26" height="32" rx="11" fill="${g.c}"/><rect x="4" y="7" width="26" height="32" rx="11" fill="none" stroke="rgba(62,61,107,.55)" stroke-width="1.6"/>
+      <rect x="8" y="11" width="4" height="12" rx="2" fill="rgba(255,255,255,.55)"/>
+      <circle cx="13.5" cy="22" r="1.7" fill="#3E3D6B"/><circle cx="20.5" cy="22" r="1.7" fill="#3E3D6B"/>
+      <path d="M14.5 25.5 Q17 28 19.5 25.5" stroke="#3E3D6B" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+      <ellipse cx="10.5" cy="25" rx="2" ry="1.2" fill="rgba(255,120,150,.55)"/><ellipse cx="23.5" cy="25" rx="2" ry="1.2" fill="rgba(255,120,150,.55)"/>
+      <text x="17" y="35.5" text-anchor="middle" font-family="Jua, sans-serif" font-size="${g.sym.length > 2 ? 6 : 7}" fill="#fff">${g.sym}</text></svg>`;
+  }
+
+  // ---------- 단계 ----------
+  // ground: [x, y, w, h, 모양] · plat: 한쪽에서만 올라서는 발판 · hazard: 빠지면 처음 자리로 · storms: 번개 구름
+  const STAGES = [
+    { name: "바닷가 잠수부", theme: "beach", gas: "o2", img: "s1", fly: false, who: "잠수부", cit: { x: 800, kind: "diver" }, prop: "tank",
+      story: "바닷가 부두에서 잠수부가 헉헉거리고 있어요. 무슨 일이 생긴 걸까요?",
+      mission: "잠수부에게 걸어가서 이야기를 들어 보세요.",
+      say: "헉헉… 바닷속 깊이 들어가야 하는데 산소통이 텅 비었어요! 이대로는 숨을 쉴 수가 없어요.",
+      hint: "생물이 숨을 쉴 때 꼭 필요한 기체를 찾아보세요.",
+      done: "잠수부의 통에 산소를 가득 채웠어요! 이제 바닷속에서도 숨을 쉴 수 있어요.",
+      ground: [[0, 400, 960, 140]] },
+    { name: "밍밍한 사이다", theme: "town", gas: "co2", img: "s2", fly: false, who: "음료 가게 사장님", cit: { x: 760, kind: "shop" }, prop: "soda",
+      story: "음료 가게 앞에서 아이가 시무룩해요. 사이다를 한 모금 마시더니 고개를 갸웃거려요.",
+      mission: "음료 가게 사장님에게 걸어가요.",
+      say: "우리 가게 사이다가 밍밍해요! 마셔도 톡 쏘는 맛이 하나도 안 나요. 어떻게 하죠?",
+      hint: "물에 녹으면 톡 쏘는 맛이 나는 기체를 찾아보세요.",
+      done: "사이다에 이산화탄소를 녹였더니 보글보글 톡 쏘는 맛이 돌아왔어요!",
+      wrongWhy: { o2: "산소는 물에 녹아도 톡 쏘는 맛이 나지 않아요." },
+      ground: [[0, 400, 960, 140]] },
+    { name: "과자 공장", theme: "factory", gas: "n2", img: "s3", fly: false, who: "과자 공장 직원", cit: { x: 860, kind: "worker" }, prop: "snack",
+      story: "과자 공장에서 울음소리가 들려요. 컨베이어 벨트가 뒤로 밀어내니 힘차게 걸어가요!",
+      mission: "뒤로 밀리는 벨트를 지나 과자 공장 직원에게 가요.",
+      say: "과자 봉지가 납작해서 옮기다가 과자가 다 부서졌어요! 봉지를 빵빵하게 채우고 싶은데, 과자 맛이 변하면 안 돼요.",
+      hint: "공기 중에 가장 많고, 다른 물질과 잘 변하지 않는 기체를 찾아보세요.",
+      done: "과자 봉지에 질소를 빵빵하게 채웠어요! 과자도 안 부서지고 맛도 그대로예요.",
+      wrongWhy: { o2: "산소는 다른 물질과 잘 반응해서 과자 맛이 변할 수 있어요.", ng: "천연가스는 불이 아주 잘 붙어서 과자 봉지에 넣으면 위험해요!", h2: "수소는 불이 붙기 쉬워서 과자 봉지에 넣으면 위험해요!" },
+      belt: [280, 620, -95],
+      ground: [[0, 400, 960, 140]] },
+    { name: "옥상에 불이 났어요", theme: "city", gas: "co2", img: "s4", fly: true, who: "소방관", cit: { x: 860, kind: "fire" }, prop: "fire",
+      story: "높은 빌딩 옥상에서 연기가 피어올라요! 계단으로는 너무 오래 걸려요. 이제 영웅의 비행 실력을 보여 줄 때예요!",
+      mission: "Space나 ↑를 꾹 눌러 날아올라 옥상의 소방관에게 가요.",
+      say: "옥상에 불이 났어요! 그런데 소화기 속이 텅 비었어요. 어서 불을 꺼야 해요!",
+      hint: "불을 끄는 성질이 있는 기체를 찾아보세요.",
+      done: "소화기에 이산화탄소를 채워 칙칙! 불이 깨끗하게 꺼졌어요.",
+      wrongWhy: { o2: "앗! 산소는 물질이 타는 것을 도와줘서 불이 더 커져요!", ng: "앗! 천연가스는 불이 아주 잘 붙어서 불이 더 커져요!", h2: "앗! 수소는 불이 잘 붙어서 불이 더 커져요!" },
+      ground: [[0, 400, 600, 140], [600, 150, 360, 390, "b"], [210, 300, 120, 240, "b2"]] },
+    { name: "산꼭대기 캠핑장", theme: "night", gas: "ng", img: "s5", fly: true, who: "캠핑하는 친구", cit: { x: 840, kind: "camper" }, prop: "stove",
+      story: "깜깜한 밤, 높은 산꼭대기에서 누군가 덜덜 떨고 있어요. 절벽이 높아서 걸어서는 올라갈 수 없어요.",
+      mission: "날아서 절벽을 올라 산꼭대기 캠핑장으로 가요.",
+      say: "산꼭대기는 너무 추워요. 휴대용 버너의 가스가 떨어져서 따뜻한 라면을 끓일 수가 없어요.",
+      hint: "불이 아주 잘 붙고, 탈 때 뜨거운 열을 내는 기체를 찾아보세요.",
+      done: "버너에 천연가스를 넣으니 불이 화르륵! 따뜻한 라면이 보글보글 끓어요.",
+      wrongWhy: { he: "헬륨은 불이 붙지 않아서 버너에 넣어도 불이 켜지지 않아요.", co2: "이산화탄소는 오히려 불을 끄는 성질이 있어요!", n2: "질소는 다른 물질과 잘 변하지 않아서 타지 않아요." },
+      ground: [[0, 400, 290, 140], [290, 290, 210, 250], [500, 170, 460, 370]] },
+    { name: "깜깜한 간판", theme: "street", gas: "ne", img: "s6", fly: false, who: "간판 가게 사장님", cit: { x: 740, kind: "sign" }, prop: "neon",
+      story: "밤거리가 오늘따라 너무 어두워요. 가게 앞에서 사장님이 간판을 올려다보며 한숨을 쉬어요.",
+      mission: "밤거리를 걸어 간판 가게 사장님에게 가요.",
+      say: "오늘 밤 가게 문을 여는데 간판에 불이 안 들어와요! 반짝반짝 예쁜 빛이 나야 손님이 찾아올 텐데…",
+      hint: "전기를 통하게 하면 밝은 색깔의 빛을 내는 기체를 찾아보세요.",
+      done: "간판 유리관에 네온을 넣고 전기를 통했더니 알록달록 반짝반짝 빛나요!",
+      ground: [[0, 400, 960, 140]] },
+    { name: "다리가 끊긴 강", theme: "river", gas: "o2", img: "s7", fly: true, who: "구급대원", cit: { x: 690, kind: "medic" }, prop: "ambulance",
+      story: "강 건너편에 구급차가 멈춰 서 있어요. 다리가 끊어져서 걸어서는 건널 수 없어요!",
+      mission: "강 위를 날아서 건너 구급대원에게 가요. 물에 빠지지 않게 조심!",
+      say: "환자가 숨쉬기 힘들어해요! 구급차의 산소통이 비어 있어요. 빨리 도와주세요!",
+      hint: "생물이 숨을 쉴 때 꼭 필요한 기체를 찾아보세요.",
+      done: "산소통을 채워 환자에게 산소를 전했어요! 환자가 편안하게 숨을 쉬어요.",
+      wrongWhy: { co2: "이산화탄소는 우리가 숨을 내쉴 때 나오는 기체라 숨쉬기를 도와주지 못해요." },
+      hazard: [[320, 440, 320, 100, "water"]],
+      ground: [[0, 400, 320, 140], [640, 400, 320, 140]] },
+    { name: "번개 골짜기", theme: "canyon", gas: "h2", img: "s8", fly: true, who: "운전기사", cit: { x: 770, kind: "driver" }, prop: "car",
+      story: "깊은 골짜기 건너편에 친환경 자동차가 멈춰 있어요. 골짜기에는 찌릿찌릿 번개 구름이 오르락내리락해요!",
+      mission: "번개 구름을 피해 골짜기를 날아 건너 운전기사에게 가요.",
+      say: "제 자동차는 달려도 공기를 더럽히지 않는 친환경 자동차예요. 그런데 연료가 다 떨어져서 멈췄어요!",
+      hint: "탈 때 오염 물질 대신 물이 나오는 기체를 찾아보세요.",
+      done: "수소를 가득 채웠어요! 자동차가 부릉부릉, 뒤로는 깨끗한 물방울만 톡톡 떨어져요.",
+      wrongWhy: { ng: "천연가스도 버스 연료로 쓰이지만, 탈 때 물만 나오는 친환경 연료는 따로 있어요!", he: "헬륨은 불이 붙지 않아서 자동차 연료가 될 수 없어요." },
+      hazard: [[260, 470, 440, 70, "pit"]],
+      storms: [{ x: 390, y: 260, ax: 0, ay: 120, sp: 1.6, ph: 0 }, { x: 570, y: 260, ax: 0, ay: 120, sp: 1.6, ph: Math.PI }],
+      ground: [[0, 400, 260, 140], [700, 400, 260, 140]] },
+    { name: "하늘 위 비행선", theme: "sky", gas: "he", img: "s9", fly: true, who: "비행선 조종사", cit: { x: 800, y: 260, kind: "pilot" }, prop: "airship",
+      story: "구름 위에 떠 있는 비행선이 자꾸 아래로 처져요! 조종사가 손을 흔들며 도움을 청해요.",
+      mission: "구름 발판에서 쉬어 가며 하늘 높이 날아 비행선 조종사에게 가요. 번개 구름을 조심!",
+      say: "비행선 속 기체가 새어 나가서 자꾸 내려가요! 하늘에 둥둥 떠 있게 채워 주세요. 불이 붙으면 절대 안 돼요!",
+      hint: "공기보다 아주 가볍고, 불이 붙지 않아 안전한 기체를 찾아보세요.",
+      done: "비행선에 헬륨을 채웠어요! 비행선이 다시 둥실둥실 하늘 높이 떠올라요.",
+      wrongWhy: { h2: "수소도 아주 가볍지만 불이 붙기 쉬워서 사람이 타는 비행선에는 위험해요!", ng: "천연가스는 불이 아주 잘 붙어서 위험해요!" },
+      plat: [[300, 360, 110, 18], [500, 300, 110, 18], [700, 260, 200, 16, "gondola"]],
+      storms: [{ x: 460, y: 170, ax: 60, ay: 30, sp: 1.2, ph: 0 }, { x: 640, y: 380, ax: 50, ay: 40, sp: 1.4, ph: 2 }],
+      ground: [[0, 400, 220, 140]] },
+    { name: "스모그 대마왕", theme: "boss", boss: true, img: "boss", fly: true,
+      story: "시민들을 괴롭힌 범인은 바로 스모그 대마왕! 하늘 높이 떠서 콜록콜록 스모그 공을 던지고 있어요.",
+      mission: "스모그 공을 피해 날아올라 대마왕에게 다가가요. 대마왕의 기체 문제 5개를 모두 맞히면 이겨요!",
+      ground: [[0, 400, 960, 140]] },
+  ];
+
+  // 보스 문제: 기체마다 1문제씩 7문제 중 매판 5문제를 골라요
+  const BOSS_Q = [
+    { gas: "o2", q: "흐흐, 우주로 가는 로켓의 불꽃을 약하게 만들었다! 로켓 연료가 활활 타도록 ‘타는 것을 도와주는’ 기체는 무엇이냐?" },
+    { gas: "co2", q: "아이스크림 가게의 드라이아이스를 몽땅 녹여 버렸지! 드라이아이스는 어떤 기체를 아주 차갑게 얼려 만든 것이냐?" },
+    { gas: "n2", q: "우리가 마시는 공기 속에 가장 많이 들어 있고, 다른 물질과 잘 변하지 않는 기체는 무엇이냐?" },
+    { gas: "he", q: "놀이공원 풍선을 전부 바람 빠지게 했다! 공기보다 아주 가볍고 불이 붙지 않는, 풍선을 둥둥 띄우는 기체는?" },
+    { gas: "h2", q: "내가 제일 싫어하는 기체를 맞혀 봐라! 세상에서 가장 가볍고, 탈 때 매연 대신 물만 나오는 기체는?" },
+    { gas: "ng", q: "집집마다 가스레인지를 멈춰 버렸다! 가스레인지와 시내버스 연료로 쓰이고, 탈 때 뜨거운 열을 내는 기체는?" },
+    { gas: "ne", q: "밤거리 간판을 모두 깜깜하게 만들었다! 전기를 통하면 아름답고 밝은 색깔의 빛을 내는 기체는?" },
+  ];
+  const BOSS_N = 5;
+
+  const THEMES = {
+    beach: { sky: ["#9EDBFF", "#E8F7FF"], top: "#FBE3A6", side: "#F2CF83", dot: "#E2B868" },
+    town: { sky: ["#BFE7FF", "#FFF0F5"], top: "#C9C3DE", side: "#ADA6CB", dot: "#9A93BC" },
+    factory: { sky: ["#DCE7F5", "#F7F3FF"], top: "#B8C2D8", side: "#98A3BF", dot: "#8892AE" },
+    city: { sky: ["#A9DDFF", "#FFEFF4"], top: "#BFC8DA", side: "#A3AEC6", dot: "#8F9AB5" },
+    night: { sky: ["#2D2A5E", "#6E5BA8"], top: "#7FA97A", side: "#6A5E88", dot: "#5D5279" },
+    street: { sky: ["#25265A", "#5B4B92"], top: "#8E8AB0", side: "#6E6A93", dot: "#5F5B85" },
+    river: { sky: ["#BDE8FF", "#FFF4E6"], top: "#8EDB86", side: "#D9A36E", dot: "#C38B57" },
+    canyon: { sky: ["#FFD9B8", "#FFF3E0"], top: "#E8B07A", side: "#D08C55", dot: "#BE7A45" },
+    sky: { sky: ["#7CC8FF", "#E7F6FF"], top: "#8EDB86", side: "#D9A36E", dot: "#C38B57" },
+    boss: { sky: ["#6B6492", "#B9A9C9"], top: "#A7A2BC", side: "#837D9E", dot: "#746E8E" },
+  };
+
+  // ---------- 소리: Web Audio로 직접 만든 배경음악과 효과음 ----------
+  const Sound = (() => {
+    let ac = null, master, musicBus, sfxBus, noiseBuf, nextT = 0, stepI = 0, track = "main";
+    const pref = { music: true, sfx: true };
+    try { Object.assign(pref, JSON.parse(localStorage.getItem("gas-hero-sound") || "{}")); } catch (e) {}
+    const save = () => { try { localStorage.setItem("gas-hero-sound", JSON.stringify(pref)); } catch (e) {} };
+    const hz = m => 440 * Math.pow(2, (m - 69) / 12);
+    function init() {
+      if (ac) { if (ac.state === "suspended") ac.resume(); return; }
+      const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+      try { ac = new AC(); } catch (e) { return; }
+      master = ac.createGain(); master.gain.value = 0.8; master.connect(ac.destination);
+      musicBus = ac.createGain(); musicBus.gain.value = pref.music ? 0.5 : 0; musicBus.connect(master);
+      sfxBus = ac.createGain(); sfxBus.gain.value = pref.sfx ? 1 : 0; sfxBus.connect(master);
+      noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
+      const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      nextT = ac.currentTime + 0.1;
+      setInterval(schedule, 25);
+    }
+    function tone(bus, t, f, dur, { type = "triangle", vol = 0.2, slide = 0, attack = 0.005, lp = 0 } = {}) {
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = type; o.frequency.setValueAtTime(f, t);
+      if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(30, f * slide), t + dur);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + attack);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      let out = o;
+      if (lp) { const f2 = ac.createBiquadFilter(); f2.type = "lowpass"; f2.frequency.value = lp; o.connect(f2); out = f2; }
+      out.connect(g).connect(bus); o.start(t); o.stop(t + dur + 0.02);
+    }
+    function noise(bus, t, dur, { vol = 0.2, freq = 2000, type = "bandpass", sweep = 0 } = {}) {
+      const s = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain();
+      s.buffer = noiseBuf; f.type = type; f.frequency.setValueAtTime(freq, t);
+      if (sweep) f.frequency.exponentialRampToValueAtTime(freq * sweep, t + dur);
+      g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      s.connect(f).connect(g).connect(bus); s.start(t, Math.random() * 0.5); s.stop(t + dur + 0.02);
+    }
+    const _ = null;
+    // 영웅 행진곡 (바장조, 씩씩하게)
+    const MAIN = {
+      bpm: 126,
+      mel: [65,_,_,69,72,_,69,_, 70,_,74,_,72,_,_,_,  65,_,_,69,72,_,77,_, 76,_,74,_,72,_,_,_,
+            74,_,_,72,70,_,69,_, 67,_,69,_,70,_,_,_,  72,_,74,_,76,_,79,_, 77,_,_,_,_,_,_,_],
+      mel2: [77,_,76,_,74,_,72,_, 70,_,72,_,74,_,_,_, 72,_,70,_,69,_,67,_, 69,_,70,_,72,_,_,_,
+             74,_,76,_,77,_,74,_, 72,_,_,69,70,_,72,_, 74,_,72,_,76,_,74,_, 77,_,_,_,_,_,_,_],
+      roots: [41, 46, 48, 41], chords: [[57, 60, 65], [58, 62, 65], [55, 60, 64], [57, 60, 65]],
+    };
+    // 대마왕 (라단조, 긴장감)
+    const BOSS = {
+      bpm: 138,
+      mel: [69,_,72,_,76,_,72,_, 74,_,72,_,71,_,_,_,  69,_,72,_,77,_,76,_, 74,_,_,_,71,_,_,_,
+            72,_,71,_,69,_,71,_, 72,_,74,_,76,_,_,_,  77,_,76,_,74,_,71,_, 69,_,_,_,68,_,_,_],
+      mel2: [76,_,_,77,76,_,74,_, 72,_,74,_,76,_,_,_, 77,_,_,79,77,_,76,_, 74,_,72,_,71,_,_,_,
+             72,_,74,_,76,_,79,_, 77,_,76,_,74,_,72,_, 71,_,72,_,74,_,71,_, 69,_,_,_,_,_,_,_],
+      roots: [45, 41, 43, 40], chords: [[57, 60, 64], [53, 57, 60], [55, 59, 62], [52, 56, 59]],
+    };
+    function schedule() {
+      if (!ac) return;
+      const T = track === "boss" ? BOSS : MAIN, STEP = 60 / T.bpm / 4;
+      while (nextT < ac.currentTime + 0.15) {
+        const i = stepI % 64, bar = i >> 4, s = i & 15, phrase = (stepI >> 6) & 1;
+        const m = (phrase ? T.mel2 : T.mel)[i];
+        if (m) {
+          tone(musicBus, nextT, hz(m), STEP * 2.2, { type: "square", vol: 0.04, lp: 2200 });
+          tone(musicBus, nextT, hz(m + 12), STEP * 3.2, { type: "sine", vol: 0.035 });
+        }
+        if (s === 0 || s === 6 || s === 8 || s === 12) tone(musicBus, nextT, hz(T.roots[bar] + (s === 8 ? 7 : 0)), STEP * 1.8, { type: "sine", vol: 0.15 });
+        if (s === 0) for (const c of T.chords[bar]) tone(musicBus, nextT, hz(c), STEP * 14, { type: "triangle", vol: 0.022, attack: 0.08 });
+        if (s % 4 === 2) noise(musicBus, nextT, 0.04, { vol: 0.045, freq: 8000, type: "highpass" });
+        if (s === 4 || s === 12) noise(musicBus, nextT, 0.08, { vol: 0.05, freq: 1800 });
+        nextT += STEP; stepI++;
+      }
+    }
+    const on = () => ac && pref.sfx;
+    const now = () => ac.currentTime;
+    let lastFly = 0;
+    return {
+      init, pref,
+      setTrack(t) { if (t !== track) { track = t; stepI = 0; } },
+      setMusic(v) { pref.music = v; save(); if (ac) musicBus.gain.setTargetAtTime(v ? 0.5 : 0, now(), 0.1); },
+      setSfx(v) { pref.sfx = v; save(); if (ac) sfxBus.gain.setTargetAtTime(v ? 1 : 0, now(), 0.05); },
+      duck(v) { if (ac && pref.music) musicBus.gain.setTargetAtTime(v ? 0.16 : 0.5, now(), 0.15); },
+      click() { if (on()) tone(sfxBus, now(), 880, 0.07, { type: "sine", vol: 0.1, slide: 1.5 }); },
+      fly() {
+        if (!on() || now() - lastFly < 0.18) return; lastFly = now();
+        noise(sfxBus, now(), 0.22, { vol: 0.06, freq: 900, sweep: 2.2 });
+      },
+      takeoff() { if (on()) { tone(sfxBus, now(), 380, 0.22, { type: "square", vol: 0.05, slide: 2.4, lp: 2600 }); noise(sfxBus, now(), 0.3, { vol: 0.08, freq: 700, sweep: 3 }); } },
+      zap() { if (on()) { noise(sfxBus, now(), 0.3, { vol: 0.25, freq: 3000, type: "highpass" }); tone(sfxBus, now(), 900, 0.25, { type: "sawtooth", vol: 0.06, slide: 0.3, lp: 3000 }); } },
+      cough() { if (on()) [0, 0.14].forEach(d => noise(sfxBus, now() + d, 0.12, { vol: 0.2, freq: 600 })); },
+      splash() { if (on()) { noise(sfxBus, now(), 0.5, { vol: 0.3, freq: 900, sweep: 0.4 }); tone(sfxBus, now(), 600, 0.3, { type: "sine", vol: 0.12, slide: 0.4 }); } },
+      hiss() { if (on()) { noise(sfxBus, now(), 0.9, { vol: 0.16, freq: 2500, sweep: 0.5 }); } },
+      start() { if (on()) [72, 76, 79, 84].forEach((m, k) => tone(sfxBus, now() + k * 0.07, hz(m), 0.18, { type: "square", vol: 0.06, lp: 3000 })); },
+      win() {
+        if (!on()) return;
+        [72, 76, 79, 84, 79, 84, 88].forEach((m, k) => tone(sfxBus, now() + k * 0.09, hz(m), k === 6 ? 0.6 : 0.16, { type: "square", vol: 0.07, lp: 3500 }));
+        for (let k = 0; k < 6; k++) tone(sfxBus, now() + 0.6 + k * 0.05, hz(96 + (k % 3) * 3), 0.25, { type: "sine", vol: 0.05 });
+      },
+      star(k) { if (on()) tone(sfxBus, now() + k * 0.12 + 0.15, hz(84 + k * 4), 0.35, { type: "sine", vol: 0.16 }); },
+      right() { if (on()) { tone(sfxBus, now(), hz(84), 0.15, { type: "sine", vol: 0.2 }); tone(sfxBus, now() + 0.12, hz(91), 0.35, { type: "sine", vol: 0.2 }); } },
+      wrong() { if (on()) { tone(sfxBus, now(), 220, 0.18, { type: "square", vol: 0.1, lp: 1200 }); tone(sfxBus, now() + 0.2, 160, 0.3, { type: "square", vol: 0.1, lp: 1000 }); } },
+      ouch() { if (on()) tone(sfxBus, now(), 500, 0.25, { type: "triangle", vol: 0.15, slide: 0.5 }); },
+      poof() { if (on()) { noise(sfxBus, now(), 1.2, { vol: 0.35, freq: 500, type: "lowpass", sweep: 4 }); tone(sfxBus, now(), 300, 1, { type: "triangle", vol: 0.15, slide: 3 }); } },
+      ending() {
+        if (!on()) return;
+        const mel = [72, 76, 79, 84, 83, 79, 81, 84, 88];
+        mel.forEach((m, k) => { tone(sfxBus, now() + k * 0.16, hz(m), 0.4, { type: "triangle", vol: 0.14 }); tone(sfxBus, now() + k * 0.16, hz(m - 12), 0.3, { type: "sine", vol: 0.08 }); });
+        for (let k = 0; k < 10; k++) tone(sfxBus, now() + 1.5 + k * 0.06, hz(96 + (k % 4) * 2), 0.3, { type: "sine", vol: 0.04 });
+      },
+      low() { if (on()) [0, 0.16].forEach(d => tone(sfxBus, now() + d, 660, 0.1, { type: "square", vol: 0.05, lp: 2000 })); },
+    };
+  })();
+  addEventListener("pointerdown", () => Sound.init(), { capture: true });
+  addEventListener("keydown", () => Sound.init(), { capture: true });
+  document.addEventListener("click", e => { if (e.target.closest("button")) Sound.click(); });
+  function syncSoundButtons() {
+    const m = $("musicBtn"), s = $("sfxBtn");
+    m.setAttribute("aria-pressed", Sound.pref.music); m.textContent = Sound.pref.music ? "음악 켬" : "음악 끔";
+    s.setAttribute("aria-pressed", Sound.pref.sfx); s.textContent = Sound.pref.sfx ? "효과음 켬" : "효과음 끔";
+  }
+  $("musicBtn").onclick = () => { Sound.setMusic(!Sound.pref.music); syncSoundButtons(); };
+  $("sfxBtn").onclick = () => { Sound.setSfx(!Sound.pref.sfx); syncSoundButtons(); };
+  syncSoundButtons();
+
+  // ---------- 이미지 ----------
+  const IMG = {};
+  for (const n of ["hero", "boss"]) { IMG[n] = new Image(); IMG[n].src = ASSET + n + ".webp"; }
+  // 카드 그림은 미리 받아 둬요
+  for (const n of ["s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "ending"]) { const im = new Image(); im.src = ASSET + n + ".webp"; }
+
+  // ---------- 진행 저장 ----------
+  let progress = { unlocked: 1, stars: [], scores: [], found: {} };
+  try { const p = JSON.parse(localStorage.getItem("gas-hero-v1") || "null"); if (p && p.unlocked) progress = Object.assign(progress, p); } catch (e) {}
+  const saveProgress = () => { try { localStorage.setItem("gas-hero-v1", JSON.stringify(progress)); } catch (e) {} };
+
+  // ---------- 게임 상태 ----------
+  let si = 0, st, G, P;
+  const keys = {};
+  const fx = [];
+  let clock = 0, bgCache = null;
+
+  function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+  const groundTopAt = x => { let top = H; for (const [gx, gy, gw] of st.ground) if (x >= gx && x <= gx + gw) top = Math.min(top, gy); return top; };
+  function citPos() {
+    if (!st.cit) return null;
+    return { x: st.cit.x, y: st.cit.y != null ? st.cit.y : groundTopAt(st.cit.x) };
+  }
+
+  function loadStage(i) {
+    si = i; st = STAGES[i];
+    G = {
+      mode: "intro", hp: 100, time: 0, toast: null, invuln: 0, solved: false, solveT: 0, hintUsed: false, wrongs: 0, lowWarned: false,
+      bossHP: BOSS_N, bossQ: st.boss ? shuffle(BOSS_Q).slice(0, BOSS_N) : [], qi: 0, bossDown: false, endT: 0, smog: [], smogT: 1.5, answered: [],
+    };
+    P = { x: 40, y: groundTopAt(54) - PH, vx: 0, vy: 0, on: true, face: 1, phase: 0, flying: false, safe: null };
+    P.safe = { x: P.x, y: P.y };
+    fx.length = 0;
+    for (const k in keys) keys[k] = false;
+    bgCache = paintBg(st.theme);
+    Sound.setTrack(st.boss ? "boss" : "main");
+    $("missionTxt").innerHTML = `<b>미션</b>${st.mission}`;
+    renderLevelButtons(); updateHud();
+    showIntro();
+  }
+
+  // ---------- 체력 ----------
+  function hpCost(v) {
+    if (G.mode !== "play" && G.mode !== "quiz") return;
+    G.hp = Math.max(0, G.hp - v);
+    if (!G.lowWarned && G.hp <= 25) { G.lowWarned = true; Sound.low(); }
+    if (G.hp <= 0) fail();
+  }
+
+  // ---------- 입력 ----------
+  const keyMap = { ArrowLeft: "l", KeyA: "l", ArrowRight: "r", KeyD: "r", Space: "f", ArrowUp: "f", KeyW: "f", ArrowDown: "d", KeyS: "d" };
+  const typing = el => !!el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName));
+  addEventListener("keydown", e => {
+    if (typing(e.target) || e.isComposing || e.ctrlKey || e.metaKey || e.altKey) return;
+    const k = keyMap[e.code];
+    if ((e.code === "Enter" || e.code === "Space") && !$("ov").hidden) {
+      if (e.target.closest?.("button")) return;
+      const b = $("card").querySelector("button.primary");
+      if (b) { e.preventDefault(); b.click(); }
+      return;
+    }
+    if (G.mode === "play" && k) { e.preventDefault(); keys[k] = true; }
+    if (e.code === "KeyR" && (G.mode === "play" || G.mode === "fail")) restart();
+  });
+  addEventListener("keyup", e => { const k = keyMap[e.code]; if (k) keys[k] = false; });
+  addEventListener("blur", () => { for (const k in keys) keys[k] = false; });
+  for (const b of document.querySelectorAll(".touch button")) {
+    const k = b.dataset.k;
+    b.addEventListener("pointerdown", e => {
+      e.preventDefault(); Sound.init(); b.classList.add("down");
+      if (G.mode === "play") keys[k] = true;
+    });
+    const up = () => { keys[k] = false; b.classList.remove("down"); };
+    b.addEventListener("pointerup", up); b.addEventListener("pointercancel", up); b.addEventListener("pointerleave", up);
+    b.addEventListener("contextmenu", e => e.preventDefault());
+  }
+
+  // ---------- 물리 ----------
+  const rect = (x, y, w, h, o = {}) => ({ x, y, w, h, ...o });
+  function solids() {
+    const out = [];
+    for (const g of st.ground) out.push(rect(g[0], g[1], g[2], g[3], { stat: true }));
+    for (const p of st.plat || []) out.push(rect(p[0], p[1], p[2], p[3], { oneWay: true, stat: true }));
+    return out;
+  }
+  const overlap = (a, b) => a.x < b.x + b.w && a.x + PW > b.x && a.y < b.y + b.h && a.y + PH > b.y;
+
+  function physics(dt, sol) {
+    let dir = (keys.r ? 1 : 0) - (keys.l ? 1 : 0);
+    P.vx = dir * SPD;
+    if (dir) { P.face = dir; P.phase += dt * 12; hpCost(COST.move * dt); } else P.phase = 0;
+    if (G.mode !== "play") return;
+    // 컨베이어 벨트는 영웅을 뒤로 밀어요
+    if (st.belt && P.on && P.x + PW / 2 > st.belt[0] && P.x + PW / 2 < st.belt[1]) P.vx += st.belt[2];
+    const flying = !!keys.f;
+    if (flying) {
+      if (!P.flying && P.on) Sound.takeoff();
+      P.vy -= FLY * dt; hpCost(COST.fly * dt); Sound.fly();
+      if (Math.random() < dt * 30) fx.push({ x: P.x + PW / 2 - P.face * 10, y: P.y + PH - 6, vx: -P.face * 40, vy: 60, life: .5, max: .5, c: "rgba(255,255,255,.9)", r: 3 + Math.random() * 3 });
+    }
+    P.flying = flying;
+    P.vy += GR * dt;
+    P.vy = Math.max(-320, Math.min(P.vy, keys.d ? 560 : 340));
+    P.x += P.vx * dt;
+    P.x = Math.max(0, Math.min(W - PW, P.x));
+    for (const s of sol) if (!s.oneWay && overlap(P, s)) {
+      if (P.vx > 0 && P.x + PW - s.x < 24) P.x = s.x - PW;
+      else if (P.vx < 0 && s.x + s.w - P.x < 24) P.x = s.x + s.w;
+      else if (P.y + PH - s.y > 12) { const l = P.x + PW - s.x, r = s.x + s.w - P.x; P.x += l < r ? -l : r; }
+    }
+    const prevB = P.y + PH, prevTop = P.y;
+    P.y += P.vy * dt; P.on = false;
+    if (P.y < 6) { P.y = 6; P.vy = Math.max(0, P.vy); }
+    for (const s of sol) {
+      if (!(P.x + PW > s.x + 1 && P.x < s.x + s.w - 1)) continue;
+      if (s.oneWay) {
+        if (P.vy >= 0 && prevB <= s.y + 6 && P.y + PH >= s.y && !keys.d) land(s);
+      } else if (P.y + PH > s.y && P.y < s.y + s.h) {
+        if (P.vy >= 0 && prevB <= s.y + 12) land(s);
+        else if (P.vy < 0 && prevTop >= s.y + s.h - 14) { P.y = s.y + s.h; P.vy = 0; }
+      }
+    }
+    for (const h of st.hazard || []) if (overlap(P, rect(h[0], h[1], h[2], h[3]))) return fall(h[4]);
+    if (P.y > H + 10) return fall("sky");
+  }
+  function land(s) {
+    P.y = s.y - PH; P.vy = 0; P.on = true;
+    if (s.stat) P.safe = { x: P.x, y: P.y };
+  }
+  function fall(kind) {
+    if (kind === "water") { Sound.splash(); burst(P.x + PW / 2, Math.min(P.y + PH, 470), 16, ["#9FDCFF", "#fff", "#6EC1F5"], 220, 0.7); }
+    else Sound.ouch();
+    P.x = P.safe.x; P.y = P.safe.y; P.vx = P.vy = 0; P.on = true;
+    toast((kind === "water" ? "풍덩! " : "앗, 떨어졌어요! ") + "체력 -" + COST.fall);
+    hpCost(COST.fall);
+  }
+
+  // ---------- 번개 구름·스모그 공 ----------
+  function stormPos(s) { return { x: s.x + Math.sin(clock * s.sp + s.ph) * s.ax, y: s.y + Math.sin(clock * s.sp * 1.3 + s.ph) * s.ay }; }
+  function hitBy(cx, cy, r) {
+    const px = Math.max(P.x, Math.min(cx, P.x + PW)), py = Math.max(P.y, Math.min(cy, P.y + PH));
+    return (px - cx) ** 2 + (py - cy) ** 2 < r * r;
+  }
+  function knock(fromX, msg, cost, snd) {
+    G.invuln = 1.2; snd();
+    P.vx = 0; P.x += (P.x + PW / 2 < fromX ? -40 : 40); P.x = Math.max(0, Math.min(W - PW, P.x)); P.vy = 160;
+    burst(P.x + PW / 2, P.y + 20, 12, ["#FFE066", "#fff"], 200, .5);
+    toast(msg + " 체력 -" + cost); hpCost(cost);
+  }
+  function hazards(dt) {
+    if (G.invuln > 0) G.invuln -= dt;
+    for (const s of st.storms || []) {
+      const p = stormPos(s);
+      if (G.invuln <= 0 && hitBy(p.x, p.y + 6, 36)) knock(p.x, "찌릿! 번개 구름에 닿았어요.", COST.zap, Sound.zap);
+    }
+    if (st.boss && !G.bossDown && G.mode === "play") {
+      G.smogT -= dt;
+      if (G.smogT <= 0) {
+        G.smogT = 2 + Math.random() * .8;
+        const b = bossPos();
+        G.smog.push({ x: b.x - 60, y: b.y + 20, vx: -150 - Math.random() * 40, vy: (Math.random() - .3) * 90 });
+      }
+    }
+    for (let i = G.smog.length - 1; i >= 0; i--) {
+      const m = G.smog[i];
+      m.x += m.vx * dt; m.y += m.vy * dt;
+      if (m.y > 380 || m.y < 40) m.vy *= -1;
+      if (m.x < -40) { G.smog.splice(i, 1); continue; }
+      if (G.mode === "play" && G.invuln <= 0 && hitBy(m.x, m.y, 24)) { G.smog.splice(i, 1); knock(m.x, "콜록콜록! 스모그 공에 맞았어요.", COST.smog, Sound.cough); }
+    }
+  }
+
+  // ---------- 장면 흐름 ----------
+  function overlay({ no, title, html, img, imgCls, buttons, stars, wide }) {
+    const card = $("card");
+    card.className = "card" + (wide ? " wide" : "");
+    card.innerHTML = `${img ? `<img class="pic ${imgCls || ""}" src="${ASSET}${img}.webp" alt="">` : ""}
+      ${no ? `<span class="no">${no}</span>` : ""}${title ? `<h2>${title}</h2>` : ""}
+      ${stars != null ? `<div class="stars" aria-label="별 ${stars}개">${[0, 1, 2].map(k => `<span class="${k < stars ? "on" : ""}">★</span>`).join("")}</div>` : ""}
+      ${html || ""}<div class="row"></div>`;
+    const row = card.querySelector(".row");
+    for (const [label, fn, primary] of buttons || []) {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = label;
+      if (primary) b.className = "primary"; b.onclick = fn; row.appendChild(b);
+    }
+    $("ov").hidden = false;
+    $("ov").scrollTop = 0;
+    const pb = row.querySelector(".primary"); if (pb && document.activeElement && document.activeElement !== document.body) pb.focus({ preventScroll: true });
+  }
+  const condBadge = () => st.boss ? `<span class="cond boss">🧠 보스 문제 5개</span><span class="cond fly">🦸 날아야 해요</span>`
+    : st.fly ? `<span class="cond fly">🦸 날지 않으면 갈 수 없어요</span>` : `<span class="cond walk">🚶 걸어서 갈 수 있어요</span>`;
+  function showIntro() {
+    G.mode = "intro"; Sound.duck(false);
+    overlay({ no: `${si + 1}단계 / 10`, title: st.name, img: st.img, imgCls: st.boss ? "sq" : "",
+      html: `<p>${st.story}</p><div class="mission">${st.mission}</div><div class="badges">${condBadge()}</div>`,
+      buttons: [["출동!", start, true]] });
+  }
+  function start() { G.mode = "play"; $("ov").hidden = true; Sound.start(); }
+  function restart() { loadStage(si); start(); }
+  function fail() {
+    G.mode = "fail"; for (const k in keys) keys[k] = false; Sound.wrong(); updateHud();
+    overlay({ no: `${si + 1}단계`, title: "영웅도 힘이 다 빠졌어요", img: "hero", imgCls: "sq",
+      html: `<p>걷고, 날고, 기체를 잘못 고를 때마다 체력이 줄어요. 꼭 필요할 때만 날고, 기체의 성질을 떠올려 한 번에 맞혀 봐요!</p>`,
+      buttons: [["다시 도전", restart, true]] });
+  }
+
+  function gasButtons() {
+    return `<div class="gases">${GASES.map(g => `<button type="button" class="gas" data-id="${g.id}" style="--c:${g.c}">${tankSvg(g)}<span>${g.name}</span></button>`).join("")}</div>`;
+  }
+  function showProblem() {
+    G.mode = "quiz"; for (const k in keys) keys[k] = false; P.vx = 0; Sound.duck(true);
+    overlay({ wide: true, no: `${si + 1}단계 · ${st.name}`,
+      html: `<div class="prob">
+        <div class="prob-l"><img class="pic" src="${ASSET}${st.img}.webp" alt=""><div class="speech"><span class="who">${st.who}</span>${st.say}</div></div>
+        <div class="prob-r"><div class="ask">어떤 기체가 필요할까요?<small>7가지 기체 중 딱 맞는 하나를 골라 전해 주세요. 틀리면 체력 -${COST.wrong}</small></div>
+          ${gasButtons()}
+          <button type="button" class="hintbtn" id="hintBtn">💡 힌트 보기 (체력 -${COST.hint})</button>
+          <div class="fb" id="fb" role="status"></div></div></div>` });
+    bindGasButtons(id => id === st.gas, onStageRight, onWrong);
+    $("hintBtn").onclick = () => {
+      if (G.hintUsed) return; G.hintUsed = true; hpCost(COST.hint); updateHud(); if (G.mode === "fail") return;
+      const d = document.createElement("div"); d.className = "hint"; d.textContent = "💡 " + st.hint;
+      $("hintBtn").replaceWith(d);
+    };
+  }
+  function bindGasButtons(isRight, onRight, onBad) {
+    for (const b of $("card").querySelectorAll(".gas")) b.onclick = () => {
+      if (b.disabled) return;
+      const id = b.dataset.id;
+      if (isRight(id)) {
+        b.classList.add("right"); Sound.right();
+        for (const x of $("card").querySelectorAll(".gas")) x.disabled = true;
+        onRight(id);
+      } else {
+        b.classList.remove("wrong"); void b.offsetWidth; b.classList.add("wrong"); b.disabled = true;
+        onBad(id);
+      }
+    };
+  }
+  function wrongText(id) {
+    const g = GAS[id], why = st.wrongWhy && st.wrongWhy[id];
+    return why || `${g.name}${josa(g.name, "은", "는")} ‘${g.feat}’ 이 상황에는 맞지 않아요.`;
+  }
+  function onWrong(id) {
+    Sound.wrong(); G.wrongs++;
+    hpCost(COST.wrong); updateHud(); if (G.mode === "fail") return;
+    const fb = $("fb"); fb.textContent = `${wrongText(id)} 체력 -${COST.wrong}`; fb.className = "fb err";
+  }
+  function onStageRight(id) {
+    const g = GAS[id];
+    progress.found[id] = true; saveProgress(); renderDex();
+    const fb = $("fb"); fb.textContent = `정답! ${g.name}${josa(g.name, "은", "는")} ${g.feat}`; fb.className = "fb ok";
+    setTimeout(() => { $("ov").hidden = true; Sound.duck(false); G.mode = "solve"; G.solveT = 0; Sound.hiss(); }, 1500);
+  }
+
+  function totalScore() { return STAGES.reduce((a, _, i) => a + (progress.scores[i] || 0), 0); }
+  function recordScore() {
+    const pts = Math.round(G.hp);
+    const prev = progress.scores[si];
+    progress.scores[si] = Math.max(prev || 0, pts);
+    const stars = pts >= 80 ? 3 : pts >= 60 ? 2 : 1;
+    progress.stars[si] = Math.max(progress.stars[si] || 0, stars);
+    progress.unlocked = Math.max(progress.unlocked, Math.min(STAGES.length, si + 2));
+    saveProgress(); renderLevelButtons(); renderRank(); updateHud();
+    for (let k = 0; k < stars; k++) Sound.star(k);
+    return { pts, prev, stars };
+  }
+  function showClear() {
+    G.mode = "won"; Sound.win();
+    const { pts, prev, stars } = recordScore();
+    const g = GAS[st.gas];
+    overlay({ no: `${si + 1}단계 해결!`, title: "고마워요, 히어로!", img: st.img, imgCls: "sm", stars,
+      html: `<p>남은 체력 <b>${pts}</b> → <b>${pts}점</b>${prev != null && pts > prev ? " · 최고 기록!" : ""}${G.wrongs ? ` · 틀린 횟수 ${G.wrongs}번` : " · 한 번에 정답!"}</p>
+        <div class="result"><b>${g.name} (${g.sym})</b><ul><li>${st.done}</li><li>성질: ${g.feat}</li><li>이럴 때 써요: ${g.use}</li></ul></div>`,
+      buttons: [[si === 8 ? "대마왕에게 가기" : "다음 단계", () => loadStage(si + 1), true], ["다시 하기", restart]] });
+  }
+
+  // ---------- 보스 ----------
+  function bossPos() {
+    const k = 1 - G.bossHP / BOSS_N;
+    return { x: 740, y: 170 + Math.sin(clock * 1.6) * 14, s: 1 - k * 0.45 };
+  }
+  function showBossQuiz() {
+    G.mode = "quiz"; for (const k in keys) keys[k] = false; P.vx = 0; Sound.duck(true);
+    const q = G.bossQ[G.qi];
+    const dots = Array.from({ length: BOSS_N }, (_, k) => `<i class="${k < G.bossHP ? "" : "off"}"></i>`).join("");
+    overlay({ wide: true, no: `스모그 대마왕의 문제 ${G.qi + 1} / ${BOSS_N}`,
+      html: `<div class="prob">
+        <div class="prob-l"><img class="pic sq" src="${ASSET}boss.webp" alt=""><div class="speech"><span class="who">대마왕</span>${q.q}</div></div>
+        <div class="prob-r"><div class="ask">정답 기체를 날려 대마왕을 물리쳐요!<small>틀리면 체력 -${COST.wrong}. 맞힐 때까지 다시 고를 수 있어요.</small></div>
+          <div class="bossbar">대마왕 기운 ${dots}</div>
+          ${gasButtons()}
+          <div class="fb" id="fb" role="status"></div></div></div>` });
+    bindGasButtons(id => id === q.gas, id => {
+      const g = GAS[id];
+      progress.found[id] = true; saveProgress(); renderDex();
+      G.answered.push(q.gas);
+      G.bossHP--;
+      const fb = $("fb");
+      fb.textContent = G.bossHP > 0 ? `정답! ${g.name} 발사! 으윽… 아직 ${G.bossHP}문제 남았다!` : `정답! ${g.name} 발사! 으아아~ 내가 졌다!`;
+      fb.className = "fb ok";
+      for (const i of $("card").querySelectorAll(".bossbar i")) i.className = "";
+      $("card").querySelectorAll(".bossbar i").forEach((i, k) => { if (k >= G.bossHP) i.className = "off"; });
+      const b = bossPos(); burst(b.x, b.y, 18, [g.c, "#fff"], 260, .8, true);
+      setTimeout(() => {
+        G.qi++;
+        if (G.qi < BOSS_N) showBossQuiz();
+        else { $("ov").hidden = true; Sound.duck(false); startEnding(); }
+      }, 1300);
+    }, id => {
+      Sound.wrong(); G.wrongs++;
+      hpCost(COST.wrong); updateHud(); if (G.mode === "fail") return;
+      const g = GAS[id];
+      $("fb").textContent = `흐하하, 틀렸다! ${g.name}${josa(g.name, "은", "는")} ‘${g.feat}’ 체력 -${COST.wrong}`; $("fb").className = "fb err";
+    });
+  }
+  function startEnding() {
+    G.mode = "ending"; G.bossDown = true; G.endT = 0; G.smog.length = 0; for (const k in keys) keys[k] = false;
+    G.clearSky = paintBg("town");
+    Sound.poof();
+    const b = bossPos();
+    for (let k = 0; k < 4; k++) burst(b.x + (Math.random() - .5) * 80, b.y + (Math.random() - .5) * 60, 10, ["#B8B2CC", "#E6E1F2", "#fff"], 200, 1.2);
+  }
+  function showEnding() {
+    G.mode = "won";
+    const { pts, stars } = recordScore();
+    const allDone = STAGES.every((_, i) => progress.stars[i] > 0);
+    const list = G.answered.map(id => `<li>${GAS[id].name}: ${GAS[id].feat}</li>`).join("");
+    overlay({ no: "10단계 통과!", title: "도시를 지켰어요!", img: "ending", imgCls: "wide", stars,
+      html: `<p>스모그 대마왕이 사라지고 도와준 시민들이 모두 모였어요! 마지막 단계 점수 <b>${pts}점</b> · 총점 <b>${totalScore()}점</b></p>
+        <div class="result"><b>이번 판 대마왕 문제의 정답</b><ul>${list}</ul></div>
+        <p>${allDone ? "10단계를 모두 통과했어요. 명예의 전당에 이름을 올려 보세요!" : "아직 통과하지 못한 단계가 있어요. 모두 통과하면 랭킹에 등록할 수 있어요."}</p>`,
+      buttons: [["랭킹 등록하러 가기", goRank, true], ["새 문제로 다시", restart], ["1단계부터", () => loadStage(0)]] });
+  }
+
+  // ---------- 진행 ----------
+  function step(dt) {
+    G.time += dt;
+    const sol = solids();
+    if (G.mode === "play") physics(dt, sol);
+    if (G.mode === "play" || G.mode === "quiz") hazards(dt);
+    if (G.mode === "play") {
+      const c = citPos();
+      if (c && !G.solved && P.x + PW > c.x - 32 && P.x < c.x + 32 && P.y < c.y && P.y + PH > c.y - 80) showProblem();
+      if (st.boss && !G.bossDown) {
+        const b = bossPos(), dx = P.x + PW / 2 - b.x, dy = P.y + PH / 2 - b.y;
+        if (dx * dx + dy * dy < 150 * 150) { P.x = Math.min(P.x, b.x - 110); showBossQuiz(); }
+      }
+    }
+    if (G.mode === "solve") {
+      G.solveT += dt;
+      const pp = propPos(), g = GAS[st.gas];
+      if (G.solveT < 1.1 && Math.random() < dt * 40) {
+        const sx = P.x + PW / 2, sy = P.y + 10;
+        fx.push({ x: sx, y: sy, vx: (pp.x - sx) * 1.2 + (Math.random() - .5) * 60, vy: (pp.y - sy) * 1.2 + (Math.random() - .5) * 60, life: .8, max: .8, c: g.c, r: 4 + Math.random() * 4, drift: true });
+      }
+      if (G.solveT > 1 && !G.solved) { G.solved = true; burst(pp.x, pp.y, 26, ["#FFD86E", "#FF9CC4", "#9EE6C8", "#fff", g.c], 260, 1, true); Sound.win(); }
+      if (G.solveT > 2.8) showClear();
+    }
+    if (G.mode === "ending") {
+      G.endT += dt;
+      // 영웅은 땅으로 내려와요
+      P.y = Math.min(400 - PH, P.y + 200 * dt); P.x += (430 - P.x) * Math.min(1, dt * 2);
+      if (G.endT > 1.4 && Math.random() < dt * 8) burst(Math.random() * W, 40 + Math.random() * 100, 6, ["#FF9CC4", "#5AB4FF", "#FFB648", "#3FC49A", "#B892FF"], 160, 1.4, true);
+      if (G.endT > 6) showEnding();
+    }
+    if (G.toast) { G.toast.t -= dt; if (G.toast.t <= 0) G.toast = null; }
+  }
+  function toast(text) { G.toast = { text, t: 2.4 }; }
+
+  // ---------- 효과 ----------
+  function burst(x, y, n, colors, speed, life, confetti) {
+    if (reduceMotion) n = Math.ceil(n / 3);
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * Math.PI * 2, v = speed * (0.35 + Math.random() * 0.65);
+      fx.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - (confetti ? 120 : 0), life, max: life,
+        c: colors[i % colors.length], r: confetti ? 4 + Math.random() * 3 : 3 + Math.random() * 5, rot: Math.random() * 6, confetti });
+    }
+  }
+  function stepFx(dt) {
+    for (let i = fx.length - 1; i >= 0; i--) {
+      const p = fx[i];
+      p.life -= dt; if (p.life <= 0) { fx.splice(i, 1); continue; }
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      if (p.drift) continue;
+      const d = p.confetti ? 1.6 : 4; p.vx -= p.vx * d * dt; p.vy -= p.vy * d * dt;
+      if (p.confetti) { p.vy += 260 * dt; p.rot += dt * 8; }
+    }
+  }
+  function drawFx(c) {
+    for (const p of fx) {
+      c.globalAlpha = Math.min(1, p.life / p.max * 1.6);
+      c.fillStyle = p.c;
+      if (p.confetti) { c.save(); c.translate(p.x, p.y); c.rotate(p.rot); c.fillRect(-p.r, -p.r * 0.5, p.r * 2, p.r); c.restore(); }
+      else { c.beginPath(); c.arc(p.x, p.y, p.r, 0, Math.PI * 2); c.fill(); }
+    }
+    c.globalAlpha = 1;
+  }
+
+  // ---------- 그리기 도우미 ----------
+  function rr(c, x, y, w, h, r) {
+    r = Math.max(0, Math.min(r, w / 2, h / 2));
+    c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
+    c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
+  }
+  function txt(c, s, x, y, size, color, { align = "center", stroke = "#fff", sw = 5 } = {}) {
+    c.font = `${size}px Jua, "Gowun Dodum", sans-serif`; c.textAlign = align; c.textBaseline = "middle";
+    if (stroke) { c.lineWidth = sw; c.strokeStyle = stroke; c.lineJoin = "round"; c.strokeText(s, x, y); }
+    c.fillStyle = color; c.fillText(s, x, y);
+  }
+  function drawHeart(c, x, y, r) {
+    c.beginPath(); c.moveTo(x, y + r * .9);
+    c.bezierCurveTo(x - r * 1.6, y - r * .2, x - r * .8, y - r * 1.4, x, y - r * .5);
+    c.bezierCurveTo(x + r * .8, y - r * 1.4, x + r * 1.6, y - r * .2, x, y + r * .9); c.fill();
+  }
+  function drawStar(c, x, y, r) {
+    c.beginPath(); for (let k = 0; k < 10; k++) { const a = -Math.PI / 2 + k * Math.PI / 5, r2 = k % 2 ? r * .45 : r; c.lineTo(x + Math.cos(a) * r2, y + Math.sin(a) * r2); } c.closePath(); c.fill();
+  }
+  function cloud(c, x, y, s, col) {
+    c.fillStyle = col; c.beginPath();
+    c.arc(x, y, 22 * s, 0, 7); c.arc(x + 24 * s, y - 10 * s, 26 * s, 0, 7); c.arc(x + 50 * s, y, 20 * s, 0, 7); c.arc(x + 25 * s, y + 8 * s, 20 * s, 0, 7); c.fill();
+  }
+  function tankCanvas(c, x, y, s, col, faceMood) {
+    c.save(); c.translate(x, y); c.scale(s, s);
+    c.fillStyle = "#6B6A8E"; rr(c, -4, -24, 8, 6, 2); c.fill();
+    c.fillStyle = col; rr(c, -13, -19, 26, 34, 11); c.fill();
+    c.strokeStyle = "rgba(62,61,107,.5)"; c.lineWidth = 1.6; c.stroke();
+    c.fillStyle = "rgba(255,255,255,.55)"; rr(c, -9, -15, 4, 12, 2); c.fill();
+    c.fillStyle = "#3E3D6B"; c.beginPath(); c.arc(-4, -3, 1.8, 0, 7); c.arc(4, -3, 1.8, 0, 7); c.fill();
+    c.strokeStyle = "#3E3D6B"; c.lineWidth = 1.4; c.beginPath();
+    if (faceMood === "sad") c.arc(0, 4, 3, 1.15 * Math.PI, 1.85 * Math.PI); else c.arc(0, 0.5, 3, .15 * Math.PI, .85 * Math.PI);
+    c.stroke();
+    c.restore();
+  }
+
+  // ---------- 영웅 ----------
+  function drawHero(c, x, by, o = {}) {
+    const f = o.face || 1, ph = o.phase || 0, pose = o.pose || "stand";
+    c.save(); c.translate(x, by); c.scale((o.scale || 1) * SC, (o.scale || 1) * SC);
+    if (pose !== "fly") { c.fillStyle = "rgba(40,50,90,.15)"; c.beginPath(); c.ellipse(0, 1, 14, 4, 0, 0, 7); c.fill(); }
+    c.scale(f, 1);
+    const fly = pose === "fly", sw = fly ? 0 : Math.sin(ph) * 4;
+    if (fly) { c.translate(0, -26); c.rotate(.28); c.translate(0, 26); }
+    // 망토
+    const flap = Math.sin(clock * (fly ? 18 : 4)) * (fly ? 4 : 2);
+    c.fillStyle = "#FF5D6C";
+    c.beginPath(); c.moveTo(-7, -33);
+    if (fly) { c.quadraticCurveTo(-30, -30 + flap, -44, -18 + flap); c.lineTo(-34, -10 - flap * .5); c.lineTo(4, -14); }
+    else { c.quadraticCurveTo(-18 - Math.abs(sw) * .6, -18 + flap, -16, -5); c.lineTo(5, -7); }
+    c.lineTo(7, -33); c.closePath(); c.fill();
+    // 다리·장화
+    c.fillStyle = "#3D78D8";
+    if (fly) { rr(c, -10, -14, 6, 12, 3); c.fill(); rr(c, -2, -13, 6, 12, 3); c.fill(); }
+    else { rr(c, -7, -13 - (sw > 0 ? sw * .5 : 0), 6, 12, 3); c.fill(); rr(c, 1, -13 - (sw < 0 ? -sw * .5 : 0), 6, 12, 3); c.fill(); }
+    c.fillStyle = "#FF5D6C";
+    if (fly) { rr(c, -12, -4, 8, 5, 2); c.fill(); rr(c, -3, -3, 8, 5, 2); c.fill(); }
+    else { rr(c, -8, -4 - (sw > 0 ? sw * .5 : 0), 8, 5, 2); c.fill(); rr(c, 1, -4 - (sw < 0 ? -sw * .5 : 0), 8, 5, 2); c.fill(); }
+    // 몸
+    c.fillStyle = "#5AB4FF"; rr(c, -10, -33, 20, 22, 8); c.fill();
+    c.fillStyle = "#FFC94A"; c.fillRect(-10, -16, 20, 3);
+    c.fillStyle = "#FFD84A"; drawStar(c, 0, -24, 6);
+    // 팔
+    c.strokeStyle = "#5AB4FF"; c.lineWidth = 5; c.lineCap = "round";
+    const up = pose === "cheer";
+    c.beginPath();
+    if (fly) { c.moveTo(6, -29); c.lineTo(17, -38); c.moveTo(-7, -28); c.lineTo(-13, -21); }
+    else if (up) { c.moveTo(-8, -29); c.lineTo(-14, -42); c.moveTo(8, -29); c.lineTo(14, -42); }
+    else { c.moveTo(-8, -29); c.lineTo(-12, -19 + sw * .4); c.moveTo(8, -29); c.lineTo(12, -19 - sw * .4); }
+    c.stroke();
+    c.fillStyle = "#FF5D6C";
+    if (fly) { c.beginPath(); c.arc(18, -39, 3.8, 0, 7); c.arc(-13, -20, 3.4, 0, 7); c.fill(); }
+    else if (up) { c.beginPath(); c.arc(-14, -43, 3.6, 0, 7); c.arc(14, -43, 3.6, 0, 7); c.fill(); }
+    else { c.beginPath(); c.arc(-12, -18 + sw * .4, 3.4, 0, 7); c.arc(12, -18 - sw * .4, 3.4, 0, 7); c.fill(); }
+    if (o.tank) tankCanvas(c, 14, -20, .55, o.tank);
+    // 머리
+    c.fillStyle = "#FFE0C7"; c.beginPath(); c.arc(0, -48, 16, 0, 7); c.fill();
+    // 머리카락
+    c.fillStyle = "#7A4A2A";
+    c.beginPath(); c.arc(0, -51, 16.5, Math.PI * 1.02, Math.PI * 1.98);
+    c.quadraticCurveTo(12, -56, 4, -55); c.quadraticCurveTo(0, -60, -5, -55); c.quadraticCurveTo(-12, -55, -16, -49); c.fill();
+    c.beginPath(); c.moveTo(-3, -66); c.quadraticCurveTo(2, -74, 8, -70); c.quadraticCurveTo(3, -69, 2, -64); c.fill();
+    // 가면
+    c.fillStyle = "#2F5BC4";
+    rr(c, -13, -51, 26, 9, 4.5); c.fill();
+    c.fillStyle = "#fff"; c.beginPath(); c.ellipse(-5, -46.5, 4, 3.8, 0, 0, 7); c.ellipse(6, -46.5, 4, 3.8, 0, 0, 7); c.fill();
+    c.fillStyle = "#3A2F55";
+    if (up || o.happy) {
+      c.strokeStyle = "#3A2F55"; c.lineWidth = 2;
+      for (const ex of [-5, 6]) { c.beginPath(); c.arc(ex, -45.5, 2.6, Math.PI * 1.1, Math.PI * 1.9); c.stroke(); }
+    } else {
+      for (const ex of [-4, 7]) { c.beginPath(); c.ellipse(ex, -46.5, 2.2, 2.8, 0, 0, 7); c.fill(); }
+      c.fillStyle = "#fff"; for (const ex of [-4, 7]) { c.beginPath(); c.arc(ex + .8, -47.6, .9, 0, 7); c.fill(); }
+    }
+    c.fillStyle = "rgba(255,120,150,.5)"; c.beginPath(); c.ellipse(-8, -38, 3.4, 2, 0, 0, 7); c.ellipse(10, -38, 3.4, 2, 0, 0, 7); c.fill();
+    c.strokeStyle = "#B4505E"; c.lineWidth = 1.6; c.beginPath(); c.arc(2, -38.5, 3.4, .15 * Math.PI, .85 * Math.PI); c.stroke();
+    c.restore();
+  }
+
+  // ---------- 시민 ----------
+  const CIT = {
+    diver: { body: "#2E3B6E", hair: "#6B4430" }, shop: { body: "#FF9CC4", hair: "#8A5A3C" }, worker: { body: "#F4F6FB", hair: "#8A5A3C" },
+    fire: { body: "#3C3C55", hair: "#5B3A28" }, camper: { body: "#8FB3E8", hair: "#6B4430" }, sign: { body: "#FFD1E0", hair: "#7A4A2A" },
+    medic: { body: "#2E4D7A", hair: "#6B4430" }, driver: { body: "#BFE9C5", hair: "#5B3A28" }, pilot: { body: "#FFB648", hair: "#7A4A2A" },
+  };
+  function drawCitizen(c, x, by, kind, mood, o = {}) {
+    const C = CIT[kind]; const cheer = mood === "happy";
+    const hop = o.hop || 0;
+    c.save(); c.translate(x, by - hop); c.scale((o.scale || 1) * SC, (o.scale || 1) * SC);
+    c.fillStyle = "rgba(40,50,90,.15)"; c.beginPath(); c.ellipse(0, 1 + hop, 13, 4, 0, 0, 7); c.fill();
+    c.scale(o.face || -1, 1);
+    // 다리
+    c.fillStyle = "#4A4560"; rr(c, -7, -12, 6, 11, 3); c.fill(); rr(c, 1, -12, 6, 11, 3); c.fill();
+    c.fillStyle = kind === "diver" ? "#FFB648" : "#5B4A3A"; rr(c, -8, -3, 8, 4, 2); c.fill(); rr(c, 1, -3, 8, 4, 2); c.fill();
+    // 몸
+    c.fillStyle = C.body; rr(c, -10, -31, 20, 21, 8); c.fill();
+    if (kind === "fire") { c.fillStyle = "#FFD84A"; c.fillRect(-10, -20, 20, 3); }
+    if (kind === "shop" || kind === "sign") { c.fillStyle = "#fff"; rr(c, -6, -26, 12, 15, 4); c.fill(); }
+    if (kind === "medic") { c.fillStyle = "#fff"; c.fillRect(-2, -26, 4, 10); c.fillRect(-5, -23, 10, 4); }
+    if (kind === "diver") { c.fillStyle = "#FFB648"; c.fillRect(-10, -24, 20, 2); }
+    // 팔
+    c.strokeStyle = C.body; c.lineWidth = 5; c.lineCap = "round"; c.beginPath();
+    if (cheer) { c.moveTo(-8, -27); c.lineTo(-14, -41); c.moveTo(8, -27); c.lineTo(14, -41); }
+    else { c.moveTo(-8, -27); c.lineTo(-4, -20); c.moveTo(8, -27); c.lineTo(4, -20); }
+    c.stroke();
+    c.fillStyle = "#FFE0C7";
+    if (cheer) { c.beginPath(); c.arc(-14, -42, 3.2, 0, 7); c.arc(14, -42, 3.2, 0, 7); c.fill(); }
+    else { c.beginPath(); c.arc(-3, -19, 3.2, 0, 7); c.arc(3, -19, 3.2, 0, 7); c.fill(); }
+    // 머리
+    c.fillStyle = "#FFE0C7"; c.beginPath(); c.arc(0, -45, 14, 0, 7); c.fill();
+    c.fillStyle = C.hair; c.beginPath(); c.arc(0, -47, 14.5, Math.PI * 1.02, Math.PI * 1.98); c.quadraticCurveTo(6, -51, 0, -49); c.quadraticCurveTo(-7, -51, -14.5, -46); c.fill();
+    // 얼굴
+    c.fillStyle = "#3A2F55";
+    if (cheer) {
+      c.strokeStyle = "#3A2F55"; c.lineWidth = 2;
+      for (const ex of [-5, 5]) { c.beginPath(); c.arc(ex, -44, 2.8, Math.PI * 1.1, Math.PI * 1.9); c.stroke(); }
+      c.fillStyle = "#C2465A"; c.beginPath(); c.arc(0, -38.5, 3.6, 0, Math.PI); c.fill();
+    } else {
+      for (const ex of [-5, 5]) { c.beginPath(); c.ellipse(ex, -44, 2.2, 2.9, 0, 0, 7); c.fill(); }
+      c.strokeStyle = "#3A2F55"; c.lineWidth = 1.4;
+      for (const ex of [-5, 5]) { c.beginPath(); c.moveTo(ex - 3 * Math.sign(ex), -49.5); c.lineTo(ex + 2 * Math.sign(ex), -48); c.stroke(); }
+      c.strokeStyle = "#B4505E"; c.lineWidth = 1.6; c.beginPath(); c.arc(0, -36, 3, 1.15 * Math.PI, 1.85 * Math.PI); c.stroke();
+      // 땀방울
+      c.fillStyle = "#7CC8FF"; c.beginPath(); c.moveTo(13, -54); c.quadraticCurveTo(17, -48, 13, -46); c.quadraticCurveTo(9, -48, 13, -54); c.fill();
+    }
+    c.fillStyle = "rgba(255,120,150,.45)"; c.beginPath(); c.ellipse(-9, -39, 3, 1.8, 0, 0, 7); c.ellipse(9, -39, 3, 1.8, 0, 0, 7); c.fill();
+    // 모자
+    switch (kind) {
+      case "diver": c.fillStyle = "#2E3B6E"; c.beginPath(); c.arc(0, -50, 15, Math.PI, 0); c.fill(); c.fillStyle = "#7CD3FF"; rr(c, -12, -60, 24, 8, 4); c.fill(); c.strokeStyle = "#2E3B6E"; c.lineWidth = 2; c.stroke(); break;
+      case "shop": c.fillStyle = "#FF7EB6"; rr(c, -12, -62, 24, 8, 4); c.fill(); c.fillStyle = "#fff"; c.fillRect(-12, -57, 24, 2); break;
+      case "worker": c.fillStyle = "#fff"; c.beginPath(); c.arc(-6, -64, 8, 0, 7); c.arc(6, -64, 8, 0, 7); c.arc(0, -68, 9, 0, 7); c.fill(); rr(c, -12, -60, 24, 8, 3); c.fill(); break;
+      case "fire": c.fillStyle = "#FF4D4D"; c.beginPath(); c.arc(0, -52, 15, Math.PI, 0); c.fill(); rr(c, -18, -54, 36, 5, 2.5); c.fill(); c.fillStyle = "#FFD84A"; c.beginPath(); c.arc(0, -60, 3, 0, 7); c.fill(); break;
+      case "camper": c.fillStyle = "#A8B4C8"; c.beginPath(); c.arc(0, -52, 14.5, Math.PI, 0); c.fill(); c.fillStyle = "#fff"; c.beginPath(); c.arc(0, -68, 5, 0, 7); c.fill(); break;
+      case "sign": c.fillStyle = "#FF8FB8"; c.beginPath(); c.ellipse(2, -58, 16, 6, -.15, 0, 7); c.fill(); c.beginPath(); c.arc(2, -64, 2.5, 0, 7); c.fill(); break;
+      case "medic": c.fillStyle = "#2E4D7A"; c.beginPath(); c.arc(0, -53, 13, Math.PI, 0); c.fill(); rr(c, 0, -55, 18, 4, 2); c.fill(); break;
+      case "driver": c.fillStyle = "#6CC97A"; c.beginPath(); c.arc(0, -53, 13, Math.PI, 0); c.fill(); rr(c, 0, -55, 18, 4, 2); c.fill(); c.fillStyle = "#fff"; c.beginPath(); c.ellipse(-2, -60, 3, 2, .5, 0, 7); c.fill(); break;
+      case "pilot": c.fillStyle = "#8A5A3C"; c.beginPath(); c.arc(0, -51, 15, Math.PI, 0); c.fill(); c.fillStyle = "#9FDCFF"; c.strokeStyle = "#5B4A3A"; c.lineWidth = 1.5; c.beginPath(); c.arc(-5, -59, 4, 0, 7); c.arc(5, -59, 4, 0, 7); c.fill(); c.stroke(); break;
+    }
+    c.restore();
+  }
+
+  // ---------- 배경 ----------
+  function paintBg(theme) {
+    const T = THEMES[theme];
+    const oc = document.createElement("canvas"); oc.width = W; oc.height = H;
+    const c = oc.getContext("2d");
+    const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, T.sky[0]); g.addColorStop(1, T.sky[1]);
+    c.fillStyle = g; c.fillRect(0, 0, W, H);
+    let seed = 7; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+    const sun = () => { c.fillStyle = "#FFE48A"; c.beginPath(); c.arc(110, 78, 36, 0, 7); c.fill(); c.fillStyle = "rgba(255,228,138,.35)"; c.beginPath(); c.arc(110, 78, 54, 0, 7); c.fill(); };
+    const nightSky = () => {
+      for (let i = 0; i < 60; i++) { c.fillStyle = `rgba(255,255,255,${.4 + rnd() * .5})`; c.beginPath(); c.arc(rnd() * W, rnd() * 300, 1 + rnd() * 1.8, 0, 7); c.fill(); }
+      c.fillStyle = "#FFF3B0"; c.beginPath(); c.arc(840, 76, 30, 0, 7); c.fill();
+      c.fillStyle = T.sky[0]; c.beginPath(); c.arc(826, 66, 27, 0, 7); c.fill();
+    };
+    if (theme === "beach") {
+      sun();
+      for (const [x, y, s] of [[260, 70, 1], [560, 110, .8], [780, 60, 1.1]]) cloud(c, x, y, s, "rgba(255,255,255,.92)");
+      c.fillStyle = "#5CB8F0"; c.fillRect(0, 300, W, 110);
+      c.fillStyle = "#7FCBF5"; for (let x = 0; x < W; x += 60) { c.beginPath(); c.ellipse(x + 30, 302, 30, 6, 0, 0, Math.PI); c.fill(); }
+      c.fillStyle = "rgba(255,255,255,.5)"; for (let i = 0; i < 18; i++) { rr(c, rnd() * W, 320 + rnd() * 70, 20 + rnd() * 30, 3, 2); c.fill(); }
+      // 작은 배
+      c.fillStyle = "#fff"; c.beginPath(); c.moveTo(560, 296); c.lineTo(640, 296); c.lineTo(625, 312); c.lineTo(575, 312); c.fill();
+      c.fillStyle = "#FF8FB8"; c.beginPath(); c.moveTo(600, 294); c.lineTo(600, 250); c.lineTo(628, 290); c.fill();
+      // 야자수
+      c.strokeStyle = "#B97A4A"; c.lineWidth = 10; c.lineCap = "round"; c.beginPath(); c.moveTo(70, 400); c.quadraticCurveTo(60, 320, 90, 250); c.stroke();
+      c.fillStyle = "#5BC47A"; for (const a of [-2.6, -2, -1.2, -.5, .2]) { c.beginPath(); c.ellipse(90 + Math.cos(a) * 34, 250 + Math.sin(a) * 18, 38, 10, a, 0, 7); c.fill(); }
+    } else if (theme === "town" || theme === "city" || theme === "factory") {
+      if (theme !== "factory") sun();
+      for (const [x, y, s] of [[280, 70, 1], [600, 100, .8]]) cloud(c, x, y, s, "rgba(255,255,255,.9)");
+      const cols = ["#D9D3F0", "#CFE3F7", "#F7D9E6", "#DCEFE0"];
+      for (let x = -20, k = 0; x < W; x += 92, k++) {
+        const h = 120 + ((k * 53) % 110); c.fillStyle = cols[k % 4]; rr(c, x, 400 - h, 84, h + 10, 8); c.fill();
+        c.fillStyle = "rgba(255,255,255,.65)";
+        for (let wy = 400 - h + 16; wy < 380; wy += 30) for (let wx = x + 12; wx < x + 74; wx += 24) { rr(c, wx, wy, 14, 16, 4); c.fill(); }
+      }
+      if (theme === "factory") {
+        c.fillStyle = "rgba(160,170,200,.9)"; rr(c, 0, 210, W, 200, 0); c.fill();
+        c.fillStyle = "#AEB8D2"; for (const x of [120, 300, 760]) { rr(c, x, 120, 40, 120, 6); c.fill(); }
+        c.fillStyle = "rgba(255,255,255,.6)"; for (const x of [140, 320, 780]) { c.beginPath(); c.arc(x, 104, 16, 0, 7); c.arc(x + 18, 88, 20, 0, 7); c.fill(); }
+        c.fillStyle = "#C8D1E6"; for (let x = 40; x < W; x += 140) { rr(c, x, 250, 90, 60, 10); c.fill(); }
+        c.fillStyle = "#FFD86E"; c.font = "24px Jua"; c.textAlign = "center"; c.fillText("바삭 과자 공장", 480, 236);
+      }
+    } else if (theme === "night" || theme === "street") {
+      nightSky();
+      if (theme === "night") {
+        for (const [x, h, col] of [[150, 220, "#4B4384"], [420, 280, "#3F3876"], [700, 240, "#4B4384"]]) {
+          c.fillStyle = col; c.beginPath(); c.moveTo(x - 240, 420); c.lineTo(x, 420 - h); c.lineTo(x + 240, 420); c.fill();
+          c.fillStyle = "rgba(255,255,255,.75)"; c.beginPath(); c.moveTo(x - 40, 420 - h + 50); c.lineTo(x, 420 - h); c.lineTo(x + 40, 420 - h + 50); c.lineTo(x, 420 - h + 40); c.fill();
+        }
+      } else {
+        for (let x = -10, k = 0; x < W; x += 100, k++) {
+          const h = 140 + ((k * 61) % 120); c.fillStyle = k % 2 ? "#3A3874" : "#45428A"; rr(c, x, 400 - h, 92, h + 10, 6); c.fill();
+          for (let wy = 400 - h + 16; wy < 370; wy += 28) for (let wx = x + 12; wx < x + 80; wx += 22) { c.fillStyle = rnd() < .5 ? "rgba(255,230,140,.85)" : "rgba(255,255,255,.12)"; rr(c, wx, wy, 12, 14, 3); c.fill(); }
+        }
+        c.fillStyle = "#6E6A93"; for (const x of [120, 420]) { c.fillRect(x, 260, 6, 140); c.fillStyle = "#FFE9A0"; c.beginPath(); c.arc(x + 3, 256, 10, 0, 7); c.fill(); c.fillStyle = "rgba(255,233,160,.25)"; c.beginPath(); c.arc(x + 3, 256, 30, 0, 7); c.fill(); c.fillStyle = "#6E6A93"; }
+      }
+    } else if (theme === "river" || theme === "sky") {
+      sun();
+      for (const [x, y, s] of [[260, 70, 1], [520, 110, .8], [760, 60, 1.1]]) cloud(c, x, y, s, "rgba(255,255,255,.9)");
+      if (theme === "river") {
+        c.fillStyle = "#BDEBB5"; c.beginPath(); c.moveTo(0, 360);
+        for (let x = 0; x <= W; x += 40) c.lineTo(x, 330 + Math.sin(x / 120) * 26); c.lineTo(W, H); c.lineTo(0, H); c.fill();
+        c.fillStyle = "#E8DDF6"; for (let x = 680, k = 0; x < 940; x += 60, k++) { rr(c, x, 300 - k % 2 * 30, 50, 120, 6); c.fill(); }
+      } else {
+        for (const [x, y, s] of [[60, 470, 1.6], [360, 500, 1.8], [700, 480, 1.7], [900, 430, 1.2]]) cloud(c, x, y, s, "rgba(255,255,255,.85)");
+      }
+    } else if (theme === "canyon") {
+      sun();
+      for (const [x, y, s] of [[300, 70, 1], [700, 90, .9]]) cloud(c, x, y, s, "rgba(255,255,255,.85)");
+      c.fillStyle = "#F2C08E"; c.beginPath(); c.moveTo(0, 300);
+      for (let x = 0; x <= W; x += 60) c.lineTo(x, 260 + (x / 60 % 2) * 30); c.lineTo(W, H); c.lineTo(0, H); c.fill();
+      c.fillStyle = "#B86E3E"; c.fillRect(260, 400, 440, 140);
+      c.fillStyle = "#9C5A30"; for (let y = 420; y < H; y += 30) { c.fillRect(260, y, 440, 4); }
+    } else if (theme === "boss") {
+      for (let i = 0; i < 12; i++) { c.fillStyle = `rgba(80,74,110,${.15 + rnd() * .2})`; c.beginPath(); c.arc(rnd() * W, 60 + rnd() * 300, 40 + rnd() * 50, 0, 7); c.fill(); }
+      for (let x = -10, k = 0; x < W; x += 90, k++) { const h = 120 + ((k * 47) % 100); c.fillStyle = "rgba(90,84,120,.55)"; rr(c, x, 400 - h, 80, h + 10, 6); c.fill(); }
+    }
+    return oc;
+  }
+
+  function drawGround(c) {
+    const T = THEMES[st.theme];
+    for (const [x, y, w, h, kind] of st.ground) {
+      if (kind === "b" || kind === "b2") {
+        c.fillStyle = kind === "b" ? "#F2E6FF" : "#E2F0FF"; rr(c, x, y, w, h + 20, 10); c.fill();
+        c.fillStyle = kind === "b" ? "#D9C7F2" : "#C7DDF5"; c.fillRect(x, y, w, 12);
+        c.fillStyle = "#BFE7FF";
+        for (let wy = y + 30; wy < H - 10; wy += 46) for (let wx = x + 20; wx < x + w - 30; wx += 44) { rr(c, wx, wy, 26, 30, 6); c.fill(); }
+        continue;
+      }
+      c.fillStyle = T.side; rr(c, x, y, w, h + 20, 14); c.fill();
+      c.fillStyle = T.dot;
+      for (let gx = x + 18; gx < x + w - 10; gx += 46) for (let gy = y + 34; gy < Math.min(H, y + h); gy += 40) { c.beginPath(); c.ellipse(gx + (gy % 3) * 8, gy, 6, 4, 0, 0, 7); c.fill(); }
+      c.fillStyle = T.top; rr(c, x, y, w, 16, 10); c.fill();
+      for (let gx = x + 8; gx < x + w - 6; gx += 16) { c.beginPath(); c.arc(gx, y + 15, 8, 0, Math.PI); c.fill(); }
+    }
+    for (const [x, y, w, h, kind] of st.plat || []) {
+      if (kind === "gondola") continue;
+      cloud(c, x + 12, y + 6, .9, "#fff");
+      c.fillStyle = "rgba(160,200,240,.5)"; rr(c, x + 6, y + 10, w - 12, 8, 4); c.fill();
+    }
+    if (st.belt) {
+      const [a, b] = st.belt;
+      c.fillStyle = "#6E7896"; rr(c, a, 386, b - a, 20, 10); c.fill();
+      c.fillStyle = "#4E5776"; for (let k = 0; k < (b - a) / 24; k++) { const xx = a + ((k * 24 - clock * 95) % (b - a) + (b - a)) % (b - a); c.fillRect(xx, 389, 10, 14); }
+      for (const xx of [a + 10, b - 10]) { c.fillStyle = "#AEB8D2"; c.beginPath(); c.arc(xx, 396, 9, 0, 7); c.fill(); }
+      txt(c, "◀◀ 밀려요", (a + b) / 2, 372, 16, "#6E7896");
+    }
+  }
+  function drawHazards(c) {
+    for (const [x, y, w, h, kind] of st.hazard || []) {
+      if (kind === "water") {
+        c.fillStyle = "rgba(110,190,245,.85)"; c.fillRect(x, y, w, H - y);
+        c.strokeStyle = "rgba(255,255,255,.9)"; c.lineWidth = 3; c.beginPath();
+        for (let k = 0; k <= w; k += 6) c.lineTo(x + k, y + Math.sin((k + clock * 60) / 14) * 3);
+        c.stroke();
+        // 끊어진 다리
+        c.fillStyle = "#C98B4A"; rr(c, x - 10, 392, 70, 12, 4); c.fill(); rr(c, x + w - 60, 392, 70, 12, 4); c.fill();
+        c.save(); c.translate(x + 70, 400); c.rotate(.5); c.fillStyle = "#C98B4A"; rr(c, 0, 0, 50, 10, 4); c.fill(); c.restore();
+      } else if (kind === "pit") {
+        c.fillStyle = "#7A4426"; c.fillRect(x, y, w, h);
+      }
+    }
+  }
+  function drawStorm(c, s) {
+    const p = stormPos(s);
+    c.save(); c.translate(p.x, p.y);
+    c.fillStyle = "#7C7A9E"; c.beginPath(); c.arc(-24, 4, 20, 0, 7); c.arc(0, -8, 26, 0, 7); c.arc(24, 4, 20, 0, 7); c.arc(0, 10, 22, 0, 7); c.fill();
+    c.fillStyle = "#fff"; for (const ex of [-9, 9]) { c.beginPath(); c.arc(ex, -2, 5, 0, 7); c.fill(); }
+    c.fillStyle = "#3A2F55"; for (const ex of [-8, 10]) { c.beginPath(); c.arc(ex, -1, 2.6, 0, 7); c.fill(); }
+    c.strokeStyle = "#3A2F55"; c.lineWidth = 2.4; c.lineCap = "round"; c.beginPath(); c.moveTo(-15, -11); c.lineTo(-5, -7); c.moveTo(15, -11); c.lineTo(5, -7); c.stroke();
+    if (Math.sin(clock * 9 + s.ph) > -.3) {
+      c.fillStyle = "#FFE066"; c.strokeStyle = "#F0B429"; c.lineWidth = 1.5;
+      c.beginPath(); c.moveTo(-4, 26); c.lineTo(6, 26); c.lineTo(0, 40); c.lineTo(9, 40); c.lineTo(-6, 62); c.lineTo(-1, 45); c.lineTo(-9, 45); c.closePath(); c.fill(); c.stroke();
+    }
+    c.restore();
+  }
+
+  // ---------- 시민의 물건 (해결되면 바뀌어요) ----------
+  function propPos() {
+    const c = citPos();
+    switch (st.prop) {
+      case "tank": return { x: 880, y: 370 };
+      case "soda": return { x: 850, y: 330 };
+      case "snack": return { x: 720, y: 380 };
+      case "fire": return { x: 710, y: 120 };
+      case "stove": return { x: 770, y: 150 };
+      case "neon": return { x: 840, y: 160 };
+      case "ambulance": return { x: 860, y: 350 };
+      case "car": return { x: 870, y: 370 };
+      case "airship": return { x: 800, y: 140 };
+    }
+    return c;
+  }
+  function drawProp(c) {
+    const k = G.solved ? Math.max(0, Math.min(1, G.solveT - 1)) : 0, ok = G.solved;
+    const t = clock;
+    switch (st.prop) {
+      case "tank": {
+        tankCanvas(c, 880, 380, 1.4, ok ? "#5AB4FF" : "#C9CEDA", ok ? "happy" : "sad");
+        c.fillStyle = "#fff"; rr(c, 905, 330, 30, 14, 6); c.fill();
+        c.fillStyle = ok ? "#3FC49A" : "#FF5D6C"; rr(c, 907, 332, ok ? 26 : 5, 10, 5); c.fill();
+        if (ok) for (let i = 0; i < 4; i++) { const yy = 330 - ((t * 40 + i * 25) % 100); c.strokeStyle = "rgba(255,255,255,.9)"; c.lineWidth = 2; c.beginPath(); c.arc(860 + Math.sin(t * 3 + i) * 6, yy, 4, 0, 7); c.stroke(); }
+        // 부두 기둥
+        c.fillStyle = "#B97A4A"; for (const x of [640, 940]) { rr(c, x, 350, 16, 52, 6); c.fill(); }
+        break;
+      }
+      case "soda": {
+        c.fillStyle = "#FFC2DE"; rr(c, 790, 340, 150, 62, 10); c.fill();
+        c.fillStyle = "#fff"; for (let x = 790; x < 940; x += 30) { c.beginPath(); c.arc(x + 15, 250, 15, 0, Math.PI); c.fill(); }
+        c.fillStyle = "#FF8FB8"; for (let x = 790; x < 940; x += 60) { c.fillRect(x, 230, 30, 20); c.beginPath(); c.arc(x + 15, 250, 15, 0, Math.PI); c.fill(); }
+        c.fillStyle = "#fff"; c.fillRect(790, 230, 150, 0);
+        c.fillStyle = "#B9A4E0"; c.fillRect(796, 250, 6, 90); c.fillRect(928, 250, 6, 90);
+        // 컵
+        c.fillStyle = "rgba(220,245,255,.9)"; c.beginPath(); c.moveTo(835, 300); c.lineTo(865, 300); c.lineTo(860, 340); c.lineTo(840, 340); c.closePath(); c.fill();
+        c.strokeStyle = "#8FC6E8"; c.lineWidth = 2; c.stroke();
+        c.fillStyle = "#BFF0D8"; c.fillRect(840, 312, 21, 26);
+        c.strokeStyle = "#FF7EB6"; c.lineWidth = 3; c.beginPath(); c.moveTo(856, 318); c.lineTo(866, 286); c.stroke();
+        if (ok) {
+          for (let i = 0; i < 7; i++) { const yy = 336 - ((t * 50 + i * 13) % 60); c.strokeStyle = "rgba(255,255,255,.95)"; c.lineWidth = 1.6; c.beginPath(); c.arc(843 + (i * 5) % 16, yy, 2.4, 0, 7); c.stroke(); }
+          txt(c, "톡톡!", 900, 290 - Math.abs(Math.sin(t * 4)) * 6, 20, "#3FC49A");
+        } else txt(c, "밍밍…", 900, 290, 18, "#8A88AE");
+        // 아이
+        drawCitizen(c, 690, 400, "driver", ok ? "happy" : "sad", { face: 1, scale: .8, hop: ok ? Math.abs(Math.sin(t * 6)) * 8 : 0 });
+        break;
+      }
+      case "snack": {
+        const colors = ["#FFD86E", "#FF9CC4", "#9ED8FF"];
+        for (let i = 0; i < 3; i++) {
+          const x = 650 + i * 52, h = 10 + 32 * k;
+          c.fillStyle = colors[i]; rr(c, x, 400 - h - 2, 44, h, Math.min(14, h / 2)); c.fill();
+          c.fillStyle = "rgba(255,255,255,.5)"; rr(c, x + 6, 400 - h + 2, 5, Math.max(3, h * .4), 2); c.fill();
+          if (!ok) { c.fillStyle = "#E8B060"; for (let j = 0; j < 4; j++) { c.beginPath(); c.arc(x + 6 + j * 11, 401, 2.4, 0, 7); c.fill(); } }
+          else if (h > 30) { c.fillStyle = "#3E3D6B"; c.beginPath(); c.arc(x + 17, 400 - h / 2, 2, 0, 7); c.arc(x + 27, 400 - h / 2, 2, 0, 7); c.fill(); }
+        }
+        if (ok) txt(c, "빵빵!", 726, 330 - Math.abs(Math.sin(t * 4)) * 6, 20, "#3FC49A");
+        break;
+      }
+      case "fire": {
+        if (!ok || k < 1) {
+          const a = 1 - k;
+          c.globalAlpha = a;
+          for (let i = 0; i < 4; i++) {
+            const x = 660 + i * 30, hh = 40 + Math.sin(t * 10 + i * 2) * 8 + (i % 2) * 14;
+            c.fillStyle = "#FF8A3D"; c.beginPath(); c.moveTo(x - 16, 150); c.quadraticCurveTo(x - 12, 150 - hh * .6, x, 150 - hh); c.quadraticCurveTo(x + 12, 150 - hh * .6, x + 16, 150); c.fill();
+            c.fillStyle = "#FFD86E"; c.beginPath(); c.moveTo(x - 8, 150); c.quadraticCurveTo(x - 6, 150 - hh * .35, x, 150 - hh * .55); c.quadraticCurveTo(x + 6, 150 - hh * .35, x + 8, 150); c.fill();
+          }
+          c.fillStyle = "rgba(120,110,140,.35)"; for (let i = 0; i < 3; i++) { const yy = 90 - ((t * 30 + i * 30) % 90); c.beginPath(); c.arc(700 + Math.sin(t + i) * 20, yy, 18 + i * 4, 0, 7); c.fill(); }
+          c.globalAlpha = 1;
+        }
+        if (ok) {
+          c.fillStyle = `rgba(255,255,255,${.8 * (1 - k * .6)})`;
+          for (let i = 0; i < 6; i++) { c.beginPath(); c.arc(650 + i * 24, 140 - Math.sin(i + t) * 8, 18, 0, 7); c.fill(); }
+          if (k >= 1) txt(c, "불이 꺼졌어요!", 720, 100, 22, "#3FC49A");
+        }
+        break;
+      }
+      case "stove": {
+        // 텐트
+        c.fillStyle = "#FFB648"; c.beginPath(); c.moveTo(560, 170); c.lineTo(620, 90); c.lineTo(680, 170); c.fill();
+        c.fillStyle = "#E0902A"; c.beginPath(); c.moveTo(605, 170); c.lineTo(620, 110); c.lineTo(635, 170); c.fill();
+        // 버너와 냄비
+        c.fillStyle = "#7A7896"; rr(c, 750, 158, 40, 12, 4); c.fill();
+        if (ok) {
+          for (let i = 0; i < 3; i++) { c.fillStyle = "#6EB8FF"; c.beginPath(); c.moveTo(756 + i * 12, 158); c.quadraticCurveTo(760 + i * 12, 144 - Math.sin(t * 12 + i) * 3, 764 + i * 12, 158); c.fill(); }
+          c.fillStyle = "rgba(255,180,100,.25)"; c.beginPath(); c.arc(770, 150, 34 + Math.sin(t * 5) * 3, 0, 7); c.fill();
+        }
+        c.fillStyle = "#C9CEDA"; rr(c, 748, 120, 44, 26, 6); c.fill(); c.fillStyle = "#A9AFC2"; rr(c, 744, 116, 52, 6, 3); c.fill();
+        if (ok) { c.strokeStyle = "rgba(255,255,255,.75)"; c.lineWidth = 3; c.lineCap = "round"; for (let i = 0; i < 3; i++) { c.beginPath(); for (let y = 0; y < 30; y += 3) c.lineTo(756 + i * 13 + Math.sin((y + t * 40) / 6) * 4, 110 - y); c.stroke(); } txt(c, "보글보글", 770, 66, 18, "#FFD86E", { stroke: "#3E3D6B", sw: 4 }); }
+        // 가스통
+        tankCanvas(c, 812, 160, .7, ok ? "#FF8A3D" : "#C9CEDA", ok ? "happy" : "sad");
+        break;
+      }
+      case "neon": {
+        // 가게
+        c.fillStyle = "#4F4B86"; rr(c, 700, 210, 250, 200, 8); c.fill();
+        c.fillStyle = "#FF8FB8"; for (let x = 700; x < 950; x += 50) { c.fillRect(x, 210, 25, 22); } c.fillStyle = "#fff"; for (let x = 725; x < 950; x += 50) c.fillRect(x, 210, 25, 22);
+        c.fillStyle = ok ? "rgba(255,230,160,.85)" : "#3A3768"; rr(c, 830, 260, 90, 140, 8); c.fill();
+        // 간판 틀
+        c.fillStyle = "#2B2950"; rr(c, 720, 110, 230, 92, 16); c.fill();
+        const glow = (col, fn) => { c.save(); if (ok) { c.shadowColor = col; c.shadowBlur = 18 * k; } c.strokeStyle = ok ? col : "#5D5A86"; c.lineWidth = 5; c.lineCap = "round"; c.lineJoin = "round"; fn(); c.restore(); };
+        glow("#FF6FAE", () => { c.beginPath(); const x = 748, y = 150; c.moveTo(x, y + 22); c.bezierCurveTo(x - 32, y, x - 18, y - 26, x, y - 10); c.bezierCurveTo(x + 18, y - 26, x + 32, y, x, y + 22); c.stroke(); });
+        glow("#7FE7FF", () => { c.beginPath(); const x = 918, y = 156; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 10 : 24; c.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r); } c.closePath(); c.stroke(); });
+        c.save(); if (ok) { c.shadowColor = "#FFE066"; c.shadowBlur = 14 * k; }
+        txt(c, "별빛 상점", 833, 158, 22, ok ? "#FFF3A0" : "#5D5A86", { stroke: null }); c.restore();
+        break;
+      }
+      case "ambulance": {
+        const sh = ok ? Math.sin(t * 20) > 0 : false;
+        c.fillStyle = "#fff"; rr(c, 790, 300, 160, 90, 14); c.fill(); rr(c, 900, 270, 50, 40, 10); c.fill();
+        c.strokeStyle = "#E3E8F2"; c.lineWidth = 3; rr(c, 790, 300, 160, 90, 14); c.stroke();
+        c.fillStyle = "#FF5D6C"; c.fillRect(790, 340, 160, 10); c.fillRect(860, 310, 8, 26); c.fillRect(851, 319, 26, 8);
+        c.fillStyle = "#BFE7FF"; rr(c, 908, 278, 34, 22, 6); c.fill();
+        c.fillStyle = sh ? "#FF5D6C" : "#5AB4FF"; rr(c, 905, 260, 16, 10, 4); c.fill(); c.fillStyle = sh ? "#5AB4FF" : "#FF5D6C"; rr(c, 925, 260, 16, 10, 4); c.fill();
+        c.fillStyle = "#4A4560"; for (const x of [820, 920]) { c.beginPath(); c.arc(x, 392, 14, 0, 7); c.fill(); c.fillStyle = "#C9CEDA"; c.beginPath(); c.arc(x, 392, 6, 0, 7); c.fill(); c.fillStyle = "#4A4560"; }
+        // 들것 위 환자
+        c.fillStyle = "#FFD86E"; rr(c, 730, 368, 64, 8, 4); c.fill(); c.fillStyle = "#4A4560"; c.fillRect(736, 376, 4, 18); c.fillRect(784, 376, 4, 18);
+        c.fillStyle = "#9ED8FF"; rr(c, 738, 354, 50, 14, 7); c.fill();
+        c.fillStyle = "#FFE0C7"; c.beginPath(); c.arc(784, 356, 10, 0, 7); c.fill();
+        c.fillStyle = "#3A2F55";
+        if (ok) { c.strokeStyle = "#3A2F55"; c.lineWidth = 1.6; c.beginPath(); c.arc(781, 354, 2, Math.PI, 0); c.arc(788, 354, 2, Math.PI, 0); c.stroke(); c.fillStyle = "rgba(160,230,255,.85)"; c.beginPath(); c.ellipse(786, 361, 5, 4, 0, 0, 7); c.fill(); tankCanvas(c, 760, 340, .5, "#5AB4FF", "happy"); }
+        else { c.beginPath(); c.arc(781, 355, 1.6, 0, 7); c.arc(788, 355, 1.6, 0, 7); c.fill(); }
+        break;
+      }
+      case "car": {
+        const dx = ok ? Math.sin(t * 30) * 1 : 0;
+        c.save(); c.translate(dx, 0);
+        c.fillStyle = "#A6E3B4"; rr(c, 810, 330, 130, 50, 22); c.fill(); rr(c, 832, 300, 82, 40, 18); c.fill();
+        c.fillStyle = "#DFF6FF"; rr(c, 842, 308, 30, 24, 8); c.fill(); rr(c, 878, 308, 28, 24, 8); c.fill();
+        c.fillStyle = "#fff"; c.beginPath(); c.ellipse(875, 352, 10, 6, .4, 0, 7); c.fill(); c.fillStyle = "#5BC47A"; c.beginPath(); c.ellipse(875, 352, 6, 3, .4, 0, 7); c.fill();
+        c.fillStyle = "#4A4560"; for (const x of [838, 912]) { c.beginPath(); c.arc(x, 382, 15, 0, 7); c.fill(); c.fillStyle = "#C9CEDA"; c.beginPath(); c.arc(x, 382, 6, 0, 7); c.fill(); c.fillStyle = "#4A4560"; }
+        c.restore();
+        // 계기판 말풍선
+        c.fillStyle = "#fff"; rr(c, 880, 240, 60, 36, 14); c.fill();
+        c.fillStyle = ok ? "#3FC49A" : "#FF5D6C"; rr(c, 888, 252, ok ? 44 : 8, 12, 4); c.fill();
+        c.strokeStyle = "#8A88AE"; c.lineWidth = 2; rr(c, 888, 252, 44, 12, 4); c.stroke();
+        if (ok) {
+          for (let i = 0; i < 3; i++) { const p = (t * 1.2 + i / 3) % 1; c.fillStyle = `rgba(110,190,245,${1 - p})`; const x = 806 - p * 20, y = 372 + p * 26; c.beginPath(); c.moveTo(x, y - 6); c.quadraticCurveTo(x + 5, y, x, y + 3); c.quadraticCurveTo(x - 5, y, x, y - 6); c.fill(); }
+          txt(c, "물만 나와요!", 760, 330, 17, "#2F86DB");
+        }
+        break;
+      }
+      case "airship": {
+        const ry = 36 + 26 * k, y = 150 - 10 * k + Math.sin(t * 1.5) * 3;
+        c.save(); c.beginPath(); c.ellipse(800, y, 150, ry, 0, 0, 7); c.clip();
+        const cols = ["#FFB3D4", "#FFE08A", "#A8DCFF", "#BFF0D8"];
+        for (let i = -6; i < 6; i++) { c.fillStyle = cols[(i + 12) % 4]; c.fillRect(800 + i * 26, y - ry, 26, ry * 2); }
+        c.restore();
+        c.strokeStyle = "rgba(62,61,107,.35)"; c.lineWidth = 2; c.beginPath(); c.ellipse(800, y, 150, ry, 0, 0, 7); c.stroke();
+        if (!ok) { c.strokeStyle = "rgba(62,61,107,.3)"; for (let i = 0; i < 4; i++) { c.beginPath(); c.moveTo(700 + i * 50, y - ry * .5); c.quadraticCurveTo(712 + i * 50, y, 700 + i * 50, y + ry * .5); c.stroke(); } }
+        c.fillStyle = "#FF8FB8"; c.beginPath(); c.moveTo(650, y); c.lineTo(620, y - 30); c.lineTo(626, y + 30); c.fill();
+        c.strokeStyle = "#8A5A3C"; c.lineWidth = 2; c.beginPath(); c.moveTo(730, y + ry * .8); c.lineTo(715, 262); c.moveTo(870, y + ry * .8); c.lineTo(885, 262); c.stroke();
+        // 곤돌라
+        c.fillStyle = "#C98B4A"; rr(c, 700, 260, 200, 26, 10); c.fill();
+        c.fillStyle = "#9A6430"; rr(c, 696, 257, 208, 8, 4); c.fill();
+        if (ok) txt(c, "둥실둥실!", 800, y - ry - 18, 20, "#3FC49A");
+        break;
+      }
+    }
+  }
+
+  // ---------- 보스 그리기 ----------
+  function drawBoss(c) {
+    if (!st.boss) return;
+    const b = bossPos();
+    let s = b.s, a = 1, y = b.y;
+    if (G.bossDown) { const k = Math.min(1, G.endT / 1.2); s *= 1 - k; a = 1 - k; y -= k * 60; }
+    if (a <= 0) return;
+    const size = 230 * s;
+    c.save(); c.globalAlpha = a;
+    if (IMG.boss.complete && IMG.boss.naturalWidth) {
+      c.translate(b.x, y); c.rotate(Math.sin(clock * 2) * .05);
+      c.drawImage(IMG.boss, -size / 2, -size / 2, size, size);
+    }
+    c.restore();
+    if (!G.bossDown && G.mode === "play") {
+      c.fillStyle = "#fff"; rr(c, b.x - 120, b.y - size / 2 - 52, 240, 40, 16); c.fill();
+      txt(c, "흐하하! 내 문제를 풀 수 있겠냐?", b.x, b.y - size / 2 - 32, 16, "#6B4FC4", { stroke: null });
+    }
+    for (const m of G.smog) {
+      c.fillStyle = "#8E88A6"; c.beginPath(); c.arc(m.x, m.y, 20, 0, 7); c.arc(m.x + 12, m.y - 8, 13, 0, 7); c.arc(m.x - 12, m.y - 6, 12, 0, 7); c.fill();
+      c.fillStyle = "#3A2F55"; c.beginPath(); c.arc(m.x - 6, m.y, 2.4, 0, 7); c.arc(m.x + 6, m.y, 2.4, 0, 7); c.fill();
+    }
+  }
+
+  function drawStage(c) {
+    c.drawImage(bgCache, 0, 0);
+    // 대마왕이 사라지면 스모그가 걷히고 맑은 하늘이 나와요
+    if (G.clearSky) { c.globalAlpha = Math.max(0, Math.min(1, ((G.mode === "ending" ? G.endT : 9) - .6) / 1.6)); c.drawImage(G.clearSky, 0, 0); c.globalAlpha = 1; }
+    drawGround(c); drawProp(c);
+    drawHazards(c);
+    // 시민
+    const cp = citPos();
+    if (cp && G.mode !== "ending") {
+      const happy = G.solved;
+      drawCitizen(c, cp.x, cp.y, st.cit.kind, happy ? "happy" : "sad", { hop: happy ? Math.abs(Math.sin(clock * 6)) * 10 : 0 });
+      if (!G.solved && (G.mode === "play" || G.mode === "intro")) {
+        const by = cp.y - 110 + Math.sin(clock * 4) * 4;
+        c.fillStyle = "#fff"; rr(c, cp.x - 52, by - 18, 104, 32, 14); c.fill();
+        c.beginPath(); c.moveTo(cp.x - 6, by + 14); c.lineTo(cp.x, by + 24); c.lineTo(cp.x + 6, by + 14); c.fill();
+        txt(c, "도와주세요!", cp.x, by - 2, 16, "#FF5D6C", { stroke: null });
+      }
+    }
+    for (const s of st.storms || []) drawStorm(c, s);
+    drawBoss(c);
+    // 엔딩: 도와준 시민들이 모두 나와 환호해요
+    if (st.boss && G.mode === "ending" || (st.boss && G.mode === "won" && G.bossDown)) {
+      const e = G.mode === "ending" ? G.endT : 9;
+      STAGES.slice(0, 9).forEach((S, i) => {
+        const tx = [55, 140, 225, 310, 610, 690, 770, 850, 925][i], fromLeft = i < 4;
+        const k = Math.max(0, Math.min(1, (e - 1.2 - i * .12) / 1.2));
+        if (k <= 0) return;
+        const x = fromLeft ? -40 + (tx + 40) * k : W + 40 - (W + 40 - tx) * k;
+        drawCitizen(c, x, 400, S.cit.kind, k >= 1 ? "happy" : "sad", { face: x < 480 ? 1 : -1, hop: k >= 1 ? Math.abs(Math.sin(clock * 7 + i)) * 14 : 0 });
+      });
+      if (e > 2.6) txt(c, "고마워요, 기체 히어로!", 480, 120 + Math.sin(clock * 3) * 4, 40, "#FF5D6C");
+    }
+    // 영웅
+    let pose = P.flying || (!P.on && G.mode === "play") ? "fly" : "stand";
+    let px = P.x + PW / 2, py = P.y + PH;
+    if (G.mode === "play" && P.on && (keys.l || keys.r)) pose = "stand";
+    if (G.mode === "solve") { pose = G.solved ? "cheer" : "stand"; if (G.solved) py -= Math.abs(Math.sin(G.solveT * 9)) * 14; }
+    if (G.mode === "ending" || (st.boss && G.mode === "won")) { pose = "cheer"; py -= Math.abs(Math.sin(clock * 7)) * 14; }
+    const face = G.mode === "solve" ? (propPos().x >= px ? 1 : -1) : P.face;
+    const blink = G.invuln > 0 && Math.sin(clock * 30) > 0;
+    if (!blink) drawHero(c, px, py, { face, phase: P.phase, pose, tank: G.mode === "solve" && !G.solved ? GAS[st.gas].c : null, happy: G.solved });
+    drawFx(c);
+    if (G.toast) {
+      c.globalAlpha = Math.min(1, G.toast.t * 2);
+      c.font = "20px Jua, sans-serif"; const w = c.measureText(G.toast.text).width + 40;
+      c.fillStyle = "rgba(255,255,255,.95)"; rr(c, W / 2 - w / 2, 18, w, 40, 20); c.fill();
+      c.strokeStyle = "#FFB3BA"; c.lineWidth = 3; c.stroke();
+      txt(c, G.toast.text, W / 2, 39, 20, "#E2475A", { stroke: null });
+      c.globalAlpha = 1;
+    }
+  }
+
+  // ---------- HUD ----------
+  function updateHud() {
+    $("lvlNo").textContent = `${si + 1}단계`;
+    $("lvlName").textContent = st.name;
+    const hp = Math.max(0, G.hp);
+    $("hpTxt").textContent = Math.ceil(hp);
+    const fill = $("hpFill"); fill.style.width = hp + "%";
+    fill.style.background = hp > 50 ? "linear-gradient(90deg,#FF9CA6,#FF6B6B)" : hp > 25 ? "linear-gradient(90deg,#FFD27A,#FFB648)" : "linear-gradient(90deg,#FF9DA8,#FF5D6C)";
+    $("scoreTxt").textContent = totalScore() + "점";
+  }
+  function renderLevelButtons() {
+    const box = $("levels"); box.textContent = "";
+    STAGES.forEach((L, i) => {
+      const b = document.createElement("button"); b.type = "button";
+      b.disabled = i + 1 > progress.unlocked; if (i === si) b.classList.add("cur");
+      b.title = L.name; b.setAttribute("aria-label", `${i + 1}단계 ${L.name}`);
+      const s = progress.stars[i] || 0;
+      b.innerHTML = `<span class="n">${i + 1}</span><span class="s">${"★".repeat(s)}</span>`;
+      b.onclick = () => loadStage(i);
+      box.appendChild(b);
+    });
+  }
+  function renderDex() {
+    $("dex").innerHTML = GASES.map(g => progress.found[g.id]
+      ? `<div class="dx" style="--c:${g.c}">${tankSvg(g)}<span><b>${g.name}</b>${g.feat}<span class="use">🧰 ${g.use}</span></span></div>`
+      : `<div class="dx locked" style="--c:${g.c}">${tankSvg(g)}<span><b>${g.name}</b>시민을 도와주면 성질이 기록돼요.</span></div>`).join("");
+  }
+  $("unlockAll").onclick = () => { progress.unlocked = STAGES.length; saveProgress(); renderLevelButtons(); };
+  $("restartBtn").onclick = restart;
+  $("fromStartBtn").onclick = () => loadStage(0);
+
+  // ---------- 랭킹 ----------
+  const TOP_N = 5, MAX = STAGES.length * 100;
+  const Rank = { db: null, user: null, uid: null, rows: [], status: "loading", readOnly: false };
+  const clearedCount = () => STAGES.filter((_, i) => progress.stars[i] > 0).length;
+  const cleanScore = v => Math.max(0, Math.min(MAX, Math.round(Number(v) || 0)));
+  const cleanNick = v => String(v || "").replace(/\s+/g, " ").trim().slice(0, 12);
+  function goRank() {
+    $("rank").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    setTimeout(() => { if (!$("nick").disabled) $("nick").focus({ preventScroll: true }); }, reduceMotion ? 0 : 450);
+  }
+  let boardSeq = 0;
+  async function renderRank() {
+    const total = totalScore(), cleared = clearedCount();
+    $("myTotal").textContent = total; $("myClear").textContent = cleared;
+    const ls = $("lvScores"); ls.textContent = "";
+    STAGES.forEach((_, i) => {
+      const li = document.createElement("li"); const done = progress.stars[i] > 0;
+      if (!done) li.className = "none";
+      const sm = document.createElement("small"); sm.textContent = `${i + 1}단계`;
+      li.append(sm, done ? String(progress.scores[i] || 0) : "–"); ls.appendChild(li);
+    });
+    const mine = Rank.rows.find(r => r.id === Rank.uid);
+    const btn = $("rankBtn"), msg = $("rankMsg"), nick = $("nick");
+    const writable = Rank.status === "ready" && !Rank.readOnly && !!Rank.uid;
+    let note = "", cls = "", can = false;
+    if (Rank.status === "off") note = "지금은 순위표에 연결할 수 없어요. 인터넷 연결을 확인해 주세요.";
+    else if (Rank.status === "loading") note = "순위표에 연결하는 중이에요…";
+    else if (!writable) note = "보기 권한만 있어서 등록할 수는 없어요.";
+    else if (cleared < STAGES.length) note = `${STAGES.length - cleared}개 단계만 더 통과하면 등록할 수 있어요!`;
+    else if (mine && cleanScore(mine.score) >= total) { note = `${cleanScore(mine.score)}점으로 등록되어 있어요. 단계를 다시 해서 기록을 올려 보세요.`; cls = "ok"; can = true; }
+    else { note = mine ? `새 총점 ${total}점! 다시 등록하면 순위에 반영돼요.` : `총점 ${total}점, 지금 바로 등록할 수 있어요!`; can = true; }
+    if (!msg.dataset.sticky) { msg.textContent = note; msg.className = "msg " + cls; btn.disabled = !can; }
+    nick.disabled = !writable;
+    btn.textContent = mine ? "기록 갱신" : "랭킹 등록";
+    if (mine && !nick.value && document.activeElement !== nick) nick.value = cleanNick(mine.nick);
+    const board = $("board");
+    if (Rank.status !== "ready") { board.innerHTML = `<li class="empty">${Rank.status === "off" ? "순위표를 불러올 수 없어요." : "순위표를 불러오는 중이에요…"}</li>`; return; }
+    const rows = Rank.rows.filter(r => cleanNick(r.nick))
+      .sort((a, b) => cleanScore(b.score) - cleanScore(a.score) || String(a.at).localeCompare(String(b.at))).slice(0, TOP_N);
+    if (!rows.length) { board.innerHTML = `<li class="empty">아직 아무도 등록하지 않았어요.<br>대마왕을 물리치고 첫 번째 영웅이 되어 보세요!</li>`; return; }
+    const seq = ++boardSeq;
+    let ps = {};
+    try { if (Rank.user) ps = await Rank.user.profiles(rows.map(r => r.id)); } catch (e) {}
+    if (seq !== boardSeq) return;
+    board.textContent = "";
+    rows.forEach((r, i) => {
+      const li = document.createElement("li"); if (r.id === Rank.uid) li.className = "me";
+      const no = document.createElement("span"); no.className = "no"; no.textContent = i + 1;
+      const img = document.createElement("img"); img.alt = "";
+      if (ps[r.id] && ps[r.id].avatarUrl) img.src = ps[r.id].avatarUrl; else img.style.visibility = "hidden";
+      const nm = document.createElement("span"); nm.className = "nm"; nm.textContent = cleanNick(r.nick);
+      if (r.id === Rank.uid) { const me = document.createElement("small"); me.textContent = "나"; nm.appendChild(me); }
+      const sc = document.createElement("span"); sc.className = "sc"; sc.textContent = cleanScore(r.score) + "점";
+      li.append(no, img, nm, sc); board.appendChild(li);
+    });
+  }
+  $("rankForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const msg = $("rankMsg"), btn = $("rankBtn");
+    const nick = cleanNick($("nick").value);
+    if (!nick) { msg.textContent = "이름을 한 글자 이상 적어 주세요."; msg.className = "msg err"; return; }
+    if (!Rank.save || !Rank.uid || clearedCount() < STAGES.length) return;
+    btn.disabled = true; msg.dataset.sticky = "1"; msg.textContent = "등록하는 중…"; msg.className = "msg";
+    const body = { nick, score: totalScore(), levels: STAGES.map((_, i) => progress.scores[i] || 0), at: new Date().toISOString() };
+    try {
+      await Rank.save(body);
+      msg.textContent = `${nick} 님, ${body.score}점으로 등록했어요!`; msg.className = "msg ok"; Sound.win();
+    } catch (err) {
+      if (err && err.code === "invalid_argument") { Rank.readOnly = true; msg.textContent = "등록 권한이 없어요."; }
+      else if (err && err.code === "unavailable") msg.textContent = "잠시 연결이 불안정해요. 조금 뒤에 다시 눌러 주세요.";
+      else msg.textContent = "등록하지 못했어요. 페이지를 새로 고친 뒤 다시 시도해 주세요.";
+      msg.className = "msg err";
+    }
+    setTimeout(() => { delete msg.dataset.sticky; renderRank(); }, 2600);
+  });
+  // 3min-playground.com에서는 다른 게임과 같은 Firestore에 랭킹을 저장해요.
+  function initFirebase() {
+    let fdb;
+    try {
+      if (!firebase.apps.length) firebase.initializeApp({
+        apiKey: "AIzaSyAqXsG8npxettrCRH3MbZwFZGLg5aehxdw",
+        authDomain: "min-playground.firebaseapp.com",
+        projectId: "min-playground",
+        storageBucket: "min-playground.firebasestorage.app",
+        messagingSenderId: "472071492052",
+        appId: "1:472071492052:web:00263046925133e55a4641"
+      });
+      fdb = firebase.firestore();
+    } catch (e) { Rank.status = "off"; return renderRank(); }
+    const ref = fdb.collection("farm_rankings").doc("gas_hero_top");
+    try { Rank.uid = localStorage.getItem("gas-hero-key"); } catch (e) {}
+    if (!Rank.uid) { Rank.uid = Date.now() + "-" + Math.floor(Math.random() * 1e6); try { localStorage.setItem("gas-hero-key", Rank.uid); } catch (e) {} }
+    Rank.save = async body => {
+      const doc = await ref.get();
+      const arr = ((doc.exists && doc.data().top) || []).filter(r => r.key !== Rank.uid);
+      arr.push({ key: Rank.uid, name: body.nick, score: body.score, levels: body.levels, at: body.at });
+      arr.sort((a, b) => cleanScore(b.score) - cleanScore(a.score));
+      await ref.set({ top: arr.slice(0, 30) });
+    };
+    // 관리자용 순위 초기화 (맨 아래 전구), 사이트의 다른 게임과 같아요
+    $("bulbWrap").hidden = false;
+    $("bulb").onclick = () => adminReset(() => ref.set({ top: [] }));
+    ref.onSnapshot(doc => {
+      Rank.rows = ((doc.exists && doc.data().top) || []).map(r => ({ id: r.key, nick: r.name, score: r.score, at: r.at }));
+      Rank.status = "ready"; renderRank();
+    }, () => { Rank.status = "off"; renderRank(); });
+  }
+  const ADMIN_PW = "3min";
+  function adminReset(clear) {
+    const pw = prompt("관리자 비밀번호를 입력하세요.");
+    if (pw === null) return;
+    if (pw !== ADMIN_PW) { alert("비밀번호가 달라요."); return; }
+    if (!confirm("'기체 히어로 출동!' 순위를 지울까요?\n지우면 되돌릴 수 없어요.")) return;
+    const bulb = $("bulb"); bulb.classList.add("on");
+    clear().then(() => alert("✅ 순위를 초기화했어요."))
+      .catch(e => alert("초기화하지 못했어요.\n" + (e && e.message ? e.message : "")))
+      .then(() => bulb.classList.remove("on"));
+  }
+  (async () => {
+    renderRank();
+    if (!window.claude?.use) { if (window.firebase) return initFirebase(); Rank.status = "off"; return renderRank(); }
+    const [db, user] = await Promise.all([claude.use("db"), claude.use("user")]);
+    if (!db) { Rank.status = "off"; return renderRank(); }
+    Rank.db = db; Rank.user = user;
+    Rank.save = body => db.doc("ranking/" + Rank.uid).set(body);
+    if (user) {
+      Rank.uid = await user.id();
+      if ((await user.can("data.write")) === false) Rank.readOnly = true;
+    }
+    db.collection("ranking").orderBy("score", "desc").limit(50).onSnapshot(snap => {
+      Rank.rows = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      Rank.status = "ready"; renderRank();
+    }, () => { Rank.status = "off"; renderRank(); });
+  })();
+
+  // ---------- 캔버스 크기 ----------
+  function resize() {
+    const r = cv.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1);
+    cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.width * H / W * dpr);
+  }
+  new ResizeObserver(resize).observe(cv);
+  resize();
+
+  // ---------- 메인 루프 ----------
+  let last = performance.now(), hudT = 0;
+  function frame(now) {
+    const dt = Math.min(0.033, (now - last) / 1000); last = now;
+    clock += dt;
+    step(dt);
+    stepFx(dt);
+    ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0);
+    drawStage(ctx);
+    hudT += dt; if (hudT > 0.06) { hudT = 0; updateHud(); }
+    requestAnimationFrame(frame);
+  }
+  renderDex();
+  loadStage(Math.max(0, progress.unlocked - 1));
+  requestAnimationFrame(frame);
+  if (document.fonts?.ready) document.fonts.ready.then(() => { bgCache = paintBg(st.theme); });
+})();
+</script>
+
+<!-- 활용 안내 시작 -->
+<section class="pgd" id="pg-guide" aria-labelledby="pgd-title" style="--pgd-accent:#FF6B6B;--pgd-soft:#DDEEFF;">
+  <div class="pgd__box">
+    <span class="pgd__ribbon">📖 활용 안내</span>
+    <span class="pgd__deco pgd__deco--a" aria-hidden="true">🦸</span>
+    <span class="pgd__deco pgd__deco--b" aria-hidden="true">🫧</span>
+    <span class="pgd__deco pgd__deco--c" aria-hidden="true">✨</span>
+    <div class="pgd__head">
+      <div class="pgd__mascot"><img src="../assets/guide/gas-hero.webp" alt="기체 통을 들고 하늘을 나는 귀여운 꼬마 영웅 그림" width="150" height="150" loading="lazy" decoding="async"></div>
+      <div>
+        <h2 class="pgd__title" id="pgd-title"><mark>기체 히어로 출동!</mark>, 이렇게 활용해요</h2>
+        <p class="pgd__lead">하늘을 나는 영웅이 되어 위기에 빠진 시민에게 <b>“지금 꼭 필요한 기체는 무엇일까?”</b>를 고민하며 7가지 기체의 성질과 쓰임새를 익히는 과학 모험 게임이에요.</p>
+      </div>
+    </div>
+    <ul class="pgd__chips" aria-label="한눈에 보기">
+      <li>🎒 4~6학년 추천</li>
+      <li>🔬 과학 · 여러 가지 기체</li>
+      <li>⏱️ 단계마다 1~2분</li>
+      <li>👤 혼자 · 모둠 대결</li>
+    </ul>
+    <div class="pgd__grid">
+      <div class="pgd__card pgd__card--how">
+        <h3><span class="pgd__ico" aria-hidden="true">🎮</span>이렇게 놀아요</h3>
+        <ol>
+        <li>방향키·<b>A D</b>로 걷고, <b>스페이스</b>나 <b>↑</b>를 꾹 누르면 날아요. 4·5·7·8·9·10단계는 <b>날지 않으면 갈 수 없어요.</b></li>
+        <li>시민에게 닿으면 이야기를 듣고 <b>7가지 기체 중 딱 맞는 하나</b>를 골라 전해 줘요.</li>
+        <li>10단계에서는 스모그 대마왕이 7문제 중 <b>무작위 5문제</b>를 내요. 할 때마다 문제가 달라져요.</li>
+        <li>체력은 단계마다 100에서 시작해요. <b>남은 체력이 곧 점수</b>, 모두 통과하면 명예의 전당에 이름을 올려요.</li>
+        </ol>
+      </div>
+      <div class="pgd__card pgd__card--learn">
+        <h3><span class="pgd__ico" aria-hidden="true">🌱</span>이런 걸 배워요</h3>
+        <ul>
+        <li><b>산소·이산화탄소·질소·헬륨·수소·천연가스·네온</b>의 성질을 상황 속에서 떠올려요.</li>
+        <li>소화기, 탄산음료, 과자 봉지, 비행선, 수소 자동차, 네온사인처럼 <b>생활 속 쓰임새</b>와 연결해요.</li>
+        <li>틀린 기체를 고르면 그 기체의 성질을 알려 줘서 <b>왜 맞지 않는지</b> 스스로 비교해요.</li>
+        <li>기체 도감에 성질과 쓰임새가 하나씩 모여 <b>정리 노트</b>가 돼요.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="pgd__card pgd__card--class">
+      <h3><span class="pgd__ico" aria-hidden="true">🏫</span>교실에서 이렇게 써 보세요</h3>
+      <ul>
+        <li>단원 도입에서 “풍선을 하늘로 띄우려면 무엇을 넣어야 할까?” 질문으로 시작해요.</li>
+        <li>단계를 통과할 때마다 나오는 기체의 성질과 쓰임새를 공책에 표로 정리해요.</li>
+        <li>10단계는 매판 문제가 바뀌니 모둠별로 번갈아 도전하며 7문제를 모두 만나 봐요.</li>
+        <li>모둠별로 ‘틀리지 않고 가장 많은 체력을 남기기’ 대결을 열어요.</li>
+      </ul>
+    </div>
+    <p class="pgd__tip"><span><b>선생님 한마디</b> 휴대용 가스버너에는 실제로 부탄가스를 많이 쓰지만, 이 게임에서는 ‘불이 잘 붙고 뜨거운 열을 내는 연료 기체’를 천연가스로 묶어 소개했어요. 기체는 눈에 보이지 않아서 게임에서는 색깔 통으로 나타냈다는 점도 덧붙여 주세요.</span></p>
+  </div>
+</section>
+<!-- 활용 안내 끝 -->
+</body>
+</html>
