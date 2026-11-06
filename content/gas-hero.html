@@ -99,7 +99,7 @@ canvas#cv { display: block; width: 100%; aspect-ratio: 960 / 540; max-width: 100
 .card img.pic.sm { max-width: 170px; }
 .badges { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
 .cond { font-family: var(--f-display); font-size: 14px; border-radius: 999px; padding: 2px 12px; }
-.cond.fly { background: #FFE3E5; color: #C93A47; } .cond.walk { background: #DDF6EC; color: #1E8A64; } .cond.boss { background: #ECE4FF; color: #5B3FC4; }
+.cond.fly { background: #FFE3E5; color: #C93A47; } .cond.obs { background: #FFF2CC; color: #9A6200; } .cond.walk { background: #DDF6EC; color: #1E8A64; } .cond.boss { background: #ECE4FF; color: #5B3FC4; }
 .stars { display: flex; gap: 6px; font-size: 38px; line-height: 1; }
 .stars span { color: #E6ECF5; }
 .stars span.on { color: var(--sun); text-shadow: 0 3px 0 #E09424; animation: pop .4s cubic-bezier(.2, 1.8, .4, 1) both; }
@@ -285,6 +285,7 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
       <ul class="keys">
         <li><kbd>←</kbd> <kbd>→</kbd> 또는 <kbd>A</kbd> <kbd>D</kbd> 걷기 · <kbd>Space</kbd> <kbd>↑</kbd> <kbd>W</kbd> 꾹 누르면 날기 · <kbd>↓</kbd> 빨리 내려오기</li>
         <li>시민에게 닿으면 7가지 기체 중 하나를 골라 도와줘요. 틀리면 체력 -20, 힌트를 보면 체력 -5.</li>
+        <li>⚡ 천둥 구름·💨 매연에 닿으면 체력이 줄고, 🌀 돌풍에 닿으면 엉뚱한 곳으로 날아가요. 🌫️ 안개 속은 보이지 않아요.</li>
         <li>♥ 체력은 단계마다 100에서 시작해요. 걸을 때 조금, 날 때 더 많이 줄어요. 물에 빠지거나 번개 구름에 닿아도 줄어요.</li>
         <li>단계를 통과할 때 남은 체력이 그 단계의 점수예요. <kbd>R</kbd> 다시 · <kbd>Enter</kbd> 시작</li>
       </ul>
@@ -336,7 +337,7 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
 (() => {
   const W = 960, H = 540;
   const GR = 1500, FLY = 2700, SPD = 220, PW = 32, PH = 66, SC = 1.25;
-  const COST = { move: 2, fly: 5, fall: 10, zap: 10, smog: 8, wrong: 20, hint: 5 };
+  const COST = { move: 2, fly: 5, fall: 10, zap: 10, smog: 8, wrong: 20, hint: 5, shield: 10, slam: 15 };
   const $ = id => document.getElementById(id);
   const cv = $("cv"), ctx = cv.getContext("2d");
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -375,78 +376,93 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
       hint: "생물이 숨을 쉴 때 꼭 필요한 기체를 찾아보세요.",
       done: "잠수부의 통에 산소를 가득 채웠어요! 이제 바닷속에서도 숨을 쉴 수 있어요.",
       ground: [[0, 400, 960, 140]] },
-    { name: "밍밍한 사이다", theme: "town", gas: "co2", img: "s2", fly: false, who: "음료 가게 사장님", cit: { x: 760, kind: "shop" }, prop: "soda",
-      story: "음료 가게 앞에서 아이가 시무룩해요. 사이다를 한 모금 마시더니 고개를 갸웃거려요.",
-      mission: "음료 가게 사장님에게 걸어가요.",
+    { name: "분수 건너 음료 가게", theme: "town", gas: "co2", img: "s2", fly: true, who: "음료 가게 사장님", cit: { x: 760, kind: "shop" }, prop: "soda",
+      story: "광장 한가운데 커다란 분수가 길을 막고 있어요. 분수 건너 음료 가게 앞에서 아이가 시무룩해요. 이제 영웅의 비행 실력을 보여 줄 때예요!",
+      mission: "Space나 ↑를 꾹 눌러 분수 위를 날아 건너요. 물에 빠지면 체력 -10!",
       say: "우리 가게 사이다가 밍밍해요! 마셔도 톡 쏘는 맛이 하나도 안 나요. 어떻게 하죠?",
       hint: "물에 녹으면 톡 쏘는 맛이 나는 기체를 찾아보세요.",
       done: "사이다에 이산화탄소를 녹였더니 보글보글 톡 쏘는 맛이 돌아왔어요!",
       wrongWhy: { o2: "산소는 물에 녹아도 톡 쏘는 맛이 나지 않아요." },
-      ground: [[0, 400, 960, 140]] },
-    { name: "과자 공장", theme: "factory", gas: "n2", img: "s3", fly: false, who: "과자 공장 직원", cit: { x: 860, kind: "worker" }, prop: "snack",
-      story: "과자 공장에서 울음소리가 들려요. 컨베이어 벨트가 뒤로 밀어내니 힘차게 걸어가요!",
-      mission: "뒤로 밀리는 벨트를 지나 과자 공장 직원에게 가요.",
+      hazard: [[300, 440, 300, 100, "fountain"]],
+      ground: [[0, 400, 300, 140], [600, 400, 360, 140]] },
+    { name: "과자 공장", theme: "factory", gas: "n2", img: "s3", fly: true, who: "과자 공장 직원", cit: { x: 860, kind: "worker" }, prop: "snack",
+      story: "과자 공장에서 울음소리가 들려요. 그런데 상자가 천장까지 쌓여 있고, 굴뚝에서는 콜록콜록 매연이 뿜어 나와요!",
+      mission: "뒤로 미는 벨트를 지나 상자 더미를 날아서 넘어요. 매연에 닿으면 체력이 줄어요!",
       say: "과자 봉지가 납작해서 옮기다가 과자가 다 부서졌어요! 봉지를 빵빵하게 채우고 싶은데, 과자 맛이 변하면 안 돼요.",
       hint: "공기 중에 가장 많고, 다른 물질과 잘 변하지 않는 기체를 찾아보세요.",
       done: "과자 봉지에 질소를 빵빵하게 채웠어요! 과자도 안 부서지고 맛도 그대로예요.",
       wrongWhy: { o2: "산소는 다른 물질과 잘 반응해서 과자 맛이 변할 수 있어요.", bu: "뷰테인은 작은 불씨에도 불이 아주 쉽게 붙어서 과자 봉지에 넣으면 위험해요!", h2: "수소는 불이 붙기 쉬워서 과자 봉지에 넣으면 위험해요!" },
-      belt: [280, 620, -95],
-      ground: [[0, 400, 960, 140]] },
+      belt: [130, 410, -95],
+      vents: [{ x: 428, y: 400, vx: 0, vy: -150, every: 1.5, ph: 0, life: 3 }, { x: 505, y: 250, vx: 0, vy: -120, every: 1.9, ph: .8, life: 2.4 }],
+      ground: [[0, 400, 960, 140], [450, 250, 110, 150, "crate"]] },
     { name: "옥상에 불이 났어요", theme: "city", gas: "co2", img: "s4", fly: true, who: "소방관", cit: { x: 860, kind: "fire" }, prop: "fire",
-      story: "높은 빌딩 옥상에서 연기가 피어올라요! 계단으로는 너무 오래 걸려요. 이제 영웅의 비행 실력을 보여 줄 때예요!",
-      mission: "Space나 ↑를 꾹 눌러 날아올라 옥상의 소방관에게 가요.",
+      story: "높은 빌딩 옥상에서 연기가 피어올라요! 그런데 빌딩 사이로 휘잉~ 돌풍이 불었다 멈췄다 해요.",
+      mission: "돌풍이 멈춘 틈을 노려 빌딩 사이를 날아 옥상의 소방관에게 가요. 돌풍에 닿으면 멀리 날아가요!",
       say: "옥상에 불이 났어요! 그런데 소화기 속이 텅 비었어요. 어서 불을 꺼야 해요!",
       hint: "불을 끄는 성질이 있는 기체를 찾아보세요.",
       done: "소화기에 이산화탄소를 채워 칙칙! 불이 깨끗하게 꺼졌어요.",
       wrongWhy: { o2: "앗! 산소는 물질이 타는 것을 도와줘서 불이 더 커져요!", bu: "앗! 뷰테인은 작은 불씨에도 불이 아주 쉽게 붙어서 불이 더 커져요!", h2: "앗! 수소는 불이 잘 붙어서 불이 더 커져요!" },
+      gusts: [{ x: 345, y: 40, w: 245, h: 360, dx: -700, dy: -120, on: 1.5, off: 2.1, ph: 0 }],
+      storms: [{ x: 470, y: 70, ax: 60, ay: 18, sp: 1.3, ph: 0 }],
       ground: [[0, 400, 600, 140], [600, 150, 360, 390, "b"], [210, 300, 120, 240, "b2"]] },
     { name: "산꼭대기 캠핑장", theme: "night", gas: "bu", img: "s5", fly: true, who: "캠핑하는 친구", cit: { x: 840, kind: "camper" }, prop: "stove",
-      story: "깜깜한 밤, 높은 산꼭대기에서 누군가 덜덜 떨고 있어요. 절벽이 높아서 걸어서는 올라갈 수 없어요.",
-      mission: "날아서 절벽을 올라 산꼭대기 캠핑장으로 가요.",
+      story: "깜깜한 밤, 높은 산꼭대기에서 누군가 덜덜 떨고 있어요. 산허리에는 짙은 안개가 끼어 앞이 하나도 보이지 않아요.",
+      mission: "날아서 절벽을 올라 캠핑장으로 가요. 안개 속에는 천둥 구름이 숨어 있어요!",
       say: "산꼭대기는 너무 추워요. 휴대용 버너의 가스가 떨어져서 따뜻한 라면을 끓일 수가 없어요.",
       hint: "작은 불씨만 닿아도 불이 쉽게 붙고, 물을 끓이거나 음식을 익힐 수 있는 뜨거운 열을 내는 기체를 찾아보세요.",
       done: "버너에 뷰테인을 넣으니 작은 불씨에도 불이 화르륵! 뜨거운 열로 라면이 보글보글 끓어요.",
       wrongWhy: { he: "헬륨은 불이 붙지 않아서 버너에 넣어도 불이 켜지지 않아요.", co2: "이산화탄소는 오히려 불을 끄는 성질이 있어요!", n2: "질소는 다른 물질과 잘 변하지 않아서 타지 않아요." },
+      fog: [{ x: 270, y: 10, w: 250, h: 390 }],
+      storms: [{ x: 400, y: 200, ax: 20, ay: 95, sp: 1.5, ph: 0 }],
       ground: [[0, 400, 290, 140], [290, 290, 210, 250], [500, 170, 460, 370]] },
-    { name: "깜깜한 간판", theme: "street", gas: "ne", img: "s6", fly: false, who: "간판 가게 사장님", cit: { x: 740, kind: "sign" }, prop: "neon",
-      story: "밤거리가 오늘따라 너무 어두워요. 가게 앞에서 사장님이 간판을 올려다보며 한숨을 쉬어요.",
-      mission: "밤거리를 걸어 간판 가게 사장님에게 가요.",
+    { name: "깜깜한 간판", theme: "street", gas: "ne", img: "s6", fly: true, who: "간판 가게 사장님", cit: { x: 740, kind: "sign" }, prop: "neon",
+      story: "밤거리가 오늘따라 너무 어두워요. 길은 공사 가림막에 막혔고, 낡은 자동차는 매연을 뿜고, 골목에는 안개까지 끼었어요.",
+      mission: "매연을 피해 공사 가림막을 날아 넘고, 안개 골목을 지나 간판 가게 사장님에게 가요.",
       say: "오늘 밤 가게 문을 여는데 간판에 불이 안 들어와요! 반짝반짝 예쁜 빛이 나야 손님이 찾아올 텐데…",
       hint: "전기를 통하게 하면 밝은 색깔의 빛을 내는 기체를 찾아보세요.",
       done: "간판 유리관에 네온을 넣고 전기를 통했더니 알록달록 반짝반짝 빛나요!",
-      ground: [[0, 400, 960, 140]] },
+      vents: [{ x: 262, y: 382, vx: 200, vy: -14, every: 1.3, ph: 0, life: 1.1, car: true }],
+      fog: [{ x: 530, y: 10, w: 140, h: 390 }],
+      storms: [{ x: 600, y: 230, ax: 0, ay: 120, sp: 1.6, ph: 1 }],
+      ground: [[0, 400, 960, 140], [420, 285, 90, 115, "barrier"]] },
     { name: "다리가 끊긴 강", theme: "river", gas: "o2", img: "s7", fly: true, who: "구급대원", cit: { x: 690, kind: "medic" }, prop: "ambulance",
       story: "강 건너편에 구급차가 멈춰 서 있어요. 다리가 끊어져서 걸어서는 건널 수 없어요!",
-      mission: "강 위를 날아서 건너 구급대원에게 가요. 물에 빠지지 않게 조심!",
+      mission: "천둥 구름과 돌풍을 피해 강 위를 날아 건너 구급대원에게 가요. 물에 빠지지 않게 조심!",
       say: "환자가 숨쉬기 힘들어해요! 구급차의 산소통이 비어 있어요. 빨리 도와주세요!",
       hint: "생물이 숨을 쉴 때 꼭 필요한 기체를 찾아보세요.",
       done: "산소통을 채워 환자에게 산소를 전했어요! 환자가 편안하게 숨을 쉬어요.",
       wrongWhy: { co2: "이산화탄소는 우리가 숨을 내쉴 때 나오는 기체라 숨쉬기를 도와주지 못해요." },
       hazard: [[320, 440, 320, 100, "water"]],
+      storms: [{ x: 520, y: 290, ax: 0, ay: 110, sp: 1.7, ph: 0 }],
+      gusts: [{ x: 360, y: 40, w: 120, h: 360, dx: -600, dy: -60, on: 1.4, off: 1.9, ph: 1 }],
       ground: [[0, 400, 320, 140], [640, 400, 320, 140]] },
     { name: "번개 골짜기", theme: "canyon", gas: "h2", img: "s8", fly: true, who: "운전기사", cit: { x: 770, kind: "driver" }, prop: "car",
-      story: "깊은 골짜기 건너편에 친환경 자동차가 멈춰 있어요. 골짜기에는 찌릿찌릿 번개 구름이 오르락내리락해요!",
-      mission: "번개 구름을 피해 골짜기를 날아 건너 운전기사에게 가요.",
+      story: "깊은 골짜기 건너편에 친환경 자동차가 멈춰 있어요. 골짜기에는 번개 구름이 오르락내리락하고, 바닥에서는 돌풍이 솟구치고, 안개까지 끼어 있어요!",
+      mission: "천둥 구름·솟구치는 돌풍·안개를 뚫고 골짜기를 날아 건너 운전기사에게 가요.",
       say: "제 자동차는 달려도 공기를 더럽히지 않는 친환경 자동차예요. 그런데 연료가 다 떨어져서 멈췄어요!",
       hint: "탈 때 오염 물질 대신 물이 나오는 기체를 찾아보세요.",
       done: "수소를 가득 채웠어요! 자동차가 부릉부릉, 뒤로는 깨끗한 물방울만 톡톡 떨어져요.",
       wrongWhy: { bu: "뷰테인은 휴대용 가스버너에 쓰는 연료예요. 탈 때 오염 물질 대신 물만 나오는 친환경 자동차 연료는 따로 있어요!", he: "헬륨은 불이 붙지 않아서 자동차 연료가 될 수 없어요." },
       hazard: [[260, 470, 440, 70, "pit"]],
-      storms: [{ x: 390, y: 260, ax: 0, ay: 120, sp: 1.6, ph: 0 }, { x: 570, y: 260, ax: 0, ay: 120, sp: 1.6, ph: Math.PI }],
+      storms: [{ x: 370, y: 250, ax: 0, ay: 130, sp: 2, ph: 0 }, { x: 610, y: 250, ax: 0, ay: 130, sp: 2, ph: Math.PI }],
+      gusts: [{ x: 445, y: 120, w: 75, h: 350, dx: 0, dy: -750, on: 1.2, off: 1.6, ph: .4 }],
+      fog: [{ x: 545, y: 10, w: 140, h: 440 }],
       ground: [[0, 400, 260, 140], [700, 400, 260, 140]] },
     { name: "하늘 위 비행선", theme: "sky", gas: "he", img: "s9", fly: true, who: "비행선 조종사", cit: { x: 800, y: 260, kind: "pilot" }, prop: "airship",
       story: "구름 위에 떠 있는 비행선이 자꾸 아래로 처져요! 조종사가 손을 흔들며 도움을 청해요.",
-      mission: "구름 발판에서 쉬어 가며 하늘 높이 날아 비행선 조종사에게 가요. 번개 구름을 조심!",
+      mission: "구름 발판에서 쉬어 가며 하늘 높이 날아 비행선 조종사에게 가요. 천둥 구름·돌풍·안개를 모두 조심!",
       say: "비행선 속 기체가 새어 나가서 자꾸 내려가요! 하늘에 둥둥 떠 있게 채워 주세요. 불이 붙으면 절대 안 돼요!",
       hint: "공기보다 아주 가볍고, 불이 붙지 않아 안전한 기체를 찾아보세요.",
       done: "비행선에 헬륨을 채웠어요! 비행선이 다시 둥실둥실 하늘 높이 떠올라요.",
       wrongWhy: { h2: "수소도 아주 가볍지만 불이 붙기 쉬워서 사람이 타는 비행선에는 위험해요!", bu: "뷰테인은 작은 불씨에도 불이 아주 쉽게 붙어서 위험해요!" },
       plat: [[300, 360, 110, 18], [500, 300, 110, 18], [700, 260, 200, 16, "gondola"]],
-      storms: [{ x: 460, y: 170, ax: 60, ay: 30, sp: 1.2, ph: 0 }, { x: 640, y: 380, ax: 50, ay: 40, sp: 1.4, ph: 2 }],
+      storms: [{ x: 460, y: 170, ax: 70, ay: 40, sp: 1.4, ph: 0 }, { x: 640, y: 380, ax: 60, ay: 50, sp: 1.6, ph: 2 }],
+      gusts: [{ x: 600, y: 60, w: 90, h: 180, dx: -650, dy: 160, on: 1.4, off: 1.8, ph: .6 }],
+      fog: [{ x: 230, y: 380, w: 300, h: 150 }],
       ground: [[0, 400, 220, 140]] },
     { name: "스모그 대마왕", theme: "boss", boss: true, img: "boss", fly: true,
-      story: "시민들을 괴롭힌 범인은 바로 스모그 대마왕! 하늘 높이 떠서 콜록콜록 스모그 공을 던지고 있어요.",
-      mission: "스모그 공을 피해 날아올라 대마왕에게 다가가요. 대마왕의 기체 문제 5개를 모두 맞히면 이겨요!",
+      story: "시민들을 괴롭힌 범인은 바로 스모그 대마왕! 스모그 공을 마구 던지고, 가끔은 바닥으로 쿵 내려앉아 땅을 흔들어요. 3초마다 보호막을 켰다 껐다 해요.",
+      mission: "보호막이 꺼졌을 때 날아가 문제를 맞혀요. 맞힐 때마다 대마왕 기운이 20% 줄지만 영웅은 처음 자리로 쫓겨나요. 대마왕이 쿵 내려앉을 땐 날고 있어야 안전해요!",
       ground: [[0, 400, 960, 140]] },
   ];
 
@@ -590,6 +606,9 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
       },
       takeoff() { if (on()) { tone(sfxBus, now(), 380, 0.22, { type: "square", vol: 0.05, slide: 2.4, lp: 2600 }); noise(sfxBus, now(), 0.3, { vol: 0.08, freq: 700, sweep: 3 }); } },
       zap() { if (on()) { noise(sfxBus, now(), 0.3, { vol: 0.25, freq: 3000, type: "highpass" }); tone(sfxBus, now(), 900, 0.25, { type: "sawtooth", vol: 0.06, slide: 0.3, lp: 3000 }); } },
+      gust() { if (on()) { noise(sfxBus, now(), .7, { vol: .22, freq: 500, sweep: 4 }); noise(sfxBus, now() + .1, .5, { vol: .1, freq: 2500, sweep: .5 }); } },
+      slam() { if (on()) { tone(sfxBus, now(), 120, .6, { type: "sine", vol: .5, slide: .3 }); noise(sfxBus, now(), .7, { vol: .45, freq: 400, type: "lowpass", sweep: .3 }); } },
+      warn() { if (on()) [0, .18, .36].forEach(d => tone(sfxBus, now() + d, 880, .12, { type: "square", vol: .05, lp: 2500 })); },
       cough() { if (on()) [0, 0.14].forEach(d => noise(sfxBus, now() + d, 0.12, { vol: 0.2, freq: 600 })); },
       splash() { if (on()) { noise(sfxBus, now(), 0.5, { vol: 0.3, freq: 900, sweep: 0.4 }); tone(sfxBus, now(), 600, 0.3, { type: "sine", vol: 0.12, slide: 0.4 }); } },
       hiss() { if (on()) { noise(sfxBus, now(), 0.9, { vol: 0.16, freq: 2500, sweep: 0.5 }); } },
@@ -653,10 +672,13 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
     si = i; st = STAGES[i];
     G = {
       mode: "intro", hp: 100, time: 0, toast: null, invuln: 0, solved: false, solveT: 0, hintUsed: false, wrongs: 0, lowWarned: false,
-      bossHP: BOSS_N, bossQ: st.boss ? shuffle(BOSS_Q).slice(0, BOSS_N) : [], qi: 0, bossDown: false, endT: 0, smog: [], smogT: 1.5, answered: [],
+      bossHP: BOSS_N, bossQ: st.boss ? shuffle(BOSS_Q).slice(0, BOSS_N) : [], qi: 0, bossDown: false, endT: 0, smog: [], answered: [],
+      gustCD: 0, shake: 0, quake: 0, wave: -1,
+      boss: { y: 170, st: "float", t: 0, atk: 1.4, cyc: 0, slams: 0 },
     };
-    P = { x: 40, y: groundTopAt(54) - PH, vx: 0, vy: 0, on: true, face: 1, phase: 0, flying: false, safe: null };
+    P = { x: 40, y: groundTopAt(54) - PH, vx: 0, vy: 0, ex: 0, ey: 0, on: true, face: 1, phase: 0, flying: false, safe: null };
     P.safe = { x: P.x, y: P.y };
+    for (const v of st.vents || []) v.next = v.ph;
     fx.length = 0;
     for (const k in keys) keys[k] = false;
     bgCache = paintBg(st.theme);
@@ -715,28 +737,32 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
   function physics(dt, sol) {
     let dir = (keys.r ? 1 : 0) - (keys.l ? 1 : 0);
     P.vx = dir * SPD;
-    if (dir) { P.face = dir; P.phase += dt * 12; hpCost(COST.move * dt); } else P.phase = 0;
+    const mul = st.boss ? .35 : 1; // 대마왕 방은 여러 번 오가야 해서 걷기·날기 체력이 조금만 줄어요
+    if (dir) { P.face = dir; P.phase += dt * 12; hpCost(COST.move * mul * dt); } else P.phase = 0;
     if (G.mode !== "play") return;
     // 컨베이어 벨트는 영웅을 뒤로 밀어요
     if (st.belt && P.on && P.x + PW / 2 > st.belt[0] && P.x + PW / 2 < st.belt[1]) P.vx += st.belt[2];
     const flying = !!keys.f;
     if (flying) {
       if (!P.flying && P.on) Sound.takeoff();
-      P.vy -= FLY * dt; hpCost(COST.fly * dt); Sound.fly();
+      P.vy -= FLY * dt; hpCost(COST.fly * mul * dt); Sound.fly();
       if (Math.random() < dt * 30) fx.push({ x: P.x + PW / 2 - P.face * 10, y: P.y + PH - 6, vx: -P.face * 40, vy: 60, life: .5, max: .5, c: "rgba(255,255,255,.9)", r: 3 + Math.random() * 3 });
     }
     P.flying = flying;
     P.vy += GR * dt;
     P.vy = Math.max(-320, Math.min(P.vy, keys.d ? 560 : 340));
-    P.x += P.vx * dt;
+    // 돌풍에 밀리는 힘은 조금씩 약해져요
+    const vxAll = P.vx + P.ex;
+    P.ex *= Math.exp(-2.4 * dt); P.ey *= Math.exp(-2.4 * dt);
+    P.x += vxAll * dt;
     P.x = Math.max(0, Math.min(W - PW, P.x));
     for (const s of sol) if (!s.oneWay && overlap(P, s)) {
-      if (P.vx > 0 && P.x + PW - s.x < 24) P.x = s.x - PW;
-      else if (P.vx < 0 && s.x + s.w - P.x < 24) P.x = s.x + s.w;
+      if (vxAll > 0 && P.x + PW - s.x < 30) { P.x = s.x - PW; P.ex = 0; }
+      else if (vxAll < 0 && s.x + s.w - P.x < 30) { P.x = s.x + s.w; P.ex = 0; }
       else if (P.y + PH - s.y > 12) { const l = P.x + PW - s.x, r = s.x + s.w - P.x; P.x += l < r ? -l : r; }
     }
     const prevB = P.y + PH, prevTop = P.y;
-    P.y += P.vy * dt; P.on = false;
+    P.y += (P.vy + P.ey) * dt; P.on = false;
     if (P.y < 6) { P.y = 6; P.vy = Math.max(0, P.vy); }
     for (const s of sol) {
       if (!(P.x + PW > s.x + 1 && P.x < s.x + s.w - 1)) continue;
@@ -755,10 +781,10 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
     if (s.stat) P.safe = { x: P.x, y: P.y };
   }
   function fall(kind) {
-    if (kind === "water") { Sound.splash(); burst(P.x + PW / 2, Math.min(P.y + PH, 470), 16, ["#9FDCFF", "#fff", "#6EC1F5"], 220, 0.7); }
+    if (kind === "water" || kind === "fountain") { Sound.splash(); burst(P.x + PW / 2, Math.min(P.y + PH, 470), 16, ["#9FDCFF", "#fff", "#6EC1F5"], 220, 0.7); }
     else Sound.ouch();
-    P.x = P.safe.x; P.y = P.safe.y; P.vx = P.vy = 0; P.on = true;
-    toast((kind === "water" ? "풍덩! " : "앗, 떨어졌어요! ") + "체력 -" + COST.fall);
+    P.x = P.safe.x; P.y = P.safe.y; P.vx = P.vy = P.ex = P.ey = 0; P.on = true;
+    toast((kind === "water" || kind === "fountain" ? "풍덩! " : "앗, 떨어졌어요! ") + "체력 -" + COST.fall);
     hpCost(COST.fall);
   }
 
@@ -774,27 +800,49 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
     burst(P.x + PW / 2, P.y + 20, 12, ["#FFE066", "#fff"], 200, .5);
     toast(msg + " 체력 -" + cost); hpCost(cost);
   }
+  const gustOn = g => (G.time + g.ph) % (g.on + g.off) < g.on;
+  const gustSoon = g => { const t = (G.time + g.ph) % (g.on + g.off); return t > g.on + g.off - .6; };
+  function puff(x, y, vx, vy, life, bounce) { G.smog.push({ x, y, vx, vy, life, max: life, r: 18, bounce }); }
   function hazards(dt) {
     if (G.invuln > 0) G.invuln -= dt;
+    if (G.gustCD > 0) G.gustCD -= dt;
+    const play = G.mode === "play";
+    // 천둥 구름: 닿으면 찌릿!
     for (const s of st.storms || []) {
       const p = stormPos(s);
-      if (G.invuln <= 0 && hitBy(p.x, p.y + 6, 36)) knock(p.x, "찌릿! 번개 구름에 닿았어요.", COST.zap, Sound.zap);
+      if (play && G.invuln <= 0 && hitBy(p.x, p.y + 6, 36)) knock(p.x, "찌릿! 천둥 구름에 닿았어요.", COST.zap, Sound.zap);
     }
-    if (st.boss && !G.bossDown && G.mode === "play") {
-      G.smogT -= dt;
-      if (G.smogT <= 0) {
-        G.smogT = 2 + Math.random() * .8;
-        const b = bossPos();
-        G.smog.push({ x: b.x - 60, y: b.y + 20, vx: -150 - Math.random() * 40, vy: (Math.random() - .3) * 90 });
+    // 매연: 굴뚝·자동차에서 일정하게 뿜어 나와요
+    for (const v of st.vents || []) {
+      v.next = (v.next ?? v.ph) - dt;
+      if (v.next <= 0) { v.next += v.every; puff(v.x, v.y - 10, v.vx + (Math.random() - .5) * 20, v.vy, v.life, false); }
+    }
+    // 돌풍: 불 때 닿으면 엉뚱한 곳으로 휙!
+    for (const g of st.gusts || []) {
+      if (!play || G.gustCD > 0 || !gustOn(g) || !overlap(P, rect(g.x, g.y, g.w, g.h))) continue;
+      G.gustCD = 1.1; P.ex = g.dx; P.ey = g.dy; P.vy = Math.min(P.vy, 0); Sound.gust();
+      for (let k = 0; k < 10; k++) fx.push({ x: P.x + PW / 2, y: P.y + Math.random() * PH, vx: g.dx * .6 + (Math.random() - .5) * 80, vy: g.dy * .5 + (Math.random() - .5) * 80, life: .6, max: .6, c: "rgba(255,255,255,.9)", r: 3 + Math.random() * 3 });
+      toast("휘이잉~ 돌풍에 날려 갔어요!");
+    }
+    if (st.boss && !G.bossDown && play) bossAI(dt);
+    if (G.quake > 0) {
+      G.quake -= dt;
+      if (play && P.on && G.invuln <= 0) {
+        G.invuln = 1.2; Sound.ouch(); P.vy = -300; P.on = false;
+        burst(P.x + PW / 2, P.y + PH, 14, ["#B8B2CC", "#fff"], 220, .6);
+        toast(`쿵! 땅이 흔들려요. 날고 있어야 안전해요! 체력 -${COST.slam}`); hpCost(COST.slam);
       }
     }
     for (let i = G.smog.length - 1; i >= 0; i--) {
       const m = G.smog[i];
-      m.x += m.vx * dt; m.y += m.vy * dt;
-      if (m.y > 380 || m.y < 40) m.vy *= -1;
-      if (m.x < -40) { G.smog.splice(i, 1); continue; }
-      if (G.mode === "play" && G.invuln <= 0 && hitBy(m.x, m.y, 24)) { G.smog.splice(i, 1); knock(m.x, "콜록콜록! 스모그 공에 맞았어요.", COST.smog, Sound.cough); }
+      m.x += m.vx * dt; m.y += m.vy * dt; m.life -= dt;
+      if (m.bounce && (m.y > 380 || m.y < 40)) m.vy *= -1;
+      if (!m.bounce) m.r = 18 + (1 - m.life / m.max) * 12;
+      if (m.x < -40 || m.x > W + 40 || m.y < -40 || m.life <= 0) { G.smog.splice(i, 1); continue; }
+      if (play && G.invuln <= 0 && hitBy(m.x, m.y, m.r + 4)) { G.smog.splice(i, 1); knock(m.x, "콜록콜록! 매연에 닿았어요.", COST.smog, Sound.cough); }
     }
+    if (G.shake > 0) G.shake -= dt;
+    if (G.wave >= 0) { G.wave += dt; if (G.wave > .8) G.wave = -1; }
   }
 
   // ---------- 장면 흐름 ----------
@@ -814,8 +862,15 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
     $("ov").scrollTop = 0;
     const pb = row.querySelector(".primary"); if (pb && document.activeElement && document.activeElement !== document.body) pb.focus({ preventScroll: true });
   }
-  const condBadge = () => st.boss ? `<span class="cond boss">🧠 보스 문제 5개</span><span class="cond fly">🦸 날아야 해요</span>`
-    : st.fly ? `<span class="cond fly">🦸 날지 않으면 갈 수 없어요</span>` : `<span class="cond walk">🚶 걸어서 갈 수 있어요</span>`;
+  function condBadge() {
+    if (st.boss) return `<span class="cond boss">🧠 보스 문제 5개</span><span class="cond fly">🦸 날아야 해요</span><span class="cond obs">💨 매연 공</span><span class="cond obs">💥 쿵 내려앉기</span><span class="cond obs">🛡️ 3초 무적</span>`;
+    const out = [st.fly ? `<span class="cond fly">🦸 날지 않으면 갈 수 없어요</span>` : `<span class="cond walk">🚶 걸어서 갈 수 있어요</span>`];
+    if (st.storms) out.push(`<span class="cond obs">⚡ 천둥 구름</span>`);
+    if (st.fog) out.push(`<span class="cond obs">🌫️ 안개</span>`);
+    if (st.vents) out.push(`<span class="cond obs">💨 매연</span>`);
+    if (st.gusts) out.push(`<span class="cond obs">🌀 돌풍</span>`);
+    return out.join("");
+  }
   function showIntro() {
     G.mode = "intro"; Sound.duck(false);
     overlay({ no: `${si + 1}단계 / 10`, title: st.name, img: st.img, imgCls: st.boss ? "sq" : "",
@@ -827,7 +882,7 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
   function fail() {
     G.mode = "fail"; for (const k in keys) keys[k] = false; Sound.wrong(); updateHud();
     overlay({ no: `${si + 1}단계`, title: "영웅도 힘이 다 빠졌어요", img: "hero", imgCls: "sq",
-      html: `<p>걷고, 날고, 기체를 잘못 고를 때마다 체력이 줄어요. 꼭 필요할 때만 날고, 기체의 성질을 떠올려 한 번에 맞혀 봐요!</p>`,
+      html: `<p>걷고, 날고, 장애물에 닿고, 기체를 잘못 고를 때마다 체력이 줄어요. 천둥 구름·매연·돌풍이 움직이는 때를 잘 보고 지나가 봐요!</p>`,
       buttons: [["다시 도전", restart, true]] });
   }
 
@@ -903,9 +958,56 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
   }
 
   // ---------- 보스 ----------
+  const BOSS_SIZE = 230, SHIELD_T = 3;
   function bossPos() {
-    const k = 1 - G.bossHP / BOSS_N;
-    return { x: 740, y: 170 + Math.sin(clock * 1.6) * 14, s: 1 - k * 0.45 };
+    const k = 1 - G.bossHP / BOSS_N, B = G.boss;
+    const bob = B.st === "float" ? Math.sin(clock * 1.6) * 14 : 0;
+    const jit = B.st === "warn" ? Math.sin(clock * 60) * 4 : 0;
+    return { x: 740 + jit, y: B.y + bob, s: 1 - k * 0.4 };
+  }
+  // 3초 무적 → 3초 무적 풀림을 계속 되풀이해요
+  const bossShield = () => (G.boss.cyc % (SHIELD_T * 2)) < SHIELD_T;
+  function bossAI(dt) {
+    const B = G.boss, b = bossPos();
+    B.cyc += dt;
+    const groundY = 400 - BOSS_SIZE * b.s * .42;
+    if (B.st === "float") {
+      B.atk -= dt;
+      if (B.atk <= 0) {
+        if (Math.random() < .3 && B.slams < 99) { B.st = "warn"; B.t = 0; B.slams++; Sound.warn(); toast("대마왕이 쿵 내려앉으려 해요! 날아올라요!"); }
+        else {
+          // 영웅 쪽을 노려 매연 공을 빠르게 던져요
+          const sx = b.x - 70, sy = b.y + 20, tx = P.x + PW / 2, ty = P.y + PH / 2;
+          const sp = 240 + Math.random() * 50, d = Math.hypot(tx - sx, ty - sy) || 1;
+          puff(sx, sy, (tx - sx) / d * sp, (ty - sy) / d * sp * .8 + (Math.random() - .5) * 60, 8, true);
+          if (G.bossHP <= 2 && Math.random() < .5) puff(sx, sy, -sp, (Math.random() - .5) * 160, 8, true);
+          B.atk = 0.95 + Math.random() * .4;
+        }
+      }
+    } else if (B.st === "warn") {
+      B.t += dt; if (B.t > .85) { B.st = "drop"; B.t = 0; }
+    } else if (B.st === "drop") {
+      B.y += 950 * dt;
+      if (B.y >= groundY) {
+        B.y = groundY; B.st = "land"; B.t = 0;
+        G.shake = .6; G.quake = .35; G.wave = 0; Sound.slam();
+        for (let k = 0; k < 3; k++) burst(b.x + (k - 1) * 70, 400, 10, ["#B8B2CC", "#8E88A6", "#fff"], 260, .8);
+      }
+    } else if (B.st === "land") {
+      B.t += dt; if (B.t > .7) B.st = "rise";
+    } else if (B.st === "rise") {
+      B.y -= 320 * dt; if (B.y <= 170) { B.y = 170; B.st = "float"; B.atk = 1.1; }
+    }
+  }
+  function kickBack() {
+    // 정답을 맞히면 대마왕이 영웅을 처음 자리로 쫓아내요
+    const b = bossPos();
+    for (let k = 0; k < 18; k++) fx.push({ x: b.x - 80, y: b.y + (Math.random() - .5) * 120, vx: -500 - Math.random() * 200, vy: (Math.random() - .5) * 80, life: .9, max: .9, c: "rgba(184,178,204,.9)", r: 6 + Math.random() * 6 });
+    P.x = 40; P.y = 400 - PH; P.vx = P.vy = P.ex = P.ey = 0; P.on = true; P.safe = { x: P.x, y: P.y };
+    G.invuln = 1.5; G.smog.length = 0;
+    Object.assign(G.boss, { y: 170, st: "float", t: 0, atk: 1.6 });
+    Sound.gust();
+    toast(`으악! 처음 자리로 쫓겨났어요. 대마왕 기운 ${G.bossHP * 20}% 남았어요!`);
   }
   function showBossQuiz() {
     G.mode = "quiz"; for (const k in keys) keys[k] = false; P.vx = 0; Sound.duck(true);
@@ -914,7 +1016,7 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
     overlay({ wide: true, no: `스모그 대마왕의 문제 ${G.qi + 1} / ${BOSS_N}`,
       html: `<div class="prob">
         <div class="prob-l"><img class="pic sq" src="${ASSET}boss.webp" alt=""><div class="speech"><span class="who">대마왕</span>${q.q}</div></div>
-        <div class="prob-r"><div class="ask">정답 기체를 날려 대마왕을 물리쳐요!<small>틀리면 체력 -${COST.wrong}. 맞힐 때까지 다시 고를 수 있어요.</small></div>
+        <div class="prob-r"><div class="ask">정답 기체를 날려 대마왕을 물리쳐요!<small>맞히면 대마왕 기운 -20%, 하지만 처음 자리로 쫓겨나요. 틀리면 체력 -${COST.wrong}.</small></div>
           <div class="bossbar">대마왕 기운 ${dots}</div>
           ${gasButtons()}
           <div class="fb" id="fb" role="status"></div></div></div>` });
@@ -924,15 +1026,16 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
       G.answered.push(q.gas);
       G.bossHP--;
       const fb = $("fb");
-      fb.textContent = G.bossHP > 0 ? `정답! ${g.name} 발사! 으윽… 아직 ${G.bossHP}문제 남았다!` : `정답! ${g.name} 발사! 으아아~ 내가 졌다!`;
+      fb.textContent = G.bossHP > 0 ? `정답! ${g.name} 발사! 대마왕 기운 -20%! “으윽… 저리 가라!”` : `정답! ${g.name} 발사! 으아아~ 내가 졌다!`;
       fb.className = "fb ok";
       for (const i of $("card").querySelectorAll(".bossbar i")) i.className = "";
       $("card").querySelectorAll(".bossbar i").forEach((i, k) => { if (k >= G.bossHP) i.className = "off"; });
       const b = bossPos(); burst(b.x, b.y, 18, [g.c, "#fff"], 260, .8, true);
       setTimeout(() => {
         G.qi++;
-        if (G.qi < BOSS_N) showBossQuiz();
-        else { $("ov").hidden = true; Sound.duck(false); startEnding(); }
+        $("ov").hidden = true; Sound.duck(false);
+        if (G.qi < BOSS_N) { G.mode = "play"; kickBack(); }
+        else startEnding();
       }, 1300);
     }, id => {
       Sound.wrong(); G.wrongs++;
@@ -972,7 +1075,11 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
       if (c && !G.solved && P.x + PW > c.x - 32 && P.x < c.x + 32 && P.y < c.y && P.y + PH > c.y - 80) showProblem();
       if (st.boss && !G.bossDown) {
         const b = bossPos(), dx = P.x + PW / 2 - b.x, dy = P.y + PH / 2 - b.y;
-        if (dx * dx + dy * dy < 150 * 150) { P.x = Math.min(P.x, b.x - 110); showBossQuiz(); }
+        if (dx * dx + dy * dy < 150 * 150) {
+          if (bossShield() || G.boss.st === "warn" || G.boss.st === "drop") {
+            if (G.invuln <= 0) { knock(b.x, "앗! 대마왕은 지금 보호막 무적이에요.", COST.shield, Sound.zap); P.ex = -450; }
+          } else showBossQuiz();
+        }
       }
     }
     if (G.mode === "solve") {
@@ -1276,6 +1383,25 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
         for (let wy = y + 30; wy < H - 10; wy += 46) for (let wx = x + 20; wx < x + w - 30; wx += 44) { rr(c, wx, wy, 26, 30, 6); c.fill(); }
         continue;
       }
+      if (kind === "crate") {
+        // 천장까지 쌓인 과자 상자
+        for (let yy = y; yy < y + h; yy += 50) for (let xx = x; xx < x + w - 10; xx += 55) {
+          c.fillStyle = "#E8B77A"; rr(c, xx + 2, yy + 2, 51, 46, 6); c.fill();
+          c.strokeStyle = "#C98B4A"; c.lineWidth = 2; c.stroke();
+          c.fillStyle = "#FF9CC4"; rr(c, xx + 18, yy + 16, 20, 14, 4); c.fill();
+        }
+        continue;
+      }
+      if (kind === "barrier") {
+        // 공사 가림막
+        c.fillStyle = "#FFD84A"; rr(c, x, y, w, h + 10, 8); c.fill();
+        c.save(); c.beginPath(); rr(c, x, y, w, h, 8); c.clip();
+        c.fillStyle = "#3E3D6B"; for (let k = -h; k < w + h; k += 30) { c.beginPath(); c.moveTo(x + k, y); c.lineTo(x + k + 15, y); c.lineTo(x + k + 15 - h, y + h); c.lineTo(x + k - h, y + h); c.fill(); }
+        c.restore();
+        c.fillStyle = "#FF5D6C"; for (const xx of [x + 14, x + w - 14]) { c.beginPath(); c.arc(xx, y - 6, 7 + Math.sin(clock * 6) * 1.5, 0, 7); c.fill(); }
+        txt(c, "공사 중", x + w / 2, y + h / 2, 18, "#fff", { stroke: "#3E3D6B", sw: 5 });
+        continue;
+      }
       c.fillStyle = T.side; rr(c, x, y, w, h + 20, 14); c.fill();
       c.fillStyle = T.dot;
       for (let gx = x + 18; gx < x + w - 10; gx += 46) for (let gy = y + 34; gy < Math.min(H, y + h); gy += 40) { c.beginPath(); c.ellipse(gx + (gy % 3) * 8, gy, 6, 4, 0, 0, 7); c.fill(); }
@@ -1307,7 +1433,87 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
         c.save(); c.translate(x + 70, 400); c.rotate(.5); c.fillStyle = "#C98B4A"; rr(c, 0, 0, 50, 10, 4); c.fill(); c.restore();
       } else if (kind === "pit") {
         c.fillStyle = "#7A4426"; c.fillRect(x, y, w, h);
+      } else if (kind === "fountain") {
+        // 광장 분수
+        c.fillStyle = "#C9C3DE"; c.fillRect(x - 6, 400, 12, H - 400); c.fillRect(x + w - 6, 400, 12, H - 400);
+        c.fillStyle = "rgba(110,190,245,.85)"; c.fillRect(x, y, w, H - y);
+        c.strokeStyle = "rgba(255,255,255,.9)"; c.lineWidth = 3; c.beginPath();
+        for (let k = 0; k <= w; k += 6) c.lineTo(x + k, y + Math.sin((k + clock * 60) / 14) * 3);
+        c.stroke();
+        const cx = x + w / 2;
+        c.fillStyle = "#C9C3DE"; rr(c, cx - 14, 360, 28, 90, 6); c.fill(); rr(c, cx - 50, 356, 100, 12, 6); c.fill();
+        c.fillStyle = "rgba(160,215,250,.8)";
+        for (let k = 0; k < 7; k++) { const t = (clock * 1.4 + k / 7) % 1, a = (k - 3) * .45; c.beginPath(); c.arc(cx + Math.sin(a) * t * 90, 350 - Math.sin(t * Math.PI) * 120 * Math.cos(a * .6), 5, 0, 7); c.fill(); }
       }
+    }
+  }
+  function drawVents(c) {
+    for (const v of st.vents || []) {
+      if (v.car) {
+        // 매연을 뿜는 낡은 자동차
+        c.fillStyle = "#9A93BC"; rr(c, v.x - 110, v.y - 34, 104, 34, 12); c.fill(); rr(c, v.x - 90, v.y - 58, 60, 28, 10); c.fill();
+        c.fillStyle = "#3A3768"; rr(c, v.x - 84, v.y - 52, 22, 18, 5); c.fill(); rr(c, v.x - 58, v.y - 52, 22, 18, 5); c.fill();
+        c.fillStyle = "#4A4560"; for (const xx of [v.x - 88, v.x - 30]) { c.beginPath(); c.arc(xx, v.y + 2, 12, 0, 7); c.fill(); }
+        c.fillStyle = "#6E6A93"; rr(c, v.x - 8, v.y - 12, 14, 7, 3); c.fill();
+      } else {
+        c.fillStyle = "#8E95AE"; rr(c, v.x - 13, v.y - 34, 26, 34, 4); c.fill();
+        c.fillStyle = "#6E7896"; rr(c, v.x - 17, v.y - 40, 34, 10, 4); c.fill();
+        c.fillStyle = "#FFD84A"; c.fillRect(v.x - 13, v.y - 22, 26, 5);
+      }
+    }
+  }
+  function drawSmog(c) {
+    for (const m of G.smog) {
+      const a = m.bounce ? 1 : Math.min(1, m.life / m.max * 2.5);
+      c.globalAlpha = a;
+      c.fillStyle = "#8E88A6"; c.beginPath(); c.arc(m.x, m.y, m.r, 0, 7); c.arc(m.x + m.r * .6, m.y - m.r * .4, m.r * .65, 0, 7); c.arc(m.x - m.r * .6, m.y - m.r * .3, m.r * .6, 0, 7); c.fill();
+      c.fillStyle = "#3A2F55"; c.beginPath(); c.arc(m.x - m.r * .3, m.y, 2.4, 0, 7); c.arc(m.x + m.r * .3, m.y, 2.4, 0, 7); c.fill();
+      c.strokeStyle = "#3A2F55"; c.lineWidth = 1.5; c.beginPath(); c.arc(m.x, m.y + m.r * .45, 3, 1.1 * Math.PI, 1.9 * Math.PI); c.stroke();
+    }
+    c.globalAlpha = 1;
+  }
+  function drawGusts(c) {
+    for (const g of st.gusts || []) {
+      const on = gustOn(g), soon = !on && gustSoon(g);
+      const ang = Math.atan2(g.dy, g.dx), ux = Math.cos(ang), uy = Math.sin(ang);
+      c.save(); c.beginPath(); rr(c, g.x, g.y, g.w, g.h, 24); c.clip();
+      c.fillStyle = on ? "rgba(200,235,255,.28)" : "rgba(200,235,255,.08)"; c.fillRect(g.x, g.y, g.w, g.h);
+      if (on) {
+        c.strokeStyle = "rgba(255,255,255,.9)"; c.lineWidth = 3; c.lineCap = "round";
+        for (let k = 0; k < 14; k++) {
+          const span = Math.abs(ux) > .5 ? g.w + 80 : g.h + 80;
+          const t = ((clock * 1.6 + k * .37) % 1) * span - 40;
+          const bx = ux ? (ux < 0 ? g.x + g.w - t : g.x + t) : g.x + ((k * 53) % g.w);
+          const by = uy && Math.abs(uy) > .5 ? (uy < 0 ? g.y + g.h - t : g.y + t) : g.y + ((k * 71) % g.h);
+          c.beginPath(); c.moveTo(bx, by); c.quadraticCurveTo(bx - ux * 20 + uy * 8, by - uy * 20 + ux * 8, bx - ux * 44, by - uy * 44); c.stroke();
+        }
+      }
+      c.restore();
+      c.strokeStyle = on ? "rgba(255,255,255,.95)" : "rgba(255,255,255,.55)"; c.lineWidth = 2.5; c.setLineDash([10, 8]);
+      rr(c, g.x, g.y, g.w, g.h, 24); c.stroke(); c.setLineDash([]);
+      txt(c, on ? "🌀 돌풍!" : soon ? "곧 불어요!" : "🌀 쉬는 중", g.x + g.w / 2, g.y + 18, 15, on ? "#2F86DB" : soon ? "#E2475A" : "#8A88AE");
+    }
+  }
+  // 안개는 약 8초마다 천천히 짙어졌다가 천천히 걷혀요
+  function fogThick(f) {
+    const k = .5 + .5 * Math.cos((G.time + f.x / 120) * Math.PI * 2 / 8);
+    return k * k * (3 - 2 * k);
+  }
+  function drawFog(c) {
+    for (const f of st.fog || []) {
+      const k = fogThick(f);
+      c.save();
+      c.globalAlpha = .1 + .9 * k;
+      c.fillStyle = "rgba(236,240,248,.96)"; rr(c, f.x, f.y, f.w, f.h, 30); c.fill();
+      c.fillStyle = "rgba(255,255,255,.95)";
+      for (let k = 0; k < 12; k++) {
+        const fx2 = f.x + ((k * 47 + clock * 14) % (f.w + 40)) - 20, fy = f.y + 20 + ((k * 89) % Math.max(20, f.h - 40));
+        c.beginPath(); c.arc(fx2, fy, 26 + (k % 3) * 8, 0, 7); c.fill();
+      }
+      for (const sx of [f.x, f.x + f.w]) for (let yy = f.y + 20; yy < f.y + f.h; yy += 40) { c.beginPath(); c.arc(sx + Math.sin(clock + yy) * 4, yy, 22, 0, 7); c.fill(); }
+      c.globalAlpha = 1;
+      txt(c, k > .65 ? "🌫️ 안개 짙음" : k < .3 ? "🌫️ 안개 걷힘" : "🌫️ 안개", f.x + f.w / 2, f.y + 22, 15, "#8A88AE");
+      c.restore();
     }
   }
   function drawStorm(c, s) {
@@ -1494,29 +1700,53 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
     let s = b.s, a = 1, y = b.y;
     if (G.bossDown) { const k = Math.min(1, G.endT / 1.2); s *= 1 - k; a = 1 - k; y -= k * 60; }
     if (a <= 0) return;
-    const size = 230 * s;
+    const size = BOSS_SIZE * s, B = G.boss;
+    // 쿵 내려앉기 예고: 바닥에 붉은 그림자
+    if (!G.bossDown && (B.st === "warn" || B.st === "drop")) {
+      c.fillStyle = `rgba(255,93,108,${.25 + Math.abs(Math.sin(clock * 12)) * .3})`;
+      c.beginPath(); c.ellipse(b.x, 402, size * .55, 14, 0, 0, 7); c.fill();
+      txt(c, "⚠ 쿵!", b.x, 372, 22, "#E2475A");
+    }
     c.save(); c.globalAlpha = a;
     if (IMG.boss.complete && IMG.boss.naturalWidth) {
       c.translate(b.x, y); c.rotate(Math.sin(clock * 2) * .05);
+      if (B.st === "land") c.scale(1.12, .9);
       c.drawImage(IMG.boss, -size / 2, -size / 2, size, size);
     }
     c.restore();
-    if (!G.bossDown && G.mode === "play") {
-      c.fillStyle = "#fff"; rr(c, b.x - 120, b.y - size / 2 - 52, 240, 40, 16); c.fill();
-      txt(c, "흐하하! 내 문제를 풀 수 있겠냐?", b.x, b.y - size / 2 - 32, 16, "#6B4FC4", { stroke: null });
+    if (G.bossDown) return;
+    // 보호막 (3초 무적)
+    const shield = bossShield(), left = SHIELD_T - (B.cyc % SHIELD_T);
+    if (shield) {
+      c.save();
+      c.strokeStyle = `rgba(255,216,74,${.7 + Math.sin(clock * 10) * .2})`; c.lineWidth = 6;
+      c.fillStyle = "rgba(255,240,170,.18)";
+      c.beginPath(); c.arc(b.x, y, size * .58, 0, 7); c.fill(); c.stroke();
+      c.strokeStyle = "rgba(255,255,255,.8)"; c.lineWidth = 3; c.beginPath(); c.arc(b.x, y, size * .5, Math.PI * 1.1, Math.PI * 1.4); c.stroke();
+      c.restore();
     }
-    for (const m of G.smog) {
-      c.fillStyle = "#8E88A6"; c.beginPath(); c.arc(m.x, m.y, 20, 0, 7); c.arc(m.x + 12, m.y - 8, 13, 0, 7); c.arc(m.x - 12, m.y - 6, 12, 0, 7); c.fill();
-      c.fillStyle = "#3A2F55"; c.beginPath(); c.arc(m.x - 6, m.y, 2.4, 0, 7); c.arc(m.x + 6, m.y, 2.4, 0, 7); c.fill();
-    }
+    // 기운 막대와 상태 표시
+    const bw = 170, bx = 860 - bw / 2, by = 40;
+    c.fillStyle = "#fff"; rr(c, bx - 8, by - 26, bw + 16, 52, 14); c.fill();
+    c.fillStyle = "#EEE9F7"; rr(c, bx, by + 6, bw, 12, 6); c.fill();
+    c.fillStyle = "#8E7BC4"; rr(c, bx, by + 6, bw * G.bossHP / BOSS_N, 12, 6); c.fill();
+    txt(c, shield ? `🛡️ 무적! ${Math.ceil(left)}초` : `지금이야! ${Math.ceil(left)}초`, 860, by - 8, 16, shield ? "#C98A00" : "#1E9A6E", { stroke: null });
+    txt(c, `대마왕 기운 ${G.bossHP * 20}%`, 860, by + 12, 11, "#fff", { stroke: "#6B4FC4", sw: 3 });
+  }
+  function drawWave(c) {
+    if (G.wave < 0) return;
+    const k = G.wave / .8;
+    c.strokeStyle = `rgba(142,136,166,${1 - k})`; c.lineWidth = 8 * (1 - k) + 2;
+    c.beginPath(); c.ellipse(740, 402, 60 + k * 800, 10 + k * 14, 0, Math.PI, 0); c.stroke();
   }
 
   function drawStage(c) {
+    if (G.shake > 0 && !reduceMotion) { const m = 9 * G.shake / .6; c.translate((Math.random() - .5) * m, (Math.random() - .5) * m); }
     c.drawImage(bgCache, 0, 0);
     // 대마왕이 사라지면 스모그가 걷히고 맑은 하늘이 나와요
     if (G.clearSky) { c.globalAlpha = Math.max(0, Math.min(1, ((G.mode === "ending" ? G.endT : 9) - .6) / 1.6)); c.drawImage(G.clearSky, 0, 0); c.globalAlpha = 1; }
     drawGround(c); drawProp(c);
-    drawHazards(c);
+    drawHazards(c); drawVents(c); drawGusts(c);
     // 시민
     const cp = citPos();
     if (cp && G.mode !== "ending") {
@@ -1530,7 +1760,9 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
       }
     }
     for (const s of st.storms || []) drawStorm(c, s);
-    drawBoss(c);
+    drawBoss(c); drawWave(c); drawSmog(c);
+    // 안개는 장애물을 가리지만 영웅은 보여요
+    drawFog(c);
     // 엔딩: 도와준 시민들이 모두 나와 환호해요
     if (st.boss && G.mode === "ending" || (st.boss && G.mode === "won" && G.bossDown)) {
       const e = G.mode === "ending" ? G.endT : 9;
@@ -1780,9 +2012,10 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
       <div class="pgd__card pgd__card--how">
         <h3><span class="pgd__ico" aria-hidden="true">🎮</span>이렇게 놀아요</h3>
         <ol>
-        <li>방향키·<b>A D</b>로 걷고, <b>스페이스</b>나 <b>↑</b>를 꾹 누르면 날아요. 4·5·7·8·9·10단계는 <b>날지 않으면 갈 수 없어요.</b></li>
+        <li>방향키·<b>A D</b>로 걷고, <b>스페이스</b>나 <b>↑</b>를 꾹 누르면 날아요. 2단계부터는 <b>날지 않으면 갈 수 없어요.</b></li>
+        <li>3단계부터 <b>천둥 구름·매연·돌풍·안개</b> 장애물이 하나씩 늘어나요. 움직이는 때를 잘 보고 지나가요.</li>
         <li>시민에게 닿으면 이야기를 듣고 <b>7가지 기체 중 딱 맞는 하나</b>를 골라 전해 줘요.</li>
-        <li>10단계에서는 스모그 대마왕이 7문제 중 <b>무작위 5문제</b>를 내요. 할 때마다 문제가 달라져요.</li>
+        <li>10단계에서는 스모그 대마왕이 7문제 중 <b>무작위 5문제</b>를 내요. 보호막이 꺼졌을 때 다가가 맞히면 대마왕 기운이 20%씩 줄어요.</li>
         <li>체력은 단계마다 100에서 시작해요. <b>남은 체력이 곧 점수</b>, 모두 통과하면 명예의 전당에 이름을 올려요.</li>
         </ol>
       </div>
