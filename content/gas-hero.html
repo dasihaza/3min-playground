@@ -1494,9 +1494,16 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
       txt(c, on ? "🌀 돌풍!" : soon ? "곧 불어요!" : "🌀 쉬는 중", g.x + g.w / 2, g.y + 18, 15, on ? "#2F86DB" : soon ? "#E2475A" : "#8A88AE");
     }
   }
+  // 안개는 약 8초마다 천천히 짙어졌다가 천천히 걷혀요
+  function fogThick(f) {
+    const k = .5 + .5 * Math.cos((G.time + f.x / 120) * Math.PI * 2 / 8);
+    return k * k * (3 - 2 * k);
+  }
   function drawFog(c) {
     for (const f of st.fog || []) {
+      const k = fogThick(f);
       c.save();
+      c.globalAlpha = .1 + .9 * k;
       c.fillStyle = "rgba(236,240,248,.96)"; rr(c, f.x, f.y, f.w, f.h, 30); c.fill();
       c.fillStyle = "rgba(255,255,255,.95)";
       for (let k = 0; k < 12; k++) {
@@ -1504,7 +1511,8 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
         c.beginPath(); c.arc(fx2, fy, 26 + (k % 3) * 8, 0, 7); c.fill();
       }
       for (const sx of [f.x, f.x + f.w]) for (let yy = f.y + 20; yy < f.y + f.h; yy += 40) { c.beginPath(); c.arc(sx + Math.sin(clock + yy) * 4, yy, 22, 0, 7); c.fill(); }
-      txt(c, "🌫️ 안개", f.x + f.w / 2, f.y + 22, 15, "#8A88AE");
+      c.globalAlpha = 1;
+      txt(c, k > .65 ? "🌫️ 안개 짙음" : k < .3 ? "🌫️ 안개 걷힘" : "🌫️ 안개", f.x + f.w / 2, f.y + 22, 15, "#8A88AE");
       c.restore();
     }
   }
