@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>또롱이의 소리 우체국 | 3분 놀이터</title>
+<meta name="description" content="소리는 고체, 액체, 기체를 통해 전달돼요. 소리 우체국 배달부 또롱이와 함께 소리 길을 잇고, 소리 도둑 쉿쉿이의 방을 탈출하고, 소리 소포를 분류하는 3학년 과학 웹게임.">
+<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<style>
+/* 솜사탕 하늘색과 우체국 빨강, 딸기우유 분홍을 섞은 파스텔 그림책 느낌. 어느 테마에서도 같은 밝은 모습을 써요. */
+:root {
+  --bg: #EAF6FF;
+  --bg2: #FFF0F6;
+  --card: #FFFFFF;
+  --ink: #3E3D6B;
+  --muted: #8A88AE;
+  --line: #DCE6F6;
+  --sky: #4FA8FF;
+  --post: #FF6B7A;
+  --post-d: #D9475A;
+  --pink: #FF8FC0;
+  --sun: #FFBE3D;
+  --mint: #34C496;
+  --grape: #A58BFF;
+  --solid: #E39A4C;   --solid-l: #FFF0DF;
+  --liquid: #3F9BF2;  --liquid-l: #E2F0FF;
+  --gas: #33B9C9;     --gas-l: #DDF7F8;
+  --f-display: "Jua", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --f-body: "Gowun Dodum", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  background: var(--bg) linear-gradient(165deg, var(--bg) 0%, var(--bg2) 100%) fixed;
+  color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 18px 40px;
+  min-height: 100%;
+}
+.topbar { max-width: 1000px; margin: 0 auto 6px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.topbar a { color: var(--ink); text-decoration: none; }
+.topbar .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; }
+.topbar .back { font-size: 12.5px; font-weight: 700; color: var(--muted); background: #fff; padding: 6px 12px; border-radius: 999px; box-shadow: 0 3px 0 var(--line); }
+.bulb-wrap { text-align: center; padding: 6px 0 0; }
+.bulb { background: none; border: 0; box-shadow: none; cursor: pointer; padding: 8px; line-height: 0; color: var(--muted); opacity: .45; transition: all .2s; }
+.bulb:hover { color: #F0B429; opacity: 1; filter: drop-shadow(0 0 8px rgba(240, 180, 41, .7)); transform: scale(1.15); }
+.bulb:active { box-shadow: none; }
+.bulb.on { color: #F0B429; opacity: 1; filter: drop-shadow(0 0 10px rgba(240, 180, 41, .85)); }
+.wrap { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+
+header { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.logo { width: 82px; height: 82px; flex: none; animation: bob 2.6s ease-in-out infinite; object-fit: contain; }
+h1 { font-family: var(--f-display); font-weight: 400; font-size: clamp(32px, 6.2vw, 52px); line-height: 1; margin: 0; letter-spacing: .02em;
+  text-shadow: 0 3px 0 #fff, 0 6px 14px rgba(80, 110, 180, .2); }
+h1 .a { color: var(--sky); } h1 .b { color: var(--post); }
+.tag { margin: 0; color: var(--muted); max-width: 50ch; text-wrap: balance; flex: 1 1 260px; min-width: 0; }
+
+/* 계기판 */
+.hud { display: flex; gap: 8px; flex-wrap: wrap; align-items: stretch; }
+.pill { background: var(--card); border-radius: 999px; padding: 6px 16px; display: flex; align-items: center; gap: 10px;
+  box-shadow: 0 3px 0 var(--line), 0 6px 16px rgba(90, 120, 180, .10); min-width: 0; position: relative; }
+.pill .lab { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.pill .val { font-family: var(--f-display); font-size: 18px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pill.level { flex: 1 1 220px; }
+.pill.level .badge { font-family: var(--f-display); background: var(--post); color: #fff; border-radius: 999px; padding: 0 10px; font-size: 15px; white-space: nowrap; }
+.pill.level .val { overflow: hidden; text-overflow: ellipsis; }
+.tbar { width: 110px; height: 14px; border-radius: 8px; background: #EEF2FA; overflow: hidden; box-shadow: inset 0 1px 2px rgba(70, 90, 140, .15); }
+.tbar .fill { height: 100%; width: 100%; border-radius: 8px; background: linear-gradient(90deg, #8FD6FF, var(--sky)); transition: background .3s; }
+.pill.timer.low .fill { background: linear-gradient(90deg, #FFB0BA, var(--post)); }
+.pill.timer.low .val { color: var(--post); animation: beat .5s ease-in-out infinite; }
+.pill.timer.hit { animation: shake .4s; }
+.minus { position: absolute; right: 8px; top: -6px; font-family: var(--f-display); color: var(--post); font-size: 18px; pointer-events: none; animation: rise .9s ease-out forwards; }
+.btns { display: flex; gap: 8px; flex-wrap: wrap; }
+button { font: inherit; font-family: var(--f-display); font-size: 16px; color: var(--ink); background: var(--card); border: 0; border-radius: 999px;
+  padding: 8px 18px; cursor: pointer; box-shadow: 0 3px 0 var(--line); transition: transform .08s; -webkit-tap-highlight-color: transparent; }
+button:hover { transform: translateY(-1px); }
+button:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--line); }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--sky); outline-offset: 2px; }
+button.primary { background: var(--post); color: #fff; box-shadow: 0 4px 0 var(--post-d); font-size: 19px; padding: 10px 26px; }
+button.primary:active { box-shadow: 0 1px 0 var(--post-d); }
+button.primary:disabled { background: #DFE5EE; color: #fff; box-shadow: 0 3px 0 #CBD3E0; cursor: not-allowed; transform: none; }
+button.tog[aria-pressed="false"] { color: var(--muted); text-decoration: line-through; }
+button.danger { color: var(--post); }
+
+/* 게임 화면 */
+.screen { position: relative; border-radius: 26px; overflow: hidden; background: #FFFDF8;
+  box-shadow: 0 0 0 6px #fff, 0 10px 0 6px var(--line), 0 24px 40px rgba(90, 120, 180, .2); margin: 6px; min-height: 620px; }
+.view { padding: 16px; display: flex; flex-direction: column; gap: 12px; min-height: 620px; }
+.overlay { position: absolute; inset: 0; display: grid; place-items: center; padding: 12px; background: rgba(226, 240, 255, .55); backdrop-filter: blur(3px); overflow-y: auto; z-index: 20; }
+.card { background: var(--card); border-radius: 28px; padding: 18px 22px 20px; max-width: 540px; width: 100%; text-align: center;
+  box-shadow: 0 8px 0 var(--line), 0 20px 50px rgba(70, 100, 170, .25); display: flex; flex-direction: column; align-items: center; gap: 8px;
+  animation: pop .35s cubic-bezier(.2, 1.6, .4, 1); max-height: 100%; overflow-y: auto; }
+.card.wide { max-width: 720px; }
+.card .no { font-family: var(--f-display); font-size: 14px; color: var(--muted); }
+.card .chap { font-family: var(--f-display); font-size: 15px; color: #fff; background: var(--grape); border-radius: 999px; padding: 2px 14px; }
+.card h2 { font-family: var(--f-display); font-weight: 400; font-size: 30px; line-height: 1.15; margin: 0; text-wrap: balance; }
+.card p { margin: 0; color: var(--muted); max-width: 48ch; }
+.card .mission { background: #EEF6FF; border-radius: 16px; padding: 8px 14px; color: var(--ink); font-weight: 700; max-width: 48ch; }
+.card img.pic { width: 100%; max-width: 280px; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 18px; box-shadow: 0 4px 0 var(--line); background: #F2F6FC; }
+.card img.pic.wide { max-width: 400px; aspect-ratio: 16 / 9; }
+.card img.pic.char { max-width: 130px; aspect-ratio: 1; object-fit: contain; box-shadow: none; background: none; }
+.card .row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 4px; }
+.genre { display: inline-flex; gap: 6px; align-items: center; font-family: var(--f-display); font-size: 14px; border-radius: 999px; padding: 2px 12px; }
+.genre.g1 { background: #FFE3E7; color: #C93A4F; } .genre.g2 { background: #ECE4FF; color: #5B3FC4; } .genre.g3 { background: #FFF2CC; color: #9A6200; }
+.stars { display: flex; gap: 6px; font-size: 40px; line-height: 1; }
+.stars span { color: #E6ECF5; }
+.stars span.on { color: var(--sun); text-shadow: 0 3px 0 #E09424; animation: pop .4s cubic-bezier(.2, 1.8, .4, 1) both; }
+.stars span.on:nth-child(2) { animation-delay: .12s; } .stars span.on:nth-child(3) { animation-delay: .24s; }
+.scorebig { font-family: var(--f-display); font-size: 22px; }
+.scorebig b { font-weight: 400; color: var(--post); font-size: 34px; }
+.learn { background: #F5F9FF; border-radius: 16px; padding: 10px 14px; text-align: left; width: 100%; font-weight: 700; font-size: 14.5px; }
+.learn .lt { font-family: var(--f-display); font-weight: 400; color: var(--sky); font-size: 15px; display: block; }
+.learn b { color: var(--post); }
+
+/* 상태 표시 */
+.st { display: inline-flex; align-items: center; gap: 3px; font-family: var(--f-display); font-size: 13px; border-radius: 999px; padding: 0 9px; line-height: 1.6; white-space: nowrap; }
+.st.s { background: var(--solid-l); color: #A45F16; } .st.l { background: var(--liquid-l); color: #1F6FC0; } .st.g { background: var(--gas-l); color: #138592; }
+
+/* 또롱이 말풍선 */
+.say { display: flex; align-items: flex-start; gap: 10px; min-width: 0; }
+.say img { width: 64px; height: 64px; object-fit: contain; flex: none; animation: bob 2.4s ease-in-out infinite; }
+.say p { margin: 0; position: relative; background: #fff; border-radius: 18px; padding: 10px 14px; font-weight: 700; font-size: 15px; box-shadow: 0 3px 0 var(--line); flex: 1; min-width: 0; }
+.say p::before { content: ""; position: absolute; left: -8px; top: 18px; border: 8px solid transparent; border-left: 0; border-right-color: #fff; }
+.say p small { display: block; color: var(--muted); font-size: 13px; }
+
+/* 1~5단계: 소리 배달 */
+.dv-top { display: grid; grid-template-columns: minmax(0, 250px) 1fr; gap: 14px; align-items: center; }
+.dv-pic { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 18px; box-shadow: 0 4px 0 var(--line); }
+.road { position: relative; background: repeating-linear-gradient(90deg, #FFF6E6 0 22px, #FFF1DA 22px 44px); border-radius: 24px; padding: 14px 10px; box-shadow: inset 0 0 0 3px #FFE3B8; }
+.path { display: flex; align-items: stretch; justify-content: center; flex-wrap: wrap; gap: 6px 0; }
+.pitem { flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; width: 104px; min-height: 104px; border-radius: 20px; padding: 6px 4px; text-align: center; position: relative; }
+.node { background: #fff; box-shadow: 0 3px 0 var(--line); }
+.node .ne { font-size: 34px; line-height: 1.1; }
+.node .nl { font-size: 12.5px; font-weight: 700; color: var(--muted); line-height: 1.25; }
+.link { align-self: center; width: 22px; height: 6px; margin: 0 1px; border-radius: 3px; background: radial-gradient(circle, #FFC86B 2.5px, transparent 3px) 0 0 / 8px 6px repeat-x; }
+.link.lit { background: radial-gradient(circle, var(--post) 3px, transparent 3.5px) 0 0 / 8px 6px repeat-x; }
+button.slot { font-family: var(--f-body); background: rgba(255, 255, 255, .7); box-shadow: none; border: 3px dashed #F4B860; padding: 6px 4px; color: var(--ink); }
+button.slot .se { font-size: 30px; line-height: 1.15; }
+button.slot .sn { font-family: var(--f-display); font-size: 14px; line-height: 1.2; }
+button.slot .sl { font-size: 11.5px; font-weight: 700; color: #B97A1E; line-height: 1.2; }
+button.slot.empty .se { color: #F4B860; font-family: var(--f-display); font-size: 28px; }
+button.slot.sel { border-color: var(--post); border-style: solid; background: #FFF4F6; animation: glow 1.2s ease-in-out infinite; }
+button.slot.full { border-style: solid; border-color: #FFC86B; background: #fff; }
+button.slot.wrong { border-color: var(--post); background: #FFE3E7; animation: shake .4s; }
+button.slot.drop { border-color: var(--sky); background: #EAF5FF; }
+.pitem.lit { box-shadow: 0 0 0 4px var(--sun), 0 0 22px rgba(255, 190, 61, .8); transform: scale(1.06); transition: transform .2s, box-shadow .2s; }
+.pitem .badge2 { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); animation: pop .35s cubic-bezier(.2, 1.8, .4, 1) both; }
+.pitem.heard { animation: jump .5s ease-out 2; }
+.note-fly { position: absolute; font-size: 26px; pointer-events: none; z-index: 3; animation: noteup 1s ease-out forwards; }
+.tray-h { font-family: var(--f-display); font-size: 16px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.tray-h small { font-family: var(--f-body); font-weight: 700; font-size: 13px; color: var(--muted); }
+.tray { display: flex; flex-wrap: wrap; gap: 8px; }
+button.tile { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px 6px 8px; border-radius: 18px; font-size: 16px; background: #fff;
+  box-shadow: 0 4px 0 #E3D3F7; border: 2px solid #EFE6FB; touch-action: none; user-select: none; -webkit-user-select: none; }
+button.tile .te { font-size: 26px; line-height: 1; }
+.ghost { position: fixed; z-index: 100; pointer-events: none; transform: translate(-50%, -50%) scale(1.1) rotate(-4deg); opacity: .92; box-shadow: 0 10px 24px rgba(70, 90, 140, .3) !important; }
+.actrow { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.fb { min-height: 1.4em; font-weight: 700; font-size: 14.5px; flex: 1 1 220px; }
+.fb.err { color: var(--post); } .fb.ok { color: #1E9A6E; }
+.checkq { background: #F7F3FF; border-radius: 20px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; animation: pop .35s cubic-bezier(.2, 1.6, .4, 1); }
+.checkq h3 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: 19px; }
+.checkq h3 small { display: block; font-family: var(--f-body); font-weight: 700; font-size: 13px; color: var(--muted); }
+.chips { display: flex; gap: 10px; flex-wrap: wrap; }
+button.chip { font-size: 19px; padding: 10px 20px; border-radius: 20px; border: 3px solid transparent; display: inline-flex; align-items: center; gap: 6px; }
+button.chip.s { background: var(--solid-l); box-shadow: 0 4px 0 #F2C99B; } button.chip.l { background: var(--liquid-l); box-shadow: 0 4px 0 #A9CFF5; } button.chip.g { background: var(--gas-l); box-shadow: 0 4px 0 #9EE0E7; }
+button.chip[aria-pressed="true"] { border-color: var(--ink); }
+button.chip[aria-pressed="true"]::after { content: "✔"; color: var(--post); }
+
+/* 6~9단계: 방 탈출 */
+.scene { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 20px; overflow: hidden; background: #F2F6FC center / cover no-repeat; box-shadow: 0 4px 0 var(--line); }
+.hs { position: absolute; transform: translate(-50%, -50%); width: clamp(40px, 7.2vw, 62px); height: clamp(40px, 7.2vw, 62px); padding: 0; border-radius: 50%;
+  font-size: clamp(20px, 3.4vw, 30px); background: rgba(255, 255, 255, .92); box-shadow: 0 4px 0 rgba(62, 61, 107, .2), 0 0 0 4px rgba(255, 190, 61, .9); animation: twinkle 1.6s ease-in-out infinite; display: grid; place-items: center; }
+.hs:hover { transform: translate(-50%, -52%) scale(1.06); }
+.hs:active { transform: translate(-50%, -48%); }
+.hs .n { position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; border-radius: 50%; background: var(--grape); color: #fff; font-size: 13px; display: grid; place-items: center; }
+.hs.done { animation: none; background: #DDF6EC; box-shadow: 0 4px 0 rgba(30, 138, 100, .3), 0 0 0 4px var(--mint); font-family: var(--f-display); color: #1E8A64; }
+.hs.lock { background: #FFF6D8; box-shadow: 0 4px 0 rgba(154, 98, 0, .3), 0 0 0 4px #FFD36B; animation: none; }
+.hs.lock.ready { animation: twinkle 1s ease-in-out infinite; box-shadow: 0 4px 0 rgba(217, 71, 90, .3), 0 0 0 5px var(--post); }
+.peek { position: absolute; right: 1%; bottom: -2%; width: 17%; max-width: 150px; pointer-events: none; animation: peek 2.8s ease-in-out infinite; filter: drop-shadow(0 4px 8px rgba(60, 40, 120, .25)); }
+.peek-say { position: absolute; right: 17%; bottom: 6%; max-width: 44%; background: #fff; border-radius: 16px; padding: 5px 12px; font-family: var(--f-display); font-size: clamp(12px, 1.8vw, 16px); color: #6B4FD0; box-shadow: 0 3px 0 rgba(107, 79, 208, .25); animation: pop .35s cubic-bezier(.2, 1.6, .4, 1); }
+.memo { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; background: #FFFBEA; border-radius: 20px; padding: 10px 14px; box-shadow: inset 0 0 0 3px #FFEBA8; }
+.memo .mt { font-family: var(--f-display); font-size: 17px; white-space: nowrap; }
+.memo .story { flex: 1 1 260px; min-width: 0; font-weight: 700; font-size: 14px; }
+.digits { display: flex; gap: 6px; }
+.digit { width: 40px; height: 48px; border-radius: 12px; background: #fff; box-shadow: 0 3px 0 #F3E1A6; display: grid; place-items: center; font-family: var(--f-display); font-size: 26px; color: #C9B98A; position: relative; }
+.digit small { position: absolute; top: -9px; left: 50%; transform: translateX(-50%); font-size: 11px; background: var(--grape); color: #fff; border-radius: 999px; padding: 0 6px; line-height: 1.5; }
+.digit.got { color: var(--post); animation: pop .4s cubic-bezier(.2, 1.8, .4, 1); }
+.pop { position: absolute; inset: 0; z-index: 15; display: grid; place-items: center; padding: 12px; background: rgba(60, 50, 110, .25); backdrop-filter: blur(2px); overflow-y: auto; }
+.popc { background: #fff; border-radius: 26px; padding: 16px 20px 18px; width: 100%; max-width: 520px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 8px 0 var(--line), 0 20px 50px rgba(70, 100, 170, .3); animation: pop .3s cubic-bezier(.2, 1.6, .4, 1); max-height: 100%; overflow-y: auto; }
+.popc .ph { display: flex; align-items: center; gap: 8px; font-family: var(--f-display); font-size: 15px; color: var(--grape); }
+.popc .ph .x { margin-left: auto; font-size: 14px; padding: 4px 12px; }
+.popc .fb { flex: none; }
+.popc .q { font-family: var(--f-display); font-size: 21px; line-height: 1.3; }
+.popc .sit { background: #F5F2FF; border-radius: 14px; padding: 8px 12px; font-weight: 700; font-size: 14.5px; }
+.opts { display: grid; gap: 8px; }
+button.opt { text-align: left; font-size: 17px; border-radius: 18px; padding: 10px 16px; background: #F6F8FC; box-shadow: 0 3px 0 var(--line); }
+button.opt.wrong { background: #FFE3E7; box-shadow: 0 3px 0 #FFC2CA; animation: shake .4s; opacity: .6; }
+button.opt.right { background: #DDF6EC; box-shadow: 0 3px 0 #A6E6CA; }
+button.opt:disabled { cursor: default; transform: none; }
+.keypad { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.keypad button { font-size: 22px; padding: 10px 0; border-radius: 16px; }
+.lockview { display: flex; justify-content: center; gap: 8px; }
+.lockview .digit { width: 52px; height: 60px; font-size: 32px; color: var(--ink); box-shadow: 0 4px 0 #CBD3E0; background: #F3F6FB; }
+.lockview.bad .digit { animation: shake .4s; background: #FFE3E7; }
+
+/* 10단계: 분류 컨베이어 */
+.sortv { background: linear-gradient(rgba(255, 251, 240, .78), rgba(255, 251, 240, .9)), url(../assets/sound-post/sort.webp) center / cover; }
+.streak { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: #fff; border-radius: 999px; padding: 6px 16px; box-shadow: 0 3px 0 var(--line); }
+.streak .lab { font-family: var(--f-display); font-size: 16px; }
+.dots { display: flex; gap: 5px; flex: 1; min-width: 160px; }
+.dots i { flex: 1; height: 16px; max-width: 34px; border-radius: 8px; background: #EEF1F7; box-shadow: inset 0 1px 2px rgba(70, 90, 140, .12); }
+.dots i.on { background: linear-gradient(180deg, #FFD36B, var(--sun)); animation: pop .3s cubic-bezier(.2, 1.8, .4, 1); }
+.streak .cnt { font-family: var(--f-display); font-size: 20px; color: var(--post); font-variant-numeric: tabular-nums; }
+.belt-wrap { position: relative; height: 200px; z-index: 3; }
+.belt { position: absolute; left: 0; right: 0; bottom: 0; height: 34px; border-radius: 18px; background: #6E6A8E; box-shadow: inset 0 -6px 0 rgba(0, 0, 0, .18), 0 4px 0 #CFC8E2; overflow: hidden; }
+.belt::before { content: ""; position: absolute; inset: 6px 8px; border-radius: 12px; background: repeating-linear-gradient(90deg, #8D89AE 0 18px, #7C789F 18px 36px); animation: belt 1.2s linear infinite; }
+.pcard { position: absolute; left: 0; bottom: 30px; width: min(310px, 74%); background: #fff; border-radius: 20px; padding: 10px 14px 12px; box-shadow: 0 6px 0 #E8D9B8, 0 12px 24px rgba(120, 90, 40, .18);
+  border: 3px solid #F6E3BB; touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; will-change: transform; }
+.pcard::before { content: "📦 소리 소포"; position: absolute; top: -12px; left: 14px; font-family: var(--f-display); font-size: 12px; background: var(--post); color: #fff; padding: 0 10px; border-radius: 999px; line-height: 1.7; }
+.pcard .pe { font-size: 34px; line-height: 1.1; float: left; margin: 4px 8px 0 0; }
+.pcard .pt { font-weight: 700; font-size: 15.5px; line-height: 1.45; }
+.pcard.drag { cursor: grabbing; box-shadow: 0 14px 30px rgba(70, 90, 140, .3); }
+.pcard.gone { transition: transform .3s ease-in, opacity .3s; opacity: 0; }
+.pcard.bad { animation: shake .4s; border-color: var(--post); }
+.boxes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+button.mbox { position: relative; display: flex; flex-direction: column; align-items: center; gap: 0; padding: 14px 6px 10px; border-radius: 30px 30px 18px 18px; color: #fff; }
+button.mbox .face { font-size: 13px; letter-spacing: 6px; opacity: .9; }
+button.mbox .slit { width: 56%; height: 9px; border-radius: 5px; background: rgba(0, 0, 0, .28); margin: 4px 0 6px; }
+button.mbox .mn { font-size: 24px; line-height: 1.1; display: flex; align-items: center; gap: 4px; }
+button.mbox .mk { font-family: var(--f-body); font-weight: 700; font-size: 12px; opacity: .92; }
+button.mbox.s { background: linear-gradient(180deg, #E8A660, #C9803A); box-shadow: 0 6px 0 #9E5E22; }
+button.mbox.l { background: linear-gradient(180deg, #5DAEFA, #2E83DA); box-shadow: 0 6px 0 #1F62A8; }
+button.mbox.g { background: linear-gradient(180deg, #67D3E0, #2EAAB9); box-shadow: 0 6px 0 #1F7F8B; }
+button.mbox.drop { transform: scale(1.06); outline: 4px solid var(--sun); }
+button.mbox.yum { animation: yum .45s ease-out; }
+button.mbox.no { animation: shake .4s; }
+.sfb { text-align: center; font-weight: 700; min-height: 1.6em; font-size: 15px; }
+.sfb.ok { color: #1E9A6E; } .sfb.err { color: var(--post); }
+
+/* 아래 패널 */
+.below { display: grid; grid-template-columns: 1fr 1.1fr; gap: 16px; }
+.panel { background: var(--card); border-radius: 24px; padding: 18px 20px; min-width: 0; box-shadow: 0 5px 0 var(--line); }
+.panel h3 { font-family: var(--f-display); font-weight: 400; font-size: 19px; margin: 0 0 10px; }
+.keys { margin: 0 0 16px; padding: 0; list-style: none; display: grid; gap: 7px; font-size: 14px; color: var(--muted); }
+kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; padding: 0 6px; color: var(--ink); background: #EFF4FB; box-shadow: 0 2px 0 var(--line); }
+.levels { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.levels button { aspect-ratio: 1; padding: 0; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.05; max-width: 66px; width: 100%; justify-self: center; }
+.levels button .ic { font-size: 13px; }
+.levels button .n { font-size: 20px; }
+.levels button .s { font-size: 10px; color: var(--sun); letter-spacing: 1px; min-height: 1.1em; }
+.levels button.cur { background: var(--sky); color: #fff; box-shadow: 0 3px 0 #2F86DB; }
+.levels button.cur .s { color: #FFE29A; }
+.levels button:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+.legend { display: flex; gap: 6px 12px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); margin: 10px 0 0; }
+.teacher { margin-top: 10px; font-size: 13px; color: var(--muted); padding: 4px 12px; }
+.notes { display: grid; gap: 7px; }
+.nt { display: grid; grid-template-columns: 30px 1fr; gap: 10px; align-items: center; padding: 7px 12px 7px 8px; border-radius: 14px; background: #F7F9FD; font-size: 13.5px; }
+.nt .ne { font-size: 24px; text-align: center; }
+.nt b { font-family: var(--f-display); font-weight: 400; font-size: 15.5px; margin-right: 6px; }
+.nt .use { display: block; color: var(--muted); font-size: 12.5px; }
+.nt .sts { display: inline-flex; gap: 4px; vertical-align: 1px; }
+.nt.locked { color: #B9C0D0; }
+.nt.locked .ne { filter: grayscale(1); opacity: .45; }
+
+/* 랭킹 */
+.rank { display: grid; grid-template-columns: 1fr 1.1fr; gap: 22px; }
+.rank > div { min-width: 0; }
+.rank .rule { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+.mybox { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.mybox > div { background: #FFF1F3; border-radius: 18px; padding: 10px 14px; }
+.mybox .lab { display: block; font-size: 12px; color: var(--muted); }
+.mybox .big { font-family: var(--f-display); font-size: 32px; line-height: 1.1; color: var(--post); font-variant-numeric: tabular-nums; }
+.mybox .unit { font-size: 13px; color: var(--muted); margin-left: 4px; }
+.lvscores { list-style: none; margin: 0 0 14px; padding: 0; display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; }
+.lvscores li { text-align: center; background: #F5F8FC; border-radius: 10px; padding: 4px 0; font-family: var(--f-display); font-size: 13px; font-variant-numeric: tabular-nums; }
+.lvscores li small { display: block; font-size: 10px; color: var(--muted); }
+.lvscores li.none { color: #C9D2E0; }
+#rankForm label { display: block; font-family: var(--f-display); font-size: 15px; margin-bottom: 4px; }
+.formrow { display: flex; gap: 8px; flex-wrap: wrap; }
+.formrow input { flex: 1 1 140px; min-width: 0; font: inherit; font-size: 16px; padding: 9px 16px; border-radius: 999px; border: 2px solid var(--line); background: #fff; color: var(--ink); }
+.formrow button:disabled { background: #DFE5EE; box-shadow: 0 3px 0 #CBD3E0; cursor: not-allowed; transform: none; }
+.msg { margin: 8px 0 0; font-size: 14px; color: var(--muted); min-height: 1.4em; }
+.msg.ok { color: var(--mint); } .msg.err { color: var(--post); }
+.board { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.board li { display: grid; grid-template-columns: 30px 30px 1fr auto; gap: 10px; align-items: center; padding: 7px 12px; border-radius: 16px; background: #F6F8FC; }
+.board li.me { background: #FFF1DE; box-shadow: inset 0 0 0 2px var(--sun); }
+.board li.empty { display: block; text-align: center; color: var(--muted); padding: 22px 12px; }
+.board .no { font-family: var(--f-display); font-size: 17px; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: #E7ECF4; color: var(--muted); }
+.board li:nth-child(1) .no { background: #FFC94A; color: #fff; } .board li:nth-child(2) .no { background: #B9C3D6; color: #fff; } .board li:nth-child(3) .no { background: #E3A774; color: #fff; }
+.board img { width: 30px; height: 30px; border-radius: 50%; }
+.board .nm { font-family: var(--f-display); font-size: 17px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.board .nm small { font-family: var(--f-body); font-size: 12px; color: var(--sun); margin-left: 6px; }
+.board .sc { font-family: var(--f-display); font-size: 18px; color: var(--post); font-variant-numeric: tabular-nums; }
+
+.confetti { position: absolute; top: -20px; font-size: 22px; pointer-events: none; z-index: 30; animation: fall 2.2s linear forwards; }
+
+@keyframes bob { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-6px) rotate(3deg); } }
+@keyframes pop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes shake { 0%, 100% { translate: 0; } 25% { translate: -6px; } 75% { translate: 6px; } }
+@keyframes beat { 50% { transform: scale(1.15); } }
+@keyframes rise { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-26px); opacity: 0; } }
+@keyframes glow { 50% { box-shadow: 0 0 0 5px rgba(255, 107, 122, .25); } }
+@keyframes twinkle { 50% { box-shadow: 0 4px 0 rgba(62, 61, 107, .2), 0 0 0 8px rgba(255, 190, 61, .45); } }
+@keyframes jump { 30% { transform: translateY(-12px) scale(1.08); } }
+@keyframes noteup { from { transform: translateY(0) scale(.6); opacity: 0; } 20% { opacity: 1; } to { transform: translateY(-50px) scale(1.2); opacity: 0; } }
+@keyframes peek { 0%, 100% { transform: translateY(6%) rotate(-4deg); } 50% { transform: translateY(0) rotate(4deg); } }
+@keyframes belt { to { background-position: 36px 0; } }
+@keyframes yum { 30% { transform: scale(1.12, .9); } 60% { transform: scale(.95, 1.06); } }
+@keyframes fall { to { transform: translateY(620px) rotate(360deg); opacity: .2; } }
+@media (prefers-reduced-motion: reduce) {
+  .logo, .card, .say img, .stars span.on, .hs, .peek, .belt::before, .pitem.heard, button.slot.sel, .pill.timer.low .val { animation: none !important; }
+}
+@media (max-width: 820px) {
+  .below, .rank { grid-template-columns: 1fr; }
+  .lvscores { grid-template-columns: repeat(5, 1fr); }
+  .card { padding: 14px 14px 16px; gap: 6px; border-radius: 22px; }
+  .card h2 { font-size: 24px; }
+  .card p { font-size: 13.5px; }
+  .card img.pic { max-width: 240px; }
+  .screen { border-radius: 18px; min-height: 0; }
+  .view { padding: 12px; min-height: 480px; }
+  .dv-top { grid-template-columns: 120px 1fr; gap: 10px; }
+  .say img { width: 46px; height: 46px; }
+  .say p { font-size: 14px; padding: 8px 12px; }
+  .pitem { width: 84px; min-height: 92px; }
+  .node .ne { font-size: 28px; }
+  button.slot .se { font-size: 24px; }
+  .link { width: 12px; }
+}
+@media (max-width: 700px) {
+  .overlay, .pop { position: fixed; inset: 0; z-index: 50; padding-top: max(12px, env(safe-area-inset-top, 0px)); padding-bottom: max(12px, env(safe-area-inset-bottom, 0px)); }
+}
+@media (max-width: 480px) {
+  .dv-top { grid-template-columns: 1fr; }
+  .dv-pic { max-height: 150px; }
+  .say img { display: none; }
+  .say p::before { display: none; }
+  .pitem { width: 72px; min-height: 84px; border-radius: 16px; }
+  .node .nl, button.slot .sl { font-size: 10.5px; }
+  button.slot .sn { font-size: 12.5px; }
+  .boxes { gap: 8px; }
+  button.mbox .mn { font-size: 20px; }
+  .belt-wrap { height: 220px; }
+  .pcard { width: 84%; }
+  button.primary { font-size: 16px; padding: 8px 20px; }
+  .peek-say { display: none; }
+}
+</style>
+<link rel="stylesheet" href="../assets/guide.css">
+</head>
+<body>
+
+<div class="topbar">
+  <a class="brand" href="../index.html">
+    <svg width="26" height="26" viewBox="0 0 34 34" fill="none">
+      <circle cx="17" cy="18" r="14" fill="#fff" stroke="#3B4655" stroke-width="2"/>
+      <path d="M17 9 L17 18 L23 21" stroke="#FF90B3" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="13" y="2" width="8" height="4" rx="1.5" fill="#3B4655"/>
+    </svg>
+    <span>3분 놀이터</span>
+  </a>
+  <a class="back" href="../index.html">← 다른 콘텐츠 보기</a>
+</div>
+<div class="wrap">
+  <header>
+    <img class="logo" src="../assets/sound-post/torong.webp" alt="" width="82" height="82">
+    <h1>또롱이의 <span class="a">소리</span> <span class="b">우체국</span></h1>
+    <p class="tag">소리는 무엇을 타고 우리 귀까지 올까요? 새내기 배달부 또롱이와 함께 소리 길을 잇고, 소리 도둑 쉿쉿이를 쫓고, 뒤죽박죽 소리 소포를 분류해요.</p>
+  </header>
+
+  <div class="hud" role="group" aria-label="게임 계기판">
+    <div class="pill level"><span class="badge" id="lvlNo">1단계</span><span class="val" id="lvlName">책상 소리 배달</span></div>
+    <div class="pill timer" id="timerPill"><span class="lab">⏰ 남은 시간</span><div class="tbar"><div class="fill" id="tFill"></div></div><span class="val" id="tTxt">60초</span></div>
+    <div class="pill"><span class="lab">총점</span><span class="val" id="scoreTxt">0점</span></div>
+    <div class="btns">
+      <button id="musicBtn" class="tog" type="button" aria-pressed="true">음악 켬</button>
+      <button id="sfxBtn" class="tog" type="button" aria-pressed="true">효과음 켬</button>
+      <button id="restartBtn" type="button">다시</button>
+      <button id="fromStartBtn" class="danger" type="button" title="1단계부터 다시 시작해요. 점수 기록은 그대로 남아요.">처음부터</button>
+    </div>
+  </div>
+
+  <div class="screen" id="screen">
+    <div class="view" id="view"></div>
+    <div class="overlay" id="ov"><div class="card" id="card"></div></div>
+  </div>
+
+  <div class="below">
+    <section class="panel">
+      <h3>이렇게 놀아요</h3>
+      <ul class="keys">
+        <li>📮 <b>1~5단계 소리 배달</b>: 그림을 보고 빈칸에 소리가 지나가는 물질을 넣어 소리 길을 이어요. 끌어다 놓거나 눌러서 넣어요.</li>
+        <li>🔍 <b>6~9단계 쉿쉿이의 방</b>: 반짝이는 단서 3개를 풀어 비밀번호 숫자를 모으고 자물쇠를 열어요.</li>
+        <li>📦 <b>10단계 소포 분류</b>: 소리 소포를 고체·액체·기체 우체통에 넣어요. <b>10개 연속</b> 맞히면 성공! <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> 키로도 넣을 수 있어요.</li>
+        <li>⏰ 단계마다 60초! 틀리면 5초가 줄어요. <b>남은 시간이 그 단계 점수</b>예요.</li>
+      </ul>
+      <h3>단계 고르기</h3>
+      <div class="levels" id="levels"></div>
+      <p class="legend"><span>📮 소리 배달</span><span>🔍 쉿쉿이의 방</span><span>📦 소포 분류</span></p>
+      <button class="teacher" id="unlockAll" type="button">선생님용: 모든 단계 열기</button>
+    </section>
+    <section class="panel">
+      <h3>소리 길 노트</h3>
+      <div class="notes" id="notes"></div>
+    </section>
+  </div>
+
+  <section class="panel rank" id="rank" aria-labelledby="rankTitle">
+    <div>
+      <h3 id="rankTitle">명예의 배달부</h3>
+      <p class="rule">단계를 통과할 때 남은 시간(초)이 그 단계 점수예요. 단계마다 최고 기록만 더해서 최대 600점! 10단계까지 모두 통과하면 랭킹에 이름을 올릴 수 있어요.</p>
+      <div class="mybox">
+        <div><span class="lab">내 총점</span><span class="big" id="myTotal">0</span><span class="unit">/ 600점</span></div>
+        <div><span class="lab">통과한 단계</span><span class="big" id="myClear">0</span><span class="unit">/ 10개</span></div>
+      </div>
+      <ol class="lvscores" id="lvScores"></ol>
+      <form id="rankForm" autocomplete="off">
+        <label for="nick">랭킹에 쓸 배달부 이름</label>
+        <div class="formrow">
+          <input id="nick" name="nick" maxlength="12" placeholder="예: 번개배달부" required>
+          <button id="rankBtn" class="primary" type="submit">랭킹 등록</button>
+        </div>
+        <p class="msg" id="rankMsg" role="status"></p>
+      </form>
+    </div>
+    <div>
+      <h3>순위표 TOP 5</h3>
+      <ol class="board" id="board"><li class="empty">순위표를 불러오는 중이에요…</li></ol>
+    </div>
+  </section>
+
+  <div class="bulb-wrap" id="bulbWrap" hidden>
+    <button class="bulb" id="bulb" type="button" aria-label=" ">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" aria-hidden="true">
+        <path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.5.4.8 1 .8 1.6v.5h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0 0 12 3z"
+              stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script>
+(() => {
+  "use strict";
+  const $ = id => document.getElementById(id);
+  const IMG = "../assets/sound-post/";
+  const TIME = 60, PEN = 5;
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  // ---------- 고체·액체·기체 ----------
+  const ST = { s: { name: "고체", e: "🧱" }, l: { name: "액체", e: "💧" }, g: { name: "기체", e: "💨" } };
+  const stChip = k => `<span class="st ${k}">${ST[k].e} ${ST[k].name}</span>`;
+
+  // ---------- 소리 길 재료 (1~5단계) ----------
+  const TILES = {
+    desk:  { e: "🪵", name: "나무 책상", st: "s" },
+    water: { e: "💧", name: "물", st: "l" },
+    sand:  { e: "⏳", name: "모래", st: "s" },
+    yarn:  { e: "🧶", name: "털실 뭉치", st: "s" },
+    air:   { e: "💨", name: "공기", st: "g" },
+    tight: { e: "🧵", name: "팽팽한 실", st: "s" },
+    loose: { e: "〰️", name: "느슨한 실", st: "s", why: "실이 느슨하면 떨림이 잘 전해지지 않아서 소리가 거의 들리지 않아요." },
+    cut:   { e: "✂️", name: "끊어진 실", st: "s", why: "실이 끊어지면 소리가 건너갈 길이 없어요." },
+    glass: { e: "🪟", name: "유리", st: "s" },
+    board: { e: "🪵", name: "나무 판자", st: "s" },
+    wall:  { e: "🧱", name: "벽", st: "s" },
+    sea:   { e: "🌊", name: "바닷물", st: "l" },
+    iron:  { e: "🔩", name: "쇠로 된 배 바닥", st: "s" },
+    ice:   { e: "🧊", name: "얼음", st: "s" },
+  };
+
+  // ---------- 10단계 소리 소포 카드 30장 ----------
+  const CARDS = [
+    ["🐎", "땅바닥에 귀를 대니 멀리서 달려오는 말발굽 소리가 들려요.", "s", "땅"],
+    ["🚪", "방문에 귀를 대고, 밖에서 문을 ‘똑똑’ 두드리는 소리를 들어요.", "s", "나무 문"],
+    ["🏓", "탁구대에 귀를 대고, 반대편에서 공이 ‘통통’ 튀는 소리를 들어요.", "s", "탁구대"],
+    ["🪵", "통나무에 귀를 대고, 딱따구리가 나무를 ‘딱딱’ 쪼는 소리를 들어요.", "s", "통나무"],
+    ["🥄", "실에 매단 숟가락을 두드리고 실 끝을 귀에 대니 종소리처럼 들려요.", "s", "실"],
+    ["🧊", "꽁꽁 언 호수 얼음에 귀를 대고, 친구가 얼음을 두드리는 소리를 들어요.", "s", "얼음"],
+    ["🌉", "나무다리에 엎드려 귀를 대고, 다리 위를 걷는 발소리를 들어요.", "s", "나무다리"],
+    ["🛏️", "2층 침대 기둥에 귀를 대고, 위층 친구가 기둥을 두드리는 소리를 들어요.", "s", "침대 기둥"],
+    ["🦷", "두 손으로 귀를 막고 이를 ‘딱딱’ 부딪치니 머리뼈를 타고 소리가 들려요.", "s", "뼈"],
+    ["🐍", "뱀은 몸을 땅에 대고, 땅으로 전해지는 발걸음 소리를 느껴요.", "s", "땅"],
+    ["🐬", "돌고래가 물속에서 ‘삑삑’ 소리를 내어 멀리 있는 친구를 불러요.", "l", "물"],
+    ["🤿", "물속에 들어간 잠수부가 지나가는 배의 엔진 소리를 들어요.", "l", "물"],
+    ["🦐", "딱총새우가 집게로 ‘딱!’ 소리를 내자 물속 물고기들이 깜짝 놀라요.", "l", "물"],
+    ["🏊", "수영장 물속에 잠수한 채, 친구가 물속에서 ‘짝짝’ 손뼉 치는 소리를 들어요.", "l", "물"],
+    ["🐟", "고깃배의 어군 탐지기가 물속으로 소리를 보내 물고기 떼를 찾아요.", "l", "바닷물"],
+    ["🐠", "어항 속 금붕어가 물로 전해진 ‘톡톡’ 소리에 놀라 수초 뒤로 숨어요.", "l", "물"],
+    ["🚢", "바닷속 잠수함이 다른 잠수함의 프로펠러 소리를 들어요.", "l", "바닷물"],
+    ["🪨", "냇물에 귀를 담그고, 친구가 물속에서 돌 두 개를 ‘딱딱’ 부딪치는 소리를 들어요.", "l", "냇물"],
+    ["🎤", "바닷속에 넣은 수중 마이크로 물고기들이 내는 소리를 녹음해요.", "l", "바닷물"],
+    ["🩰", "아티스틱 스위밍 선수들이 물속 스피커의 음악을 들으며 연기해요.", "l", "물"],
+    ["🐦", "창밖 나무에서 지저귀는 새소리가 들려요.", "g", "공기"],
+    ["⛈️", "멀리서 ‘우르릉 쾅!’ 천둥소리가 들려요.", "g", "공기"],
+    ["📢", "운동회 날, 확성기 안내 방송이 운동장에 울려 퍼져요.", "g", "공기"],
+    ["🚒", "길 건너편 소방차의 ‘삐뽀삐뽀’ 사이렌 소리가 들려요.", "g", "공기"],
+    ["🎂", "친구들이 불러 주는 생일 축하 노래를 들어요.", "g", "공기"],
+    ["🐶", "마당에서 강아지가 ‘멍멍’ 짖는 소리를 들어요.", "g", "공기"],
+    ["🎆", "밤하늘에서 ‘펑펑’ 터지는 불꽃놀이 소리가 들려요.", "g", "공기"],
+    ["🎈", "풍선이 ‘빵!’ 터지는 소리에 모두 깜짝 놀라요.", "g", "공기"],
+    ["🦟", "잠자려는데 귓가에서 모기가 ‘애앵~’ 나는 소리가 들려요.", "g", "공기"],
+    ["🥁", "공연장 무대의 ‘둥둥’ 북소리가 멀리 객석까지 들려요.", "g", "공기"],
+  ].map(([e, t, st, via]) => ({ e, t, st, via }));
+
+  // ---------- 단계 ----------
+  const STAGES = [
+    { kind: "deliver", title: "책상 소리 배달", ic: "✏️", img: "s1",
+      say: "친구가 책상 끝을 연필로 톡톡! 반대쪽 끝에서 책상에 귀를 꼭 댄 친구에게 소리를 배달해요.",
+      path: [{ e: "✏️", t: "연필로 톡톡" }, { slot: "두드린 곳 → 귀를 댄 곳", ans: "desk" }, { e: "👂", t: "책상에 댄 귀" }],
+      tiles: ["desk", "water", "sand", "yarn"],
+      learn: "책상에 귀를 대면 <b>책상(고체)</b>을 통해 소리가 전달돼요." },
+    { kind: "deliver", title: "실 전화기 배달", ic: "🥤", img: "s2",
+      say: "실 전화기로 “안녕!” 목소리를 배달해요. 실의 모양을 잘 보세요!",
+      path: [{ e: "🗣️", t: "친구 목소리" }, { slot: "입 → 컵", ans: "air" }, { e: "🥤", t: "종이컵" }, { slot: "두 컵을 잇는 줄", ans: "tight" }, { e: "🥤", t: "종이컵" }, { e: "👂", t: "내 귀" }],
+      tiles: ["air", "tight", "loose", "cut", "water"],
+      learn: "목소리는 <b>공기(기체)</b>를 지나 컵을 떨게 하고, <b>팽팽한 실(고체)</b>을 타고 건너가요. 실이 느슨하면 잘 안 들려요." },
+    { kind: "deliver", title: "수조 속 음악 배달", ic: "🐠", img: "s3",
+      say: "비닐에 싼 스피커를 물이 담긴 수조에 넣었어요. 수조에 귀를 댄 친구에게 음악을 배달해요.",
+      path: [{ e: "🔊", t: "비닐에 싼 스피커" }, { slot: "수조 속", ans: "water" }, { slot: "수조의 벽", ans: "glass" }, { e: "👂", t: "수조에 댄 귀" }],
+      tiles: ["water", "glass", "air", "sand", "board"],
+      learn: "스피커 소리는 <b>물(액체)</b>을 지나고, <b>유리 수조(고체)</b>를 지나 귀에 들려요." },
+    { kind: "deliver", title: "옆방 피아노 배달", ic: "🎹", img: "s4",
+      say: "곰돌이가 옆방에서 피아노를 쳐요. 벽 너머 침대에 앉은 친구에게 피아노 소리를 배달해요.",
+      path: [{ e: "🎹", t: "곰돌이 피아노" }, { slot: "피아노가 있는 방", ans: "air" }, { slot: "두 방 사이", ans: "wall" }, { slot: "내 방 안", ans: "air" }, { e: "👂", t: "내 귀" }],
+      tiles: ["air", "wall", "water", "glass", "tight"],
+      learn: "피아노 소리는 <b>공기(기체)</b> → <b>벽(고체)</b> → <b>공기(기체)</b>를 차례로 지나 옆방까지 전달돼요." },
+    { kind: "deliver", title: "고래의 노래 배달", ic: "🐋", img: "s5",
+      say: "바닷속 고래가 노래해요. 배 안 선실에 있는 선원에게 고래의 노래를 배달해요. 마지막 배달이에요!",
+      path: [{ e: "🐋", t: "고래의 노래" }, { slot: "바닷속", ans: "sea" }, { slot: "배의 바닥", ans: "iron" }, { slot: "배 안 선실", ans: "air" }, { e: "👂", t: "선원의 귀" }],
+      tiles: ["sea", "iron", "air", "sand", "ice", "yarn"],
+      learn: "고래의 노래는 <b>바닷물(액체)</b> → <b>쇠 배 바닥(고체)</b> → <b>공기(기체)</b>를 지나요. 소리는 고체·액체·기체를 모두 지날 수 있어요!" },
+
+    { kind: "room", title: "놀이터 창고", ic: "🛝", img: "r6",
+      story: "친구가 철봉 한쪽 끝을 ‘땡땡’ 두드리고, 또롱이는 반대쪽 끝에 귀를 대 보았어요.",
+      taunt: "히히, 놀이터 창고 비밀번호는 못 찾을걸?",
+      lock: [93, 52],
+      clues: [
+        { x: 40, y: 44, q: "철봉에 귀를 댔을 때, 소리를 귀까지 전해 준 것은 무엇일까요?",
+          opts: [["철봉 (고체)", 1], ["모래 (고체)", 0, "모래는 두드린 곳과 귀 사이에 있지 않아요."], ["물 (액체)", 0, "놀이터 철봉에는 물이 없어요."]],
+          ok: "맞아요! 철봉(고체)을 타고 소리가 전해졌어요." },
+        { x: 72, y: 28, q: "이번에는 귀를 철봉에서 떼고 들었어요. 소리는 무엇을 통해 귀에 왔을까요?",
+          opts: [["공기 (기체)", 1], ["물 (액체)", 0, "귀와 철봉 사이에는 물이 없어요."], ["아무것도 없어서 안 들려요", 0, "귀를 떼어도 소리는 들려요. 우리 주변에 늘 있는 것을 생각해 봐요."]],
+          ok: "맞아요! 귀를 떼면 공기(기체)를 통해 소리가 와요." },
+        { x: 12, y: 72, q: "귀를 철봉에 댔을 때와 뗐을 때, 언제 소리가 더 크고 또렷했을까요?",
+          opts: [["귀를 댔을 때", 1], ["귀를 뗐을 때", 0, "철봉에 귀를 대면 소리가 더 크고 또렷하게 들려요."], ["똑같아요", 0, "직접 해 보면 차이가 있어요. 다시 생각해 봐요."]],
+          ok: "맞아요! 철봉에 귀를 대면 소리가 더 크고 또렷해요." },
+      ],
+      learn: "철봉에 귀를 대면 <b>철봉(고체)</b>을 통해, 귀를 떼면 <b>공기(기체)</b>를 통해 소리가 전달돼요." },
+    { kind: "room", title: "과학실 창고", ic: "🧪", img: "r7",
+      story: "물을 가득 담은 지퍼 백을 귀에 대고, 친구가 반대쪽에서 지퍼 백을 손가락으로 ‘톡톡’ 두드렸어요.",
+      taunt: "과학실은 내 비밀 장소야. 쉿~!",
+      lock: [88, 40],
+      clues: [
+        { x: 46, y: 68, q: "물이 든 지퍼 백을 귀에 대고 있으면 ‘톡톡’ 소리가 들릴까요?",
+          opts: [["잘 들려요", 1], ["전혀 안 들려요", 0, "물이 든 지퍼 백을 귀에 대도 소리는 들려요."]],
+          ok: "맞아요! 물이 든 지퍼 백을 통해서도 소리가 들려요." },
+        { x: 55, y: 34, q: "이 소리는 지퍼 백 속의 무엇을 지나 귀에 왔을까요?",
+          opts: [["물", 1], ["모래", 0, "지퍼 백 속에는 모래가 아니라 물이 들어 있어요."], ["솜", 0, "지퍼 백 속을 다시 살펴봐요."]],
+          ok: "맞아요! 지퍼 백 속 물을 지나 소리가 왔어요." },
+        { x: 31, y: 30, q: "물처럼 소리를 전달하는 이 물질의 상태는 무엇일까요?",
+          opts: [["액체", 1], ["고체", 0, "물은 담는 그릇에 따라 모양이 바뀌어요."], ["기체", 0, "물은 눈에 보이고 흘러요. 기체가 아니에요."]],
+          ok: "맞아요! 물은 액체예요. 소리는 액체를 통해서도 전달돼요." },
+      ],
+      learn: "물이 든 지퍼 백에 귀를 대면 <b>물(액체)</b>을 통해 소리가 전달돼요." },
+    { kind: "room", title: "음악실 창고", ic: "🔺", img: "r8",
+      story: "음악실 한쪽 끝에서 친구가 트라이앵글을 ‘팅~’ 쳤어요. 반대쪽 끝에 있는 또롱이에게도 소리가 들렸어요.",
+      taunt: "트라이앵글 소리로 나를 찾을 수 있을까~?",
+      lock: [91, 42],
+      clues: [
+        { x: 49, y: 40, q: "트라이앵글 소리가 또롱이 귀까지 오는 동안 지나온 것은 무엇일까요?",
+          opts: [["공기", 1], ["물", 0, "음악실 안에는 물이 가득 차 있지 않아요."], ["철봉", 0, "트라이앵글과 또롱이 사이에 철봉은 없어요."]],
+          ok: "맞아요! 음악실 안의 공기를 지나 소리가 왔어요." },
+        { x: 14, y: 46, q: "소리를 전해 준 공기는 고체, 액체, 기체 중 무엇일까요?",
+          opts: [["기체", 1], ["고체", 0, "공기는 손으로 잡을 수 없어요."], ["액체", 0, "공기는 물처럼 흐르는 것이 보이지 않아요."]],
+          ok: "맞아요! 공기는 기체예요. 소리는 기체를 통해서도 전달돼요." },
+        { x: 80, y: 52, q: "또롱이가 트라이앵글에서 점점 멀어지면 소리는 어떻게 될까요?",
+          opts: [["점점 작아져요", 1], ["점점 커져요", 0, "멀어질수록 소리가 어떻게 들렸는지 떠올려 봐요."], ["그대로예요", 0, "멀리 갈수록 차이가 있어요."]],
+          ok: "맞아요! 소리가 나는 곳에서 멀어질수록 작게 들려요." },
+      ],
+      learn: "우리가 평소에 듣는 소리는 대부분 <b>공기(기체)</b>를 통해 전달돼요." },
+    { kind: "room", title: "우주 정거장", ic: "🚀", img: "r9",
+      story: "쉿쉿이가 우주 정거장으로 도망쳤어요! 창밖에서는 두 우주인이 공기가 없는 우주 공간에 둥둥 떠 있어요.",
+      taunt: "우주에서는 아무도 내 소리를 못 들어! 히히~",
+      lock: [89, 57],
+      clues: [
+        { x: 41, y: 36, q: "공기가 없는 우주 공간에서 한 우주인이 “안녕!” 하고 외쳤어요. 떨어져 있는 친구에게 들릴까요?",
+          opts: [["들리지 않아요", 1], ["잘 들려요", 0, "우주 공간에는 소리를 전해 줄 공기가 없어요."]],
+          ok: "맞아요! 소리를 전해 줄 물질이 없으면 소리는 전달되지 않아요." },
+        { x: 68, y: 44, q: "두 우주인이 헬멧을 꼭 맞대고 말하니 목소리가 들렸어요! 소리는 무엇을 통해 전달됐을까요?",
+          opts: [["맞댄 헬멧 (고체)", 1], ["우주 공간의 공기 (기체)", 0, "우주 공간에는 공기가 없어요."], ["물 (액체)", 0, "헬멧 사이에 물은 없어요."]],
+          ok: "맞아요! 맞닿은 헬멧(고체)을 타고 소리가 전해졌어요." },
+        { x: 12, y: 76, q: "우주 정거장 안은 공기로 가득해요. 안에서 친구와 이야기하면 어떻게 될까요?",
+          opts: [["공기를 통해 잘 들려요", 1], ["우주라서 안 들려요", 0, "정거장 안에는 공기가 있어요. 소리를 전해 줄 물질이 있지요."]],
+          ok: "맞아요! 정거장 안에서는 공기(기체)를 통해 소리가 전달돼요." },
+      ],
+      learn: "소리는 고체·액체·기체를 통해 전달돼요. 전해 줄 물질이 없는 <b>우주 공간</b>에서는 소리가 전달되지 않아요." },
+
+    { kind: "sort", title: "소리 소포 분류 대작전", ic: "📦", img: "sort",
+      learn: "땅·문·얼음은 <b>고체</b>, 물·바닷물은 <b>액체</b>, 공기는 <b>기체</b>! 소리는 이 모든 것을 통해 전달돼요." },
+  ];
+  const GENRE = { deliver: ["g1", "📮 소리 배달"], room: ["g2", "🔍 쉿쉿이의 방"], sort: ["g3", "📦 소포 분류"] };
+  const CHAPTERS = {
+    0: { chap: "1장", title: "새내기 배달부 또롱이", img: "intro", wide: true,
+      text: "소리 마을 우체국에 새내기 배달부 또롱이가 왔어요! 소리 소포는 그냥 날아가지 않아요. <b>고체·액체·기체</b> 중 무엇을 타고 가는지 알아야 귀까지 배달할 수 있지요.",
+      mission: "빈칸에 소리가 지나가는 물질을 넣어 소리 길을 이어요!" },
+    5: { chap: "2장", title: "소리 도둑 쉿쉿이가 나타났다!", img: "shh", char: true,
+      text: "앗! 소리 도둑 쉿쉿이가 우체국 창고 열쇠를 숨기고 도망쳤어요. 또롱이는 탐정 모자를 쓰고 쉿쉿이를 쫓아가요. 🕵️",
+      mission: "방마다 반짝이는 단서 3개를 풀고, 모은 숫자로 자물쇠를 열어요!" },
+    9: { chap: "3장", title: "뒤죽박죽 소포를 정리해요", img: "sort", wide: true,
+      text: "쉿쉿이를 붙잡았어요! 그런데 쉿쉿이가 도망치면서 소리 소포를 모두 뒤섞어 놓았대요. 쉿쉿이도 “미안해…” 하며 돕겠대요.",
+      mission: "소포를 읽고 소리가 지나온 물질의 상태에 맞는 우체통에 넣어요. 10개 연속 정답이면 성공!" },
+  };
+
+  // ---------- 진행 기록 ----------
+  const PKEY = "sound-post-progress";
+  let progress = { unlocked: 1, scores: Array(STAGES.length).fill(0) };
+  try { const p = JSON.parse(localStorage.getItem(PKEY)); if (p && Array.isArray(p.scores)) progress = { unlocked: Math.max(1, Math.min(STAGES.length, p.unlocked | 0)), scores: STAGES.map((_, i) => Math.max(0, Math.min(TIME, p.scores[i] | 0))) }; } catch (e) {}
+  const saveProgress = () => { try { localStorage.setItem(PKEY, JSON.stringify(progress)); } catch (e) {} };
+  const totalScore = () => progress.scores.reduce((a, b) => a + b, 0);
+  const starsOf = s => s >= 40 ? 3 : s >= 20 ? 2 : s > 0 ? 1 : 0;
+
+  // ---------- 소리 (Web Audio로 직접 만들어요) ----------
+  const Sound = (() => {
+    let ac = null, master = null, mus = null, sfxOn = true, musicOn = true, timer = null, step = 0, nextT = 0;
+    try { sfxOn = localStorage.getItem("sound-post-sfx") !== "0"; musicOn = localStorage.getItem("sound-post-music") !== "0"; } catch (e) {}
+    function ctx() {
+      if (!ac) {
+        try {
+          ac = new (window.AudioContext || window.webkitAudioContext)();
+          master = ac.createGain(); master.gain.value = .5; master.connect(ac.destination);
+          mus = ac.createGain(); mus.gain.value = .07; mus.connect(ac.destination);
+        } catch (e) { return null; }
+      }
+      if (ac.state === "suspended") ac.resume();
+      return ac;
+    }
+    function tone(f, t0, dur, type = "sine", vol = .3, f2 = null, dest = null) {
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = type; o.frequency.setValueAtTime(f, t0);
+      if (f2) o.frequency.exponentialRampToValueAtTime(f2, t0 + dur);
+      g.gain.setValueAtTime(.0001, t0); g.gain.exponentialRampToValueAtTime(vol, t0 + .012); g.gain.exponentialRampToValueAtTime(.0001, t0 + dur);
+      o.connect(g); g.connect(dest || master); o.start(t0); o.stop(t0 + dur + .05);
+    }
+    function noise(t0, dur, freq, vol) {
+      const len = Math.max(1, Math.floor(ac.sampleRate * dur)), buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+      const s = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain();
+      f.type = "bandpass"; f.frequency.value = freq; f.Q.value = 2; g.gain.value = vol;
+      s.buffer = buf; s.connect(f); f.connect(g); g.connect(master); s.start(t0);
+    }
+    const play = fn => { if (!sfxOn || !ctx()) return; try { fn(ac.currentTime); } catch (e) {} };
+    // 오르골 느낌의 배경 음악
+    const MEL = [76, 79, 81, 79, 76, 74, 72, 74, 76, 79, 84, 81, 79, 76, 74, null, 72, 74, 76, 79, 81, 79, 76, 74, 72, 76, 74, 72, 67, 72, 74, null];
+    const BASS = [48, 55, 52, 55, 45, 52, 48, 55];
+    const hz = m => 440 * Math.pow(2, (m - 69) / 12);
+    function schedule() {
+      if (!ac) return;
+      const spb = .26;
+      while (nextT < ac.currentTime + .4) {
+        const m = MEL[step % MEL.length];
+        if (m) { tone(hz(m), nextT, .5, "triangle", .5, null, mus); tone(hz(m + 12), nextT, .25, "sine", .12, null, mus); }
+        if (step % 4 === 0) tone(hz(BASS[(step / 4) % BASS.length]), nextT, .9, "sine", .55, null, mus);
+        nextT += spb; step++;
+      }
+    }
+    function startMusic() {
+      if (!musicOn || timer || !ctx()) return;
+      nextT = ac.currentTime + .1; timer = setInterval(schedule, 120);
+    }
+    function stopMusic() { clearInterval(timer); timer = null; }
+    return {
+      get sfx() { return sfxOn; }, get music() { return musicOn; },
+      unlock() { ctx(); startMusic(); },
+      setSfx(v) { sfxOn = v; try { localStorage.setItem("sound-post-sfx", v ? "1" : "0"); } catch (e) {} },
+      setMusic(v) { musicOn = v; try { localStorage.setItem("sound-post-music", v ? "1" : "0"); } catch (e) {} v ? startMusic() : stopMusic(); },
+      tap() { play(t => tone(900, t, .06, "triangle", .14)); },
+      place() { play(t => tone(520, t, .1, "sine", .3, 820)); },
+      ok() { play(t => { tone(784, t, .14, "triangle", .3); tone(1175, t + .1, .3, "triangle", .3); }); },
+      bad() { play(t => { tone(240, t, .22, "square", .09, 160); tone(180, t + .14, .25, "square", .08, 120); }); },
+      solid() { play(t => { noise(t, .07, 900, .9); tone(320, t, .16, "sine", .4, 170); noise(t + .14, .07, 900, .8); tone(320, t + .14, .16, "sine", .35, 170); }); },
+      liquid() { play(t => { tone(260, t, .14, "sine", .35, 900); tone(380, t + .13, .14, "sine", .3, 1200); }); },
+      gas() { play(t => { tone(620, t, .5, "sine", .18, 940); tone(930, t + .05, .45, "sine", .08, 1400); }); },
+      st(k) { k === "s" ? this.solid() : k === "l" ? this.liquid() : this.gas(); },
+      tick() { play(t => tone(1100, t, .05, "square", .05)); },
+      unlockLock() { play(t => { noise(t, .05, 2500, .8); noise(t + .09, .05, 2000, .8); [1047, 1319, 1568].forEach((f, i) => tone(f, t + .2 + i * .08, .35, "triangle", .22)); }); },
+      win() { play(t => [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, t + i * .1, .35, "triangle", .26))); },
+      fail() { play(t => [392, 330, 262].forEach((f, i) => tone(f, t + i * .16, .3, "triangle", .2))); },
+    };
+  })();
+  const syncSoundBtns = () => {
+    $("musicBtn").setAttribute("aria-pressed", Sound.music); $("musicBtn").textContent = Sound.music ? "음악 켬" : "음악 끔";
+    $("sfxBtn").setAttribute("aria-pressed", Sound.sfx); $("sfxBtn").textContent = Sound.sfx ? "효과음 켬" : "효과음 끔";
+  };
+  $("musicBtn").onclick = () => { Sound.unlock(); Sound.setMusic(!Sound.music); syncSoundBtns(); };
+  $("sfxBtn").onclick = () => { Sound.unlock(); Sound.setSfx(!Sound.sfx); syncSoundBtns(); };
+  syncSoundBtns();
+  document.addEventListener("pointerdown", () => Sound.unlock(), { once: true });
+
+  // ---------- 시간 ----------
+  let cur = 0, timeLeft = TIME, running = false, frozen = false, lastTick = TIME, V = null;
+  const freeze = () => { frozen = true; };
+  function updateTimer() {
+    const t = Math.max(0, timeLeft);
+    $("tFill").style.width = (t / TIME * 100) + "%";
+    $("tTxt").textContent = Math.ceil(t) + "초";
+    $("timerPill").classList.toggle("low", running && t <= 10);
+  }
+  function penalty(sec = PEN) {
+    if (!running || frozen) return;
+    timeLeft -= sec;
+    const pill = $("timerPill"), m = document.createElement("span");
+    m.className = "minus"; m.textContent = `-${sec}초`; pill.appendChild(m); setTimeout(() => m.remove(), 900);
+    pill.classList.remove("hit"); void pill.offsetWidth; pill.classList.add("hit");
+    updateTimer();
+    if (timeLeft <= 0) timeUp();
+  }
+  let prevNow = performance.now();
+  function loop(now) {
+    const dt = Math.min(.1, (now - prevNow) / 1000); prevNow = now;
+    if (running && !frozen) {
+      timeLeft -= dt;
+      const s = Math.ceil(timeLeft);
+      if (s !== lastTick) { lastTick = s; if (s <= 5 && s > 0) Sound.tick(); }
+      if (timeLeft <= 0) timeUp();
+      if (V && V.frame) V.frame(dt);
+    }
+    updateTimer();
+    requestAnimationFrame(loop);
+  }
+
+  // ---------- 화면 카드 ----------
+  function showCard(html, buttons, wide) {
+    const c = $("card");
+    c.className = "card" + (wide ? " wide" : "");
+    c.innerHTML = html;
+    if (buttons && buttons.length) {
+      const row = document.createElement("div"); row.className = "row";
+      buttons.forEach(([label, fn, primary]) => {
+        const b = document.createElement("button"); b.type = "button"; b.textContent = label;
+        if (primary) b.className = "primary";
+        b.onclick = () => { Sound.unlock(); Sound.tap(); fn(); };
+        row.appendChild(b);
+      });
+      c.appendChild(row);
+    }
+    $("ov").hidden = false;
+    const p = c.querySelector("button.primary"); if (p) p.focus({ preventScroll: true });
+  }
+  const hideCard = () => { $("ov").hidden = true; };
+  function confetti() {
+    if (reduceMotion) return;
+    const sc = $("screen"), em = ["🎵", "🎶", "⭐", "💌", "✨", "🎉"];
+    for (let i = 0; i < 18; i++) {
+      const s = document.createElement("span"); s.className = "confetti";
+      s.textContent = em[i % em.length]; s.style.left = (Math.random() * 96) + "%"; s.style.animationDelay = (Math.random() * .6) + "s";
+      sc.appendChild(s); setTimeout(() => s.remove(), 3000);
+    }
+  }
+
+  // ---------- 단계 불러오기 ----------
+  function loadStage(i, opts = {}) {
+    cur = i; running = false; frozen = false; timeLeft = TIME; lastTick = TIME;
+    if (V && V.destroy) V.destroy();
+    const S = STAGES[i];
+    $("lvlNo").textContent = `${i + 1}단계`; $("lvlName").textContent = S.title;
+    renderLevelButtons();
+    V = S.kind === "deliver" ? makeDeliver(S) : S.kind === "room" ? makeRoom(S) : makeSort(S);
+    updateTimer();
+    if (!opts.skipChapter && CHAPTERS[i]) showChapter(i); else showIntro(i);
+  }
+  function showChapter(i) {
+    const C = CHAPTERS[i];
+    const pic = C.char ? `<img class="pic char" src="${IMG}${C.img}.webp" alt="소리 도둑 쉿쉿이">` : `<img class="pic wide" src="${IMG}${C.img}.webp" alt="">`;
+    showCard(`<span class="chap">${C.chap}</span><h2>${C.title}</h2>${pic}<p>${C.text}</p><div class="mission">${C.mission}</div>`,
+      [["다음 ▶", () => showIntro(i), true]], true);
+  }
+  function showIntro(i) {
+    const S = STAGES[i], g = GENRE[S.kind];
+    let pic = "", mission = "";
+    if (S.kind === "deliver") { pic = `<img class="pic" src="${IMG}${S.img}.webp" alt="">`; mission = S.say; }
+    else if (S.kind === "room") { pic = `<img class="pic wide" src="${IMG}${S.img}.webp" alt="">`; mission = S.story + " 단서 3개를 풀어 비밀번호를 찾아요!"; }
+    else { pic = `<img class="pic char" src="${IMG}torong.webp" alt="또롱이">`; mission = "소리 소포를 읽고 고체·액체·기체 우체통에 넣어요. 틀리거나 놓치면 연속 기록이 0으로 돌아가요!"; }
+    showCard(`<span class="no">${i + 1} / ${STAGES.length}단계</span><span class="genre ${g[0]}">${g[1]}</span><h2>${S.title}</h2>${pic}<div class="mission">${mission}</div><p>⏰ 60초 안에 성공하면 남은 시간이 점수가 돼요. 틀리면 5초가 줄어요.</p>`,
+      [["시작! ▶", startStage, true]]);
+  }
+  function startStage() {
+    hideCard(); timeLeft = TIME; lastTick = TIME; running = true; frozen = false; prevNow = performance.now();
+    if (V.start) V.start();
+  }
+  function timeUp() {
+    if (!running) return;
+    running = false; timeLeft = 0; updateTimer();
+    if (V && V.stop) V.stop();
+    Sound.fail();
+    showCard(`<span class="no">${cur + 1}단계</span><h2>앗, 시간이 다 됐어요! ⏰</h2><img class="pic char" src="${IMG}shh.webp" alt=""><p>쉿쉿이가 “히히~” 하고 웃고 있어요. 다시 한번 도전해 봐요!</p>`,
+      [["다시 도전 ▶", () => loadStage(cur, { skipChapter: true }), true]]);
+  }
+  function clearStage() {
+    if (!running) return;
+    running = false;
+    if (V && V.stop) V.stop();
+    const S = STAGES[cur];
+    const score = Math.max(1, Math.ceil(timeLeft));
+    const best = progress.scores[cur], isBest = score > best;
+    if (isBest) progress.scores[cur] = score;
+    if (cur + 1 < STAGES.length) progress.unlocked = Math.max(progress.unlocked, cur + 2);
+    saveProgress(); renderLevelButtons(); renderNotes(); renderRank();
+    Sound.win(); confetti();
+    const st = starsOf(score);
+    const starsHtml = `<div class="stars">${[1, 2, 3].map(k => `<span class="${k <= st ? "on" : ""}">★</span>`).join("")}</div>`;
+    const last = cur === STAGES.length - 1;
+    const msg = cur === 4 ? "소리 배달을 모두 마쳤어요! 그런데… 우체국에 무슨 일이 생겼나 봐요!" : cur === 8 ? "드디어 쉿쉿이를 붙잡았어요!" : "";
+    showCard(`<span class="no">${cur + 1}단계 성공!</span><h2>${last ? "소포 분류 완료! 🎉" : S.kind === "room" ? "자물쇠가 열렸어요! 🔓" : "소리 배달 성공! 💌"}</h2>${starsHtml}
+      <div class="scorebig">남은 시간 <b>${score}</b>점 ${isBest ? "<span class='st g'>최고 기록!</span>" : `<small>(최고 ${best}점)</small>`}</div>
+      <div class="learn"><span class="lt">📒 소리 길 노트</span>${S.learn}</div>${msg ? `<p>${msg}</p>` : ""}`,
+      last ? [["엔딩 보기 ▶", showEnding, true], ["다시 하기", () => loadStage(cur, { skipChapter: true })]]
+           : [["다음 단계 ▶", () => loadStage(cur + 1), true], ["다시 하기", () => loadStage(cur, { skipChapter: true })]]);
+  }
+  function showEnding() {
+    const allDone = progress.scores.every(s => s > 0);
+    confetti();
+    showCard(`<span class="chap">마지막 장</span><h2>소리 우체국에 평화가!</h2><img class="pic wide" src="${IMG}ending.webp" alt="또롱이와 쉿쉿이가 손을 잡고 웃는 그림">
+      <p>쉿쉿이는 이제 소리 도둑이 아니라 또롱이의 단짝 배달부가 되었어요. 소리는 <b>고체·액체·기체</b>를 타고 오늘도 씩씩하게 배달된답니다!</p>
+      <div class="scorebig">내 총점 <b>${totalScore()}</b> / 600점</div>
+      <p>${allDone ? "모든 단계를 통과했어요. 랭킹에 이름을 올려 보세요!" : "아직 통과하지 못한 단계가 있어요. 모두 통과하면 랭킹에 등록할 수 있어요."}</p>`,
+      [["랭킹 등록하러 가기", () => { hideCard(); goRank(); }, true], ["1단계부터", () => loadStage(0)]], true);
+  }
+
+  // ---------- 1~5단계: 소리 배달 ----------
+  function makeDeliver(S) {
+    const view = $("view"); view.className = "view";
+    const slots = []; // {el, ans, val}
+    let sel = 0, phase = "build", busy = false;
+    view.innerHTML = `
+      <div class="dv-top">
+        <img class="dv-pic" src="${IMG}${S.img}.webp" alt="${esc(S.title)} 장면 그림">
+        <div class="say"><img src="${IMG}torong.webp" alt=""><p>${S.say}<small>그림을 보고, 빈칸에 소리가 지나가는 물질을 차례대로 넣어요.</small></p></div>
+      </div>
+      <div class="road"><div class="path" id="path"></div></div>
+      <div id="dvBottom"></div>`;
+    const path = $("path");
+    S.path.forEach((p, k) => {
+      if (k) { const l = document.createElement("span"); l.className = "link"; path.appendChild(l); }
+      if (p.slot) {
+        const b = document.createElement("button"); b.type = "button"; b.className = "pitem slot empty";
+        b.dataset.i = slots.length;
+        slots.push({ el: b, ans: p.ans, val: null, label: p.slot });
+        path.appendChild(b);
+      } else {
+        const d = document.createElement("div"); d.className = "pitem node";
+        d.innerHTML = `<span class="ne">${p.e}</span><span class="nl">${esc(p.t)}</span>`;
+        path.appendChild(d);
+      }
+    });
+    function drawSlot(s, k) {
+      const t = s.val && TILES[s.val];
+      s.el.className = "pitem slot " + (t ? "full" : "empty") + (k === sel && phase === "build" ? " sel" : "");
+      s.el.innerHTML = t ? `<span class="se">${t.e}</span><span class="sn">${esc(t.name)}</span><span class="sl">${esc(s.label)}</span>`
+                         : `<span class="se">?</span><span class="sl">${esc(s.label)}</span>`;
+      s.el.setAttribute("aria-label", `빈칸 ${k + 1}: ${s.label}${t ? ", " + t.name + " 넣음" : ", 비어 있음"}`);
+    }
+    const drawSlots = () => slots.forEach(drawSlot);
+    const bottom = $("dvBottom");
+    function drawBuild() {
+      bottom.innerHTML = `
+        <div class="tray-h">🎒 또롱이의 배달 가방 <small>재료를 눌러 빨간 테두리 빈칸에 넣거나, 빈칸으로 끌어다 놓아요. 넣은 재료를 누르면 빼요.</small></div>
+        <div class="tray" id="tray"></div>
+        <div class="actrow" style="margin-top:10px"><button class="primary" id="sendBtn" type="button">📮 소리 보내기</button><span class="fb" id="fb" role="status"></span></div>`;
+      const tray = $("tray");
+      shuffle(S.tiles).forEach(id => {
+        const t = TILES[id], b = document.createElement("button");
+        b.type = "button"; b.className = "tile"; b.dataset.id = id;
+        b.innerHTML = `<span class="te">${t.e}</span>${esc(t.name)}`;
+        tray.appendChild(b);
+        attachDrag(b, id);
+      });
+      $("sendBtn").onclick = send;
+      updateSend();
+    }
+    function updateSend() { const b = $("sendBtn"); if (b) b.disabled = !running || slots.some(s => !s.val) || busy; }
+    function nextEmpty(from) {
+      for (let k = 0; k < slots.length; k++) { const j = (from + k) % slots.length; if (!slots[j].val) return j; }
+      return from;
+    }
+    function put(k, id) {
+      if (!running || phase !== "build" || busy) return;
+      slots[k].val = id; Sound.place();
+      sel = nextEmpty(k);
+      drawSlots(); updateSend(); setFb("");
+    }
+    slots.forEach((s, k) => s.el.onclick = () => {
+      if (!running || phase !== "build" || busy) return;
+      Sound.tap();
+      if (s.val) s.val = null;
+      sel = k; drawSlots(); updateSend();
+    });
+    function attachDrag(b, id) {
+      let start = null, ghost = null, over = null;
+      b.addEventListener("pointerdown", e => {
+        if (!running || busy) return;
+        start = { x: e.clientX, y: e.clientY }; b.setPointerCapture(e.pointerId);
+      });
+      b.addEventListener("pointermove", e => {
+        if (!start) return;
+        if (!ghost && Math.hypot(e.clientX - start.x, e.clientY - start.y) > 8) {
+          ghost = b.cloneNode(true); ghost.classList.add("ghost"); document.body.appendChild(ghost);
+        }
+        if (ghost) {
+          ghost.style.left = e.clientX + "px"; ghost.style.top = e.clientY + "px";
+          const el = document.elementFromPoint(e.clientX, e.clientY), sl = el && el.closest(".slot");
+          if (over && over !== sl) over.classList.remove("drop");
+          over = sl; if (over) over.classList.add("drop");
+        }
+      });
+      const end = e => {
+        if (!start) return;
+        if (ghost) {
+          ghost.remove(); ghost = null;
+          if (over) { over.classList.remove("drop"); put(+over.dataset.i, id); }
+          over = null;
+        } else if (e.type === "pointerup") put(sel, id);
+        start = null;
+      };
+      b.addEventListener("pointerup", end);
+      b.addEventListener("pointercancel", end);
+      b.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); put(sel, id); } });
+    }
+    const setFb = (t, cls = "") => { const f = $("fb"); if (f) { f.textContent = t; f.className = "fb " + cls; } };
+    function send() {
+      if (!running || busy || slots.some(s => !s.val)) return;
+      const wrong = slots.filter(s => s.val !== s.ans);
+      if (wrong.length) {
+        Sound.bad(); penalty();
+        const w = TILES[wrong[0].val];
+        setFb(`앗, 소리가 중간에 멈췄어요! ${w.why || `‘${wrong[0].label}’ 자리에 ‘${w.name}’? 그림을 다시 살펴봐요.`}`, "err");
+        wrong.forEach(s => { s.el.classList.add("wrong"); });
+        busy = true; updateSend();
+        setTimeout(() => { wrong.forEach(s => s.val = null); sel = nextEmpty(slots.indexOf(wrong[0])); busy = false; drawSlots(); updateSend(); }, 700);
+        return;
+      }
+      // 소리가 길을 따라 이동해요
+      busy = true; phase = "anim"; drawSlots(); updateSend();
+      Sound.ok(); setFb("소리가 출발했어요! ♪", "ok");
+      const items = [...path.children];
+      items.forEach((el, k) => setTimeout(() => {
+        el.classList.add("lit");
+        if (el.classList.contains("slot")) Sound.st(TILES[slots[+el.dataset.i].val].st);
+        if (el.classList.contains("pitem") && !reduceMotion) {
+          const n = document.createElement("span"); n.className = "note-fly"; n.textContent = "♪";
+          n.style.left = (el.offsetLeft + el.offsetWidth / 2 - 8) + "px"; n.style.top = (el.offsetTop - 4) + "px";
+          path.parentElement.appendChild(n); setTimeout(() => n.remove(), 1000);
+        }
+        if (k === items.length - 1) { el.classList.add("heard"); setTimeout(drawCheck, 500); }
+      }, k * (reduceMotion ? 80 : 230)));
+    }
+    let picked = new Set();
+    function drawCheck() {
+      if (!running) return;
+      phase = "check"; busy = false;
+      bottom.innerHTML = `
+        <div class="checkq">
+          <h3>📋 소리 길 점검표<small>방금 소리가 지나온 빈칸의 물질들은 고체·액체·기체 중 무엇이었나요? 해당하는 것을 <b>모두</b> 골라요.</small></h3>
+          <div class="chips" id="chips">${["s", "l", "g"].map(k => `<button type="button" class="chip ${k}" data-k="${k}" aria-pressed="false">${ST[k].e} ${ST[k].name}</button>`).join("")}</div>
+          <div class="actrow"><button class="primary" id="chkBtn" type="button">✅ 점검 완료</button><span class="fb" id="fb" role="status"></span></div>
+        </div>`;
+      picked = new Set();
+      bottom.querySelectorAll(".chip").forEach(c => c.onclick = () => {
+        if (!running) return;
+        Sound.tap();
+        const k = c.dataset.k; picked.has(k) ? picked.delete(k) : picked.add(k);
+        c.setAttribute("aria-pressed", picked.has(k));
+      });
+      $("chkBtn").onclick = check;
+    }
+    function check() {
+      if (!running) return;
+      const need = new Set(slots.map(s => TILES[s.ans].st));
+      if (!picked.size) { setFb("하나 이상 골라 주세요!", "err"); return; }
+      const ok = need.size === picked.size && [...need].every(k => picked.has(k));
+      if (!ok) {
+        Sound.bad(); penalty();
+        setFb(picked.size < need.size ? "빠진 것이 있어요! 빈칸에 넣은 물질을 하나씩 떠올려 봐요." : "지나오지 않은 상태가 섞여 있어요. 빈칸의 물질을 하나씩 떠올려 봐요.", "err");
+        return;
+      }
+      slots.forEach(s => {
+        const b = document.createElement("span"); b.className = "badge2"; b.innerHTML = stChip(TILES[s.ans].st); s.el.appendChild(b);
+      });
+      freeze(); Sound.ok(); setFb("완벽해요! 소리 배달 성공!", "ok");
+      $("chkBtn").disabled = true;
+      setTimeout(clearStage, 900);
+    }
+    drawSlots(); drawBuild();
+    return {
+      start() { sel = nextEmpty(0); drawSlots(); updateSend(); },
+      stop() { busy = true; updateSend(); },
+      key(e) { const n = +e.key; const tiles = [...document.querySelectorAll("#tray .tile")]; if (phase === "build" && n >= 1 && n <= tiles.length) put(sel, tiles[n - 1].dataset.id); },
+    };
+  }
+
+  // ---------- 6~9단계: 쉿쉿이의 방 ----------
+  function makeRoom(S) {
+    const view = $("view"); view.className = "view";
+    const digits = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]).slice(0, 3);
+    const got = [false, false, false];
+    view.innerHTML = `
+      <div class="scene" id="scene" style="background-image:url(${IMG}${S.img}.webp)">
+        <img class="peek" src="${IMG}shh.webp" alt="">
+        <div class="peek-say" id="peekSay">${esc(S.taunt)}</div>
+      </div>
+      <div class="memo">
+        <span class="mt">🕵️ 단서 수첩</span>
+        <span class="story">${esc(S.story)}</span>
+        <div class="digits" id="digits">${digits.map((_, k) => `<span class="digit"><small>${k + 1}</small>?</span>`).join("")}</div>
+      </div>
+      <div class="pop" id="pop" hidden><div class="popc" id="popc"></div></div>`;
+    const scene = $("scene");
+    const hsEls = S.clues.map((c, k) => {
+      const b = document.createElement("button"); b.type = "button"; b.className = "hs";
+      b.style.left = c.x + "%"; b.style.top = c.y + "%";
+      b.innerHTML = `🔍<span class="n">${k + 1}</span>`; b.setAttribute("aria-label", `단서 ${k + 1}`);
+      b.onclick = () => { if (!running) return; Sound.tap(); openClue(k); };
+      scene.appendChild(b); return b;
+    });
+    const lockBtn = document.createElement("button"); lockBtn.type = "button"; lockBtn.className = "hs lock";
+    lockBtn.style.left = S.lock[0] + "%"; lockBtn.style.top = S.lock[1] + "%"; lockBtn.textContent = "🔒"; lockBtn.setAttribute("aria-label", "자물쇠");
+    lockBtn.onclick = () => {
+      if (!running) return; Sound.tap();
+      if (got.every(Boolean)) openLock();
+      else peek(`히히, 단서가 아직 ${got.filter(g => !g).length}개 남았어!`);
+    };
+    scene.appendChild(lockBtn);
+    function peek(t) { const p = $("peekSay"); if (!p) return; p.textContent = t; p.style.animation = "none"; void p.offsetWidth; p.style.animation = ""; }
+    const pop = $("pop"), popc = $("popc");
+    const closePop = () => { pop.hidden = true; };
+    function openClue(k) {
+      const c = S.clues[k];
+      if (got[k]) {
+        popc.innerHTML = `<div class="ph">🔍 단서 ${k + 1} <button class="x" type="button">닫기 ✕</button></div><div class="q">${esc(c.q)}</div><div class="sit">✅ ${esc(c.ok)}<br>비밀번호 ${k + 1}번째 숫자는 <b style="color:var(--post)">${digits[k]}</b>!</div>`;
+        popc.querySelector(".x").onclick = closePop; pop.hidden = false; return;
+      }
+      popc.innerHTML = `<div class="ph">🔍 단서 ${k + 1} <button class="x" type="button">닫기 ✕</button></div>
+        <div class="q">${esc(c.q)}</div><div class="opts" id="opts"></div><div class="fb" id="cfb" role="status"></div>`;
+      popc.querySelector(".x").onclick = closePop;
+      const opts = $("opts");
+      shuffle(c.opts).forEach(([text, right, why]) => {
+        const b = document.createElement("button"); b.type = "button"; b.className = "opt"; b.textContent = text;
+        b.onclick = () => {
+          if (!running) return;
+          const fb = $("cfb");
+          if (right) {
+            b.classList.add("right"); opts.querySelectorAll("button").forEach(x => x.disabled = true);
+            Sound.ok(); fb.className = "fb ok"; fb.textContent = `${c.ok} 숫자 ${digits[k]}을(를) 찾았어요!`;
+            got[k] = true;
+            const d = $("digits").children[k]; d.innerHTML = `<small>${k + 1}</small>${digits[k]}`; d.classList.add("got");
+            hsEls[k].classList.add("done"); hsEls[k].innerHTML = `${digits[k]}<span class="n">${k + 1}</span>`;
+            if (got.every(Boolean)) { lockBtn.classList.add("ready"); peek("앗, 숫자를 다 모았잖아?!"); }
+            else peek(["으앗, 들켰다!", "히잉, 제법인데?", "흥, 아직 멀었어!"][got.filter(Boolean).length % 3]);
+            setTimeout(() => { if (!pop.hidden) closePop(); if (got.every(Boolean) && running) openLock(); }, 1400);
+          } else {
+            b.classList.add("wrong"); b.disabled = true;
+            Sound.bad(); penalty(); fb.className = "fb err"; fb.textContent = why || "다시 생각해 봐요!";
+            peek("히히, 틀렸지롱~");
+          }
+        };
+        opts.appendChild(b);
+      });
+      pop.hidden = false;
+      const f = opts.querySelector("button"); if (f) f.focus({ preventScroll: true });
+    }
+    let entry = [];
+    function openLock() {
+      entry = [];
+      popc.innerHTML = `<div class="ph">🔒 창고 자물쇠 <button class="x" type="button">닫기 ✕</button></div>
+        <div class="q">단서 수첩의 숫자를 1번부터 차례대로 눌러요!</div>
+        <div class="lockview" id="lockview">${[0, 1, 2].map(() => `<span class="digit"></span>`).join("")}</div>
+        <div class="keypad" id="keypad">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<button type="button" data-n="${n}">${n}</button>`).join("")}<button type="button" data-n="x" aria-label="지우기">⌫</button></div>
+        <div class="fb" id="cfb" role="status"></div>`;
+      popc.querySelector(".x").onclick = closePop;
+      popc.querySelectorAll("#keypad button").forEach(b => b.onclick = () => press(b.dataset.n));
+      pop.hidden = false;
+    }
+    function press(n) {
+      if (!running || entry.length >= 3 && n !== "x") return;
+      Sound.tap();
+      if (n === "x") entry.pop(); else entry.push(+n);
+      const lv = $("lockview");
+      [...lv.children].forEach((d, k) => d.textContent = entry[k] ?? "");
+      if (entry.length === 3) {
+        if (entry.every((v, k) => v === digits[k])) {
+          freeze(); Sound.unlockLock(); lockBtn.textContent = "🔓"; lockBtn.classList.remove("ready");
+          $("cfb").className = "fb ok"; $("cfb").textContent = "철컥! 자물쇠가 열렸어요!";
+          peek("으아앙, 들켜 버렸다~!");
+          setTimeout(() => { closePop(); clearStage(); }, 900);
+        } else {
+          Sound.bad(); penalty(); lv.classList.add("bad");
+          $("cfb").className = "fb err"; $("cfb").textContent = "삐빅! 비밀번호가 달라요. 단서 수첩을 다시 봐요.";
+          setTimeout(() => { entry = []; lv.classList.remove("bad"); [...lv.children].forEach(d => d.textContent = ""); }, 600);
+        }
+      }
+    }
+    return {
+      start() {},
+      stop() { closePop(); },
+      key(e) { if (!pop.hidden && $("keypad") && /^[1-9]$/.test(e.key)) press(e.key); if (!pop.hidden && e.key === "Backspace" && $("keypad")) press("x"); if (e.key === "Escape") closePop(); },
+    };
+  }
+
+  // ---------- 10단계: 소포 분류 컨베이어 ----------
+  const GOAL = 10, CARD_T = 9;
+  function makeSort() {
+    const view = $("view"); view.className = "view sortv";
+    view.innerHTML = `
+      <div class="say"><img src="${IMG}shh.webp" alt=""><p>미안해… 내가 섞어 놓은 소포야. 소리가 <b>무엇을 지나</b> 귀에 왔는지 보고 우체통에 넣어 줘!<small>틀리거나 소포가 컨베이어 끝까지 가면 연속 기록이 0으로 돌아가요.</small></p></div>
+      <div class="streak"><span class="lab">🔥 연속 정답</span><div class="dots" id="dots">${"<i></i>".repeat(GOAL)}</div><span class="cnt" id="cnt">0 / ${GOAL}</span></div>
+      <div class="belt-wrap" id="beltWrap"><div class="belt"></div><div class="pcard" id="pcard" hidden><span class="pe" id="pe"></span><div class="pt" id="pt"></div></div></div>
+      <div class="boxes" id="boxes">${["s", "l", "g"].map((k, i) => `<button type="button" class="mbox ${k}" data-k="${k}"><span class="face">• ᴗ •</span><span class="slit"></span><span class="mn">${ST[k].e} ${ST[k].name}</span><span class="mk">${i + 1}번 키 · ${k === "s" ? "땅·나무·얼음…" : k === "l" ? "물·바닷물…" : "공기"}</span></button>`).join("")}</div>
+      <div class="sfb" id="sfb" role="status"></div>`;
+    let deck = [], streak = 0, cardObj = null, p = 0, wait = 0, locked = true;
+    const card = $("pcard"), wrapEl = $("beltWrap");
+    function draw() {
+      if (!deck.length) { deck = shuffle(CARDS); if (cardObj && deck[0] === cardObj) deck.push(deck.shift()); }
+      cardObj = deck.shift(); p = 0; locked = false;
+      $("pe").textContent = cardObj.e; $("pt").textContent = cardObj.t;
+      card.className = "pcard"; card.hidden = false; place();
+    }
+    function place() {
+      const max = wrapEl.clientWidth - card.offsetWidth;
+      card.style.transform = `translateX(${Math.max(0, p * max)}px)`;
+    }
+    function setStreak(n) {
+      streak = n;
+      [...$("dots").children].forEach((d, k) => d.classList.toggle("on", k < n));
+      $("cnt").textContent = `${n} / ${GOAL}`;
+    }
+    const setFb = (t, cls) => { const f = $("sfb"); f.textContent = t; f.className = "sfb " + cls; };
+    function answer(k) {
+      if (!running || locked || !cardObj) return;
+      locked = true;
+      const box = $("boxes").querySelector(`[data-k="${k}"]`);
+      const right = k === cardObj.st;
+      if (right) {
+        Sound.st(k); setTimeout(() => Sound.ok(), 120);
+        place();
+        const br = box.getBoundingClientRect(), cr = card.getBoundingClientRect();
+        const cx = Math.max(0, p * (wrapEl.clientWidth - card.offsetWidth));
+        card.classList.add("gone");
+        card.style.transform = `translate(${cx + (br.left + br.width / 2) - (cr.left + cr.width / 2)}px, ${(br.top + br.height / 2) - (cr.top + cr.height / 2)}px) scale(.2)`;
+        box.classList.remove("yum"); void box.offsetWidth; box.classList.add("yum");
+        setStreak(streak + 1);
+        setFb(`딩동! ${cardObj.via}(${ST[k].name})을(를) 통해 소리가 전달돼요.`, "ok");
+        if (streak >= GOAL) { freeze(); setTimeout(clearStage, 500); return; }
+        wait = .55;
+      } else {
+        Sound.bad();
+        box.classList.remove("no"); void box.offsetWidth; box.classList.add("no");
+        card.classList.add("bad");
+        setStreak(0);
+        setFb(`아쉬워요! 이 소리는 ${cardObj.via}(${ST[cardObj.st].name})을(를) 통해 전달돼요. 처음부터 다시 10개!`, "err");
+        wait = 1.6;
+      }
+    }
+    $("boxes").querySelectorAll(".mbox").forEach(b => b.onclick = () => { Sound.unlock(); answer(b.dataset.k); });
+    // 소포를 우체통으로 끌어다 놓기
+    let drag = null;
+    card.addEventListener("pointerdown", e => {
+      if (!running || locked) return;
+      drag = { x: e.clientX, y: e.clientY, base: card.style.transform, moved: false, over: null };
+      card.setPointerCapture(e.pointerId);
+    });
+    card.addEventListener("pointermove", e => {
+      if (!drag) return;
+      const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      if (!drag.moved && Math.hypot(dx, dy) < 8) return;
+      drag.moved = true; card.classList.add("drag");
+      const cx = Math.max(0, p * (wrapEl.clientWidth - card.offsetWidth));
+      card.style.transform = `translate(${cx + dx}px, ${dy}px) rotate(-3deg)`;
+      card.style.pointerEvents = "none";
+      const el = document.elementFromPoint(e.clientX, e.clientY), bx = el && el.closest(".mbox");
+      card.style.pointerEvents = "";
+      if (drag.over && drag.over !== bx) drag.over.classList.remove("drop");
+      drag.over = bx; if (bx) bx.classList.add("drop");
+    });
+    const endDrag = () => {
+      if (!drag) return;
+      const d = drag; drag = null; card.classList.remove("drag");
+      if (d.over) { d.over.classList.remove("drop"); answer(d.over.dataset.k); }
+      else if (!locked) place();
+    };
+    card.addEventListener("pointerup", endDrag);
+    card.addEventListener("pointercancel", endDrag);
+    setStreak(0);
+    return {
+      start() { draw(); setFb("소포가 들어와요! 알맞은 우체통을 골라요.", ""); },
+      stop() { locked = true; },
+      frame(dt) {
+        if (wait > 0) { wait -= dt; if (wait <= 0) draw(); return; }
+        if (locked || drag) return;
+        p += dt / CARD_T;
+        if (p >= 1) {
+          locked = true; Sound.bad(); setStreak(0);
+          setFb(`앗, 소포를 놓쳤어요! 이 소리는 ${cardObj.via}(${ST[cardObj.st].name})을(를) 통해 전달돼요.`, "err");
+          card.classList.add("bad"); wait = 1.4; return;
+        }
+        place();
+      },
+      key(e) { const m = { "1": "s", "2": "l", "3": "g" }[e.key]; if (m) answer(m); },
+    };
+  }
+
+  // ---------- 키보드 ----------
+  document.addEventListener("keydown", e => {
+    if (e.target.closest && e.target.closest("input, textarea")) return;
+    if (!$("ov").hidden) { if (e.key === "Enter") { const p = $("card").querySelector("button.primary"); if (p && document.activeElement !== p) { e.preventDefault(); p.click(); } } return; }
+    if (running && V && V.key) V.key(e);
+  });
+
+  // ---------- 단계 버튼과 노트 ----------
+  function renderLevelButtons() {
+    const box = $("levels"); box.textContent = "";
+    STAGES.forEach((S, i) => {
+      const b = document.createElement("button"); b.type = "button";
+      const st = starsOf(progress.scores[i]);
+      b.innerHTML = `<span class="ic">${GENRE[S.kind][1].slice(0, 2)}</span><span class="n">${i + 1}</span><span class="s">${"★".repeat(st)}</span>`;
+      b.disabled = i >= progress.unlocked;
+      if (i === cur) b.className = "cur";
+      b.title = S.title;
+      b.onclick = () => { Sound.unlock(); loadStage(i); $("screen").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" }); };
+      box.appendChild(b);
+    });
+    $("scoreTxt").textContent = totalScore() + "점";
+  }
+  function renderNotes() {
+    const box = $("notes"); box.textContent = "";
+    STAGES.forEach((S, i) => {
+      const done = progress.scores[i] > 0, d = document.createElement("div");
+      d.className = "nt" + (done ? "" : " locked");
+      if (done) {
+        const sts = S.kind === "deliver" ? [...new Set(S.path.filter(p => p.slot).map(p => TILES[p.ans].st))] : null;
+        d.innerHTML = `<span class="ne">${S.ic}</span><span><b>${i + 1}. ${S.title}</b>${sts ? `<span class="sts">${sts.map(stChip).join("")}</span>` : ""}<span class="use">${S.learn.replace(/<[^>]+>/g, "")}</span></span>`;
+      } else d.innerHTML = `<span class="ne">${S.ic}</span><span><b>${i + 1}. ???</b><span class="use">단계를 통과하면 노트에 적혀요.</span></span>`;
+      box.appendChild(d);
+    });
+  }
+  $("unlockAll").onclick = () => { progress.unlocked = STAGES.length; saveProgress(); renderLevelButtons(); };
+  $("restartBtn").onclick = () => { Sound.unlock(); loadStage(cur, { skipChapter: true }); };
+  $("fromStartBtn").onclick = () => { Sound.unlock(); loadStage(0); };
+
+  // ---------- 랭킹 ----------
+  const TOP_N = 5, MAX = STAGES.length * TIME;
+  const Rank = { db: null, user: null, uid: null, rows: [], status: "loading", readOnly: false };
+  const clearedCount = () => progress.scores.filter(s => s > 0).length;
+  const cleanScore = v => Math.max(0, Math.min(MAX, Math.round(Number(v) || 0)));
+  const cleanNick = v => String(v || "").replace(/\s+/g, " ").trim().slice(0, 12);
+  function goRank() {
+    $("rank").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    setTimeout(() => { if (!$("nick").disabled) $("nick").focus({ preventScroll: true }); }, reduceMotion ? 0 : 450);
+  }
+  let boardSeq = 0;
+  async function renderRank() {
+    const total = totalScore(), cleared = clearedCount();
+    $("myTotal").textContent = total; $("myClear").textContent = cleared;
+    const ls = $("lvScores"); ls.textContent = "";
+    STAGES.forEach((_, i) => {
+      const li = document.createElement("li"); const done = progress.scores[i] > 0;
+      if (!done) li.className = "none";
+      const sm = document.createElement("small"); sm.textContent = `${i + 1}단계`;
+      li.append(sm, done ? String(progress.scores[i]) : "–"); ls.appendChild(li);
+    });
+    const mine = Rank.rows.find(r => r.id === Rank.uid);
+    const btn = $("rankBtn"), msg = $("rankMsg"), nick = $("nick");
+    const writable = Rank.status === "ready" && !Rank.readOnly && !!Rank.uid;
+    let note = "", cls = "", can = false;
+    if (Rank.status === "off") note = "지금은 순위표에 연결할 수 없어요. 인터넷 연결을 확인해 주세요.";
+    else if (Rank.status === "loading") note = "순위표에 연결하는 중이에요…";
+    else if (!writable) note = "보기 권한만 있어서 등록할 수는 없어요.";
+    else if (cleared < STAGES.length) note = `${STAGES.length - cleared}개 단계만 더 통과하면 등록할 수 있어요!`;
+    else if (mine && cleanScore(mine.score) >= total) { note = `${cleanScore(mine.score)}점으로 등록되어 있어요. 단계를 다시 해서 기록을 올려 보세요.`; cls = "ok"; can = true; }
+    else { note = mine ? `새 총점 ${total}점! 다시 등록하면 순위에 반영돼요.` : `총점 ${total}점, 지금 바로 등록할 수 있어요!`; can = true; }
+    if (!msg.dataset.sticky) { msg.textContent = note; msg.className = "msg " + cls; btn.disabled = !can; }
+    nick.disabled = !writable;
+    btn.textContent = mine ? "기록 갱신" : "랭킹 등록";
+    if (mine && !nick.value && document.activeElement !== nick) nick.value = cleanNick(mine.nick);
+    const board = $("board");
+    if (Rank.status !== "ready") { board.innerHTML = `<li class="empty">${Rank.status === "off" ? "순위표를 불러올 수 없어요." : "순위표를 불러오는 중이에요…"}</li>`; return; }
+    const rows = Rank.rows.filter(r => cleanNick(r.nick))
+      .sort((a, b) => cleanScore(b.score) - cleanScore(a.score) || String(a.at).localeCompare(String(b.at))).slice(0, TOP_N);
+    if (!rows.length) { board.innerHTML = `<li class="empty">아직 아무도 등록하지 않았어요.<br>10단계를 모두 통과하고 첫 번째 명예 배달부가 되어 보세요!</li>`; return; }
+    const seq = ++boardSeq;
+    let ps = {};
+    try { if (Rank.user) ps = await Rank.user.profiles(rows.map(r => r.id)); } catch (e) {}
+    if (seq !== boardSeq) return;
+    board.textContent = "";
+    rows.forEach((r, i) => {
+      const li = document.createElement("li"); if (r.id === Rank.uid) li.className = "me";
+      const no = document.createElement("span"); no.className = "no"; no.textContent = i + 1;
+      const img = document.createElement("img"); img.alt = "";
+      if (ps[r.id] && ps[r.id].avatarUrl) img.src = ps[r.id].avatarUrl; else img.src = IMG + "torong.webp";
+      const nm = document.createElement("span"); nm.className = "nm"; nm.textContent = cleanNick(r.nick);
+      if (r.id === Rank.uid) { const me = document.createElement("small"); me.textContent = "나"; nm.appendChild(me); }
+      const sc = document.createElement("span"); sc.className = "sc"; sc.textContent = cleanScore(r.score) + "점";
+      li.append(no, img, nm, sc); board.appendChild(li);
+    });
+  }
+  $("rankForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const msg = $("rankMsg"), btn = $("rankBtn");
+    const nick = cleanNick($("nick").value);
+    if (!nick) { msg.textContent = "이름을 한 글자 이상 적어 주세요."; msg.className = "msg err"; return; }
+    if (!Rank.save || !Rank.uid || clearedCount() < STAGES.length) return;
+    btn.disabled = true; msg.dataset.sticky = "1"; msg.textContent = "등록하는 중…"; msg.className = "msg";
+    const body = { nick, score: totalScore(), levels: progress.scores.slice(), at: new Date().toISOString() };
+    try {
+      await Rank.save(body);
+      msg.textContent = `${nick} 님, ${body.score}점으로 등록했어요!`; msg.className = "msg ok"; Sound.win();
+    } catch (err) {
+      if (err && err.code === "invalid_argument") { Rank.readOnly = true; msg.textContent = "등록 권한이 없어요."; }
+      else if (err && err.code === "unavailable") msg.textContent = "잠시 연결이 불안정해요. 조금 뒤에 다시 눌러 주세요.";
+      else msg.textContent = "등록하지 못했어요. 페이지를 새로 고친 뒤 다시 시도해 주세요.";
+      msg.className = "msg err";
+    }
+    setTimeout(() => { delete msg.dataset.sticky; renderRank(); }, 2600);
+  });
+  // 3min-playground.com에서는 다른 게임과 같은 Firestore에 랭킹을 저장해요.
+  function initFirebase() {
+    let fdb;
+    try {
+      if (!firebase.apps.length) firebase.initializeApp({
+        apiKey: "AIzaSyAqXsG8npxettrCRH3MbZwFZGLg5aehxdw",
+        authDomain: "min-playground.firebaseapp.com",
+        projectId: "min-playground",
+        storageBucket: "min-playground.firebasestorage.app",
+        messagingSenderId: "472071492052",
+        appId: "1:472071492052:web:00263046925133e55a4641"
+      });
+      fdb = firebase.firestore();
+    } catch (e) { Rank.status = "off"; return renderRank(); }
+    const ref = fdb.collection("farm_rankings").doc("sound_post_top");
+    try { Rank.uid = localStorage.getItem("sound-post-key"); } catch (e) {}
+    if (!Rank.uid) { Rank.uid = Date.now() + "-" + Math.floor(Math.random() * 1e6); try { localStorage.setItem("sound-post-key", Rank.uid); } catch (e) {} }
+    Rank.save = async body => {
+      const doc = await ref.get();
+      const arr = ((doc.exists && doc.data().top) || []).filter(r => r.key !== Rank.uid);
+      arr.push({ key: Rank.uid, name: body.nick, score: body.score, levels: body.levels, at: body.at });
+      arr.sort((a, b) => cleanScore(b.score) - cleanScore(a.score));
+      await ref.set({ top: arr.slice(0, 30) });
+    };
+    // 관리자용 순위 초기화 (맨 아래 전구), 사이트의 다른 게임과 같아요
+    $("bulbWrap").hidden = false;
+    $("bulb").onclick = () => adminReset(() => ref.set({ top: [] }));
+    ref.onSnapshot(doc => {
+      Rank.rows = ((doc.exists && doc.data().top) || []).map(r => ({ id: r.key, nick: r.name, score: r.score, at: r.at }));
+      Rank.status = "ready"; renderRank();
+    }, () => { Rank.status = "off"; renderRank(); });
+  }
+  const ADMIN_PW = "3min";
+  function adminReset(clear) {
+    const pw = prompt("관리자 비밀번호를 입력하세요.");
+    if (pw === null) return;
+    if (pw !== ADMIN_PW) { alert("비밀번호가 달라요."); return; }
+    if (!confirm("'또롱이의 소리 우체국' 순위를 지울까요?\n지우면 되돌릴 수 없어요.")) return;
+    const bulb = $("bulb"); bulb.classList.add("on");
+    clear().then(() => alert("✅ 순위를 초기화했어요."))
+      .catch(e => alert("초기화하지 못했어요.\n" + (e && e.message ? e.message : "")))
+      .then(() => bulb.classList.remove("on"));
+  }
+  (async () => {
+    renderRank();
+    if (!window.claude?.use) { if (window.firebase) return initFirebase(); Rank.status = "off"; return renderRank(); }
+    const [db, user] = await Promise.all([claude.use("db"), claude.use("user")]);
+    if (!db) { Rank.status = "off"; return renderRank(); }
+    Rank.db = db; Rank.user = user;
+    Rank.save = body => db.doc("ranking/" + Rank.uid).set(body);
+    if (user) {
+      Rank.uid = await user.id();
+      if ((await user.can("data.write")) === false) Rank.readOnly = true;
+    }
+    db.collection("ranking").orderBy("score", "desc").limit(50).onSnapshot(snap => {
+      Rank.rows = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      Rank.status = "ready"; renderRank();
+    }, () => { Rank.status = "off"; renderRank(); });
+  })();
+
+  // ---------- 시작 ----------
+  renderNotes();
+  const startAt = Math.max(0, progress.unlocked - 1);
+  cur = startAt; renderLevelButtons();
+  V = null;
+  (function title() {
+    const S = STAGES[startAt];
+    $("lvlNo").textContent = `${startAt + 1}단계`; $("lvlName").textContent = S.title;
+    $("view").className = "view"; $("view").innerHTML = "";
+    showCard(`<h2>또롱이의 소리 우체국</h2><img class="pic wide" src="${IMG}intro.webp" alt="음표 요정 배달부 또롱이가 소리 우체국 앞을 날아다니는 그림">
+      <p>소리 소포를 귀까지 배달하는 소리 우체국! 소리가 <b>고체·액체·기체</b> 중 무엇을 지나가는지 정확히 맞혀야 배달할 수 있어요.</p>
+      <div class="row"><span class="genre g1">📮 1~5 소리 배달</span><span class="genre g2">🔍 6~9 쉿쉿이의 방</span><span class="genre g3">📦 10 소포 분류</span></div>`,
+      [[startAt ? `${startAt + 1}단계부터 이어하기 ▶` : "배달 시작! ▶", () => loadStage(startAt), true]].concat(startAt ? [["1단계부터", () => loadStage(0)]] : []), true);
+  })();
+  requestAnimationFrame(loop);
+})();
+</script>
+
+<!-- 활용 안내 시작 -->
+<section class="pgd" id="pg-guide" aria-labelledby="pgd-title" style="--pgd-accent:#FF6B7A;--pgd-soft:#DDEEFF;">
+  <div class="pgd__box">
+    <span class="pgd__ribbon">📖 활용 안내</span>
+    <span class="pgd__deco pgd__deco--a" aria-hidden="true">📮</span>
+    <span class="pgd__deco pgd__deco--b" aria-hidden="true">🎵</span>
+    <span class="pgd__deco pgd__deco--c" aria-hidden="true">✨</span>
+    <div class="pgd__head">
+      <div class="pgd__mascot"><img src="../assets/guide/sound-post.webp" alt="빨간 우체부 모자를 쓴 파란 음표 요정 또롱이 그림" width="150" height="150" loading="lazy" decoding="async"></div>
+      <div>
+        <h2 class="pgd__title" id="pgd-title"><mark>또롱이의 소리 우체국</mark>, 이렇게 활용해요</h2>
+        <p class="pgd__lead">소리 우체국 배달부 또롱이가 되어 <b>“이 소리는 무엇을 지나 귀까지 왔을까?”</b>를 맞히며, 소리가 고체·액체·기체를 통해 전달된다는 것을 익히는 과학 게임이에요.</p>
+      </div>
+    </div>
+    <ul class="pgd__chips" aria-label="한눈에 보기">
+      <li>🎒 3학년 추천</li>
+      <li>🔬 과학 · 소리의 성질</li>
+      <li>⏱️ 단계마다 60초</li>
+      <li>👤 혼자 · 짝 · 모둠 대결</li>
+    </ul>
+    <div class="pgd__grid">
+      <div class="pgd__card pgd__card--how">
+        <h3><span class="pgd__ico" aria-hidden="true">🎮</span>이렇게 놀아요</h3>
+        <ol>
+        <li><b>1~5단계 소리 배달</b>: 그림 속 상황을 보고 빈칸에 소리가 지나가는 물질을 넣어 소리 길을 이어요. 성공하면 지나온 물질의 상태(고체·액체·기체)를 점검해요.</li>
+        <li><b>6~9단계 쉿쉿이의 방</b>: 방 안의 단서 3개를 풀어 비밀번호 숫자를 모으고 자물쇠를 열어요.</li>
+        <li><b>10단계 소포 분류</b>: 30장의 상황 카드 중 무작위로 나오는 소포를 알맞은 우체통에 넣어요. 10개 연속으로 맞혀야 성공!</li>
+        <li>단계마다 60초, 틀리면 5초가 줄어요. <b>남은 시간이 점수</b>이고, 모두 통과하면 랭킹에 이름을 올려요.</li>
+        </ol>
+      </div>
+      <div class="pgd__card pgd__card--learn">
+        <h3><span class="pgd__ico" aria-hidden="true">🌱</span>이런 걸 배워요</h3>
+        <ul>
+        <li>책상·철봉·실 전화기처럼 <b>고체</b>를 통해 소리가 전달돼요.</li>
+        <li>물이 든 수조나 지퍼 백, 바닷속처럼 <b>액체</b>를 통해서도 소리가 전달돼요.</li>
+        <li>평소 듣는 소리는 대부분 <b>공기(기체)</b>를 통해 전달돼요.</li>
+        <li>소리를 전해 줄 물질이 없는 우주 공간에서는 소리가 전달되지 않아요. (심화)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="pgd__card pgd__card--class">
+      <h3><span class="pgd__ico" aria-hidden="true">🏫</span>교실에서 이렇게 써 보세요</h3>
+      <ul>
+        <li>책상에 귀 대기, 실 전화기 실험을 한 뒤 1~2단계로 실험 내용을 다시 떠올려요.</li>
+        <li>단계를 통과할 때마다 채워지는 ‘소리 길 노트’를 공책에 옮겨 적어 정리해요.</li>
+        <li>10단계는 매번 카드 순서가 바뀌니 짝과 번갈아 도전하며 30장을 모두 만나 봐요.</li>
+        <li>모둠별로 ‘틀리지 않고 가장 많은 시간을 남기기’ 대결을 열어요.</li>
+      </ul>
+    </div>
+    <p class="pgd__tip"><span><b>선생님 한마디</b> 실제로 소리는 여러 물질을 함께 지나오는 경우가 많아요. 게임에서는 귀에 닿기 직전에 소리를 전해 준 가장 중요한 물질을 기준으로 답을 정했다는 점을 덧붙여 주세요.</span></p>
+  </div>
+</section>
+<!-- 활용 안내 끝 -->
+</body>
+</html>
