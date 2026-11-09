@@ -148,6 +148,15 @@
   }
   .site-footer a{ text-decoration:underline; }
 
+  /* 관리자용 전구 : 모든 웹게임 순위 초기화 (평소엔 희미하게) */
+  .bulb-wrap{ text-align:center; padding:0 0 34px; margin-top:-30px; }
+  .bulb{
+    background:none; border:none; cursor:pointer; padding:6px; line-height:0;
+    color:#C9D3E3; opacity:.35; transition:all .2s;
+  }
+  .bulb:hover{ color:#F0B429; opacity:1; filter:drop-shadow(0 0 6px rgba(240,180,41,.6)); }
+  .bulb.on{ color:#F0B429; opacity:1; filter:drop-shadow(0 0 10px rgba(240,180,41,.85)); }
+
   @media (max-width: 860px){
     .rooms{ grid-template-columns: repeat(3, 1fr); }
   }
@@ -441,7 +450,17 @@
     <div><a href="privacy.html">개인정보처리방침</a> | 문의: dasihaza@gmail.com</div>
   </footer>
 
+  <div class="bulb-wrap">
+    <button class="bulb" id="resetBulb" type="button" aria-label=" ">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true">
+        <path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.5.4.8 1 .8 1.6v.5h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0 0 12 3z"
+              stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+
 </div>
 
+<script src="assets/score-reset.js"></script>
 </body>
 </html>
