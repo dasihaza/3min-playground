@@ -11,24 +11,26 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
 <style>
-/* 눈 내리는 남색 겨울밤과 군고구마빛 따뜻한 실내. 어느 테마에서도 같은 모습을 써요. */
+/* 솜사탕 하늘과 딸기우유빛 겨울 그림책. 갈색 테두리 스티커 느낌으로, 어느 테마에서도 같은 밝은 모습을 써요. */
 :root {
-  --night: #1F2F4F;
-  --night2: #33487A;
-  --card: #FFFDF8;
-  --cream: #FFF3DD;
-  --ink: #2F2A3D;
-  --muted: #8A8398;
-  --line: #EADFCB;
-  --ember: #FF7A2F;
-  --ember-d: #D9541A;
-  --hot: #E8483C;
-  --cold: #3F9BF2;
-  --sun: #FFC93D;
-  --mint: #2FB98A;
-  --solid: #C9803A;  --solid-l: #FFEBD3;
-  --liquid: #3F9BF2; --liquid-l: #E0EEFF;
-  --gas: #8E7CF0;    --gas-l: #ECE8FF;
+  --ol: #5A3825;
+  --bg1: #D9EAFF;
+  --bg2: #FFE4EE;
+  --card: #FFFDF7;
+  --cream: #FFF1D9;
+  --ink: #4A3226;
+  --muted: #9A8478;
+  --line: #EBD9C3;
+  --ember: #FF9A3D;
+  --ember-d: #E0701A;
+  --hot: #FF6B5E;
+  --cold: #5FB4FF;
+  --sun: #FFD95A;
+  --pink: #FF8FA3;
+  --mint: #5FCFA4;
+  --solid: #F0A04B;  --solid-l: #FFE8CC;
+  --liquid: #5FB4FF; --liquid-l: #DDF0FF;
+  --gas: #A891FF;    --gas-l: #ECE6FF;
   --f-display: "Jua", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   --f-body: "Gowun Dodum", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   color-scheme: light;
@@ -37,91 +39,96 @@
 [hidden] { display: none !important; }
 body {
   margin: 0; color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.6;
-  background: var(--night) radial-gradient(circle at 20% 0%, var(--night2) 0%, var(--night) 60%) fixed;
+  background: var(--bg1) linear-gradient(170deg, var(--bg1) 0%, var(--bg2) 100%) fixed;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
   padding-block: 18px 40px; min-height: 100%;
 }
 .snow { position: fixed; inset: 0; pointer-events: none; z-index: 0;
-  background-image: radial-gradient(#fff 1.6px, transparent 2px), radial-gradient(rgba(255,255,255,.7) 1.2px, transparent 1.6px);
-  background-size: 120px 120px, 80px 80px; background-position: 0 0, 40px 60px; opacity: .35; animation: snow 14s linear infinite; }
-@keyframes snow { to { background-position: 60px 360px, 0 300px; } }
+  background-image: radial-gradient(#fff 3px, transparent 3.6px), radial-gradient(#fff 2px, transparent 2.6px), radial-gradient(#fff 4px, transparent 4.6px);
+  background-size: 130px 130px, 90px 90px, 210px 210px; background-position: 0 0, 40px 60px, 100px 30px; opacity: .9; animation: snow 16s linear infinite; }
+@keyframes snow { to { background-position: 65px 390px, 0 330px, 60px 450px; } }
 .topbar, .wrap, .pgd { position: relative; z-index: 1; }
 .topbar { max-width: 1000px; margin: 0 auto 8px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.topbar a { color: #fff; text-decoration: none; }
+.topbar a { color: var(--ink); text-decoration: none; }
 .topbar .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; }
-.topbar .back { font-size: 12.5px; font-weight: 700; color: var(--ink); background: #fff; padding: 6px 12px; border-radius: 999px; }
+.topbar .back { font-size: 12.5px; font-weight: 700; background: #fff; padding: 6px 12px; border-radius: 999px; border: 2px solid var(--ol); }
 .wrap { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
 
-header { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; color: #fff; }
-.logo { width: 78px; height: 78px; flex: none; animation: bob 2.6s ease-in-out infinite; }
-@keyframes bob { 50% { transform: translateY(-5px); } }
-h1 { font-family: var(--f-display); font-weight: 400; font-size: clamp(32px, 6.2vw, 50px); line-height: 1.05; margin: 0; }
-h1 .a { color: var(--sun); } h1 .b { color: #FF9A5C; }
-header .tag { flex: 1 1 280px; margin: 0; font-size: 14px; color: #D8E1F5; }
+header { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.logo { width: 96px; height: 96px; flex: none; object-fit: contain; animation: bob 2.4s ease-in-out infinite; filter: drop-shadow(0 4px 0 rgba(90,56,37,.15)); }
+@keyframes bob { 50% { transform: translateY(-6px) rotate(-3deg); } }
+h1 { font-family: var(--f-display); font-weight: 400; font-size: clamp(34px, 6.4vw, 54px); line-height: 1.05; margin: 0; color: var(--ol); text-shadow: 0 3px 0 #fff; }
+h1 .a { color: var(--cold); } h1 .b { color: var(--ember); }
+header .tag { flex: 1 1 280px; margin: 0; font-size: 14px; background: #fff; border: 2.5px solid var(--ol); border-radius: 18px 18px 18px 4px; padding: 8px 14px; }
 
-button { font: inherit; font-family: var(--f-display); cursor: pointer; border: 0; border-radius: 14px; padding: 9px 14px; background: #fff; color: var(--ink); box-shadow: 0 3px 0 var(--line); transition: transform .1s; }
-button:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--line); }
-button:focus-visible, .hit:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
-button.primary { background: var(--ember); color: #fff; box-shadow: 0 4px 0 var(--ember-d); font-size: 17px; padding: 11px 20px; }
-button:disabled { opacity: .45; cursor: default; }
+button { font: inherit; font-family: var(--f-display); cursor: pointer; border: 2.5px solid var(--ol); border-radius: 16px; padding: 8px 14px; background: #fff; color: var(--ink); box-shadow: 0 4px 0 var(--ol); transition: transform .1s, box-shadow .1s; }
+button:hover:not(:disabled) { transform: translateY(-1px); }
+button:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 var(--ol); }
+button:focus-visible, .hit:focus-visible { outline: 3px solid var(--pink); outline-offset: 2px; }
+button.primary { background: var(--ember); color: #fff; font-size: 18px; padding: 11px 22px; text-shadow: 0 1px 0 var(--ember-d); }
+button:disabled { opacity: .5; cursor: default; }
 
 .hud { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; }
-.pill { background: var(--card); border-radius: 16px; padding: 8px 14px; display: flex; align-items: center; gap: 10px; font-family: var(--f-display); }
+.pill { background: var(--card); border: 2.5px solid var(--ol); border-radius: 18px; padding: 7px 14px; display: flex; align-items: center; gap: 10px; font-family: var(--f-display); box-shadow: 0 4px 0 rgba(90,56,37,.16); }
 .pill .lab { font-size: 12.5px; color: var(--muted); }
 .pill .val { font-size: 18px; }
-.pill.level .badge { background: var(--ink); color: #fff; padding: 3px 10px; border-radius: 999px; font-size: 14px; }
+.pill.level .badge { background: var(--ol); color: #fff; padding: 3px 11px; border-radius: 999px; font-size: 14px; }
 .pill.level.solid .badge { background: var(--solid); } .pill.level.liquid .badge { background: var(--liquid); } .pill.level.gas .badge { background: var(--gas); } .pill.level.boss .badge { background: var(--hot); }
 .pill.warm { flex: 1 1 220px; }
-.tbar { flex: 1; height: 14px; background: #E6EEF9; border-radius: 999px; overflow: hidden; min-width: 80px; }
-.tbar .fill { height: 100%; width: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--cold), var(--sun) 45%, var(--ember)); transition: width .25s linear; }
+.tbar { flex: 1; height: 18px; background: #E3F0FF; border: 2.5px solid var(--ol); border-radius: 999px; overflow: hidden; min-width: 80px; }
+.tbar .fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--cold), var(--sun) 45%, var(--ember) 80%, var(--hot)); transition: width .25s linear; }
 .hud .btns { display: flex; gap: 6px; margin-left: auto; }
-.hud .btns button { font-size: 13.5px; padding: 8px 12px; }
+.hud .btns button { font-size: 13.5px; padding: 6px 12px; }
 
-.screen { position: relative; background: var(--card); border-radius: 22px; padding: 12px; box-shadow: 0 10px 0 rgba(0,0,0,.18); }
-.scene { border-radius: 16px; overflow: hidden; background: var(--cream); line-height: 0; }
+.screen { position: relative; background: var(--card); border: 3px solid var(--ol); border-radius: 26px; padding: 12px; box-shadow: 0 8px 0 rgba(90,56,37,.2); }
+.scene { border-radius: 16px; border: 3px solid var(--ol); overflow: hidden; background: var(--cream); line-height: 0; }
 .scene svg { display: block; width: 100%; height: auto; font-family: var(--f-display); user-select: none; -webkit-user-select: none; }
 .scene.shake { animation: shake .35s; }
 @keyframes shake { 20% { transform: translateX(-7px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
-.ctl { padding: 12px 6px 4px; min-height: 132px; }
-.prompt { margin: 0 0 10px; font-size: 16.5px; font-weight: 700; }
+.ctl { padding: 12px 4px 4px; min-height: 150px; }
+.talk { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+.talk img { width: 62px; height: 62px; object-fit: contain; flex: none; animation: bob 2.4s ease-in-out infinite; }
+.prompt { margin: 0; flex: 1; font-size: 16.5px; font-weight: 700; background: #fff; border: 2.5px solid var(--ol); border-radius: 4px 18px 18px 18px; padding: 9px 14px; min-height: 48px; }
 .prompt small { display: block; font-weight: 400; color: var(--muted); font-size: 13.5px; }
-.opts { display: flex; flex-wrap: wrap; gap: 8px; }
-.opts button { flex: 1 1 180px; background: var(--cream); box-shadow: 0 3px 0 #E5CFA6; font-size: 16px; padding: 12px 14px; text-align: center; line-height: 1.35; }
+.opts { display: flex; flex-wrap: wrap; gap: 9px; }
+.opts button { flex: 1 1 180px; background: var(--cream); font-size: 16.5px; padding: 12px 14px; text-align: center; line-height: 1.35; }
 .opts.quiz button { flex: 1 1 44%; text-align: left; font-family: var(--f-body); font-weight: 700; font-size: 15px; }
-.opts button.ok { background: #D8F5E8; box-shadow: 0 3px 0 #9ADFC0; opacity: 1; }
-.opts button.no { background: #FFE0DC; box-shadow: 0 3px 0 #F5B3AB; }
-.fb { margin: 10px 0 0; min-height: 24px; font-weight: 700; font-size: 14.5px; }
-.opts button.primary { background: var(--ember); color: #fff; box-shadow: 0 4px 0 var(--ember-d); text-align: center; font-family: var(--f-display); font-size: 17px; }
-.fb.ok { color: #14855F; } .fb.no { color: #C9372C; }
+.opts button.ok { background: #CFF5E2; opacity: 1; }
+.opts button.no { background: #FFD9D6; }
+.opts button.primary { background: var(--ember); color: #fff; text-align: center; font-family: var(--f-display); font-size: 17px; }
+.fb { margin: 12px 0 0; min-height: 24px; font-weight: 700; font-size: 14.5px; }
+.fb.ok { color: #14855F; } .fb.no { color: #D0392E; }
 
-.overlay { position: absolute; inset: 0; background: rgba(31,47,79,.72); border-radius: 22px; display: none; align-items: center; justify-content: center; padding: 14px; z-index: 5; }
+.overlay { position: absolute; inset: 0; background: rgba(255,240,246,.82); border-radius: 23px; display: none; align-items: center; justify-content: center; padding: 14px; z-index: 5; }
 .overlay.on { display: flex; }
-.card { background: var(--card); border-radius: 20px; padding: 20px 22px; max-width: 520px; width: 100%; text-align: center; max-height: 100%; overflow: auto; animation: pop .25s; }
-@keyframes pop { from { transform: scale(.9); opacity: 0; } }
-.card h2 { font-family: var(--f-display); font-weight: 400; font-size: 27px; margin: 0 0 6px; line-height: 1.2; }
-.card .em { font-size: 52px; line-height: 1.1; }
+.card { background: var(--card); border: 3px solid var(--ol); border-radius: 24px; box-shadow: 0 8px 0 rgba(90,56,37,.22); padding: 16px 20px 18px; max-width: 500px; width: 100%; text-align: center; max-height: 100%; overflow: auto; animation: pop .3s cubic-bezier(.3,1.5,.6,1); }
+@keyframes pop { from { transform: scale(.85); opacity: 0; } }
+.card h2 { font-family: var(--f-display); font-weight: 400; font-size: 27px; margin: 4px 0 6px; line-height: 1.2; color: var(--ol); }
+.card .pic { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 16px; border: 3px solid var(--ol); margin: 8px 0; background: var(--cream); }
+.card .char { display: block; height: 150px; width: auto; max-width: 70%; object-fit: contain; margin: 4px auto; animation: bob 2.4s ease-in-out infinite; }
 .card p { margin: 6px 0; }
-.card .mission { background: var(--cream); border-radius: 14px; padding: 10px 12px; text-align: left; font-size: 14.5px; }
-.card .note { background: #EAF7F0; border-left: 5px solid var(--mint); border-radius: 10px; padding: 9px 12px; text-align: left; font-size: 14.5px; }
-.card .score { font-family: var(--f-display); font-size: 22px; color: var(--ember-d); }
-.card .row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
-.kind { display: inline-block; font-family: var(--f-display); font-size: 13px; padding: 2px 10px; border-radius: 999px; }
-.kind.solid { background: var(--solid-l); color: #8A4F12; } .kind.liquid { background: var(--liquid-l); color: #1C5FA8; } .kind.gas { background: var(--gas-l); color: #4B3BB0; } .kind.boss { background: #FFE0DC; color: #B02A20; }
+.card .mission { background: var(--cream); border: 2px dashed var(--ol); border-radius: 14px; padding: 9px 12px; text-align: left; font-size: 14.5px; }
+.card .note { background: #E6F8EE; border: 2px solid var(--mint); border-radius: 14px; padding: 9px 12px; text-align: left; font-size: 14.5px; }
+.card .score { font-family: var(--f-display); font-size: 23px; color: var(--ember-d); }
+.card .row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 12px; padding-bottom: 4px; }
+.kind { display: inline-block; font-family: var(--f-display); font-size: 13px; padding: 1px 10px; border-radius: 999px; border: 2px solid var(--ol); }
+.kind.solid { background: var(--solid-l); } .kind.liquid { background: var(--liquid-l); } .kind.gas { background: var(--gas-l); } .kind.boss { background: #FFD9D6; }
 
 .below { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.panel { background: var(--card); border-radius: 20px; padding: 16px 18px; }
-.panel h3 { font-family: var(--f-display); font-weight: 400; font-size: 19px; margin: 0 0 8px; }
+.panel { background: var(--card); border: 3px solid var(--ol); border-radius: 24px; padding: 16px 18px; box-shadow: 0 6px 0 rgba(90,56,37,.16); }
+.panel h3 { font-family: var(--f-display); font-weight: 400; font-size: 20px; margin: 0 0 8px; color: var(--ol); }
 .panel h3:not(:first-child) { margin-top: 16px; }
 .keys { margin: 0; padding: 0; list-style: none; font-size: 14px; display: grid; gap: 6px; }
-.levels { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
-.levels button { padding: 8px 0; font-size: 15px; }
-.levels button.solid { background: var(--solid-l); } .levels button.liquid { background: var(--liquid-l); } .levels button.gas { background: var(--gas-l); } .levels button.boss { background: #FFE0DC; }
-.levels button.cur { outline: 3px solid var(--ember); }
-.teacher { margin-top: 10px; font-size: 12.5px; background: none; box-shadow: none; color: var(--muted); text-decoration: underline; padding: 4px; font-family: var(--f-body); }
+.levels { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; padding-bottom: 4px; }
+.levels button { padding: 7px 0; font-size: 15px; }
+.levels button.solid { background: var(--solid-l); } .levels button.liquid { background: var(--liquid-l); } .levels button.gas { background: var(--gas-l); } .levels button.boss { background: #FFD9D6; }
+.levels button.cur { background: var(--sun); }
+.teacher { margin-top: 10px; font-size: 12.5px; background: none; border: 0; box-shadow: none; color: var(--muted); text-decoration: underline; padding: 4px; font-family: var(--f-body); }
+.teacher:active:not(:disabled) { box-shadow: none; }
 .notes { display: grid; gap: 6px; font-size: 13.5px; }
-.notes div { background: var(--cream); border-radius: 10px; padding: 7px 10px; }
-.notes div.lock { color: var(--muted); background: #F3F1EE; }
+.notes div { background: var(--cream); border-radius: 12px; padding: 7px 10px; }
+.notes div.lock { color: var(--muted); background: #F5F0EA; }
 .notes b { font-family: var(--f-display); font-weight: 400; margin-right: 4px; }
 
 .rank { display: grid; grid-template-columns: 1.1fr 1fr; gap: 18px; }
@@ -133,40 +140,45 @@ button:disabled { opacity: .45; cursor: default; }
 .mybox .lab { display: block; font-size: 12px; color: var(--muted); }
 .mybox .big { font-family: var(--f-display); font-size: 26px; } .mybox .unit { font-size: 12px; color: var(--muted); margin-left: 4px; }
 .lvscores { list-style: none; margin: 0 0 12px; padding: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; font-size: 12.5px; text-align: center; }
-.lvscores li { background: #F3F1EE; border-radius: 8px; padding: 3px 0; } .lvscores li.on { background: #FFE9C9; font-weight: 700; }
+.lvscores li { background: #F5F0EA; border-radius: 8px; padding: 3px 0; } .lvscores li.on { background: #FFE6B8; font-weight: 700; }
 #rankForm label { font-size: 13px; font-weight: 700; }
-.formrow { display: flex; gap: 8px; margin-top: 4px; }
-.formrow input { flex: 1; min-width: 0; font: inherit; padding: 9px 12px; border-radius: 12px; border: 2px solid var(--line); }
+.formrow { display: flex; gap: 8px; margin-top: 4px; padding-bottom: 4px; }
+.formrow input { flex: 1; min-width: 0; font: inherit; padding: 9px 12px; border-radius: 14px; border: 2.5px solid var(--ol); }
 .formrow button { font-size: 15px; padding: 9px 14px; }
-.msg { font-size: 13px; min-height: 20px; margin: 6px 0 0; color: var(--muted); } .msg.err { color: #C9372C; } .msg.ok { color: #14855F; }
+.msg { font-size: 13px; min-height: 20px; margin: 6px 0 0; color: var(--muted); } .msg.err { color: #D0392E; } .msg.ok { color: #14855F; }
 .board { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.board li { display: flex; align-items: center; gap: 10px; background: var(--cream); border-radius: 12px; padding: 8px 12px; font-family: var(--f-display); }
-.board li .no { width: 26px; } .board li .nm { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .board li.me { outline: 2px solid var(--ember); }
+.board li { display: flex; align-items: center; gap: 10px; background: var(--cream); border-radius: 14px; padding: 8px 12px; font-family: var(--f-display); }
+.board li .no { width: 26px; } .board li .nm { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .board li.me { outline: 2.5px solid var(--ember); }
 .board li.empty { font-family: var(--f-body); color: var(--muted); font-size: 13.5px; }
 .bulb-wrap { text-align: center; }
-.bulb { background: none; box-shadow: none; padding: 8px; line-height: 0; color: #B9C4DD; opacity: .45; }
+.bulb { background: none; border: 0; box-shadow: none; padding: 8px; line-height: 0; color: var(--muted); opacity: .45; }
 .bulb:hover, .bulb.on { color: #F0B429; opacity: 1; filter: drop-shadow(0 0 8px rgba(240,180,41,.8)); }
-.bulb:active { box-shadow: none; }
+.bulb:active:not(:disabled) { box-shadow: none; }
 
 /* 장면 속 그림 */
 .hit { cursor: pointer; }
 .hit:focus:not(:focus-visible) { outline: none; }
+.o { stroke: #5A3825; stroke-width: 4; stroke-linejoin: round; stroke-linecap: round; }
 .fl path { transform-box: fill-box; transform-origin: 50% 100%; animation: flick .5s ease-in-out infinite alternate; }
 @keyframes flick { to { transform: scaleY(1.12) scaleX(.94); } }
-.bt rect { transition: transform .5s, opacity .5s; transform-box: fill-box; transform-origin: 50% 100%; }
-.bt.melt rect { transform: scaleY(.22) scaleX(1.6); opacity: .8; }
+.bt image { transition: transform .5s, opacity .5s; transform-box: fill-box; transform-origin: 50% 100%; }
+.bt:hover image { transform: scale(1.08); }
+.bt.melt image { transform: scaleY(.3) scaleX(1.5); opacity: .85; }
 .bt.melt { pointer-events: none; }
 .stk { transform-box: fill-box; transform-origin: 50% 100%; transform: scaleY(0); }
 .pulse { transform-box: fill-box; transform-origin: center; animation: pulse 1s ease-in-out infinite; }
 @keyframes pulse { 50% { transform: scale(1.18); } }
+.wob { transform-box: fill-box; transform-origin: 50% 100%; animation: wob 2.2s ease-in-out infinite; }
+@keyframes wob { 50% { transform: rotate(3deg) translateY(-3px); } }
 .leak { animation: leak 1.2s linear infinite; } @keyframes leak { 50% { opacity: .3; } }
-.flow { fill: none; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 14 12; animation: dash 1s linear infinite; }
-.flow.hot { stroke: #E8483C; marker-end: url(#mh); } .flow.cold { stroke: #2F7FE0; marker-end: url(#mc); }
-@keyframes dash { to { stroke-dashoffset: -26; } }
-.tile { transition: transform .2s; transform-box: fill-box; transform-origin: center; }
-.tile.bad circle { fill: #FFD0CA; stroke: #E8483C; }
+.flow { fill: none; stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 14 13; animation: dash 1s linear infinite; }
+.flow.hot { stroke: #FF5A4D; marker-end: url(#mh); } .flow.cold { stroke: #3D8FF0; marker-end: url(#mc); }
+@keyframes dash { to { stroke-dashoffset: -27; } }
+.tile { transition: transform .25s cubic-bezier(.3,1.6,.6,1); transform-box: fill-box; transform-origin: center; }
+.tl:hover circle { fill: #FFF3B8; }
+.tile.bad circle { fill: #FFD0CA; stroke: #FF5A4D; }
 .blob { transition: transform .45s ease-in, opacity .45s; transform-box: fill-box; transform-origin: center; }
-.slot circle { fill: rgba(255,255,255,.75); stroke: #2F2A3D; stroke-width: 2.5; stroke-dasharray: 6 5; }
+.slot circle { fill: rgba(255,255,255,.85); stroke: #5A3825; stroke-width: 3; stroke-dasharray: 7 6; }
 .slot:hover circle { fill: #FFE9A8; }
 .lv:hover rect { fill: #FFE9A8; }
 #boss { transition: transform .5s, opacity .5s; transform-box: fill-box; transform-origin: 50% 100%; }
@@ -177,9 +189,10 @@ button:disabled { opacity: .45; cursor: default; }
   .below, .rank { grid-template-columns: 1fr; }
   .hud .btns { margin-left: 0; width: 100%; } .hud .btns button { flex: 1; }
   .opts.quiz button { flex-basis: 100%; }
-  .ctl { min-height: 150px; }
+  .talk img { width: 50px; height: 50px; }
+  .logo { width: 76px; height: 76px; }
 }
-@media (prefers-reduced-motion: reduce) { .snow, .logo, .fl path, .pulse { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .snow, .logo, .fl path, .pulse, .wob, .talk img, .card .char { animation: none; } }
 </style>
 <link rel="stylesheet" href="../assets/guide.css">
 </head>
@@ -188,9 +201,9 @@ button:disabled { opacity: .45; cursor: default; }
 <div class="topbar">
   <a class="brand" href="../index.html">
     <svg width="26" height="26" viewBox="0 0 34 34" fill="none">
-      <circle cx="17" cy="18" r="14" fill="#fff" stroke="#3B4655" stroke-width="2"/>
-      <path d="M17 9 L17 18 L23 21" stroke="#FF90B3" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-      <rect x="13" y="2" width="8" height="4" rx="1.5" fill="#3B4655"/>
+      <circle cx="17" cy="18" r="14" fill="#fff" stroke="#5A3825" stroke-width="2"/>
+      <path d="M17 9 L17 18 L23 21" stroke="#FF8FA3" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="13" y="2" width="8" height="4" rx="1.5" fill="#5A3825"/>
     </svg>
     <span>3분 놀이터</span>
   </a>
@@ -198,7 +211,7 @@ button:disabled { opacity: .45; cursor: default; }
 </div>
 <div class="wrap">
   <header>
-    <img class="logo" src="../assets/guide/winter-home.svg" alt="" width="78" height="78">
+    <img class="logo" src="../assets/winter-home/ttakkeun.webp" alt="" width="96" height="96">
     <h1>우리 집 <span class="a">겨울</span><span class="b">나기</span></h1>
     <p class="tag">한파 대왕 꽁꽁이가 몰려와요! 불꽃 요정 따끈이와 함께 고체·액체·기체에서 열이 이동하는 방법을 이용해 우리 집을 따뜻하게 지켜요.</p>
   </header>
@@ -217,7 +230,7 @@ button:disabled { opacity: .45; cursor: default; }
   <div class="screen">
     <div class="scene" id="scene"></div>
     <div class="ctl">
-      <p class="prompt" id="prompt"></p>
+      <div class="talk"><img src="../assets/winter-home/ttakkeun.webp" alt="따끈이" width="62" height="62"><p class="prompt" id="prompt"></p></div>
       <div class="opts" id="opts"></div>
       <p class="fb" id="fb" role="status"></p>
     </div>
@@ -296,6 +309,7 @@ button:disabled { opacity: .45; cursor: default; }
     { kind: "gas", icon: "🌬️", title: "공기 흐름 잇기", story: "난로를 켠 방 안에서 공기는 빙글빙글 돌아요. 화살표가 뒤죽박죽이에요.", mission: "화살표를 눌러 돌려서 <b>공기가 움직이는 방향</b>을 맞춰요.", note: "따뜻해진 공기는 위로 올라가고, 식은 공기는 아래로 내려오며 방 안을 돌아요. (대류)" },
     { kind: "boss", icon: "👑", title: "한파 대왕 꽁꽁이", story: "드디어 한파 대왕 꽁꽁이가 나타났어요! 열 이동 지식으로 꽁꽁이를 녹여요.", mission: "퀴즈 10문제 중 <b>5문제 이상</b> 맞히면 승리!", note: "고체에서는 열이 물체를 따라 이동하고, 액체와 기체에서는 온도가 높아진 물질이 직접 위로 올라가면서 열이 이동해요." }
   ];
+  const IMG = "../assets/winter-home/";
   const KIND = { solid: "고체", liquid: "액체", gas: "기체", boss: "보스전" };
 
   // ---------- 저장 ----------
@@ -351,7 +365,7 @@ button:disabled { opacity: .45; cursor: default; }
   }
   function freeze() {
     busy = true; stopAll();
-    showCard(`<div class="em">🥶</div><h2>집이 꽁꽁 얼었어요!</h2><p>온기가 모두 사라졌어요. 열 이동 노트를 떠올리며 다시 도전해 봐요.</p>`, [["다시 도전 ▶", () => loadStage(cur), true]]);
+    showCard(`<img class="char" src="${IMG}boss.webp" alt="한파 대왕 꽁꽁이"><h2>집이 꽁꽁 얼었어요!</h2><p>온기가 모두 사라졌어요. 열 이동 노트를 떠올리며 다시 도전해 봐요.</p>`, [["다시 도전 ▶", () => loadStage(cur), true]]);
   }
   setInterval(() => { if (!busy && !bossMode) { warm -= .125; hud(); if (warm <= 0) freeze(); } }, 250);
   document.addEventListener("keydown", e => { if (!busy && onKey && !$("ov").classList.contains("on")) onKey(e); });
@@ -382,7 +396,7 @@ button:disabled { opacity: .45; cursor: default; }
     fb(""); say(""); $("opts").innerHTML = ""; sceneEl.innerHTML = "";
     renderLevels();
     RUN[i](true);   // 장면 미리 그리기
-    showCard(`<span class="kind ${S.kind}">${KIND[S.kind]}${bossMode ? "" : "의 열 이동"}</span><div class="em">${S.icon}</div><h2>${i + 1}단계 · ${S.title}</h2><p>${S.story}</p><p class="mission">🎯 ${S.mission}</p>`,
+    showCard(`<span class="kind ${S.kind}">${KIND[S.kind]}${bossMode ? "" : "의 열 이동"}</span><h2>${S.icon} ${i + 1}단계 · ${S.title}</h2><img class="pic" src="${IMG}c${i + 1}.webp" alt=""><p>${S.story}</p><p class="mission">🎯 ${S.mission}</p>`,
       [[bossMode ? "보스전 시작! ▶" : "미션 시작! ▶", () => { hideCard(); stopAll(); fb(""); RUN[i](false); busy = false; }, true]]);
   }
   function win(msg, scoreOverride) {
@@ -395,7 +409,7 @@ button:disabled { opacity: .45; cursor: default; }
       if (cur + 2 > progress.unlocked) progress.unlocked = Math.min(10, cur + 2);
       saveProgress(); sWin(); renderAll();
       const S = STAGES[cur], last = cur === 9;
-      showCard(`<div class="em">${last ? "🌸" : "🎉"}</div><h2>${last ? "꽁꽁이를 물리쳤어요!" : (cur + 1) + "단계 성공!"}</h2>
+      showCard(`${last ? `<img class="pic" src="${IMG}ending.webp" alt="따끈이와 꽁꽁이가 손을 잡고 웃는 그림">` : `<img class="char" src="${IMG}ttakkeun.webp" alt="">`}<h2>${last ? "꽁꽁이를 물리쳤어요!" : (cur + 1) + "단계 성공!"}</h2>
         <p class="score">쾌적도 ${sc}점 ${isBest && best ? "· 최고 기록!" : ""}</p>
         <p class="note">📒 ${S.note}</p>
         ${last ? `<p>10단계 총점 <b>${total()}점</b>! ${progress.scores.every(s => s > 0) ? "아래 명예의 전당에 이름을 올려 보세요." : "아직 통과하지 못한 단계에도 도전해 봐요."}</p>` : ""}`,
@@ -416,21 +430,23 @@ button:disabled { opacity: .45; cursor: default; }
 
   // ---------- 그림 도구 ----------
   const DEFS = `<defs>
-    <marker id="mh" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="3.2" markerHeight="3.2" orient="auto"><path d="M0,0 L10,5 L0,10Z" fill="#E8483C"/></marker>
-    <marker id="mc" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="3.2" markerHeight="3.2" orient="auto"><path d="M0,0 L10,5 L0,10Z" fill="#2F7FE0"/></marker>
+    <marker id="mh" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="3.2" markerHeight="3.2" orient="auto"><path d="M0,0 L10,5 L0,10Z" fill="#FF5A4D"/></marker>
+    <marker id="mc" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="3.2" markerHeight="3.2" orient="auto"><path d="M0,0 L10,5 L0,10Z" fill="#3D8FF0"/></marker>
     <linearGradient id="hg" x1="0" x2="1"><stop offset="0" stop-color="#FF3B1F"/><stop offset=".75" stop-color="#FF8A3D" stop-opacity=".85"/><stop offset="1" stop-color="#FF8A3D" stop-opacity="0"/></linearGradient>
     <radialGradient id="hr"><stop offset="0" stop-color="#FF3B1F"/><stop offset=".7" stop-color="#FF8A3D" stop-opacity=".8"/><stop offset="1" stop-color="#FF8A3D" stop-opacity="0"/></radialGradient>
     <linearGradient id="haze" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#FF8A4C" stop-opacity=".55"/><stop offset=".55" stop-color="#FFC78A" stop-opacity=".25"/><stop offset="1" stop-color="#9CC8F5" stop-opacity=".35"/></linearGradient>
     <filter id="blur" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="9"/></filter>
   </defs>`;
   const svg = inner => `<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg">${DEFS}${inner}</svg>`;
-  const flame = (x, y, s = 1) => `<g class="fl" transform="translate(${x},${y}) scale(${s})"><path d="M0,-36 C15,-17 19,-6 12,6 C8,14 -8,14 -12,6 C-19,-6 -9,-13 0,-36Z" fill="#FF7A2F"/><path d="M0,-17 C7,-7 9,0 5,5 C3,9 -3,9 -5,5 C-9,0 -4,-6 0,-17Z" fill="#FFD23F"/></g>`;
-  const label = (x, y, t, o = {}) => { const w = o.w || (t.length * 15 + 24); return `<g ${o.attr || ""}><rect x="${x - w / 2}" y="${y - 15}" width="${w}" height="26" rx="13" fill="${o.bg || "#fff"}" stroke="${o.line || "#2F2A3D"}" stroke-width="1.5"/><text x="${x}" y="${y + 5}" text-anchor="middle" font-size="${o.fs || 16}" fill="${o.fg || "#2F2A3D"}" ${o.tid ? `id="${o.tid}"` : ""}>${t}</text></g>`; };
-  // 방 배경: 벽, 바닥, 눈 오는 창문
-  const room = (win = true) => `<rect width="640" height="360" fill="#FFF0D6"/><rect y="300" width="640" height="60" fill="#D9A066"/><rect y="300" width="640" height="6" fill="#B97F45"/>
-    ${win ? `<g><rect x="520" y="90" width="90" height="110" rx="6" fill="#2A3F6B" stroke="#fff" stroke-width="7"/><path d="M565,90 v110 M520,145 h90" stroke="#fff" stroke-width="5"/><g fill="#fff"><circle cx="538" cy="108" r="3"/><circle cx="590" cy="122" r="3"/><circle cx="548" cy="168" r="3"/><circle cx="596" cy="180" r="3"/><circle cx="578" cy="104" r="2"/></g></g>` : ""}`;
-  const kitchen = `<rect width="640" height="360" fill="#FFF0D6"/><g fill="#F6DDB3"><rect x="0" y="40" width="640" height="3"/><rect x="0" y="100" width="640" height="3"/></g><rect y="290" width="640" height="70" fill="#C98A52"/><rect y="290" width="640" height="7" fill="#A86B36"/>`;
-  const stove = (x, y = 300) => `<rect x="${x - 46}" y="${y - 58}" width="92" height="58" rx="10" fill="#4A4458"/><rect x="${x - 34}" y="${y - 48}" width="68" height="34" rx="6" fill="#2B2636"/>${flame(x, y - 18, .85)}<rect x="${x - 52}" y="${y - 66}" width="104" height="10" rx="5" fill="#6B6480"/>`;
+  const pic = (n, x, y, w, h, attr = "") => `<image href="${IMG}${n}.webp" x="${x}" y="${y}" width="${w}" height="${h}" ${attr}/>`;
+  const bg = n => `<image href="${IMG}bg_${n}.webp" width="640" height="360" preserveAspectRatio="xMidYMid slice"/>`;
+  const flame = (x, y, s = 1) => `<g class="fl" transform="translate(${x},${y}) scale(${s})"><path d="M0,-36 C15,-17 19,-6 12,6 C8,14 -8,14 -12,6 C-19,-6 -9,-13 0,-36Z" fill="#FF8A3D" stroke="#5A3825" stroke-width="3" stroke-linejoin="round"/><path d="M0,-17 C7,-7 9,0 5,5 C3,9 -3,9 -5,5 C-9,0 -4,-6 0,-17Z" fill="#FFD23F"/></g>`;
+  const label = (x, y, t, o = {}) => { const w = o.w || (t.length * 15 + 24); return `<g ${o.attr || ""}><rect x="${x - w / 2}" y="${y - 15}" width="${w}" height="26" rx="13" fill="${o.bg || "#fff"}" stroke="${o.line || "#5A3825"}" stroke-width="2.5"/><text x="${x}" y="${y + 5}" text-anchor="middle" font-size="${o.fs || 16}" fill="${o.fg || "#5A3825"}" ${o.tid ? `id="${o.tid}"` : ""}>${t}</text></g>`; };
+  const room = () => bg("living");
+  const kitchen = bg("kitchen");
+  // 조리대 앞 가스레인지
+  const stove = (x, y = 300, fire = true) => `<rect class="o" x="${x - 52}" y="${y - 58}" width="104" height="58" rx="14" fill="#FFB7C5"/><rect class="o" x="${x - 34}" y="${y - 46}" width="68" height="32" rx="10" fill="#7A5A4A" stroke-width="3"/>${fire ? flame(x, y - 18, .8) : ""}<rect class="o" x="${x - 60}" y="${y - 68}" width="120" height="12" rx="6" fill="#8A7A8F" stroke-width="3"/>`;
+  const nanro = x => pic("stove", x - 50, 180, 100, 125, 'class="wob"');
   // 대류 화살표 두 바퀴 (가운데에서 올라가거나 내려가요)
   function loops(x, y, w, h, up) {
     const cx = x + w / 2, t = y + h * .2, b = y + h * .82; let s = "";
@@ -479,7 +495,7 @@ button:disabled { opacity: .45; cursor: default; }
     sceneEl.innerHTML = svg(c.back + F.html() + c.front
       + label(c.tx[0], c.ty[0], "", { tid: "tTop", w: 190 }) + label(c.tx[1], c.ty[1], "", { tid: "tBot", w: 190 })
       + `<g id="dev" visibility="hidden">${c.device}</g><g id="flowg"></g>`
-      + c.slots.map((s, i) => `<g class="slot" data-i="${i}"><circle cx="${s.x}" cy="${s.y}" r="21"/><text x="${s.x}" y="${s.y + 5}" text-anchor="middle" font-size="14" fill="#2F2A3D">${s.name}</text></g>`).join(""));
+      + c.slots.map((s, i) => `<g class="slot" data-i="${i}"><circle cx="${s.x}" cy="${s.y}" r="21"/><text x="${s.x}" y="${s.y + 5}" text-anchor="middle" font-size="14" fill="#5A3825">${s.name}</text></g>`).join(""));
     F.reset();
     const temps = () => { q("#tTop").textContent = `${c.names[0]} ${Math.round(c.toC(F.row(0)))}℃`; q("#tBot").textContent = `${c.names[1]} ${Math.round(c.toC(F.row(F.R - 1)))}℃`; };
     temps();
@@ -511,7 +527,7 @@ button:disabled { opacity: .45; cursor: default; }
 
   // 1단계: 불판 위 버터가 녹는 순서
   RUN[0] = preview => {
-    const butter = (x, y, i, rot = 0) => `<g class="bt" data-i="${i}" transform="translate(${x},${y}) rotate(${rot})"><rect x="-18" y="-26" width="36" height="26" rx="5" fill="#FFD95A" stroke="#D9A300" stroke-width="2.5"/></g>`;
+    const butter = (x, y, i, rot = 0) => `<g class="bt" data-i="${i}" transform="translate(${x},${y}) rotate(${rot})">${pic("butter", -24, -44, 48, 44)}</g>`;
     function play(n, rank, after) {   // rank: 녹는 순서대로 놓은 번호
       let k = 0;
       hits(".bt", el => {
@@ -525,21 +541,21 @@ button:disabled { opacity: .45; cursor: default; }
     function roundA() {
       const flip = Math.random() < .5, xs = [170, 280, 390, 500];
       sceneEl.innerHTML = svg(kitchen + `<g transform="${flip ? "translate(640,0) scale(-1,1)" : ""}">
-        <rect x="70" y="196" width="500" height="22" rx="8" fill="#8F9AAB"/><rect id="heat" x="70" y="196" width="60" height="22" rx="8" fill="url(#hg)"/>
-        <rect x="70" y="218" width="14" height="72" fill="#6B7585"/><rect x="556" y="218" width="14" height="72" fill="#6B7585"/>
-        ${flame(105, 262, 1.25)}${xs.map((x, i) => butter(x, 196, i)).join("")}</g>` + label(320, 60, "쇠 불판의 한쪽 끝을 가열하고 있어요", { w: 330 }));
+        <rect class="o" x="78" y="214" width="16" height="84" rx="5" fill="#9AA6B8"/><rect class="o" x="546" y="214" width="16" height="84" rx="5" fill="#9AA6B8"/>
+        <rect class="o" x="66" y="194" width="508" height="26" rx="12" fill="#C3CEDD"/><rect id="heat" x="70" y="198" width="60" height="18" rx="9" fill="url(#hg)"/>
+        ${flame(118, 274, 1.25)}${xs.map((x, i) => butter(x, 196, i)).join("")}</g>` + label(320, 60, "쇠 불판의 한쪽 끝을 가열하고 있어요", { w: 330 }));
       if (preview) return;
       say("🧈 버터가 <b>녹는 순서대로</b> 눌러 보세요. <small>열은 불판을 따라 어느 쪽으로 이동할까요?</small>");
       play(k => q("#heat").setAttribute("width", xs[k - 1] - 70 + 60), [0, 1, 2, 3], roundB);
     }
     function roundB() {
-      const rs = [36, 66, 96, 124], angs = shuffle([25, 115, 205, 295]).map(a => a + Math.random() * 40 - 20);
-      sceneEl.innerHTML = svg(kitchen + `<rect x="420" y="166" width="190" height="28" rx="14" fill="#3A3446"/><circle cx="300" cy="180" r="150" fill="#3A3446"/><circle cx="300" cy="180" r="138" fill="#5A546A"/>
-        <circle id="heat" cx="300" cy="180" r="24" fill="url(#hr)"/>${flame(300, 192, .7)}
-        ${rs.map((r, i) => butter(300 + r * Math.cos(angs[i] * Math.PI / 180), 180 + r * Math.sin(angs[i] * Math.PI / 180) + 13, i)).join("")}` + label(515, 60, "위에서 본 프라이팬", { w: 180 }));
+      const rs = [54, 80, 104, 126], angs = shuffle([25, 115, 205, 295]).map(a => a + Math.random() * 40 - 20);
+      sceneEl.innerHTML = svg(kitchen + `<rect class="o" x="420" y="164" width="196" height="32" rx="16" fill="#FF8FA3"/><circle class="o" cx="300" cy="180" r="150" fill="#6F6884"/><circle cx="300" cy="180" r="134" fill="#8F88A6"/>
+        <circle id="heat" cx="300" cy="180" r="30" fill="url(#hr)"/>${flame(300, 192, .7)}
+        ${rs.map((r, i) => butter(300 + r * Math.cos(angs[i] * Math.PI / 180), 180 + r * Math.sin(angs[i] * Math.PI / 180) + 22, i)).join("")}` + label(536, 232, "위에서 본 프라이팬", { w: 170 }));
       busy = false;
       say("🍳 이번에는 프라이팬의 <b>가운데</b>를 가열해요. 버터가 녹는 순서대로 눌러요.");
-      play(k => q("#heat").setAttribute("r", rs[k - 1] + 26), [0, 1, 2, 3], () => win("열은 불에 가까운 곳에서 먼 곳으로, 팬을 따라 퍼져 나갔어요!"));
+      play(k => q("#heat").setAttribute("r", rs[k - 1] + 22), [0, 1, 2, 3], () => win("열은 불에 가까운 곳에서 먼 곳으로, 팬을 따라 퍼져 나갔어요!"));
     }
     roundA();
   };
@@ -548,9 +564,9 @@ button:disabled { opacity: .45; cursor: default; }
   RUN[1] = preview => {
     const M = [{ n: "구리판", c: "#D98A4E", s: 1.3 }, { n: "철판", c: "#8F9AAB", s: 2.6 }, { n: "유리판", c: "#BFE3F2", s: 4.2 }];
     const pos = shuffle([0, 1, 2]);   // pos[자리] = 재료 번호
-    sceneEl.innerHTML = svg(kitchen + `<path d="M150,230 h340 l-14,60 h-312z" fill="#9BD0F5" stroke="#5A8FBF" stroke-width="4"/><path d="M150,230 h340" stroke="#fff" stroke-width="4" opacity=".7"/>
-      ${pos.map((m, i) => { const x = 220 + i * 100; return `<g class="pl" data-m="${m}"><rect x="${x - 26}" y="70" width="52" height="210" rx="6" fill="${M[m].c}" stroke="#2F2A3D" stroke-width="2.5"/><rect x="${x - 11}" y="84" width="22" height="140" rx="4" fill="#fff" opacity=".9"/><rect class="stk" x="${x - 11}" y="84" width="22" height="140" rx="4" fill="#E8483C" style="transition:transform ${M[m].s}s linear"/><text class="rk" x="${x}" y="58" text-anchor="middle" font-size="18" fill="#D9541A"></text>${label(x, 322, M[m].n, { w: 76 })}</g>`; }).join("")}
-      <text x="78" y="262" font-size="15" fill="#2F2A3D" text-anchor="middle">뜨거운 물</text><text x="560" y="150" font-size="13" fill="#8A8398" text-anchor="middle">흰 띠: 열 변색</text><text x="560" y="168" font-size="13" fill="#8A8398" text-anchor="middle">붙임딱지</text>`);
+    sceneEl.innerHTML = svg(kitchen + `<path class="o" d="M150,232 h340 l-14,62 h-312z" fill="#A9DBFA"/><path d="M150,230 h340" stroke="#fff" stroke-width="4" opacity=".7"/>
+      ${pos.map((m, i) => { const x = 220 + i * 100; return `<g class="pl" data-m="${m}"><rect x="${x - 26}" y="70" width="52" height="210" rx="10" fill="${M[m].c}" class="o"/><rect x="${x - 11}" y="84" width="22" height="140" rx="4" fill="#fff" opacity=".9"/><rect class="stk" x="${x - 11}" y="84" width="22" height="140" rx="4" fill="#FF5A4D" style="transition:transform ${M[m].s}s linear"/><text class="rk" x="${x}" y="58" text-anchor="middle" font-size="18" fill="#D9541A"></text>${label(x, 322, M[m].n, { w: 76 })}</g>`; }).join("")}
+      ${label(84, 262, "뜨거운 물", { w: 100 })}${label(556, 200, "흰 띠: 열 변색 붙임딱지", { w: 158, fs: 12 })}`);
     if (preview) return;
     say("🌡️ 세 판을 뜨거운 물에 넣어요. 열이 <b>빨리 이동하는 판부터</b> 차례대로 눌러요. <small>붙임딱지는 뜨거워지면 빨갛게 변해요.</small>");
     let k = 0;
@@ -567,10 +583,10 @@ button:disabled { opacity: .45; cursor: default; }
       } else bad(k === 0 ? "금속 중에서도 구리가 열이 가장 빨리 이동해요." : "유리는 금속보다 열이 느리게 이동해요.");
     });
     function pot() {
-      sceneEl.innerHTML = svg(kitchen + `${stove(320, 300).replace(/<g class="fl".*?<\/g>/, "")}
-        <rect id="pMat" x="230" y="224" width="180" height="14" rx="6" fill="#E6E0D6" stroke="#2F2A3D" stroke-width="2.5" stroke-dasharray="7 5"/>
-        <path id="pBody" d="M225,120 h190 v80 a24,24 0 0 1 -24,24 h-142 a24,24 0 0 1 -24,-24z" fill="#E6E0D6" stroke="#2F2A3D" stroke-width="2.5" stroke-dasharray="7 5"/>
-        <g id="pHandle" fill="#E6E0D6" stroke="#2F2A3D" stroke-width="2.5" stroke-dasharray="7 5"><rect x="170" y="132" width="55" height="20" rx="10"/><rect x="415" y="132" width="55" height="20" rx="10"/></g>
+      sceneEl.innerHTML = svg(kitchen + `${stove(320, 300, false)}
+        <rect id="pMat" x="230" y="224" width="180" height="14" rx="6" fill="#F3ECE2" stroke="#5A3825" stroke-width="3.5" stroke-dasharray="7 5"/>
+        <path id="pBody" d="M225,120 h190 v80 a24,24 0 0 1 -24,24 h-142 a24,24 0 0 1 -24,-24z" fill="#F3ECE2" stroke="#5A3825" stroke-width="3.5" stroke-linejoin="round" stroke-dasharray="7 5"/>
+        <g id="pHandle" fill="#F3ECE2" stroke="#5A3825" stroke-width="3.5" stroke-dasharray="7 5"><rect x="170" y="132" width="55" height="20" rx="10"/><rect x="415" y="132" width="55" height="20" rx="10"/></g>
         <text x="320" y="170" text-anchor="middle" font-size="26">🍲</text>
         ${label(320, 84, "몸통", { tid: "lBody", w: 150 })}${label(88, 142, "손잡이", { tid: "lHandle", w: 156 })}${label(520, 231, "냄비 받침", { tid: "lMat", w: 130 })}`);
       busy = false; fb("");
@@ -579,17 +595,17 @@ button:disabled { opacity: .45; cursor: default; }
         { t: "금속", ok: 1, why: "금속은 열이 빨리 이동해서 음식이 빨리 익어요." },
         { t: "플라스틱", why: "플라스틱은 열이 느리게 이동해서 찌개가 잘 끓지 않아요." },
         { t: "나무", why: "나무는 열이 느리게 이동해서 찌개가 잘 끓지 않아요." }], () => {
-        set("pBody", "lBody", "#AEB8C6", "몸통: 금속");
+        set("pBody", "lBody", "#C3CEDD", "몸통: 금속");
         ask("🧤 <b>손잡이</b>는 뜨거워지면 안 돼요. 무엇으로 만들까요?", [
           { t: "플라스틱", ok: 1, why: "플라스틱은 열이 느리게 이동해서 손으로 잡을 수 있어요." },
           { t: "구리", why: "구리는 열이 아주 빨리 이동해서 손잡이가 금방 뜨거워져요." },
           { t: "철", why: "철은 열이 빨리 이동해서 손잡이가 뜨거워져요." }], () => {
-          set("pHandle", "lHandle", "#3A3446", "손잡이: 플라스틱");
+          set("pHandle", "lHandle", "#FF8FA3", "손잡이: 플라스틱");
           ask("🪵 뜨거운 냄비를 식탁에 놓을 때 까는 <b>냄비 받침</b>은 무엇으로 만들까요?", [
             { t: "나무", ok: 1, why: "나무는 열이 느리게 이동해서 식탁을 지켜 줘요." },
             { t: "철판", why: "철판은 열이 빨리 이동해서 식탁까지 뜨거워져요." },
             { t: "구리판", why: "구리판은 열이 아주 빨리 이동해서 식탁까지 뜨거워져요." }], () => {
-            set("pMat", "lMat", "#C9803A", "받침: 나무");
+            set("pMat", "lMat", "#E0A265", "받침: 나무");
             win("쓰임새에 맞게 열이 빨리 또는 느리게 이동하는 물질을 골랐어요!");
           });
         });
@@ -602,20 +618,19 @@ button:disabled { opacity: .45; cursor: default; }
     const SP = [
       { x: 122, y: 200, q: "🧱 벽을 따라 집 안의 열이 밖으로 빠져나가요. <b>벽 속</b>에 무엇을 넣을까요?", o: [{ t: "스타이로폼 단열재", ok: 1, why: "단열재는 열이 느리게 이동해서 집 안의 열을 지켜요." }, { t: "철판", why: "철판은 열이 빨리 이동해서 열이 더 잘 빠져나가요." }, { t: "구리판", why: "구리판은 열이 아주 빨리 이동해요." }] },
       { x: 518, y: 190, q: "🪟 얇은 유리창 한 장으로 열이 술술 새요. 어떻게 할까요?", o: [{ t: "이중창으로 바꾸고 뽁뽁이 붙이기", ok: 1, why: "유리 사이와 뽁뽁이 속 공기층이 열의 이동을 줄여 줘요." }, { t: "쇠 창살 달기", why: "쇠는 열이 빨리 이동해서 단열에 도움이 안 돼요." }, { t: "창문 활짝 열어 두기", why: "따뜻한 공기가 그대로 빠져나가 버려요." }] },
-      { x: 300, y: 222, q: "🫖 식탁 위 뜨거운 보리차가 금방 식어요. 어디에 담아 둘까요?", o: [{ t: "보온병", ok: 1, why: "보온병은 안쪽과 바깥쪽 사이에서 열이 이동하기 어렵게 만든 그릇이에요." }, { t: "쇠 냄비", why: "쇠 냄비는 열이 빨리 이동해서 금방 식어요." }, { t: "넓은 유리 접시", why: "접시에 담으면 열이 더 빨리 빠져나가요." }] },
-      { x: 410, y: 250, q: "🧒 눈을 쓸러 밖에 나가요! 몸의 열을 지키려면 무엇을 입을까요?", o: [{ t: "솜이 든 두꺼운 외투", ok: 1, why: "솜 사이사이의 공기가 몸의 열이 빠져나가는 것을 줄여 줘요." }, { t: "얇은 반소매 옷", why: "얇은 옷은 몸의 열이 금방 빠져나가요." }, { t: "쇠사슬 갑옷", why: "쇠는 열이 빨리 이동해서 몸이 금방 차가워져요." }] }
+      { x: 346, y: 226, q: "🫖 식탁 위 뜨거운 보리차가 금방 식어요. 어디에 담아 둘까요?", o: [{ t: "보온병", ok: 1, why: "보온병은 안쪽과 바깥쪽 사이에서 열이 이동하기 어렵게 만든 그릇이에요." }, { t: "쇠 냄비", why: "쇠 냄비는 열이 빨리 이동해서 금방 식어요." }, { t: "넓은 유리 접시", why: "접시에 담으면 열이 더 빨리 빠져나가요." }] },
+      { x: 456, y: 250, q: "🧒 눈을 쓸러 밖에 나가요! 몸의 열을 지키려면 무엇을 입을까요?", o: [{ t: "솜이 든 두꺼운 외투", ok: 1, why: "솜 사이사이의 공기가 몸의 열이 빠져나가는 것을 줄여 줘요." }, { t: "얇은 반소매 옷", why: "얇은 옷은 몸의 열이 금방 빠져나가요." }, { t: "쇠사슬 갑옷", why: "쇠는 열이 빨리 이동해서 몸이 금방 차가워져요." }] }
     ];
-    const leak = [`M108,150 h-50 M108,200 h-50 M108,250 h-50`, `M536,165 h50 M536,205 h50`, `M300,196 v-34 M285,200 l-14,-28 M315,200 l14,-28`, `M410,222 v-30 M392,230 l-18,-22 M428,230 l18,-22`];
-    sceneEl.innerHTML = svg(`<rect width="640" height="360" fill="#22335A"/><g fill="#fff" opacity=".8"><circle cx="40" cy="50" r="3"/><circle cx="90" cy="120" r="2"/><circle cx="590" cy="70" r="3"/><circle cx="610" cy="250" r="2"/><circle cx="30" cy="230" r="2.5"/><circle cx="560" cy="130" r="2"/></g>
-      <rect y="320" width="640" height="40" fill="#EAF2FF"/><path d="M90,120 L320,22 L550,120z" fill="#B5503C"/><path d="M90,120 L320,22 L550,120" stroke="#fff" stroke-width="10" fill="none" stroke-linecap="round"/>
-      <rect x="108" y="120" width="424" height="200" fill="#FFF0D6"/><rect x="108" y="292" width="424" height="28" fill="#D9A066"/>
-      <rect id="wall" x="108" y="120" width="16" height="200" fill="#B9B2A6"/><rect x="516" y="120" width="16" height="200" fill="#B9B2A6"/>
-      <rect id="glass" x="516" y="150" width="16" height="80" fill="#BFE3F2" stroke="#fff" stroke-width="2"/>
-      <rect x="240" y="250" width="120" height="8" rx="3" fill="#A86B36"/><rect x="252" y="258" width="8" height="34" fill="#A86B36"/><rect x="340" y="258" width="8" height="34" fill="#A86B36"/>
-      <text id="ic2" x="300" y="248" text-anchor="middle" font-size="30">🫖</text><text id="ic3" x="410" y="290" text-anchor="middle" font-size="40">🧒</text>
-      <text x="190" y="290" text-anchor="middle" font-size="36">🛋️</text>
-      ${leak.map((d, i) => `<path class="leak" id="lk${i}" d="${d}" stroke="#E8483C" stroke-width="5" stroke-linecap="round" fill="none" marker-end="url(#mh)"/>`).join("")}
-      ${SP.map((s, i) => `<g class="hs" data-i="${i}"><circle class="pulse" cx="${s.x}" cy="${s.y}" r="17" fill="#E8483C" stroke="#fff" stroke-width="3"/><text x="${s.x}" y="${s.y + 7}" text-anchor="middle" font-size="20" fill="#fff">!</text></g>`).join("")}
+    const leak = [`M108,150 h-50 M108,200 h-50 M108,250 h-50`, `M536,165 h50 M536,205 h50`, `M298,196 v-30 M282,200 l-14,-26 M314,200 l14,-26`, `M409,206 v-28 M390,212 l-16,-22 M428,212 l16,-22`];
+    sceneEl.innerHTML = svg(bg("night") + `<path class="o" d="M82,124 L320,22 L558,124z" fill="#FF8A7A"/><path d="M82,124 L320,22 L558,124" stroke="#fff" stroke-width="9" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="108" y="122" width="424" height="200" fill="#FFF1D9"/><rect x="108" y="294" width="424" height="28" fill="#F2BE8A"/>
+      <rect id="wall" class="o" x="104" y="122" width="20" height="200" fill="#C9BFB2" stroke-width="3"/><rect class="o" x="516" y="122" width="20" height="200" fill="#C9BFB2" stroke-width="3"/>
+      <rect id="glass" class="o" x="516" y="150" width="20" height="80" fill="#BFE3F2" stroke-width="3"/>
+      <path class="o" d="M104,122 H536 M104,322 H536" fill="none"/>
+      <rect class="o" x="236" y="250" width="128" height="10" rx="5" fill="#E0A265" stroke-width="3"/><rect class="o" x="250" y="260" width="9" height="34" fill="#E0A265" stroke-width="3"/><rect class="o" x="341" y="260" width="9" height="34" fill="#E0A265" stroke-width="3"/>
+      ${pic("kettle", 276, 201, 44, 49, 'id="ic2"')}${pic("kid_cold", 384, 212, 50, 83, 'id="ic3"')}
+      ${leak.map((d, i) => `<path class="leak" id="lk${i}" d="${d}" stroke="#FF5A4D" stroke-width="6" stroke-linecap="round" fill="none" marker-end="url(#mh)"/>`).join("")}
+      ${SP.map((s, i) => `<g class="hs" data-i="${i}"><circle class="pulse" cx="${s.x}" cy="${s.y}" r="17" fill="#FF5A4D" stroke="#fff" stroke-width="3"/><text x="${s.x}" y="${s.y + 7}" text-anchor="middle" font-size="20" fill="#fff">!</text></g>`).join("")}
       ${label(320, 150, "실내 온도 12℃", { tid: "tin", w: 170 })}`);
     if (preview) return;
     let done = 0;
@@ -625,10 +640,10 @@ button:disabled { opacity: .45; cursor: default; }
       const i = +el.dataset.i, s = SP[i]; sTap(); fb("");
       ask(s.q, s.o, () => {
         el.remove(); q("#lk" + i).remove(); done++;
-        if (i === 0) q("#wall").setAttribute("fill", "#FFFFFF");
+        if (i === 0) q("#wall").setAttribute("fill", "#FFF7B8");
         if (i === 1) q("#glass").setAttribute("fill", "#E6F6FF");
-        if (i === 2) q("#ic2").textContent = "🧴";
-        if (i === 3) q("#ic3").textContent = "🧥";
+        if (i === 2) { const e = q("#ic2"); e.setAttribute("href", IMG + "thermos.webp"); e.setAttribute("x", 286); e.setAttribute("width", 25); }
+        if (i === 3) { const e = q("#ic3"); e.setAttribute("href", IMG + "kid_warm.webp"); e.setAttribute("x", 382); e.setAttribute("width", 54); }
         q("#tin").textContent = `실내 온도 ${12 + done * 3}℃`;
         if (done === 4) win("열의 이동을 줄였더니 집이 훨씬 따뜻해졌어요. 이것이 단열이에요!"); else idle();
       });
@@ -638,7 +653,7 @@ button:disabled { opacity: .45; cursor: default; }
   // 4단계: 물방울 길잡이
   RUN[3] = preview => {
     const N = 8;
-    sceneEl.innerHTML = svg(kitchen + stove(320, 348) + `<path d="M170,80 v190 a22,22 0 0 0 22,22 h256 a22,22 0 0 0 22,-22 v-190" fill="#D7ECFB" stroke="#6B7585" stroke-width="8"/>
+    sceneEl.innerHTML = svg(kitchen + stove(320, 348) + `<path class="o" d="M170,80 v190 a22,22 0 0 0 22,22 h256 a22,22 0 0 0 22,-22 v-190" fill="#DDF1FF" stroke-width="6"/>
       <rect x="174" y="100" width="292" height="8" fill="#fff" opacity=".7"/>
       <text x="320" y="128" text-anchor="middle" font-size="14" fill="#5A8FBF">위쪽</text><text x="320" y="282" text-anchor="middle" font-size="14" fill="#5A8FBF">아래쪽 (불과 가까워요)</text>
       <g id="flowg"></g><g id="blobs"></g>${label(550, 50, "물방울 0 / " + N, { tid: "cnt", w: 160 })}`);
@@ -647,14 +662,14 @@ button:disabled { opacity: .45; cursor: default; }
     const seq = shuffle([1, 1, 1, 1, 0, 0, 0, 0]); let k = 0, el = null;
     const spawn = () => {
       const hot = seq[k];
-      q("#blobs").insertAdjacentHTML("beforeend", `<g class="blob"><circle cx="320" cy="196" r="34" fill="${hot ? "#F0603F" : "#3F9BF2"}" stroke="#fff" stroke-width="4"/><text x="320" y="190" text-anchor="middle" font-size="13" fill="#fff">온도가</text><text x="320" y="208" text-anchor="middle" font-size="15" fill="#fff">${hot ? "높아진 물" : "낮아진 물"}</text></g>`);
+      q("#blobs").insertAdjacentHTML("beforeend", `<g class="blob">${pic(hot ? "drop_hot" : "drop_cold", 284, 140, 72, 86)}<g class="lb"><rect x="250" y="230" width="140" height="26" rx="13" fill="${hot ? "#FFE1DC" : "#DDF0FF"}" stroke="#5A3825" stroke-width="2.5"/><text x="320" y="248" text-anchor="middle" font-size="14" fill="#5A3825">온도가 ${hot ? "높아진" : "낮아진"} 물</text></g></g>`);
       el = q("#blobs").lastElementChild;
     };
     const go = up => {
       if (busy || !el) return;
       if (up === !!seq[k]) {
-        sOk(); const e = el; el = null;
-        e.style.transform = `translate(${(k % 2 ? 1 : -1) * (40 + k * 9)}px, ${up ? -62 : 62}px) scale(.5)`; e.style.opacity = ".75";
+        sOk(); const e = el; el = null; e.querySelector(".lb").remove();
+        e.style.transform = `translate(${(k % 2 ? 1 : -1) * (46 + k * 9)}px, ${up ? -50 : 62}px) scale(.5)`; e.style.opacity = ".75";
         k++; q("#cnt").textContent = `물방울 ${k} / ${N}`; fb("⭕ " + (up ? "온도가 높아진 물은 위로!" : "온도가 낮아진 물은 아래로!"), "ok");
         if (k === N) { busy = true; later(() => { q("#blobs").innerHTML = ""; q("#flowg").innerHTML = loops(174, 100, 292, 190, true); win("뜨거워진 물은 올라가고 차가운 물은 내려오면서 물 전체가 데워져요!"); }, 600); }
         else later(spawn, 350);
@@ -668,10 +683,9 @@ button:disabled { opacity: .45; cursor: default; }
   // 5단계: 욕조 물 데우기
   RUN[4] = preview => placeGame({
     fluid: { x: 110, y: 150, w: 420, h: 150, cols: 14, rows: 6, base: .1, srcT: 1, rx: 26 },
-    back: `<rect width="640" height="360" fill="#DFF1F4"/><g stroke="#C5E3E8" stroke-width="2">${[60, 120, 180, 240, 300].map(y => `<path d="M0,${y} h640"/>`).join("")}${[80, 160, 240, 320, 400, 480, 560].map(x => `<path d="M${x},0 v360"/>`).join("")}</g>
-      <rect x="86" y="126" width="468" height="198" rx="46" fill="#fff" stroke="#9FB7C4" stroke-width="5"/><rect x="130" y="324" width="24" height="22" rx="6" fill="#9FB7C4"/><rect x="486" y="324" width="24" height="22" rx="6" fill="#9FB7C4"/>`,
-    front: `<text x="190" y="158" font-size="34">🦆</text>`,
-    device: `<rect x="-34" y="-12" width="68" height="24" rx="12" fill="#2F2A3D"/><path d="M-22,0 q5,-9 11,0 t11,0 t11,0 t11,0" stroke="#FF7A2F" stroke-width="4" fill="none"/>`,
+    back: bg("bath") + `<rect class="o" x="128" y="320" width="26" height="24" rx="8" fill="#FFB7C5"/><rect class="o" x="486" y="320" width="26" height="24" rx="8" fill="#FFB7C5"/><rect class="o" x="86" y="126" width="468" height="198" rx="46" fill="#fff"/>`,
+    front: pic("duck", 168, 124, 44, 43, 'class="wob"'),
+    device: `<rect x="-36" y="-13" width="72" height="26" rx="13" fill="#fff" stroke="#5A3825" stroke-width="3.5"/><path d="M-22,0 q5,-9 11,0 t11,0 t11,0 t11,0" stroke="#FF7A2F" stroke-width="4.5" fill="none" stroke-linecap="round"/>`,
     slots: [{ x: 320, y: 168, r: 0, cs: [6, 7], name: "위", why: "위쪽 물만 뜨거워지고 아래쪽 물은 그대로 차가워요. 뜨거워진 물은 아래로 내려가지 않아요." },
             { x: 320, y: 226, r: 3, cs: [6, 7], name: "가운데", why: "히터보다 아래에 있는 물은 여전히 차가워요." },
             { x: 320, y: 284, r: 5, cs: [6, 7], name: "아래", why: "" }],
@@ -685,9 +699,9 @@ button:disabled { opacity: .45; cursor: default; }
   // 6단계: 보리차 식히기
   RUN[5] = preview => placeGame({
     fluid: { x: 220, y: 96, w: 200, h: 196, cols: 8, rows: 7, base: .9, srcT: 0, rx: 14 },
-    back: kitchen + `<rect x="208" y="70" width="224" height="232" rx="22" fill="#fff" stroke="#9FB7C4" stroke-width="5" opacity=".95"/><path d="M432,120 h36 a16,16 0 0 1 16,16 v70 a16,16 0 0 1 -16,16 h-36" fill="none" stroke="#9FB7C4" stroke-width="10"/>`,
-    front: `<text x="320" y="330" text-anchor="middle" font-size="14" fill="#fff">유리 주전자 속 보리차</text>`,
-    device: `<rect x="-36" y="-13" width="72" height="26" rx="10" fill="#BFE6FF" stroke="#2F7FE0" stroke-width="3"/><text x="0" y="6" text-anchor="middle" font-size="16">🧊🧊</text>`,
+    back: kitchen + `<path d="M432,120 h36 a16,16 0 0 1 16,16 v70 a16,16 0 0 1 -16,16 h-36" fill="none" stroke="#5A3825" stroke-width="16"/><path d="M432,120 h36 a16,16 0 0 1 16,16 v70 a16,16 0 0 1 -16,16 h-36" fill="none" stroke="#fff" stroke-width="8"/><rect class="o" x="208" y="70" width="224" height="232" rx="24" fill="#fff"/>`,
+    front: label(320, 332, "유리 주전자 속 보리차", { w: 190, fs: 14 }),
+    device: pic("ice", -40, -24, 80, 48),
     slots: [{ x: 320, y: 110, r: 0, cs: [3, 4], name: "위", why: "" },
             { x: 240, y: 194, r: 3, cs: [0], name: "가운데", why: "얼음주머니보다 위에 있는 보리차는 여전히 뜨거워요." },
             { x: 320, y: 278, r: 6, cs: [3, 4], name: "아래", why: "아래쪽만 차가워지고 위쪽 보리차는 그대로 뜨거워요. 차가워진 물은 위로 올라가지 않아요." }],
@@ -702,23 +716,23 @@ button:disabled { opacity: .45; cursor: default; }
   RUN[6] = preview => {
     const Y = [118, 190, 262], TEMP = [27, 22, 17];
     const R = [
-      { ic: "🐱", ok: 0, q: "🐱 고양이 나비는 <b>가장 따뜻한 자리</b>를 좋아해요. 어느 칸에 올려 줄까요?", why: "따뜻해진 공기가 위로 올라가서 맨 위 칸이 가장 따뜻해요.", no: "더 따뜻한 칸이 있어요. 따뜻해진 공기는 어디로 갈까요?" },
-      { ic: "🍫", ok: 2, q: "🍫 초콜릿이 녹지 않게 <b>가장 시원한 칸</b>에 두려고 해요. 어느 칸일까요?", why: "차가운 공기는 아래쪽에 있어서 맨 아래 칸이 가장 시원해요.", no: "그 칸은 따뜻해서 초콜릿이 녹아요. 차가운 공기는 어디에 있을까요?" },
-      { ic: "🧤", ok: 0, q: "🧤 눈싸움으로 젖은 장갑을 <b>빨리 말리고</b> 싶어요. 어느 칸에 둘까요?", why: "따뜻한 공기가 모이는 높은 곳에서 빨래가 더 빨리 말라요.", no: "더 따뜻한 칸에 두면 더 빨리 말라요." }
+      { ic: "cat", ok: 0, q: "🐱 고양이 나비는 <b>가장 따뜻한 자리</b>를 좋아해요. 어느 칸에 올려 줄까요?", why: "따뜻해진 공기가 위로 올라가서 맨 위 칸이 가장 따뜻해요.", no: "더 따뜻한 칸이 있어요. 따뜻해진 공기는 어디로 갈까요?" },
+      { ic: "choco", ok: 2, q: "🍫 초콜릿이 녹지 않게 <b>가장 시원한 칸</b>에 두려고 해요. 어느 칸일까요?", why: "차가운 공기는 아래쪽에 있어서 맨 아래 칸이 가장 시원해요.", no: "그 칸은 따뜻해서 초콜릿이 녹아요. 차가운 공기는 어디에 있을까요?" },
+      { ic: "mittens", ok: 0, q: "🧤 눈싸움으로 젖은 장갑을 <b>빨리 말리고</b> 싶어요. 어느 칸에 둘까요?", why: "따뜻한 공기가 모이는 높은 곳에서 빨래가 더 빨리 말라요.", no: "더 따뜻한 칸에 두면 더 빨리 말라요." }
     ];
-    sceneEl.innerHTML = svg(room(false) + `<rect width="640" height="300" fill="url(#haze)"/>${stove(120)}
-      <path class="flow hot" d="M120,225 V70 H330"/>
-      <rect x="420" y="76" width="12" height="224" fill="#A86B36"/><rect x="568" y="76" width="12" height="224" fill="#A86B36"/>
-      ${Y.map((y, i) => `<g class="lv" data-i="${i}"><rect x="432" y="${y - 44}" width="136" height="58" fill="#FFF7E8" stroke="#A86B36" stroke-width="3" stroke-dasharray="6 5"/><rect x="420" y="${y + 14}" width="160" height="10" rx="3" fill="#A86B36"/><text class="it" x="500" y="${y + 4}" text-anchor="middle" font-size="34"></text><text class="tp" x="600" y="${y - 8}" font-size="15" fill="#2F2A3D" text-anchor="middle"></text></g>`).join("")}
-      <text x="500" y="56" text-anchor="middle" font-size="15" fill="#2F2A3D">3단 선반</text>`);
+    sceneEl.innerHTML = svg(room() + `<rect width="640" height="303" fill="url(#haze)"/>${nanro(120)}
+      <path class="flow hot" d="M120,172 V56 H240"/>
+      <rect class="o" x="292" y="76" width="14" height="228" rx="5" fill="#E0A265" stroke-width="3"/><rect class="o" x="454" y="76" width="14" height="228" rx="5" fill="#E0A265" stroke-width="3"/>
+      ${Y.map((y, i) => `<g class="lv" data-i="${i}"><rect x="306" y="${y - 46}" width="148" height="60" fill="#FFFBF0" stroke="#5A3825" stroke-width="3" stroke-dasharray="7 6" rx="6"/><rect class="o" x="288" y="${y + 14}" width="184" height="12" rx="6" fill="#E0A265" stroke-width="3"/><image class="it" x="384" y="${y - 44}" width="56" height="58" visibility="hidden"/><text class="tp" x="342" y="${y - 8}" font-size="18" fill="#D0392E" text-anchor="middle"></text></g>`).join("")}
+      ${label(380, 50, "3단 선반", { w: 96 })}`);
     if (preview) return;
     let k = 0;
-    const next = () => { qa(".it").forEach(t => t.textContent = ""); say(R[k].q + " <small>선반의 칸을 눌러요.</small>"); };
+    const next = () => { qa(".it").forEach(t => t.setAttribute("visibility", "hidden")); say(R[k].q + " <small>선반의 칸을 눌러요.</small>"); };
     next();
     hits(".lv", el => {
       const i = +el.dataset.i, r = R[k];
       if (i === r.ok) {
-        el.querySelector(".it").textContent = r.ic; qa(".tp").forEach((t, j) => t.textContent = TEMP[j] + "℃");
+        const it = el.querySelector(".it"); it.setAttribute("href", IMG + r.ic + ".webp"); it.setAttribute("visibility", "visible"); qa(".tp").forEach((t, j) => t.textContent = TEMP[j] + "℃");
         busy = true; good(r.why); k++;
         if (k === R.length) win(); else later(() => { busy = false; fb(""); next(); }, 1900);
       } else bad(r.no);
@@ -727,33 +741,33 @@ button:disabled { opacity: .45; cursor: default; }
 
   // 8단계: 거실 난방기 놓기
   RUN[7] = preview => placeGame({
-    fluid: { x: 40, y: 40, w: 560, h: 260, cols: 14, rows: 6, base: .1, srcT: 1, opacity: .62 },
-    back: room(true) + `<rect x="36" y="110" width="70" height="8" rx="3" fill="#A86B36"/><rect x="250" y="286" width="250" height="14" rx="7" fill="#E88D8D"/><text x="300" y="292" font-size="40" text-anchor="middle">🧒</text><text x="360" y="292" font-size="44" text-anchor="middle">👩</text><text x="425" y="292" font-size="44" text-anchor="middle">👨</text>`,
-    front: `<rect x="40" y="40" width="560" height="260" fill="none" stroke="#2F2A3D" stroke-width="3" rx="4"/><text id="face" x="362" y="232" text-anchor="middle" font-size="18" fill="#2F2A3D">🥶 으으, 추워요</text>`,
-    device: `<rect x="-26" y="-18" width="52" height="36" rx="8" fill="#fff" stroke="#2F2A3D" stroke-width="3"/><path d="M-16,-8 h32 M-16,0 h32 M-16,8 h32" stroke="#FF7A2F" stroke-width="4" stroke-linecap="round"/>`,
-    slots: [{ x: 72, y: 86, r: 0, cs: [0, 1], name: "선반", why: "천장 가까운 공기만 따뜻해지고, 가족이 있는 바닥은 여전히 추워요." },
+    fluid: { x: 0, y: 0, w: 640, h: 303, cols: 14, rows: 6, base: .1, srcT: 1, opacity: .6 },
+    back: room() + `<rect class="o" x="34" y="118" width="76" height="10" rx="5" fill="#E0A265" stroke-width="3"/>`,
+    front: pic("family", 270, 212, 160, 97, 'id="fam"') + label(350, 196, "🥶 으으, 추워요", { tid: "face", w: 150 }),
+    device: pic("heater", -26, -32, 52, 58),
+    slots: [{ x: 72, y: 92, r: 0, cs: [0, 1], name: "선반", why: "천장 가까운 공기만 따뜻해지고, 가족이 있는 바닥은 여전히 추워요." },
             { x: 72, y: 180, r: 3, cs: [0, 1], name: "벽", why: "난방기보다 아래쪽 공기는 여전히 차가워서 바닥에 앉은 가족은 추워요." },
-            { x: 72, y: 272, r: 5, cs: [0, 1], name: "바닥", why: "" }],
-    ok: 2, names: ["천장 근처", "바닥 근처"], tx: [330, 330], ty: [22, 338], toC: t => 6 + t * 30,
+            { x: 72, y: 276, r: 5, cs: [0, 1], name: "바닥", why: "" }],
+    ok: 2, names: ["천장 근처", "바닥 근처"], tx: [330, 330], ty: [24, 336], toC: t => 6 + t * 30,
     prompt: "🛋️ 난방기를 <b>어디에</b> 놓을까요? 높은 선반 위, 벽 가운데, 바닥 중에서 골라요. <small>색깔은 공기의 온도예요.</small>",
     watching: "⏳ 방 안 공기가 데워지는 모습을 지켜봐요…",
-    onEnd: ok => { q("#face").textContent = ok ? "😊 따뜻해요!" : "🥶 으으, 추워요"; },
-    flow: `<path class="flow hot" d="M120,250 V70 H500"/><path class="flow cold" d="M540,80 V272 H170"/>`,
+    onEnd: ok => { q("#face").textContent = ok ? "😊 따뜻해요!" : "🥶 으으, 추워요"; q("#fam").setAttribute("href", IMG + (ok ? "family_warm" : "family") + ".webp"); },
+    flow: `<path class="flow hot" d="M130,250 V62 H520"/><path class="flow cold" d="M560,72 V280 H180"/>`,
     okMsg: "낮은 곳에서 따뜻해진 공기가 위로 올라가며 방 전체가 따뜻해졌어요!"
   }, preview);
 
   // 9단계: 공기 흐름 잇기
   RUN[8] = preview => {
-    const TL = [{ x: 120, y: 165, a: 0, n: "난로 위" }, { x: 250, y: 62, a: 1 }, { x: 400, y: 62, a: 1, n: "천장 아래" }, { x: 470, y: 165, a: 2, n: "차가운 창가" }, { x: 400, y: 268, a: 3 }, { x: 250, y: 268, a: 3, n: "바닥 위" }];
+    const TL = [{ x: 120, y: 142, a: 0, n: "난로 위", up: 1 }, { x: 250, y: 62, a: 1 }, { x: 400, y: 62, a: 1, n: "천장 아래" }, { x: 540, y: 165, a: 2, n: "차가운 창가" }, { x: 400, y: 268, a: 3 }, { x: 250, y: 268, a: 3, n: "바닥 위" }];
     const rot = TL.map(t => (t.a + 1 + Math.floor(Math.random() * 3)) % 4);
-    sceneEl.innerHTML = svg(room(true) + stove(120) + `<path d="M120,235 V62 H470 V268 H170" stroke="#2F2A3D" stroke-width="3" stroke-dasharray="3 9" fill="none" opacity=".35"/><g id="flowg"></g>
-      ${TL.map((t, i) => `<g class="tl" data-i="${i}"><g class="tile" style="transform:rotate(${rot[i] * 90}deg)"><circle cx="${t.x}" cy="${t.y}" r="27" fill="#fff" stroke="#2F2A3D" stroke-width="3"/><path d="M${t.x},${t.y + 15} V${t.y - 9} M${t.x - 11},${t.y - 3} L${t.x},${t.y - 16} L${t.x + 11},${t.y - 3}" stroke="#8E7CF0" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>${t.n ? `<text x="${t.x}" y="${t.y + (t.y > 200 ? -36 : 48)}" text-anchor="middle" font-size="13" fill="#2F2A3D">${t.n}</text>` : ""}</g>`).join("")}`);
+    sceneEl.innerHTML = svg(room() + nanro(120) + `<path d="M120,178 V62 H540 V268 H180" stroke="#5A3825" stroke-width="3" stroke-dasharray="3 9" fill="none" opacity=".35" stroke-linecap="round"/><g id="flowg"></g>
+      ${TL.map((t, i) => `<g class="tl" data-i="${i}"><g class="tile" style="transform:rotate(${rot[i] * 90}deg)"><circle cx="${t.x}" cy="${t.y}" r="28" fill="#fff" stroke="#5A3825" stroke-width="3.5"/><path d="M${t.x},${t.y + 15} V${t.y - 9} M${t.x - 11},${t.y - 3} L${t.x},${t.y - 16} L${t.x + 11},${t.y - 3}" stroke="#A891FF" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>${t.n ? `<text x="${t.x}" y="${t.y + (t.y > 200 || t.up ? -38 : 50)}" text-anchor="middle" font-size="14" fill="#5A3825" stroke="#fff" stroke-width="4" paint-order="stroke" stroke-linejoin="round">${t.n}</text>` : ""}</g>`).join("")}`);
     if (preview) return;
     say("🌬️ 화살표를 눌러 돌려서 <b>공기가 움직이는 방향</b>을 맞춘 뒤 확인 버튼을 눌러요. <small>난로 위 공기는 따뜻해지고, 창가의 공기는 차가워져요.</small>");
     hits(".tl", el => { const i = +el.dataset.i; rot[i]++; sTap(); const t = el.querySelector(".tile"); t.classList.remove("bad"); t.style.transform = `rotate(${rot[i] * 90}deg)`; });
     opts(["✅ 공기 흐름 확인!"], () => {
       const wrong = TL.map((t, i) => rot[i] % 4 !== t.a ? i : -1).filter(i => i >= 0);
-      if (!wrong.length) { busy = true; qa(".tl").forEach(e => e.setAttribute("opacity", ".35")); q("#flowg").innerHTML = `<path class="flow hot" d="M120,235 V62 H430"/><path class="flow cold" d="M470,90 V268 H180"/>`; win("따뜻해진 공기는 위로, 창가에서 식은 공기는 아래로! 공기가 방 안을 돌아요."); }
+      if (!wrong.length) { busy = true; qa(".tl").forEach(e => e.setAttribute("opacity", ".35")); q("#flowg").innerHTML = `<path class="flow hot" d="M120,172 V62 H500"/><path class="flow cold" d="M540,74 V268 H186"/>`; win("따뜻해진 공기는 위로, 창가에서 식은 공기는 아래로! 공기가 방 안을 돌아요."); }
       else {
         wrong.forEach(i => qa(".tile")[i].classList.add("bad"));
         bad(`${wrong.length}개가 달라요. ` + (wrong.includes(0) ? "난로 위 따뜻해진 공기는 위로 올라가요." : wrong.includes(3) ? "창가에서 차가워진 공기는 아래로 내려와요." : "올라간 공기는 천장을 따라 창가로, 내려온 공기는 바닥을 따라 난로로 가요."));
@@ -790,15 +804,10 @@ button:disabled { opacity: .45; cursor: default; }
     ]
   };
   RUN[9] = preview => {
-    sceneEl.innerHTML = svg(`<rect width="640" height="360" fill="#22335A"/><g fill="#fff" opacity=".85">${Array.from({ length: 26 }, (_, i) => `<circle cx="${(i * 97) % 640}" cy="${(i * 53) % 300}" r="${2 + i % 3}"/>`).join("")}</g>
-      <rect y="300" width="640" height="60" fill="#EAF2FF"/>
-      <g transform="translate(90,200)"><path d="M-60,30 L0,-30 L60,30z" fill="#B5503C"/><rect x="-46" y="30" width="92" height="70" fill="#FFF0D6"/><rect x="-14" y="52" width="28" height="28" fill="#FFC93D"/><text x="0" y="-36" text-anchor="middle" font-size="14" fill="#fff">우리 집</text></g>
-      <g id="boss"><path d="M300,300 C230,300 220,230 262,200 C240,140 300,96 350,120 C380,80 460,90 470,140 C530,150 540,230 500,262 C520,290 470,300 440,300z" fill="#CFE9FF" stroke="#7FB7E8" stroke-width="5"/>
-        <path d="M330,96 l14,-34 l22,26 l20,-32 l20,32 l22,-26 l12,34z" fill="#FFC93D" stroke="#D9A300" stroke-width="3"/>
-        <path d="M322,168 l34,14 M436,168 l-34,14" stroke="#2F2A3D" stroke-width="6" stroke-linecap="round"/><circle cx="342" cy="196" r="9" fill="#2F2A3D"/><circle cx="416" cy="196" r="9" fill="#2F2A3D"/>
-        <path id="mouth" d="M350,244 q30,-22 60,0" stroke="#2F2A3D" stroke-width="6" fill="none" stroke-linecap="round"/>
-        <text id="sweat" x="476" y="180" font-size="26"></text></g>
-      <text x="380" y="340" text-anchor="middle" font-size="16" fill="#2F2A3D">한파 대왕 꽁꽁이</text>
+    sceneEl.innerHTML = svg(bg("night") + `<g transform="translate(110,226)"><path class="o" d="M-66,30 L0,-34 L66,30z" fill="#FF8A7A"/><rect class="o" x="-48" y="30" width="96" height="70" fill="#FFF1D9"/><rect class="o" x="-15" y="50" width="30" height="30" rx="5" fill="#FFD95A" stroke-width="3"/></g>
+      ${pic("ttakkeun", 150, 236, 62, 63, 'class="wob"')}${label(110, 172, "우리 집", { w: 80, fs: 14 })}
+      <g id="boss">${pic("boss", 300, 78, 220, 235, 'id="bossimg"')}</g>
+      ${label(410, 340, "한파 대왕 꽁꽁이", { w: 150, fs: 14 })}
       ${label(550, 40, "❄️❄️❄️❄️❄️", { tid: "hp", w: 160 })}${label(96, 40, "문제 1 / 10", { tid: "qn", w: 150 })}`);
     if (preview) return;
     const pick = (k, n) => shuffle(QUIZ[k]).slice(0, n);
@@ -807,9 +816,8 @@ button:disabled { opacity: .45; cursor: default; }
     const paint = () => {
       const left = Math.max(0, 5 - right);
       q("#hp").textContent = left ? "❄️".repeat(left) + "💧".repeat(5 - left) : "녹았다! 💦";
-      const b = q("#boss"); b.style.transform = `scale(${.55 + left * .09})`; b.style.opacity = left ? 1 : .55;
-      q("#sweat").textContent = left <= 3 ? "💦" : "";
-      if (!left) q("#mouth").setAttribute("d", "M350,236 q30,22 60,0");
+      const b = q("#boss"); b.style.transform = `scale(${.6 + left * .08})`;
+      if (!left) q("#bossimg").setAttribute("href", IMG + "boss_melt.webp");
       $("wFill").style.width = Math.min(100, right * 20) + "%"; $("wTxt").textContent = `${Math.min(right, 5)}/5`;
       $("scoreTxt").textContent = `맞힌 문제 ${right}개`;
     };
@@ -834,7 +842,7 @@ button:disabled { opacity: .45; cursor: default; }
       busy = true;
       if (right >= 5) return win("", right * 10);
       sNo();
-      showCard(`<div class="em">🥶</div><h2>꽁꽁이가 아직 버티고 있어요</h2><p>10문제 중 <b>${right}문제</b>를 맞혔어요. 5문제 이상 맞혀야 꽁꽁이를 녹일 수 있어요.</p><p class="note">📒 열 이동 노트를 다시 읽고 도전해 봐요!</p>`, [["다시 도전 ▶", () => loadStage(9), true]]);
+      showCard(`<img class="char" src="${IMG}boss.webp" alt="한파 대왕 꽁꽁이"><h2>꽁꽁이가 아직 버티고 있어요</h2><p>10문제 중 <b>${right}문제</b>를 맞혔어요. 5문제 이상 맞혀야 꽁꽁이를 녹일 수 있어요.</p><p class="note">📒 열 이동 노트를 다시 읽고 도전해 봐요!</p>`, [["다시 도전 ▶", () => loadStage(9), true]]);
     };
     paint(); next();
   };
@@ -938,7 +946,7 @@ button:disabled { opacity: .45; cursor: default; }
   const startAt = Math.max(0, Math.min(9, progress.unlocked - 1));
   cur = startAt; renderLevels(); RUN[startAt](true);
   $("lvlNo").textContent = (startAt + 1) + "단계"; $("lvlName").textContent = STAGES[startAt].title; $("lvlPill").className = "pill level " + STAGES[startAt].kind;
-  showCard(`<div class="em">🏠❄️</div><h2>우리 집 겨울나기</h2>
+  showCard(`<h2>우리 집 겨울나기</h2><img class="pic" src="${IMG}title.webp" alt="눈 오는 밤, 따뜻한 집 앞의 따끈이와 하늘의 꽁꽁이 그림">
     <p>한파 대왕 꽁꽁이가 우리 집을 꽁꽁 얼리려고 해요! 불꽃 요정 따끈이와 함께 <b>열이 이동하는 방법</b>을 이용해 집을 따뜻하게 지켜요.</p>
     <p><span class="kind solid">1~3 고체</span> <span class="kind liquid">4~6 액체</span> <span class="kind gas">7~9 기체</span> <span class="kind boss">10 보스전</span></p>`,
     [[startAt ? `${startAt + 1}단계부터 이어하기 ▶` : "겨울나기 시작! ▶", () => loadStage(startAt), true]].concat(startAt ? [["1단계부터", () => loadStage(0)]] : []));
@@ -946,14 +954,14 @@ button:disabled { opacity: .45; cursor: default; }
 </script>
 
 <!-- 활용 안내 시작 -->
-<section class="pgd" id="pg-guide" aria-labelledby="pgd-title" style="--pgd-accent:#FF7A2F;--pgd-soft:#FFE9C9;">
+<section class="pgd" id="pg-guide" aria-labelledby="pgd-title" style="--pgd-accent:#FF9A3D;--pgd-soft:#FFE4EE;">
   <div class="pgd__box">
     <span class="pgd__ribbon">📖 활용 안내</span>
     <span class="pgd__deco pgd__deco--a" aria-hidden="true">🔥</span>
     <span class="pgd__deco pgd__deco--b" aria-hidden="true">❄️</span>
     <span class="pgd__deco pgd__deco--c" aria-hidden="true">✨</span>
     <div class="pgd__head">
-      <div class="pgd__mascot"><img src="../assets/guide/winter-home.svg" alt="빨간 목도리를 두른 불꽃 요정 따끈이 그림" width="150" height="150" loading="lazy" decoding="async"></div>
+      <div class="pgd__mascot"><img src="../assets/guide/winter-home.webp" alt="빨간 목도리를 두른 불꽃 요정 따끈이 그림" width="150" height="150" loading="lazy" decoding="async"></div>
       <div>
         <h2 class="pgd__title" id="pgd-title"><mark>우리 집 겨울나기</mark>, 이렇게 활용해요</h2>
         <p class="pgd__lead">한 집 안에서 벌어지는 생활 속 미션을 깨며 <b>고체·액체·기체에서 열이 이동하는 방법</b>을 차례로 익히고, 보스전 퀴즈로 단원을 마무리하는 과학 게임이에요.</p>
