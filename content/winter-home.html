@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>우리 집 겨울나기 | 3분 놀이터</title>
+<meta name="description" content="고체·액체·기체에서 열은 어떻게 이동할까요? 냄비 손잡이 고르기, 욕조 물 데우기, 거실 난방 미션을 깨며 한파 대왕 꽁꽁이에게서 우리 집을 지키는 5학년 과학 웹게임.">
+<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<style>
+/* 눈 내리는 남색 겨울밤과 군고구마빛 따뜻한 실내. 어느 테마에서도 같은 모습을 써요. */
+:root {
+  --night: #1F2F4F;
+  --night2: #33487A;
+  --card: #FFFDF8;
+  --cream: #FFF3DD;
+  --ink: #2F2A3D;
+  --muted: #8A8398;
+  --line: #EADFCB;
+  --ember: #FF7A2F;
+  --ember-d: #D9541A;
+  --hot: #E8483C;
+  --cold: #3F9BF2;
+  --sun: #FFC93D;
+  --mint: #2FB98A;
+  --solid: #C9803A;  --solid-l: #FFEBD3;
+  --liquid: #3F9BF2; --liquid-l: #E0EEFF;
+  --gas: #8E7CF0;    --gas-l: #ECE8FF;
+  --f-display: "Jua", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --f-body: "Gowun Dodum", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0; color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.6;
+  background: var(--night) radial-gradient(circle at 20% 0%, var(--night2) 0%, var(--night) 60%) fixed;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 18px 40px; min-height: 100%;
+}
+.snow { position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image: radial-gradient(#fff 1.6px, transparent 2px), radial-gradient(rgba(255,255,255,.7) 1.2px, transparent 1.6px);
+  background-size: 120px 120px, 80px 80px; background-position: 0 0, 40px 60px; opacity: .35; animation: snow 14s linear infinite; }
+@keyframes snow { to { background-position: 60px 360px, 0 300px; } }
+.topbar, .wrap, .pgd { position: relative; z-index: 1; }
+.topbar { max-width: 1000px; margin: 0 auto 8px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.topbar a { color: #fff; text-decoration: none; }
+.topbar .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; }
+.topbar .back { font-size: 12.5px; font-weight: 700; color: var(--ink); background: #fff; padding: 6px 12px; border-radius: 999px; }
+.wrap { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+
+header { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; color: #fff; }
+.logo { width: 78px; height: 78px; flex: none; animation: bob 2.6s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(-5px); } }
+h1 { font-family: var(--f-display); font-weight: 400; font-size: clamp(32px, 6.2vw, 50px); line-height: 1.05; margin: 0; }
+h1 .a { color: var(--sun); } h1 .b { color: #FF9A5C; }
+header .tag { flex: 1 1 280px; margin: 0; font-size: 14px; color: #D8E1F5; }
+
+button { font: inherit; font-family: var(--f-display); cursor: pointer; border: 0; border-radius: 14px; padding: 9px 14px; background: #fff; color: var(--ink); box-shadow: 0 3px 0 var(--line); transition: transform .1s; }
+button:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--line); }
+button:focus-visible, .hit:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+button.primary { background: var(--ember); color: #fff; box-shadow: 0 4px 0 var(--ember-d); font-size: 17px; padding: 11px 20px; }
+button:disabled { opacity: .45; cursor: default; }
+
+.hud { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; }
+.pill { background: var(--card); border-radius: 16px; padding: 8px 14px; display: flex; align-items: center; gap: 10px; font-family: var(--f-display); }
+.pill .lab { font-size: 12.5px; color: var(--muted); }
+.pill .val { font-size: 18px; }
+.pill.level .badge { background: var(--ink); color: #fff; padding: 3px 10px; border-radius: 999px; font-size: 14px; }
+.pill.level.solid .badge { background: var(--solid); } .pill.level.liquid .badge { background: var(--liquid); } .pill.level.gas .badge { background: var(--gas); } .pill.level.boss .badge { background: var(--hot); }
+.pill.warm { flex: 1 1 220px; }
+.tbar { flex: 1; height: 14px; background: #E6EEF9; border-radius: 999px; overflow: hidden; min-width: 80px; }
+.tbar .fill { height: 100%; width: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--cold), var(--sun) 45%, var(--ember)); transition: width .25s linear; }
+.hud .btns { display: flex; gap: 6px; margin-left: auto; }
+.hud .btns button { font-size: 13.5px; padding: 8px 12px; }
+
+.screen { position: relative; background: var(--card); border-radius: 22px; padding: 12px; box-shadow: 0 10px 0 rgba(0,0,0,.18); }
+.scene { border-radius: 16px; overflow: hidden; background: var(--cream); line-height: 0; }
+.scene svg { display: block; width: 100%; height: auto; font-family: var(--f-display); user-select: none; -webkit-user-select: none; }
+.scene.shake { animation: shake .35s; }
+@keyframes shake { 20% { transform: translateX(-7px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
+.ctl { padding: 12px 6px 4px; min-height: 132px; }
+.prompt { margin: 0 0 10px; font-size: 16.5px; font-weight: 700; }
+.prompt small { display: block; font-weight: 400; color: var(--muted); font-size: 13.5px; }
+.opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.opts button { flex: 1 1 180px; background: var(--cream); box-shadow: 0 3px 0 #E5CFA6; font-size: 16px; padding: 12px 14px; text-align: center; line-height: 1.35; }
+.opts.quiz button { flex: 1 1 44%; text-align: left; font-family: var(--f-body); font-weight: 700; font-size: 15px; }
+.opts button.ok { background: #D8F5E8; box-shadow: 0 3px 0 #9ADFC0; opacity: 1; }
+.opts button.no { background: #FFE0DC; box-shadow: 0 3px 0 #F5B3AB; }
+.fb { margin: 10px 0 0; min-height: 24px; font-weight: 700; font-size: 14.5px; }
+.opts button.primary { background: var(--ember); color: #fff; box-shadow: 0 4px 0 var(--ember-d); text-align: center; font-family: var(--f-display); font-size: 17px; }
+.fb.ok { color: #14855F; } .fb.no { color: #C9372C; }
+
+.overlay { position: absolute; inset: 0; background: rgba(31,47,79,.72); border-radius: 22px; display: none; align-items: center; justify-content: center; padding: 14px; z-index: 5; }
+.overlay.on { display: flex; }
+.card { background: var(--card); border-radius: 20px; padding: 20px 22px; max-width: 520px; width: 100%; text-align: center; max-height: 100%; overflow: auto; animation: pop .25s; }
+@keyframes pop { from { transform: scale(.9); opacity: 0; } }
+.card h2 { font-family: var(--f-display); font-weight: 400; font-size: 27px; margin: 0 0 6px; line-height: 1.2; }
+.card .em { font-size: 52px; line-height: 1.1; }
+.card p { margin: 6px 0; }
+.card .mission { background: var(--cream); border-radius: 14px; padding: 10px 12px; text-align: left; font-size: 14.5px; }
+.card .note { background: #EAF7F0; border-left: 5px solid var(--mint); border-radius: 10px; padding: 9px 12px; text-align: left; font-size: 14.5px; }
+.card .score { font-family: var(--f-display); font-size: 22px; color: var(--ember-d); }
+.card .row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
+.kind { display: inline-block; font-family: var(--f-display); font-size: 13px; padding: 2px 10px; border-radius: 999px; }
+.kind.solid { background: var(--solid-l); color: #8A4F12; } .kind.liquid { background: var(--liquid-l); color: #1C5FA8; } .kind.gas { background: var(--gas-l); color: #4B3BB0; } .kind.boss { background: #FFE0DC; color: #B02A20; }
+
+.below { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.panel { background: var(--card); border-radius: 20px; padding: 16px 18px; }
+.panel h3 { font-family: var(--f-display); font-weight: 400; font-size: 19px; margin: 0 0 8px; }
+.panel h3:not(:first-child) { margin-top: 16px; }
+.keys { margin: 0; padding: 0; list-style: none; font-size: 14px; display: grid; gap: 6px; }
+.levels { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.levels button { padding: 8px 0; font-size: 15px; }
+.levels button.solid { background: var(--solid-l); } .levels button.liquid { background: var(--liquid-l); } .levels button.gas { background: var(--gas-l); } .levels button.boss { background: #FFE0DC; }
+.levels button.cur { outline: 3px solid var(--ember); }
+.teacher { margin-top: 10px; font-size: 12.5px; background: none; box-shadow: none; color: var(--muted); text-decoration: underline; padding: 4px; font-family: var(--f-body); }
+.notes { display: grid; gap: 6px; font-size: 13.5px; }
+.notes div { background: var(--cream); border-radius: 10px; padding: 7px 10px; }
+.notes div.lock { color: var(--muted); background: #F3F1EE; }
+.notes b { font-family: var(--f-display); font-weight: 400; margin-right: 4px; }
+
+.rank { display: grid; grid-template-columns: 1.1fr 1fr; gap: 18px; }
+.rank > div { min-width: 0; }
+.formrow button { white-space: nowrap; flex: none; }
+.rank .rule { font-size: 13.5px; color: var(--muted); margin: 0 0 10px; }
+.mybox { display: flex; gap: 10px; margin-bottom: 10px; }
+.mybox > div { flex: 1; background: var(--cream); border-radius: 14px; padding: 8px 12px; }
+.mybox .lab { display: block; font-size: 12px; color: var(--muted); }
+.mybox .big { font-family: var(--f-display); font-size: 26px; } .mybox .unit { font-size: 12px; color: var(--muted); margin-left: 4px; }
+.lvscores { list-style: none; margin: 0 0 12px; padding: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; font-size: 12.5px; text-align: center; }
+.lvscores li { background: #F3F1EE; border-radius: 8px; padding: 3px 0; } .lvscores li.on { background: #FFE9C9; font-weight: 700; }
+#rankForm label { font-size: 13px; font-weight: 700; }
+.formrow { display: flex; gap: 8px; margin-top: 4px; }
+.formrow input { flex: 1; min-width: 0; font: inherit; padding: 9px 12px; border-radius: 12px; border: 2px solid var(--line); }
+.formrow button { font-size: 15px; padding: 9px 14px; }
+.msg { font-size: 13px; min-height: 20px; margin: 6px 0 0; color: var(--muted); } .msg.err { color: #C9372C; } .msg.ok { color: #14855F; }
+.board { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.board li { display: flex; align-items: center; gap: 10px; background: var(--cream); border-radius: 12px; padding: 8px 12px; font-family: var(--f-display); }
+.board li .no { width: 26px; } .board li .nm { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .board li.me { outline: 2px solid var(--ember); }
+.board li.empty { font-family: var(--f-body); color: var(--muted); font-size: 13.5px; }
+.bulb-wrap { text-align: center; }
+.bulb { background: none; box-shadow: none; padding: 8px; line-height: 0; color: #B9C4DD; opacity: .45; }
+.bulb:hover, .bulb.on { color: #F0B429; opacity: 1; filter: drop-shadow(0 0 8px rgba(240,180,41,.8)); }
+.bulb:active { box-shadow: none; }
+
+/* 장면 속 그림 */
+.hit { cursor: pointer; }
+.hit:focus:not(:focus-visible) { outline: none; }
+.fl path { transform-box: fill-box; transform-origin: 50% 100%; animation: flick .5s ease-in-out infinite alternate; }
+@keyframes flick { to { transform: scaleY(1.12) scaleX(.94); } }
+.bt rect { transition: transform .5s, opacity .5s; transform-box: fill-box; transform-origin: 50% 100%; }
+.bt.melt rect { transform: scaleY(.22) scaleX(1.6); opacity: .8; }
+.bt.melt { pointer-events: none; }
+.stk { transform-box: fill-box; transform-origin: 50% 100%; transform: scaleY(0); }
+.pulse { transform-box: fill-box; transform-origin: center; animation: pulse 1s ease-in-out infinite; }
+@keyframes pulse { 50% { transform: scale(1.18); } }
+.leak { animation: leak 1.2s linear infinite; } @keyframes leak { 50% { opacity: .3; } }
+.flow { fill: none; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 14 12; animation: dash 1s linear infinite; }
+.flow.hot { stroke: #E8483C; marker-end: url(#mh); } .flow.cold { stroke: #2F7FE0; marker-end: url(#mc); }
+@keyframes dash { to { stroke-dashoffset: -26; } }
+.tile { transition: transform .2s; transform-box: fill-box; transform-origin: center; }
+.tile.bad circle { fill: #FFD0CA; stroke: #E8483C; }
+.blob { transition: transform .45s ease-in, opacity .45s; transform-box: fill-box; transform-origin: center; }
+.slot circle { fill: rgba(255,255,255,.75); stroke: #2F2A3D; stroke-width: 2.5; stroke-dasharray: 6 5; }
+.slot:hover circle { fill: #FFE9A8; }
+.lv:hover rect { fill: #FFE9A8; }
+#boss { transition: transform .5s, opacity .5s; transform-box: fill-box; transform-origin: 50% 100%; }
+#boss.hitb { animation: blink .4s; }
+@keyframes blink { 50% { opacity: .35; } }
+
+@media (max-width: 760px) {
+  .below, .rank { grid-template-columns: 1fr; }
+  .hud .btns { margin-left: 0; width: 100%; } .hud .btns button { flex: 1; }
+  .opts.quiz button { flex-basis: 100%; }
+  .ctl { min-height: 150px; }
+}
+@media (prefers-reduced-motion: reduce) { .snow, .logo, .fl path, .pulse { animation: none; } }
+</style>
+<link rel="stylesheet" href="../assets/guide.css">
+</head>
+<body>
+<div class="snow" aria-hidden="true"></div>
+<div class="topbar">
+  <a class="brand" href="../index.html">
+    <svg width="26" height="26" viewBox="0 0 34 34" fill="none">
+      <circle cx="17" cy="18" r="14" fill="#fff" stroke="#3B4655" stroke-width="2"/>
+      <path d="M17 9 L17 18 L23 21" stroke="#FF90B3" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="13" y="2" width="8" height="4" rx="1.5" fill="#3B4655"/>
+    </svg>
+    <span>3분 놀이터</span>
+  </a>
+  <a class="back" href="../index.html">← 다른 콘텐츠 보기</a>
+</div>
+<div class="wrap">
+  <header>
+    <img class="logo" src="../assets/guide/winter-home.svg" alt="" width="78" height="78">
+    <h1>우리 집 <span class="a">겨울</span><span class="b">나기</span></h1>
+    <p class="tag">한파 대왕 꽁꽁이가 몰려와요! 불꽃 요정 따끈이와 함께 고체·액체·기체에서 열이 이동하는 방법을 이용해 우리 집을 따뜻하게 지켜요.</p>
+  </header>
+
+  <div class="hud" role="group" aria-label="게임 계기판">
+    <div class="pill level" id="lvlPill"><span class="badge" id="lvlNo">1단계</span><span class="val" id="lvlName"></span></div>
+    <div class="pill warm"><span class="lab" id="warmLab">🔥 집 안 온기</span><div class="tbar"><div class="fill" id="wFill"></div></div><span class="val" id="wTxt">100</span></div>
+    <div class="pill"><span class="lab">쾌적도 총점</span><span class="val" id="scoreTxt">0점</span></div>
+    <div class="btns">
+      <button id="sfxBtn" type="button" aria-pressed="true">효과음 켬</button>
+      <button id="restartBtn" type="button">다시</button>
+      <button id="fromStartBtn" type="button" title="1단계부터 다시 시작해요. 점수 기록은 그대로 남아요.">처음부터</button>
+    </div>
+  </div>
+
+  <div class="screen">
+    <div class="scene" id="scene"></div>
+    <div class="ctl">
+      <p class="prompt" id="prompt"></p>
+      <div class="opts" id="opts"></div>
+      <p class="fb" id="fb" role="status"></p>
+    </div>
+    <div class="overlay" id="ov"><div class="card" id="card"></div></div>
+  </div>
+
+  <div class="below">
+    <section class="panel">
+      <h3>이렇게 놀아요</h3>
+      <ul class="keys">
+        <li>🍳 <b>1~3단계 고체</b>: 버터가 녹는 순서, 냄비 재료 고르기, 열이 새는 곳 막기</li>
+        <li>🛁 <b>4~6단계 액체</b>: 물방울 길잡이, 욕조 물 데우기, 보리차 식히기</li>
+        <li>🛋️ <b>7~9단계 기체</b>: 따뜻한 자리 찾기, 거실 난방기 놓기, 공기 흐름 잇기</li>
+        <li>👑 <b>10단계 보스전</b>: 퀴즈 10문제 중 <b>5문제 이상</b> 맞히면 꽁꽁이를 물리쳐요.</li>
+        <li>🔥 집 안 온기는 시간이 지나면 조금씩 식고, 틀리면 10씩 줄어요. <b>남은 온기가 그 단계 쾌적도 점수</b>예요.</li>
+      </ul>
+      <h3>단계 고르기</h3>
+      <div class="levels" id="levels"></div>
+      <button class="teacher" id="unlockAll" type="button">선생님용: 모든 단계 열기</button>
+    </section>
+    <section class="panel">
+      <h3>열 이동 노트</h3>
+      <div class="notes" id="notes"></div>
+    </section>
+  </div>
+
+  <section class="panel rank" aria-labelledby="rankTitle">
+    <div>
+      <h3 id="rankTitle">겨울나기 명예의 전당</h3>
+      <p class="rule">단계를 통과할 때 남은 온기가 쾌적도 점수예요(보스전은 맞힌 문제마다 10점). 단계마다 최고 기록만 더해서 최대 1000점! 10단계까지 모두 통과하면 순위에 이름을 올릴 수 있어요.</p>
+      <div class="mybox">
+        <div><span class="lab">내 총점</span><span class="big" id="myTotal">0</span><span class="unit">/ 1000점</span></div>
+        <div><span class="lab">통과한 단계</span><span class="big" id="myClear">0</span><span class="unit">/ 10개</span></div>
+      </div>
+      <ol class="lvscores" id="lvScores"></ol>
+      <form id="rankForm" autocomplete="off">
+        <label for="nick">순위에 쓸 이름</label>
+        <div class="formrow">
+          <input id="nick" name="nick" maxlength="12" placeholder="예: 따끈따끈" required>
+          <button id="rankBtn" class="primary" type="submit">순위 등록</button>
+        </div>
+        <p class="msg" id="rankMsg" role="status"></p>
+      </form>
+    </div>
+    <div>
+      <h3>순위표 TOP 5</h3>
+      <ol class="board" id="board"><li class="empty">순위표를 불러오는 중이에요…</li></ol>
+    </div>
+  </section>
+
+  <div class="bulb-wrap" id="bulbWrap" hidden>
+    <button class="bulb" id="bulb" type="button" aria-label=" ">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" aria-hidden="true">
+        <path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.5.4.8 1 .8 1.6v.5h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0 0 12 3z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script>
+(() => {
+  "use strict";
+  const $ = id => document.getElementById(id);
+  const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+  // ---------- 단계 정보 ----------
+  const STAGES = [
+    { kind: "solid", icon: "🧈", title: "불판 위 버터", story: "저녁은 따끈한 구이! 불판 한쪽을 가열하면 열은 어디로 이동할까요?", mission: "버터가 <b>녹는 순서대로</b> 눌러요.", note: "고체에서 열은 온도가 높은 곳에서 낮은 곳으로, 물체를 따라 이동해요. (전도)" },
+    { kind: "solid", icon: "🍲", title: "냄비 손잡이 고르기", story: "된장찌개 냄비를 새로 만들어요. 물질마다 열이 이동하는 빠르기가 달라요.", mission: "열이 <b>빨리 이동하는 판</b>부터 고르고, 냄비의 각 부분에 알맞은 재료를 골라요.", note: "고체 물질의 종류에 따라 열이 이동하는 빠르기가 달라요. 구리 → 철 → 유리 순서로 빠르고, 플라스틱·나무는 금속보다 느려요." },
+    { kind: "solid", icon: "🏠", title: "열이 새는 곳 막기", story: "난방을 해도 집이 금방 식어요. 집 안의 열이 고체를 따라 밖으로 빠져나가고 있어요!", mission: "<b>! 표시</b>를 눌러 열이 새는 곳을 찾고, 열의 이동을 줄여요.", note: "열의 이동을 줄이는 것을 단열이라고 해요. 단열재·이중창·보온병·솜옷은 열이 느리게 이동해서 온기를 지켜 줘요." },
+    { kind: "liquid", icon: "💧", title: "물방울 길잡이", story: "주전자에 보리차를 끓여요. 불 위에서 물방울들이 어디로 갈지 헤매고 있어요.", mission: "온도가 <b>높아진 물은 위로</b>, <b>낮아진 물은 아래로</b> 보내요.", note: "액체에서 온도가 높아진 물은 위로 올라가고, 위에 있던 온도가 낮은 물은 아래로 내려와요. (대류)" },
+    { kind: "liquid", icon: "🛁", title: "욕조 물 데우기", story: "차가운 욕조 물을 히터로 데워서 따끈한 목욕을 해요.", mission: "물 <b>전체</b>가 따뜻해지도록 히터 놓을 자리를 골라요.", note: "물을 아래쪽에서 데우면 뜨거워진 물은 올라가고 차가운 물은 내려오는 과정이 반복되어 물 전체가 따뜻해져요." },
+    { kind: "liquid", icon: "🧊", title: "보리차 식히기", story: "동생이 마실 보리차가 너무 뜨거워요! 얼음주머니로 빨리 식혀야 해요.", mission: "보리차 <b>전체</b>가 식도록 얼음주머니 놓을 자리를 골라요.", note: "온도가 낮아진 액체는 아래로 내려가요. 그래서 액체를 식힐 때는 얼음을 위쪽에 두어요." },
+    { kind: "gas", icon: "🐱", title: "따뜻한 자리 찾기", story: "거실에 난로를 켰어요. 방 안 공기의 온도는 높이에 따라 달라요.", mission: "3단 선반에서 <b>알맞은 칸</b>을 골라요.", note: "기체에서도 온도가 높아진 공기는 위로 올라가요. 그래서 난방을 한 방은 높은 곳이 더 따뜻해요." },
+    { kind: "gas", icon: "🛋️", title: "거실 난방기 놓기", story: "새 난방기가 왔어요! 가족은 거실 바닥에 앉아 있어요.", mission: "방 <b>전체</b>가 따뜻해지도록 난방기 놓을 자리를 골라요.", note: "난방기를 낮은 곳에 두면 따뜻해진 공기가 위로 올라가면서 방 전체가 따뜻해져요." },
+    { kind: "gas", icon: "🌬️", title: "공기 흐름 잇기", story: "난로를 켠 방 안에서 공기는 빙글빙글 돌아요. 화살표가 뒤죽박죽이에요.", mission: "화살표를 눌러 돌려서 <b>공기가 움직이는 방향</b>을 맞춰요.", note: "따뜻해진 공기는 위로 올라가고, 식은 공기는 아래로 내려오며 방 안을 돌아요. (대류)" },
+    { kind: "boss", icon: "👑", title: "한파 대왕 꽁꽁이", story: "드디어 한파 대왕 꽁꽁이가 나타났어요! 열 이동 지식으로 꽁꽁이를 녹여요.", mission: "퀴즈 10문제 중 <b>5문제 이상</b> 맞히면 승리!", note: "고체에서는 열이 물체를 따라 이동하고, 액체와 기체에서는 온도가 높아진 물질이 직접 위로 올라가면서 열이 이동해요." }
+  ];
+  const KIND = { solid: "고체", liquid: "액체", gas: "기체", boss: "보스전" };
+
+  // ---------- 저장 ----------
+  const PKEY = "winter-home-progress";
+  let progress = { unlocked: 1, scores: STAGES.map(() => 0) };
+  try { const p = JSON.parse(localStorage.getItem(PKEY)); if (p && Array.isArray(p.scores)) progress = { unlocked: Math.max(1, Math.min(10, p.unlocked | 0)), scores: STAGES.map((_, i) => Math.max(0, Math.min(100, p.scores[i] | 0))) }; } catch (e) {}
+  const saveProgress = () => { try { localStorage.setItem(PKEY, JSON.stringify(progress)); } catch (e) {} };
+  const total = () => progress.scores.reduce((a, b) => a + b, 0);
+
+  // ---------- 효과음 ----------
+  let sfxOn = true, ac = null;
+  try { sfxOn = localStorage.getItem("winter-home-sfx") !== "0"; } catch (e) {}
+  function tone(f, t0, d, type = "sine", v = .14) {
+    if (!sfxOn) return;
+    try {
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      if (ac.state === "suspended") ac.resume();
+      const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime + t0;
+      o.type = type; o.frequency.value = f; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.001, t + d);
+      o.connect(g).connect(ac.destination); o.start(t); o.stop(t + d);
+    } catch (e) {}
+  }
+  const sOk = () => { tone(660, 0, .12); tone(880, .1, .18); };
+  const sNo = () => tone(150, 0, .28, "sawtooth", .1);
+  const sWin = () => [523, 659, 784, 1047].forEach((f, i) => tone(f, i * .11, .25, "triangle"));
+  const sTap = () => tone(440, 0, .06, "triangle", .08);
+  function syncSfx() { $("sfxBtn").textContent = sfxOn ? "효과음 켬" : "효과음 끔"; $("sfxBtn").setAttribute("aria-pressed", sfxOn); }
+  $("sfxBtn").onclick = () => { sfxOn = !sfxOn; try { localStorage.setItem("winter-home-sfx", sfxOn ? "1" : "0"); } catch (e) {} syncSfx(); sTap(); };
+
+  // ---------- 진행 엔진 ----------
+  let cur = 0, warm = 100, busy = true, token = 0, timers = [], onKey = null, bossMode = false;
+  const later = (fn, ms) => { const t = token; timers.push(setTimeout(() => { if (t === token) fn(); }, ms)); };
+  const every = (fn, ms) => { const t = token; const id = setInterval(() => { if (t !== token) return clearInterval(id); if (fn() === false) clearInterval(id); }, ms); timers.push(id); };
+  function stopAll() { token++; timers.forEach(id => { clearTimeout(id); clearInterval(id); }); timers = []; onKey = null; }
+  const sceneEl = $("scene");
+  const q = sel => sceneEl.querySelector(sel), qa = sel => [...sceneEl.querySelectorAll(sel)];
+  const say = html => { $("prompt").innerHTML = html; };
+  const fb = (msg, cls) => { $("fb").textContent = msg || ""; $("fb").className = "fb " + (cls || ""); };
+  function opts(list, cb, cls) {
+    const box = $("opts"); box.className = "opts " + (cls || ""); box.innerHTML = "";
+    list.forEach((html, i) => { const b = document.createElement("button"); b.type = "button"; b.innerHTML = html; b.onclick = () => { if (!busy) cb(i, b); }; box.appendChild(b); });
+  }
+  function hud() {
+    if (bossMode) return;
+    const w = Math.max(0, Math.ceil(warm));
+    $("wFill").style.width = w + "%"; $("wTxt").textContent = w;
+  }
+  function good(msg) { sOk(); fb("⭕ " + msg, "ok"); }
+  function bad(msg) {
+    sNo(); fb("❌ " + msg + " (온기 -10)", "no"); warm -= 10; hud();
+    sceneEl.classList.remove("shake"); void sceneEl.offsetWidth; sceneEl.classList.add("shake");
+    if (warm <= 0) freeze();
+  }
+  function freeze() {
+    busy = true; stopAll();
+    showCard(`<div class="em">🥶</div><h2>집이 꽁꽁 얼었어요!</h2><p>온기가 모두 사라졌어요. 열 이동 노트를 떠올리며 다시 도전해 봐요.</p>`, [["다시 도전 ▶", () => loadStage(cur), true]]);
+  }
+  setInterval(() => { if (!busy && !bossMode) { warm -= .125; hud(); if (warm <= 0) freeze(); } }, 250);
+  document.addEventListener("keydown", e => { if (!busy && onKey && !$("ov").classList.contains("on")) onKey(e); });
+  // 장면 속 누를 수 있는 그림은 키보드로도 누를 수 있게 해요
+  function hits(sel, fn) {
+    qa(sel).forEach(el => {
+      el.classList.add("hit"); el.setAttribute("tabindex", "0"); el.setAttribute("role", "button");
+      const go = () => { if (!busy) fn(el); };
+      el.onclick = go; el.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); go(); } };
+    });
+  }
+  function showCard(html, btns) {
+    $("card").innerHTML = html + `<div class="row"></div>`;
+    const row = $("card").querySelector(".row");
+    btns.forEach(([t, fn, pri]) => { const b = document.createElement("button"); b.type = "button"; b.textContent = t; if (pri) b.className = "primary"; b.onclick = () => { sTap(); fn(); }; row.appendChild(b); });
+    $("ov").classList.add("on");
+    const f = row.querySelector(".primary"); if (f) f.focus({ preventScroll: true });
+  }
+  const hideCard = () => $("ov").classList.remove("on");
+
+  function loadStage(i) {
+    stopAll(); cur = i; busy = true; warm = 100; bossMode = STAGES[i].kind === "boss";
+    const S = STAGES[i];
+    $("lvlNo").textContent = (i + 1) + "단계"; $("lvlName").textContent = S.title; $("lvlPill").className = "pill level " + S.kind;
+    $("warmLab").textContent = bossMode ? "❄️ 꽁꽁이 녹이기" : "🔥 집 안 온기";
+    if (bossMode) { $("wFill").style.width = "0%"; $("wTxt").textContent = "0/5"; } else hud();
+    $("scoreTxt").textContent = total() + "점";
+    fb(""); say(""); $("opts").innerHTML = ""; sceneEl.innerHTML = "";
+    renderLevels();
+    RUN[i](true);   // 장면 미리 그리기
+    showCard(`<span class="kind ${S.kind}">${KIND[S.kind]}${bossMode ? "" : "의 열 이동"}</span><div class="em">${S.icon}</div><h2>${i + 1}단계 · ${S.title}</h2><p>${S.story}</p><p class="mission">🎯 ${S.mission}</p>`,
+      [[bossMode ? "보스전 시작! ▶" : "미션 시작! ▶", () => { hideCard(); stopAll(); fb(""); RUN[i](false); busy = false; }, true]]);
+  }
+  function win(msg, scoreOverride) {
+    busy = true;
+    if (msg) good(msg);
+    later(() => {
+      const sc = scoreOverride != null ? scoreOverride : Math.max(1, Math.ceil(warm));
+      const best = progress.scores[cur], isBest = sc > best;
+      if (isBest) progress.scores[cur] = sc;
+      if (cur + 2 > progress.unlocked) progress.unlocked = Math.min(10, cur + 2);
+      saveProgress(); sWin(); renderAll();
+      const S = STAGES[cur], last = cur === 9;
+      showCard(`<div class="em">${last ? "🌸" : "🎉"}</div><h2>${last ? "꽁꽁이를 물리쳤어요!" : (cur + 1) + "단계 성공!"}</h2>
+        <p class="score">쾌적도 ${sc}점 ${isBest && best ? "· 최고 기록!" : ""}</p>
+        <p class="note">📒 ${S.note}</p>
+        ${last ? `<p>10단계 총점 <b>${total()}점</b>! ${progress.scores.every(s => s > 0) ? "아래 명예의 전당에 이름을 올려 보세요." : "아직 통과하지 못한 단계에도 도전해 봐요."}</p>` : ""}`,
+        last ? [["순위 등록하러 가기", () => { hideCard(); $("rankTitle").scrollIntoView({ behavior: "smooth" }); $("nick").focus({ preventScroll: true }); }, true], ["다시 도전", () => loadStage(cur)]]
+             : [["다음 단계 ▶", () => loadStage(cur + 1), true], ["다시 도전", () => loadStage(cur)]]);
+    }, msg ? 1700 : 300);
+  }
+  // 보기 중 하나를 고르는 질문. 맞히면 done()
+  function ask(question, list, done) {
+    say(question);
+    const items = shuffle(list);
+    opts(items.map(o => o.t), (i, b) => {
+      const o = items[i];
+      if (o.ok) { b.classList.add("ok"); busy = true; good(o.why); later(() => { busy = false; done(); }, 1500); }
+      else { b.classList.add("no"); b.disabled = true; bad(o.why); }
+    });
+  }
+
+  // ---------- 그림 도구 ----------
+  const DEFS = `<defs>
+    <marker id="mh" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="3.2" markerHeight="3.2" orient="auto"><path d="M0,0 L10,5 L0,10Z" fill="#E8483C"/></marker>
+    <marker id="mc" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="3.2" markerHeight="3.2" orient="auto"><path d="M0,0 L10,5 L0,10Z" fill="#2F7FE0"/></marker>
+    <linearGradient id="hg" x1="0" x2="1"><stop offset="0" stop-color="#FF3B1F"/><stop offset=".75" stop-color="#FF8A3D" stop-opacity=".85"/><stop offset="1" stop-color="#FF8A3D" stop-opacity="0"/></linearGradient>
+    <radialGradient id="hr"><stop offset="0" stop-color="#FF3B1F"/><stop offset=".7" stop-color="#FF8A3D" stop-opacity=".8"/><stop offset="1" stop-color="#FF8A3D" stop-opacity="0"/></radialGradient>
+    <linearGradient id="haze" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#FF8A4C" stop-opacity=".55"/><stop offset=".55" stop-color="#FFC78A" stop-opacity=".25"/><stop offset="1" stop-color="#9CC8F5" stop-opacity=".35"/></linearGradient>
+    <filter id="blur" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="9"/></filter>
+  </defs>`;
+  const svg = inner => `<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg">${DEFS}${inner}</svg>`;
+  const flame = (x, y, s = 1) => `<g class="fl" transform="translate(${x},${y}) scale(${s})"><path d="M0,-36 C15,-17 19,-6 12,6 C8,14 -8,14 -12,6 C-19,-6 -9,-13 0,-36Z" fill="#FF7A2F"/><path d="M0,-17 C7,-7 9,0 5,5 C3,9 -3,9 -5,5 C-9,0 -4,-6 0,-17Z" fill="#FFD23F"/></g>`;
+  const label = (x, y, t, o = {}) => { const w = o.w || (t.length * 15 + 24); return `<g ${o.attr || ""}><rect x="${x - w / 2}" y="${y - 15}" width="${w}" height="26" rx="13" fill="${o.bg || "#fff"}" stroke="${o.line || "#2F2A3D"}" stroke-width="1.5"/><text x="${x}" y="${y + 5}" text-anchor="middle" font-size="${o.fs || 16}" fill="${o.fg || "#2F2A3D"}" ${o.tid ? `id="${o.tid}"` : ""}>${t}</text></g>`; };
+  // 방 배경: 벽, 바닥, 눈 오는 창문
+  const room = (win = true) => `<rect width="640" height="360" fill="#FFF0D6"/><rect y="300" width="640" height="60" fill="#D9A066"/><rect y="300" width="640" height="6" fill="#B97F45"/>
+    ${win ? `<g><rect x="520" y="90" width="90" height="110" rx="6" fill="#2A3F6B" stroke="#fff" stroke-width="7"/><path d="M565,90 v110 M520,145 h90" stroke="#fff" stroke-width="5"/><g fill="#fff"><circle cx="538" cy="108" r="3"/><circle cx="590" cy="122" r="3"/><circle cx="548" cy="168" r="3"/><circle cx="596" cy="180" r="3"/><circle cx="578" cy="104" r="2"/></g></g>` : ""}`;
+  const kitchen = `<rect width="640" height="360" fill="#FFF0D6"/><g fill="#F6DDB3"><rect x="0" y="40" width="640" height="3"/><rect x="0" y="100" width="640" height="3"/></g><rect y="290" width="640" height="70" fill="#C98A52"/><rect y="290" width="640" height="7" fill="#A86B36"/>`;
+  const stove = (x, y = 300) => `<rect x="${x - 46}" y="${y - 58}" width="92" height="58" rx="10" fill="#4A4458"/><rect x="${x - 34}" y="${y - 48}" width="68" height="34" rx="6" fill="#2B2636"/>${flame(x, y - 18, .85)}<rect x="${x - 52}" y="${y - 66}" width="104" height="10" rx="5" fill="#6B6480"/>`;
+  // 대류 화살표 두 바퀴 (가운데에서 올라가거나 내려가요)
+  function loops(x, y, w, h, up) {
+    const cx = x + w / 2, t = y + h * .2, b = y + h * .82; let s = "";
+    for (const d of [-1, 1]) {
+      const c = cx + d * w * .07, e = cx + d * w * .4;
+      s += up ? `<path class="flow hot" d="M${c},${b} L${c},${t} L${e - d * 26},${t}"/><path class="flow cold" d="M${e},${t} L${e},${b} L${c + d * 26},${b}"/>`
+              : `<path class="flow cold" d="M${c},${t} L${c},${b} L${e - d * 26},${b}"/><path class="flow hot" d="M${e},${b} L${e},${t} L${c + d * 26},${t}"/>`;
+    }
+    return s;
+  }
+
+  // ---------- 물·공기 흐름 흉내 (뜨거운 것은 위로, 차가운 것은 아래로) ----------
+  function Fluid(o) {
+    const C = o.cols, R = o.rows, cw = o.w / C, ch = o.h / R;
+    let T, src = null, rects = [];
+    const mix = (a, b, k) => Math.round(a + (b - a) * k);
+    const color = t => {
+      t = Math.max(0, Math.min(1, t));
+      const A = [70, 150, 235], M = [250, 228, 205], H = [240, 80, 50];
+      const [p, n, k] = t < .5 ? [A, M, t * 2] : [M, H, (t - .5) * 2];
+      return `rgb(${mix(p[0], n[0], k)},${mix(p[1], n[1], k)},${mix(p[2], n[2], k)})`;
+    };
+    const html = () => {
+      let s = "";
+      for (let r = -1; r <= R; r++) for (let c = -1; c <= C; c++) s += `<rect x="${(o.x + c * cw).toFixed(1)}" y="${(o.y + r * ch).toFixed(1)}" width="${(cw + .6).toFixed(1)}" height="${(ch + .6).toFixed(1)}"/>`;
+      return `<clipPath id="flc"><rect x="${o.x}" y="${o.y}" width="${o.w}" height="${o.h}" rx="${o.rx || 0}"/></clipPath><g clip-path="url(#flc)" opacity="${o.opacity || 1}"><g id="flg" filter="url(#blur)">${s}</g></g>`;
+    };
+    const draw = () => { let k = 0; for (let r = -1; r <= R; r++) for (let c = -1; c <= C; c++) rects[k++].setAttribute("fill", color(T[Math.max(0, Math.min(R - 1, r))][Math.max(0, Math.min(C - 1, c))])); };
+    const reset = () => { T = []; for (let r = 0; r < R; r++) T.push(Array(C).fill(o.base)); src = null; rects = qa("#flg rect"); draw(); };
+    const step = () => {
+      if (src) for (const c of src.cs) T[src.r][c] += (o.srcT - T[src.r][c]) * .6;
+      for (let p = 0; p < 2; p++) for (let c = 0; c < C; c++) for (let r = 0; r < R - 1; r++) if (T[r + 1][c] > T[r][c] + .015) { const t = T[r][c]; T[r][c] = T[r + 1][c]; T[r + 1][c] = t; }
+      const N = T.map(a => a.slice());
+      for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
+        let v = T[r][c] * .5 + (T[r][Math.max(0, c - 1)] + T[r][Math.min(C - 1, c + 1)]) * .25;
+        v += .004 * ((T[Math.max(0, r - 1)][c] + T[Math.min(R - 1, r + 1)][c]) / 2 - v); N[r][c] = v;
+      }
+      T = N; draw();
+    };
+    const row = r => T[r].reduce((a, b) => a + b, 0) / C;
+    return { html, reset, step, row, setSrc: s => { src = s; }, R, C, cw, ch };
+  }
+  // 자리 고르기 → 흐름 지켜보기 → 결과. 5·6·8단계가 함께 써요.
+  function placeGame(c, preview) {
+    const F = Fluid(c.fluid);
+    sceneEl.innerHTML = svg(c.back + F.html() + c.front
+      + label(c.tx[0], c.ty[0], "", { tid: "tTop", w: 190 }) + label(c.tx[1], c.ty[1], "", { tid: "tBot", w: 190 })
+      + `<g id="dev" visibility="hidden">${c.device}</g><g id="flowg"></g>`
+      + c.slots.map((s, i) => `<g class="slot" data-i="${i}"><circle cx="${s.x}" cy="${s.y}" r="21"/><text x="${s.x}" y="${s.y + 5}" text-anchor="middle" font-size="14" fill="#2F2A3D">${s.name}</text></g>`).join(""));
+    F.reset();
+    const temps = () => { q("#tTop").textContent = `${c.names[0]} ${Math.round(c.toC(F.row(0)))}℃`; q("#tBot").textContent = `${c.names[1]} ${Math.round(c.toC(F.row(F.R - 1)))}℃`; };
+    temps();
+    if (preview) return;
+    say(c.prompt);
+    hits(".slot", el => {
+      const i = +el.dataset.i, s = c.slots[i];
+      busy = true; sTap(); fb(c.watching);
+      qa(".slot").forEach(e => e.setAttribute("visibility", "hidden"));
+      const dev = q("#dev"); dev.setAttribute("visibility", "visible"); dev.setAttribute("transform", `translate(${s.x},${s.y})`);
+      F.setSrc({ r: s.r, cs: s.cs });
+      let n = 0;
+      every(() => {
+        F.step(); temps();
+        if (++n < 130) return;
+        if (c.onEnd) c.onEnd(i === c.ok);
+        if (i === c.ok) { q("#flowg").innerHTML = c.flow; win(c.okMsg); }
+        else {
+          busy = false; bad(s.why);
+          if (warm > 0) { busy = true; later(() => { F.reset(); temps(); if (c.onEnd) c.onEnd(null); dev.setAttribute("visibility", "hidden"); qa(".slot").forEach(e => e.setAttribute("visibility", "visible")); busy = false; }, 2300); }
+        }
+        return false;
+      }, 33);
+    });
+  }
+
+  // ---------- 단계별 놀이 ----------
+  const RUN = [];
+
+  // 1단계: 불판 위 버터가 녹는 순서
+  RUN[0] = preview => {
+    const butter = (x, y, i, rot = 0) => `<g class="bt" data-i="${i}" transform="translate(${x},${y}) rotate(${rot})"><rect x="-18" y="-26" width="36" height="26" rx="5" fill="#FFD95A" stroke="#D9A300" stroke-width="2.5"/></g>`;
+    function play(n, rank, after) {   // rank: 녹는 순서대로 놓은 번호
+      let k = 0;
+      hits(".bt", el => {
+        if (+el.dataset.i === rank[k]) {
+          el.classList.add("melt"); sOk(); k++; n(k);
+          fb(k < rank.length ? `⭕ 맞아요! ${k}번째로 녹았어요.` : "", "ok");
+          if (k === rank.length) { busy = true; later(after, 900); }
+        } else bad("불에서 더 가까운 버터가 먼저 녹아요.");
+      });
+    }
+    function roundA() {
+      const flip = Math.random() < .5, xs = [170, 280, 390, 500];
+      sceneEl.innerHTML = svg(kitchen + `<g transform="${flip ? "translate(640,0) scale(-1,1)" : ""}">
+        <rect x="70" y="196" width="500" height="22" rx="8" fill="#8F9AAB"/><rect id="heat" x="70" y="196" width="60" height="22" rx="8" fill="url(#hg)"/>
+        <rect x="70" y="218" width="14" height="72" fill="#6B7585"/><rect x="556" y="218" width="14" height="72" fill="#6B7585"/>
+        ${flame(105, 262, 1.25)}${xs.map((x, i) => butter(x, 196, i)).join("")}</g>` + label(320, 60, "쇠 불판의 한쪽 끝을 가열하고 있어요", { w: 330 }));
+      if (preview) return;
+      say("🧈 버터가 <b>녹는 순서대로</b> 눌러 보세요. <small>열은 불판을 따라 어느 쪽으로 이동할까요?</small>");
+      play(k => q("#heat").setAttribute("width", xs[k - 1] - 70 + 60), [0, 1, 2, 3], roundB);
+    }
+    function roundB() {
+      const rs = [36, 66, 96, 124], angs = shuffle([25, 115, 205, 295]).map(a => a + Math.random() * 40 - 20);
+      sceneEl.innerHTML = svg(kitchen + `<rect x="420" y="166" width="190" height="28" rx="14" fill="#3A3446"/><circle cx="300" cy="180" r="150" fill="#3A3446"/><circle cx="300" cy="180" r="138" fill="#5A546A"/>
+        <circle id="heat" cx="300" cy="180" r="24" fill="url(#hr)"/>${flame(300, 192, .7)}
+        ${rs.map((r, i) => butter(300 + r * Math.cos(angs[i] * Math.PI / 180), 180 + r * Math.sin(angs[i] * Math.PI / 180) + 13, i)).join("")}` + label(515, 60, "위에서 본 프라이팬", { w: 180 }));
+      busy = false;
+      say("🍳 이번에는 프라이팬의 <b>가운데</b>를 가열해요. 버터가 녹는 순서대로 눌러요.");
+      play(k => q("#heat").setAttribute("r", rs[k - 1] + 26), [0, 1, 2, 3], () => win("열은 불에 가까운 곳에서 먼 곳으로, 팬을 따라 퍼져 나갔어요!"));
+    }
+    roundA();
+  };
+
+  // 2단계: 열이 이동하는 빠르기 + 냄비 재료
+  RUN[1] = preview => {
+    const M = [{ n: "구리판", c: "#D98A4E", s: 1.3 }, { n: "철판", c: "#8F9AAB", s: 2.6 }, { n: "유리판", c: "#BFE3F2", s: 4.2 }];
+    const pos = shuffle([0, 1, 2]);   // pos[자리] = 재료 번호
+    sceneEl.innerHTML = svg(kitchen + `<path d="M150,230 h340 l-14,60 h-312z" fill="#9BD0F5" stroke="#5A8FBF" stroke-width="4"/><path d="M150,230 h340" stroke="#fff" stroke-width="4" opacity=".7"/>
+      ${pos.map((m, i) => { const x = 220 + i * 100; return `<g class="pl" data-m="${m}"><rect x="${x - 26}" y="70" width="52" height="210" rx="6" fill="${M[m].c}" stroke="#2F2A3D" stroke-width="2.5"/><rect x="${x - 11}" y="84" width="22" height="140" rx="4" fill="#fff" opacity=".9"/><rect class="stk" x="${x - 11}" y="84" width="22" height="140" rx="4" fill="#E8483C" style="transition:transform ${M[m].s}s linear"/><text class="rk" x="${x}" y="58" text-anchor="middle" font-size="18" fill="#D9541A"></text>${label(x, 322, M[m].n, { w: 76 })}</g>`; }).join("")}
+      <text x="78" y="262" font-size="15" fill="#2F2A3D" text-anchor="middle">뜨거운 물</text><text x="560" y="150" font-size="13" fill="#8A8398" text-anchor="middle">흰 띠: 열 변색</text><text x="560" y="168" font-size="13" fill="#8A8398" text-anchor="middle">붙임딱지</text>`);
+    if (preview) return;
+    say("🌡️ 세 판을 뜨거운 물에 넣어요. 열이 <b>빨리 이동하는 판부터</b> 차례대로 눌러요. <small>붙임딱지는 뜨거워지면 빨갛게 변해요.</small>");
+    let k = 0;
+    hits(".pl", el => {
+      const m = +el.dataset.m;
+      if (el.dataset.done) return;
+      if (m === k) {
+        el.dataset.done = 1; el.querySelector(".rk").textContent = (k + 1) + "등"; sOk(); k++;
+        if (k === 3) {
+          busy = true; fb("⭕ 구리 → 철 → 유리 순서! 직접 확인해 봐요.", "ok");
+          qa(".stk").forEach(s => { s.style.transform = "scaleY(1)"; });
+          later(pot, 4700);
+        } else fb("⭕ 맞아요!", "ok");
+      } else bad(k === 0 ? "금속 중에서도 구리가 열이 가장 빨리 이동해요." : "유리는 금속보다 열이 느리게 이동해요.");
+    });
+    function pot() {
+      sceneEl.innerHTML = svg(kitchen + `${stove(320, 300).replace(/<g class="fl".*?<\/g>/, "")}
+        <rect id="pMat" x="230" y="224" width="180" height="14" rx="6" fill="#E6E0D6" stroke="#2F2A3D" stroke-width="2.5" stroke-dasharray="7 5"/>
+        <path id="pBody" d="M225,120 h190 v80 a24,24 0 0 1 -24,24 h-142 a24,24 0 0 1 -24,-24z" fill="#E6E0D6" stroke="#2F2A3D" stroke-width="2.5" stroke-dasharray="7 5"/>
+        <g id="pHandle" fill="#E6E0D6" stroke="#2F2A3D" stroke-width="2.5" stroke-dasharray="7 5"><rect x="170" y="132" width="55" height="20" rx="10"/><rect x="415" y="132" width="55" height="20" rx="10"/></g>
+        <text x="320" y="170" text-anchor="middle" font-size="26">🍲</text>
+        ${label(320, 84, "몸통", { tid: "lBody", w: 150 })}${label(88, 142, "손잡이", { tid: "lHandle", w: 156 })}${label(520, 231, "냄비 받침", { tid: "lMat", w: 130 })}`);
+      busy = false; fb("");
+      const set = (id, lab, col, name) => { const e = q("#" + id); e.setAttribute("fill", col); e.removeAttribute("stroke-dasharray"); q("#" + lab).textContent = name; };
+      ask("🍲 <b>냄비 몸통</b>은 열이 빨리 이동해야 찌개가 잘 끓어요. 무엇으로 만들까요?", [
+        { t: "금속", ok: 1, why: "금속은 열이 빨리 이동해서 음식이 빨리 익어요." },
+        { t: "플라스틱", why: "플라스틱은 열이 느리게 이동해서 찌개가 잘 끓지 않아요." },
+        { t: "나무", why: "나무는 열이 느리게 이동해서 찌개가 잘 끓지 않아요." }], () => {
+        set("pBody", "lBody", "#AEB8C6", "몸통: 금속");
+        ask("🧤 <b>손잡이</b>는 뜨거워지면 안 돼요. 무엇으로 만들까요?", [
+          { t: "플라스틱", ok: 1, why: "플라스틱은 열이 느리게 이동해서 손으로 잡을 수 있어요." },
+          { t: "구리", why: "구리는 열이 아주 빨리 이동해서 손잡이가 금방 뜨거워져요." },
+          { t: "철", why: "철은 열이 빨리 이동해서 손잡이가 뜨거워져요." }], () => {
+          set("pHandle", "lHandle", "#3A3446", "손잡이: 플라스틱");
+          ask("🪵 뜨거운 냄비를 식탁에 놓을 때 까는 <b>냄비 받침</b>은 무엇으로 만들까요?", [
+            { t: "나무", ok: 1, why: "나무는 열이 느리게 이동해서 식탁을 지켜 줘요." },
+            { t: "철판", why: "철판은 열이 빨리 이동해서 식탁까지 뜨거워져요." },
+            { t: "구리판", why: "구리판은 열이 아주 빨리 이동해서 식탁까지 뜨거워져요." }], () => {
+            set("pMat", "lMat", "#C9803A", "받침: 나무");
+            win("쓰임새에 맞게 열이 빨리 또는 느리게 이동하는 물질을 골랐어요!");
+          });
+        });
+      });
+    }
+  };
+
+  // 3단계: 단열
+  RUN[2] = preview => {
+    const SP = [
+      { x: 122, y: 200, q: "🧱 벽을 따라 집 안의 열이 밖으로 빠져나가요. <b>벽 속</b>에 무엇을 넣을까요?", o: [{ t: "스타이로폼 단열재", ok: 1, why: "단열재는 열이 느리게 이동해서 집 안의 열을 지켜요." }, { t: "철판", why: "철판은 열이 빨리 이동해서 열이 더 잘 빠져나가요." }, { t: "구리판", why: "구리판은 열이 아주 빨리 이동해요." }] },
+      { x: 518, y: 190, q: "🪟 얇은 유리창 한 장으로 열이 술술 새요. 어떻게 할까요?", o: [{ t: "이중창으로 바꾸고 뽁뽁이 붙이기", ok: 1, why: "유리 사이와 뽁뽁이 속 공기층이 열의 이동을 줄여 줘요." }, { t: "쇠 창살 달기", why: "쇠는 열이 빨리 이동해서 단열에 도움이 안 돼요." }, { t: "창문 활짝 열어 두기", why: "따뜻한 공기가 그대로 빠져나가 버려요." }] },
+      { x: 300, y: 222, q: "🫖 식탁 위 뜨거운 보리차가 금방 식어요. 어디에 담아 둘까요?", o: [{ t: "보온병", ok: 1, why: "보온병은 안쪽과 바깥쪽 사이에서 열이 이동하기 어렵게 만든 그릇이에요." }, { t: "쇠 냄비", why: "쇠 냄비는 열이 빨리 이동해서 금방 식어요." }, { t: "넓은 유리 접시", why: "접시에 담으면 열이 더 빨리 빠져나가요." }] },
+      { x: 410, y: 250, q: "🧒 눈을 쓸러 밖에 나가요! 몸의 열을 지키려면 무엇을 입을까요?", o: [{ t: "솜이 든 두꺼운 외투", ok: 1, why: "솜 사이사이의 공기가 몸의 열이 빠져나가는 것을 줄여 줘요." }, { t: "얇은 반소매 옷", why: "얇은 옷은 몸의 열이 금방 빠져나가요." }, { t: "쇠사슬 갑옷", why: "쇠는 열이 빨리 이동해서 몸이 금방 차가워져요." }] }
+    ];
+    const leak = [`M108,150 h-50 M108,200 h-50 M108,250 h-50`, `M536,165 h50 M536,205 h50`, `M300,196 v-34 M285,200 l-14,-28 M315,200 l14,-28`, `M410,222 v-30 M392,230 l-18,-22 M428,230 l18,-22`];
+    sceneEl.innerHTML = svg(`<rect width="640" height="360" fill="#22335A"/><g fill="#fff" opacity=".8"><circle cx="40" cy="50" r="3"/><circle cx="90" cy="120" r="2"/><circle cx="590" cy="70" r="3"/><circle cx="610" cy="250" r="2"/><circle cx="30" cy="230" r="2.5"/><circle cx="560" cy="130" r="2"/></g>
+      <rect y="320" width="640" height="40" fill="#EAF2FF"/><path d="M90,120 L320,22 L550,120z" fill="#B5503C"/><path d="M90,120 L320,22 L550,120" stroke="#fff" stroke-width="10" fill="none" stroke-linecap="round"/>
+      <rect x="108" y="120" width="424" height="200" fill="#FFF0D6"/><rect x="108" y="292" width="424" height="28" fill="#D9A066"/>
+      <rect id="wall" x="108" y="120" width="16" height="200" fill="#B9B2A6"/><rect x="516" y="120" width="16" height="200" fill="#B9B2A6"/>
+      <rect id="glass" x="516" y="150" width="16" height="80" fill="#BFE3F2" stroke="#fff" stroke-width="2"/>
+      <rect x="240" y="250" width="120" height="8" rx="3" fill="#A86B36"/><rect x="252" y="258" width="8" height="34" fill="#A86B36"/><rect x="340" y="258" width="8" height="34" fill="#A86B36"/>
+      <text id="ic2" x="300" y="248" text-anchor="middle" font-size="30">🫖</text><text id="ic3" x="410" y="290" text-anchor="middle" font-size="40">🧒</text>
+      <text x="190" y="290" text-anchor="middle" font-size="36">🛋️</text>
+      ${leak.map((d, i) => `<path class="leak" id="lk${i}" d="${d}" stroke="#E8483C" stroke-width="5" stroke-linecap="round" fill="none" marker-end="url(#mh)"/>`).join("")}
+      ${SP.map((s, i) => `<g class="hs" data-i="${i}"><circle class="pulse" cx="${s.x}" cy="${s.y}" r="17" fill="#E8483C" stroke="#fff" stroke-width="3"/><text x="${s.x}" y="${s.y + 7}" text-anchor="middle" font-size="20" fill="#fff">!</text></g>`).join("")}
+      ${label(320, 150, "실내 온도 12℃", { tid: "tin", w: 170 })}`);
+    if (preview) return;
+    let done = 0;
+    const idle = () => { say("🔍 <b>! 표시</b>를 눌러 열이 새는 곳을 살펴봐요. <small>빨간 화살표는 빠져나가는 열이에요.</small>"); $("opts").innerHTML = ""; };
+    idle();
+    hits(".hs", el => {
+      const i = +el.dataset.i, s = SP[i]; sTap(); fb("");
+      ask(s.q, s.o, () => {
+        el.remove(); q("#lk" + i).remove(); done++;
+        if (i === 0) q("#wall").setAttribute("fill", "#FFFFFF");
+        if (i === 1) q("#glass").setAttribute("fill", "#E6F6FF");
+        if (i === 2) q("#ic2").textContent = "🧴";
+        if (i === 3) q("#ic3").textContent = "🧥";
+        q("#tin").textContent = `실내 온도 ${12 + done * 3}℃`;
+        if (done === 4) win("열의 이동을 줄였더니 집이 훨씬 따뜻해졌어요. 이것이 단열이에요!"); else idle();
+      });
+    });
+  };
+
+  // 4단계: 물방울 길잡이
+  RUN[3] = preview => {
+    const N = 8;
+    sceneEl.innerHTML = svg(kitchen + stove(320, 348) + `<path d="M170,80 v190 a22,22 0 0 0 22,22 h256 a22,22 0 0 0 22,-22 v-190" fill="#D7ECFB" stroke="#6B7585" stroke-width="8"/>
+      <rect x="174" y="100" width="292" height="8" fill="#fff" opacity=".7"/>
+      <text x="320" y="128" text-anchor="middle" font-size="14" fill="#5A8FBF">위쪽</text><text x="320" y="282" text-anchor="middle" font-size="14" fill="#5A8FBF">아래쪽 (불과 가까워요)</text>
+      <g id="flowg"></g><g id="blobs"></g>${label(550, 50, "물방울 0 / " + N, { tid: "cnt", w: 160 })}`);
+    if (preview) return;
+    say("💧 가운데에 나타난 물방울을 알맞은 곳으로 보내요. <small>키보드 ↑ ↓ 키로도 보낼 수 있어요.</small>");
+    const seq = shuffle([1, 1, 1, 1, 0, 0, 0, 0]); let k = 0, el = null;
+    const spawn = () => {
+      const hot = seq[k];
+      q("#blobs").insertAdjacentHTML("beforeend", `<g class="blob"><circle cx="320" cy="196" r="34" fill="${hot ? "#F0603F" : "#3F9BF2"}" stroke="#fff" stroke-width="4"/><text x="320" y="190" text-anchor="middle" font-size="13" fill="#fff">온도가</text><text x="320" y="208" text-anchor="middle" font-size="15" fill="#fff">${hot ? "높아진 물" : "낮아진 물"}</text></g>`);
+      el = q("#blobs").lastElementChild;
+    };
+    const go = up => {
+      if (busy || !el) return;
+      if (up === !!seq[k]) {
+        sOk(); const e = el; el = null;
+        e.style.transform = `translate(${(k % 2 ? 1 : -1) * (40 + k * 9)}px, ${up ? -62 : 62}px) scale(.5)`; e.style.opacity = ".75";
+        k++; q("#cnt").textContent = `물방울 ${k} / ${N}`; fb("⭕ " + (up ? "온도가 높아진 물은 위로!" : "온도가 낮아진 물은 아래로!"), "ok");
+        if (k === N) { busy = true; later(() => { q("#blobs").innerHTML = ""; q("#flowg").innerHTML = loops(174, 100, 292, 190, true); win("뜨거워진 물은 올라가고 차가운 물은 내려오면서 물 전체가 데워져요!"); }, 600); }
+        else later(spawn, 350);
+      } else bad(seq[k] ? "온도가 높아진 물은 위로 올라가요." : "온도가 낮아진 물은 아래로 내려와요.");
+    };
+    opts(["⬆ 위로 보내기", "⬇ 아래로 보내기"], i => go(i === 0));
+    onKey = e => { if (e.key === "ArrowUp") { e.preventDefault(); go(true); } else if (e.key === "ArrowDown") { e.preventDefault(); go(false); } };
+    spawn();
+  };
+
+  // 5단계: 욕조 물 데우기
+  RUN[4] = preview => placeGame({
+    fluid: { x: 110, y: 150, w: 420, h: 150, cols: 14, rows: 6, base: .1, srcT: 1, rx: 26 },
+    back: `<rect width="640" height="360" fill="#DFF1F4"/><g stroke="#C5E3E8" stroke-width="2">${[60, 120, 180, 240, 300].map(y => `<path d="M0,${y} h640"/>`).join("")}${[80, 160, 240, 320, 400, 480, 560].map(x => `<path d="M${x},0 v360"/>`).join("")}</g>
+      <rect x="86" y="126" width="468" height="198" rx="46" fill="#fff" stroke="#9FB7C4" stroke-width="5"/><rect x="130" y="324" width="24" height="22" rx="6" fill="#9FB7C4"/><rect x="486" y="324" width="24" height="22" rx="6" fill="#9FB7C4"/>`,
+    front: `<text x="190" y="158" font-size="34">🦆</text>`,
+    device: `<rect x="-34" y="-12" width="68" height="24" rx="12" fill="#2F2A3D"/><path d="M-22,0 q5,-9 11,0 t11,0 t11,0 t11,0" stroke="#FF7A2F" stroke-width="4" fill="none"/>`,
+    slots: [{ x: 320, y: 168, r: 0, cs: [6, 7], name: "위", why: "위쪽 물만 뜨거워지고 아래쪽 물은 그대로 차가워요. 뜨거워진 물은 아래로 내려가지 않아요." },
+            { x: 320, y: 226, r: 3, cs: [6, 7], name: "가운데", why: "히터보다 아래에 있는 물은 여전히 차가워요." },
+            { x: 320, y: 284, r: 5, cs: [6, 7], name: "아래", why: "" }],
+    ok: 2, names: ["위쪽 물", "아래쪽 물"], tx: [180, 460], ty: [70, 70], toC: t => 12 + t * 35,
+    prompt: "🛁 히터를 욕조의 <b>어디에</b> 놓을까요? 동그라미를 눌러 골라요. <small>색깔은 물의 온도예요. 파랑은 차갑고 빨강은 뜨거워요.</small>",
+    watching: "⏳ 물이 데워지는 모습을 지켜봐요…",
+    flow: loops(110, 150, 420, 150, true),
+    okMsg: "아래에서 데워진 물이 올라가고 차가운 물이 내려오며 욕조 전체가 따뜻해졌어요!"
+  }, preview);
+
+  // 6단계: 보리차 식히기
+  RUN[5] = preview => placeGame({
+    fluid: { x: 220, y: 96, w: 200, h: 196, cols: 8, rows: 7, base: .9, srcT: 0, rx: 14 },
+    back: kitchen + `<rect x="208" y="70" width="224" height="232" rx="22" fill="#fff" stroke="#9FB7C4" stroke-width="5" opacity=".95"/><path d="M432,120 h36 a16,16 0 0 1 16,16 v70 a16,16 0 0 1 -16,16 h-36" fill="none" stroke="#9FB7C4" stroke-width="10"/>`,
+    front: `<text x="320" y="330" text-anchor="middle" font-size="14" fill="#fff">유리 주전자 속 보리차</text>`,
+    device: `<rect x="-36" y="-13" width="72" height="26" rx="10" fill="#BFE6FF" stroke="#2F7FE0" stroke-width="3"/><text x="0" y="6" text-anchor="middle" font-size="16">🧊🧊</text>`,
+    slots: [{ x: 320, y: 110, r: 0, cs: [3, 4], name: "위", why: "" },
+            { x: 240, y: 194, r: 3, cs: [0], name: "가운데", why: "얼음주머니보다 위에 있는 보리차는 여전히 뜨거워요." },
+            { x: 320, y: 278, r: 6, cs: [3, 4], name: "아래", why: "아래쪽만 차가워지고 위쪽 보리차는 그대로 뜨거워요. 차가워진 물은 위로 올라가지 않아요." }],
+    ok: 0, names: ["위쪽 보리차", "아래쪽 보리차"], tx: [110, 110], ty: [120, 270], toC: t => 10 + t * 78,
+    prompt: "🧊 얼음주머니를 주전자의 <b>어디에</b> 댈까요? 동그라미를 눌러 골라요. <small>이번에는 데우기가 아니라 식히기예요!</small>",
+    watching: "⏳ 보리차가 식는 모습을 지켜봐요…",
+    flow: loops(220, 96, 200, 196, false),
+    okMsg: "위에서 차가워진 보리차가 내려가고 뜨거운 보리차가 올라오며 전체가 식었어요!"
+  }, preview);
+
+  // 7단계: 따뜻한 자리 찾기
+  RUN[6] = preview => {
+    const Y = [118, 190, 262], TEMP = [27, 22, 17];
+    const R = [
+      { ic: "🐱", ok: 0, q: "🐱 고양이 나비는 <b>가장 따뜻한 자리</b>를 좋아해요. 어느 칸에 올려 줄까요?", why: "따뜻해진 공기가 위로 올라가서 맨 위 칸이 가장 따뜻해요.", no: "더 따뜻한 칸이 있어요. 따뜻해진 공기는 어디로 갈까요?" },
+      { ic: "🍫", ok: 2, q: "🍫 초콜릿이 녹지 않게 <b>가장 시원한 칸</b>에 두려고 해요. 어느 칸일까요?", why: "차가운 공기는 아래쪽에 있어서 맨 아래 칸이 가장 시원해요.", no: "그 칸은 따뜻해서 초콜릿이 녹아요. 차가운 공기는 어디에 있을까요?" },
+      { ic: "🧤", ok: 0, q: "🧤 눈싸움으로 젖은 장갑을 <b>빨리 말리고</b> 싶어요. 어느 칸에 둘까요?", why: "따뜻한 공기가 모이는 높은 곳에서 빨래가 더 빨리 말라요.", no: "더 따뜻한 칸에 두면 더 빨리 말라요." }
+    ];
+    sceneEl.innerHTML = svg(room(false) + `<rect width="640" height="300" fill="url(#haze)"/>${stove(120)}
+      <path class="flow hot" d="M120,225 V70 H330"/>
+      <rect x="420" y="76" width="12" height="224" fill="#A86B36"/><rect x="568" y="76" width="12" height="224" fill="#A86B36"/>
+      ${Y.map((y, i) => `<g class="lv" data-i="${i}"><rect x="432" y="${y - 44}" width="136" height="58" fill="#FFF7E8" stroke="#A86B36" stroke-width="3" stroke-dasharray="6 5"/><rect x="420" y="${y + 14}" width="160" height="10" rx="3" fill="#A86B36"/><text class="it" x="500" y="${y + 4}" text-anchor="middle" font-size="34"></text><text class="tp" x="600" y="${y - 8}" font-size="15" fill="#2F2A3D" text-anchor="middle"></text></g>`).join("")}
+      <text x="500" y="56" text-anchor="middle" font-size="15" fill="#2F2A3D">3단 선반</text>`);
+    if (preview) return;
+    let k = 0;
+    const next = () => { qa(".it").forEach(t => t.textContent = ""); say(R[k].q + " <small>선반의 칸을 눌러요.</small>"); };
+    next();
+    hits(".lv", el => {
+      const i = +el.dataset.i, r = R[k];
+      if (i === r.ok) {
+        el.querySelector(".it").textContent = r.ic; qa(".tp").forEach((t, j) => t.textContent = TEMP[j] + "℃");
+        busy = true; good(r.why); k++;
+        if (k === R.length) win(); else later(() => { busy = false; fb(""); next(); }, 1900);
+      } else bad(r.no);
+    });
+  };
+
+  // 8단계: 거실 난방기 놓기
+  RUN[7] = preview => placeGame({
+    fluid: { x: 40, y: 40, w: 560, h: 260, cols: 14, rows: 6, base: .1, srcT: 1, opacity: .62 },
+    back: room(true) + `<rect x="36" y="110" width="70" height="8" rx="3" fill="#A86B36"/><rect x="250" y="286" width="250" height="14" rx="7" fill="#E88D8D"/><text x="300" y="292" font-size="40" text-anchor="middle">🧒</text><text x="360" y="292" font-size="44" text-anchor="middle">👩</text><text x="425" y="292" font-size="44" text-anchor="middle">👨</text>`,
+    front: `<rect x="40" y="40" width="560" height="260" fill="none" stroke="#2F2A3D" stroke-width="3" rx="4"/><text id="face" x="362" y="232" text-anchor="middle" font-size="18" fill="#2F2A3D">🥶 으으, 추워요</text>`,
+    device: `<rect x="-26" y="-18" width="52" height="36" rx="8" fill="#fff" stroke="#2F2A3D" stroke-width="3"/><path d="M-16,-8 h32 M-16,0 h32 M-16,8 h32" stroke="#FF7A2F" stroke-width="4" stroke-linecap="round"/>`,
+    slots: [{ x: 72, y: 86, r: 0, cs: [0, 1], name: "선반", why: "천장 가까운 공기만 따뜻해지고, 가족이 있는 바닥은 여전히 추워요." },
+            { x: 72, y: 180, r: 3, cs: [0, 1], name: "벽", why: "난방기보다 아래쪽 공기는 여전히 차가워서 바닥에 앉은 가족은 추워요." },
+            { x: 72, y: 272, r: 5, cs: [0, 1], name: "바닥", why: "" }],
+    ok: 2, names: ["천장 근처", "바닥 근처"], tx: [330, 330], ty: [22, 338], toC: t => 6 + t * 30,
+    prompt: "🛋️ 난방기를 <b>어디에</b> 놓을까요? 높은 선반 위, 벽 가운데, 바닥 중에서 골라요. <small>색깔은 공기의 온도예요.</small>",
+    watching: "⏳ 방 안 공기가 데워지는 모습을 지켜봐요…",
+    onEnd: ok => { q("#face").textContent = ok ? "😊 따뜻해요!" : "🥶 으으, 추워요"; },
+    flow: `<path class="flow hot" d="M120,250 V70 H500"/><path class="flow cold" d="M540,80 V272 H170"/>`,
+    okMsg: "낮은 곳에서 따뜻해진 공기가 위로 올라가며 방 전체가 따뜻해졌어요!"
+  }, preview);
+
+  // 9단계: 공기 흐름 잇기
+  RUN[8] = preview => {
+    const TL = [{ x: 120, y: 165, a: 0, n: "난로 위" }, { x: 250, y: 62, a: 1 }, { x: 400, y: 62, a: 1, n: "천장 아래" }, { x: 470, y: 165, a: 2, n: "차가운 창가" }, { x: 400, y: 268, a: 3 }, { x: 250, y: 268, a: 3, n: "바닥 위" }];
+    const rot = TL.map(t => (t.a + 1 + Math.floor(Math.random() * 3)) % 4);
+    sceneEl.innerHTML = svg(room(true) + stove(120) + `<path d="M120,235 V62 H470 V268 H170" stroke="#2F2A3D" stroke-width="3" stroke-dasharray="3 9" fill="none" opacity=".35"/><g id="flowg"></g>
+      ${TL.map((t, i) => `<g class="tl" data-i="${i}"><g class="tile" style="transform:rotate(${rot[i] * 90}deg)"><circle cx="${t.x}" cy="${t.y}" r="27" fill="#fff" stroke="#2F2A3D" stroke-width="3"/><path d="M${t.x},${t.y + 15} V${t.y - 9} M${t.x - 11},${t.y - 3} L${t.x},${t.y - 16} L${t.x + 11},${t.y - 3}" stroke="#8E7CF0" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>${t.n ? `<text x="${t.x}" y="${t.y + (t.y > 200 ? -36 : 48)}" text-anchor="middle" font-size="13" fill="#2F2A3D">${t.n}</text>` : ""}</g>`).join("")}`);
+    if (preview) return;
+    say("🌬️ 화살표를 눌러 돌려서 <b>공기가 움직이는 방향</b>을 맞춘 뒤 확인 버튼을 눌러요. <small>난로 위 공기는 따뜻해지고, 창가의 공기는 차가워져요.</small>");
+    hits(".tl", el => { const i = +el.dataset.i; rot[i]++; sTap(); const t = el.querySelector(".tile"); t.classList.remove("bad"); t.style.transform = `rotate(${rot[i] * 90}deg)`; });
+    opts(["✅ 공기 흐름 확인!"], () => {
+      const wrong = TL.map((t, i) => rot[i] % 4 !== t.a ? i : -1).filter(i => i >= 0);
+      if (!wrong.length) { busy = true; qa(".tl").forEach(e => e.setAttribute("opacity", ".35")); q("#flowg").innerHTML = `<path class="flow hot" d="M120,235 V62 H430"/><path class="flow cold" d="M470,90 V268 H180"/>`; win("따뜻해진 공기는 위로, 창가에서 식은 공기는 아래로! 공기가 방 안을 돌아요."); }
+      else {
+        wrong.forEach(i => qa(".tile")[i].classList.add("bad"));
+        bad(`${wrong.length}개가 달라요. ` + (wrong.includes(0) ? "난로 위 따뜻해진 공기는 위로 올라가요." : wrong.includes(3) ? "창가에서 차가워진 공기는 아래로 내려와요." : "올라간 공기는 천장을 따라 창가로, 내려온 공기는 바닥을 따라 난로로 가요."));
+      }
+    });
+  };
+
+  // 10단계: 보스전 퀴즈
+  const QUIZ = {
+    solid: [
+      { q: "뜨거운 국에 쇠숟가락을 담가 두었더니 손잡이까지 뜨거워졌어요. 그 까닭은 무엇일까요?", a: ["열이 숟가락을 따라 온도가 높은 곳에서 낮은 곳으로 이동해서", "국물이 숟가락 속으로 스며들어서", "숟가락의 차가움이 국으로 이동해서", "숟가락이 스스로 열을 만들어서"], why: "고체에서 열은 온도가 높은 곳에서 낮은 곳으로 물체를 따라 이동해요." },
+      { q: "네모난 쇠 불판의 가운데를 가열하면 열은 어떻게 이동할까요?", a: ["가운데에서 가장자리 쪽으로 퍼져요", "가장자리에서 가운데로 모여요", "한쪽 방향으로만 이동해요", "이동하지 않아요"], why: "열은 가열한 곳(온도가 높은 곳)에서 멀어지는 방향으로 퍼져요." },
+      { q: "구리판, 철판, 유리판 중에서 열이 가장 빠르게 이동하는 것은 무엇일까요?", a: ["구리판", "철판", "유리판", "모두 같아요"], why: "열이 이동하는 빠르기는 구리 → 철 → 유리 순서예요." },
+      { q: "냄비의 손잡이를 플라스틱이나 나무로 만드는 까닭은 무엇일까요?", a: ["금속보다 열이 느리게 이동해서", "금속보다 열이 빠르게 이동해서", "금속보다 무거워서", "물에 잘 뜨기 때문에"], why: "플라스틱과 나무는 열이 느리게 이동해서 손잡이가 덜 뜨거워져요." },
+      { q: "겨울에 집의 벽 속에 단열재를 넣는 까닭은 무엇일까요?", a: ["집 안의 열이 밖으로 이동하는 것을 줄이려고", "집 안의 열이 밖으로 더 잘 이동하게 하려고", "벽을 무겁게 하려고", "벽에서 열이 생기게 하려고"], why: "단열재는 열의 이동을 줄여 집 안의 온기를 지켜 줘요." }
+    ],
+    liquid: [
+      { q: "주전자의 물을 아래에서 가열했어요. 온도가 높아진 물은 어떻게 될까요?", a: ["위로 올라가요", "바닥에 머물러요", "옆으로만 움직여요", "아래로 더 내려가요"], why: "액체에서 온도가 높아진 물은 위로 올라가요." },
+      { q: "뜨거워진 물이 위로 올라가면, 위에 있던 온도가 낮은 물은 어떻게 될까요?", a: ["아래로 내려와요", "더 위로 올라가요", "그 자리에 멈춰요", "모두 사라져요"], why: "온도가 낮은 물은 아래로 내려오고, 이 과정이 반복돼요." },
+      { q: "욕조의 물 전체를 골고루 데우려면 히터를 어디에 두어야 할까요?", a: ["욕조의 아래쪽", "욕조의 위쪽", "물 밖 공기 중", "어디에 두어도 같아요"], why: "아래쪽에서 데워진 물이 올라가며 물 전체가 따뜻해져요." },
+      { q: "냄비의 바닥만 가열해도 물 전체가 뜨거워지는 까닭은 무엇일까요?", a: ["뜨거워진 물은 올라가고 차가운 물은 내려오는 과정이 반복되어서", "물은 움직이지 않고 열만 차례로 전달되어서", "냄비 뚜껑이 물을 눌러 주어서", "물이 불꽃을 빨아들여서"], why: "액체는 온도가 달라진 물이 직접 움직이면서 열이 이동해요." },
+      { q: "뜨거운 보리차를 빨리 식히려면 얼음주머니를 주전자의 어디에 대는 것이 좋을까요?", a: ["위쪽", "아래쪽", "어디든 같아요", "주전자에서 멀리 떨어진 곳"], why: "위에서 차가워진 물이 아래로 내려가며 전체가 식어요." }
+    ],
+    gas: [
+      { q: "난로를 켰을 때 난로 주변에서 따뜻해진 공기는 어떻게 될까요?", a: ["위로 올라가요", "바닥으로 가라앉아요", "그 자리에 머물러요", "난로 속으로 들어가요"], why: "기체에서도 온도가 높아진 공기는 위로 올라가요." },
+      { q: "난방기를 방의 낮은 곳에 설치하는 까닭은 무엇일까요?", a: ["따뜻해진 공기가 위로 올라가면서 방 전체가 따뜻해지기 때문에", "따뜻해진 공기가 아래에만 머물기 때문에", "차가운 공기가 위로 올라가기 때문에", "높은 곳은 원래 뜨겁기 때문에"], why: "낮은 곳에서 데워진 공기가 올라가며 방 전체를 돌아요." },
+      { q: "난로를 켠 방에서 온도가 가장 높은 곳은 어디일까요?", a: ["천장과 가까운 높은 곳", "바닥과 가까운 낮은 곳", "창문 바로 아래", "어디나 똑같아요"], why: "따뜻해진 공기가 위로 올라가서 높은 곳이 더 따뜻해요." },
+      { q: "에어컨(냉방기)을 방의 높은 곳에 설치하는 까닭은 무엇일까요?", a: ["차가워진 공기는 아래로 내려오기 때문에", "차가워진 공기는 위로 올라가기 때문에", "높은 곳이 더 시원하기 때문에", "공기는 움직이지 않기 때문에"], why: "위에서 차가워진 공기가 내려오며 방 전체가 시원해져요." },
+      { q: "모닥불을 피우면 연기가 위로 올라가는 까닭은 무엇일까요?", a: ["불 주변에서 뜨거워진 공기가 위로 올라가기 때문에", "차가워진 공기가 위로 올라가기 때문에", "연기가 땅을 싫어하기 때문에", "바람이 항상 위로만 불기 때문에"], why: "뜨거워진 공기가 위로 올라가면서 연기도 함께 올라가요." }
+    ],
+    mix: [
+      { q: "열이 이동하는 방법이 나머지와 다른 하나는 무엇일까요?", a: ["프라이팬 손잡이가 점점 뜨거워진다", "주전자의 물이 전체적으로 데워진다", "난로를 켠 방 전체가 따뜻해진다", "욕조 아래를 데우면 물 전체가 따뜻해진다"], why: "프라이팬은 고체라서 열이 물체를 따라 이동해요. 나머지는 물과 공기가 직접 움직여요." },
+      { q: "액체와 기체에서 열이 이동하는 모습의 공통점은 무엇일까요?", a: ["온도가 높아진 물질이 직접 위로 올라가요", "물질은 가만히 있고 열만 이동해요", "온도가 낮아진 물질이 위로 올라가요", "열이 전혀 이동하지 않아요"], why: "액체와 기체는 온도가 높아진 물질이 직접 위로 올라가면서 열이 이동해요." }
+    ]
+  };
+  RUN[9] = preview => {
+    sceneEl.innerHTML = svg(`<rect width="640" height="360" fill="#22335A"/><g fill="#fff" opacity=".85">${Array.from({ length: 26 }, (_, i) => `<circle cx="${(i * 97) % 640}" cy="${(i * 53) % 300}" r="${2 + i % 3}"/>`).join("")}</g>
+      <rect y="300" width="640" height="60" fill="#EAF2FF"/>
+      <g transform="translate(90,200)"><path d="M-60,30 L0,-30 L60,30z" fill="#B5503C"/><rect x="-46" y="30" width="92" height="70" fill="#FFF0D6"/><rect x="-14" y="52" width="28" height="28" fill="#FFC93D"/><text x="0" y="-36" text-anchor="middle" font-size="14" fill="#fff">우리 집</text></g>
+      <g id="boss"><path d="M300,300 C230,300 220,230 262,200 C240,140 300,96 350,120 C380,80 460,90 470,140 C530,150 540,230 500,262 C520,290 470,300 440,300z" fill="#CFE9FF" stroke="#7FB7E8" stroke-width="5"/>
+        <path d="M330,96 l14,-34 l22,26 l20,-32 l20,32 l22,-26 l12,34z" fill="#FFC93D" stroke="#D9A300" stroke-width="3"/>
+        <path d="M322,168 l34,14 M436,168 l-34,14" stroke="#2F2A3D" stroke-width="6" stroke-linecap="round"/><circle cx="342" cy="196" r="9" fill="#2F2A3D"/><circle cx="416" cy="196" r="9" fill="#2F2A3D"/>
+        <path id="mouth" d="M350,244 q30,-22 60,0" stroke="#2F2A3D" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <text id="sweat" x="476" y="180" font-size="26"></text></g>
+      <text x="380" y="340" text-anchor="middle" font-size="16" fill="#2F2A3D">한파 대왕 꽁꽁이</text>
+      ${label(550, 40, "❄️❄️❄️❄️❄️", { tid: "hp", w: 160 })}${label(96, 40, "문제 1 / 10", { tid: "qn", w: 150 })}`);
+    if (preview) return;
+    const pick = (k, n) => shuffle(QUIZ[k]).slice(0, n);
+    const qs = shuffle([...pick("solid", 3), ...pick("liquid", 3), ...pick("gas", 3), ...pick("mix", 1)]);
+    let k = 0, right = 0;
+    const paint = () => {
+      const left = Math.max(0, 5 - right);
+      q("#hp").textContent = left ? "❄️".repeat(left) + "💧".repeat(5 - left) : "녹았다! 💦";
+      const b = q("#boss"); b.style.transform = `scale(${.55 + left * .09})`; b.style.opacity = left ? 1 : .55;
+      q("#sweat").textContent = left <= 3 ? "💦" : "";
+      if (!left) q("#mouth").setAttribute("d", "M350,236 q30,22 60,0");
+      $("wFill").style.width = Math.min(100, right * 20) + "%"; $("wTxt").textContent = `${Math.min(right, 5)}/5`;
+      $("scoreTxt").textContent = `맞힌 문제 ${right}개`;
+    };
+    const next = () => {
+      if (k === qs.length) return end();
+      const Q = qs[k], items = shuffle(Q.a.map((t, i) => ({ t, ok: i === 0 })));
+      q("#qn").textContent = `문제 ${k + 1} / 10`; fb("");
+      say(`Q${k + 1}. ${Q.q}` + (right >= 5 ? " <small>꽁꽁이는 이미 녹았어요! 남은 문제는 보너스 점수예요.</small>" : ""));
+      opts(items.map(o => o.t), (i, b) => {
+        busy = true; const o = items[i];
+        [...$("opts").children].forEach((x, j) => { x.disabled = true; if (items[j].ok) x.classList.add("ok"); });
+        if (o.ok) { right++; sOk(); fb("⭕ 정답! " + Q.why, "ok"); const bs = q("#boss"); bs.classList.remove("hitb"); void bs.getBoundingClientRect(); bs.classList.add("hitb"); }
+        else { b.classList.add("no"); sNo(); fb("❌ 아쉬워요. " + Q.why, "no"); }
+        paint(); k++;
+        opts2();
+      }, "quiz");
+      busy = false;
+    };
+    // 해설을 읽고 넘어가는 버튼
+    const opts2 = () => { const b = document.createElement("button"); b.type = "button"; b.className = "primary"; b.style.flex = "1 1 100%"; b.textContent = k === qs.length ? "결과 보기 ▶" : "다음 문제 ▶"; b.onclick = () => { sTap(); next(); }; $("opts").appendChild(b); b.focus({ preventScroll: true }); };
+    const end = () => {
+      busy = true;
+      if (right >= 5) return win("", right * 10);
+      sNo();
+      showCard(`<div class="em">🥶</div><h2>꽁꽁이가 아직 버티고 있어요</h2><p>10문제 중 <b>${right}문제</b>를 맞혔어요. 5문제 이상 맞혀야 꽁꽁이를 녹일 수 있어요.</p><p class="note">📒 열 이동 노트를 다시 읽고 도전해 봐요!</p>`, [["다시 도전 ▶", () => loadStage(9), true]]);
+    };
+    paint(); next();
+  };
+
+  // ---------- 아래쪽 패널 ----------
+  function renderLevels() {
+    const box = $("levels"); box.innerHTML = "";
+    STAGES.forEach((S, i) => {
+      const b = document.createElement("button"); b.type = "button"; const open = i < progress.unlocked;
+      b.className = S.kind + (i === cur ? " cur" : ""); b.disabled = !open;
+      b.textContent = open ? `${S.icon} ${i + 1}` : `🔒 ${i + 1}`; b.title = `${i + 1}단계 ${S.title}`; b.setAttribute("aria-label", `${i + 1}단계 ${S.title}${open ? "" : " (잠김)"}`);
+      b.onclick = () => { loadStage(i); $("lvlPill").scrollIntoView({ behavior: "smooth", block: "nearest" }); };
+      box.appendChild(b);
+    });
+  }
+  function renderNotes() {
+    $("notes").innerHTML = STAGES.map((S, i) => progress.scores[i] > 0
+      ? `<div><b>${i + 1}. <span class="kind ${S.kind}">${KIND[S.kind]}</span></b> ${S.note}</div>`
+      : `<div class="lock"><b>${i + 1}.</b> ${i + 1}단계를 통과하면 적혀요.</div>`).join("");
+  }
+  function renderAll() { renderLevels(); renderNotes(); renderRank(); $("scoreTxt").textContent = total() + "점"; }
+  $("restartBtn").onclick = () => loadStage(cur);
+  $("fromStartBtn").onclick = () => loadStage(0);
+  $("unlockAll").onclick = () => { progress.unlocked = 10; saveProgress(); renderLevels(); };
+
+  // ---------- 순위 ----------
+  const Rank = { rows: [], status: "loading", uid: null, save: null };
+  const cleanScore = s => Math.max(0, Math.min(1000, s | 0));
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  function renderRank() {
+    const cleared = progress.scores.filter(s => s > 0).length;
+    $("myTotal").textContent = total(); $("myClear").textContent = cleared;
+    $("lvScores").innerHTML = progress.scores.map((s, i) => `<li class="${s ? "on" : ""}">${i + 1}단계 ${s || "-"}</li>`).join("");
+    const msg = $("rankMsg"), ready = Rank.status === "ready" && Rank.save;
+    $("rankBtn").disabled = !ready || cleared < 10;
+    if (!msg.dataset.sticky) {
+      msg.className = "msg";
+      msg.textContent = Rank.status === "off" ? "지금은 순위표에 연결할 수 없어요. 점수는 이 기기에 저장돼요." : cleared < 10 ? `10단계까지 모두 통과하면 등록할 수 있어요. (지금 ${cleared}개)` : "이름을 쓰고 등록해 보세요!";
+    }
+    const board = $("board");
+    if (Rank.status === "loading") return;
+    if (Rank.status === "off") { board.innerHTML = `<li class="empty">순위표를 불러오지 못했어요.</li>`; return; }
+    const rows = Rank.rows.slice().sort((a, b) => cleanScore(b.score) - cleanScore(a.score)).slice(0, 5);
+    board.innerHTML = rows.length ? rows.map((r, i) => `<li class="${r.id === Rank.uid ? "me" : ""}"><span class="no">${["🥇", "🥈", "🥉"][i] || (i + 1)}</span><span class="nm">${esc(r.nick)}</span><span>${cleanScore(r.score)}점</span></li>`).join("")
+      : `<li class="empty">아직 등록된 기록이 없어요. 첫 번째 주인공이 되어 보세요!</li>`;
+  }
+  $("rankForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const nick = $("nick").value.trim().slice(0, 12), msg = $("rankMsg");
+    if (!nick || !Rank.save || progress.scores.some(s => !s)) return;
+    $("rankBtn").disabled = true; msg.dataset.sticky = "1"; msg.className = "msg"; msg.textContent = "등록하는 중이에요…";
+    try { await Rank.save({ nick, score: total(), levels: progress.scores.slice(), at: Date.now() }); msg.textContent = "✅ 등록했어요!"; msg.className = "msg ok"; }
+    catch (err) { msg.textContent = "등록하지 못했어요. 잠시 뒤에 다시 눌러 주세요."; msg.className = "msg err"; }
+    setTimeout(() => { delete msg.dataset.sticky; renderRank(); }, 2600);
+  });
+  // 사이트의 다른 게임과 같은 Firestore에 순위를 저장해요.
+  function initFirebase() {
+    let fdb;
+    try {
+      if (!firebase.apps.length) firebase.initializeApp({
+        apiKey: "AIzaSyAqXsG8npxettrCRH3MbZwFZGLg5aehxdw",
+        authDomain: "min-playground.firebaseapp.com",
+        projectId: "min-playground",
+        storageBucket: "min-playground.firebasestorage.app",
+        messagingSenderId: "472071492052",
+        appId: "1:472071492052:web:00263046925133e55a4641"
+      });
+      fdb = firebase.firestore();
+    } catch (e) { Rank.status = "off"; return renderRank(); }
+    const ref = fdb.collection("farm_rankings").doc("winter_home_top");
+    try { Rank.uid = localStorage.getItem("winter-home-key"); } catch (e) {}
+    if (!Rank.uid) { Rank.uid = Date.now() + "-" + Math.floor(Math.random() * 1e6); try { localStorage.setItem("winter-home-key", Rank.uid); } catch (e) {} }
+    Rank.save = async body => {
+      const doc = await ref.get();
+      const arr = ((doc.exists && doc.data().top) || []).filter(r => r.key !== Rank.uid);
+      arr.push({ key: Rank.uid, name: body.nick, score: body.score, levels: body.levels, at: body.at });
+      arr.sort((a, b) => cleanScore(b.score) - cleanScore(a.score));
+      await ref.set({ top: arr.slice(0, 30) });
+    };
+    // 관리자용 순위 초기화 (맨 아래 전구), 사이트의 다른 게임과 같아요
+    $("bulbWrap").hidden = false;
+    $("bulb").onclick = () => {
+      const pw = prompt("관리자 비밀번호를 입력하세요.");
+      if (pw === null) return;
+      if (pw !== "3min") { alert("비밀번호가 달라요."); return; }
+      if (!confirm("'우리 집 겨울나기' 순위를 지울까요?\n지우면 되돌릴 수 없어요.")) return;
+      $("bulb").classList.add("on");
+      ref.set({ top: [] }).then(() => alert("✅ 순위를 초기화했어요."))
+        .catch(e => alert("초기화하지 못했어요.\n" + (e && e.message ? e.message : "")))
+        .then(() => $("bulb").classList.remove("on"));
+    };
+    ref.onSnapshot(doc => {
+      Rank.rows = ((doc.exists && doc.data().top) || []).map(r => ({ id: r.key, nick: r.name, score: r.score, at: r.at }));
+      Rank.status = "ready"; renderRank();
+    }, () => { Rank.status = "off"; renderRank(); });
+  }
+
+  // ---------- 시작 ----------
+  syncSfx(); renderAll();
+  if (window.firebase) initFirebase(); else { Rank.status = "off"; renderRank(); }
+  const startAt = Math.max(0, Math.min(9, progress.unlocked - 1));
+  cur = startAt; renderLevels(); RUN[startAt](true);
+  $("lvlNo").textContent = (startAt + 1) + "단계"; $("lvlName").textContent = STAGES[startAt].title; $("lvlPill").className = "pill level " + STAGES[startAt].kind;
+  showCard(`<div class="em">🏠❄️</div><h2>우리 집 겨울나기</h2>
+    <p>한파 대왕 꽁꽁이가 우리 집을 꽁꽁 얼리려고 해요! 불꽃 요정 따끈이와 함께 <b>열이 이동하는 방법</b>을 이용해 집을 따뜻하게 지켜요.</p>
+    <p><span class="kind solid">1~3 고체</span> <span class="kind liquid">4~6 액체</span> <span class="kind gas">7~9 기체</span> <span class="kind boss">10 보스전</span></p>`,
+    [[startAt ? `${startAt + 1}단계부터 이어하기 ▶` : "겨울나기 시작! ▶", () => loadStage(startAt), true]].concat(startAt ? [["1단계부터", () => loadStage(0)]] : []));
+})();
+</script>
+
+<!-- 활용 안내 시작 -->
+<section class="pgd" id="pg-guide" aria-labelledby="pgd-title" style="--pgd-accent:#FF7A2F;--pgd-soft:#FFE9C9;">
+  <div class="pgd__box">
+    <span class="pgd__ribbon">📖 활용 안내</span>
+    <span class="pgd__deco pgd__deco--a" aria-hidden="true">🔥</span>
+    <span class="pgd__deco pgd__deco--b" aria-hidden="true">❄️</span>
+    <span class="pgd__deco pgd__deco--c" aria-hidden="true">✨</span>
+    <div class="pgd__head">
+      <div class="pgd__mascot"><img src="../assets/guide/winter-home.svg" alt="빨간 목도리를 두른 불꽃 요정 따끈이 그림" width="150" height="150" loading="lazy" decoding="async"></div>
+      <div>
+        <h2 class="pgd__title" id="pgd-title"><mark>우리 집 겨울나기</mark>, 이렇게 활용해요</h2>
+        <p class="pgd__lead">한 집 안에서 벌어지는 생활 속 미션을 깨며 <b>고체·액체·기체에서 열이 이동하는 방법</b>을 차례로 익히고, 보스전 퀴즈로 단원을 마무리하는 과학 게임이에요.</p>
+      </div>
+    </div>
+    <ul class="pgd__chips" aria-label="한눈에 보기">
+      <li>🎒 5학년 추천</li>
+      <li>🔬 과학 · 열의 이동</li>
+      <li>⏱️ 단계마다 1~2분</li>
+      <li>👤 혼자 · 짝 · 모둠 대결</li>
+    </ul>
+    <div class="pgd__grid">
+      <div class="pgd__card pgd__card--how">
+        <h3><span class="pgd__ico" aria-hidden="true">🎮</span>이렇게 놀아요</h3>
+        <ol>
+        <li><b>1~3단계 고체</b>: 버터가 녹는 순서 맞히기, 냄비 몸통·손잡이·받침 재료 고르기, 열이 새는 곳을 찾아 단열하기.</li>
+        <li><b>4~6단계 액체</b>: 뜨거워진 물과 차가워진 물 보내기, 욕조 히터 자리 고르기, 얼음주머니 자리 고르기.</li>
+        <li><b>7~9단계 기체</b>: 선반에서 따뜻한 칸·시원한 칸 찾기, 난방기 자리 고르기, 방 안 공기 흐름 화살표 맞추기.</li>
+        <li><b>10단계 보스전</b>: 무작위로 나오는 퀴즈 10문제 중 5문제 이상 맞히면 한파 대왕 꽁꽁이를 물리쳐요.</li>
+        </ol>
+      </div>
+      <div class="pgd__card pgd__card--learn">
+        <h3><span class="pgd__ico" aria-hidden="true">🌱</span>이런 걸 배워요</h3>
+        <ul>
+        <li><b>고체</b>에서 열은 온도가 높은 곳에서 낮은 곳으로 물체를 따라 이동해요.</li>
+        <li><b>액체</b>에서는 온도가 높아진 액체가 위로 올라가고, 온도가 낮아진 액체는 아래로 내려오는 과정을 반복하면서 열이 이동해요.</li>
+        <li><b>기체</b>에서는 온도가 높아진 공기가 위로 올라가면서 열이 이동해요.</li>
+        <li>물질에 따라 열이 이동하는 빠르기가 다르고, 이를 이용해 단열을 해요.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="pgd__card pgd__card--class">
+      <h3><span class="pgd__ico" aria-hidden="true">🏫</span>교실에서 이렇게 써 보세요</h3>
+      <ul>
+        <li>고체·액체·기체 차시를 마칠 때마다 해당 3개 단계씩 나누어 정리 활동으로 써요.</li>
+        <li>5·6·8단계는 자리를 고르기 전에 “어떻게 될까?” 예상을 먼저 말해 보게 한 뒤 결과를 함께 지켜봐요.</li>
+        <li>단계를 통과할 때마다 채워지는 ‘열 이동 노트’를 공책에 옮겨 적어요.</li>
+        <li>단원 마무리 시간에는 10단계 보스전만 골라 모둠 퀴즈 대결로 써요. (‘선생님용: 모든 단계 열기’)</li>
+      </ul>
+    </div>
+    <p class="pgd__tip"><span><b>선생님 한마디</b> 5·6·8단계의 색깔 변화는 ‘온도가 높아진 물질은 위로, 낮아진 물질은 아래로’라는 규칙만 단순하게 흉내 낸 것이에요. 실제로는 고체에서처럼 열이 조금씩 전달되기도 하니, 오래 두면 결과가 조금 달라질 수 있다는 점을 덧붙여 주세요.</span></p>
+  </div>
+</section>
+<!-- 활용 안내 끝 -->
+<script src="../assets/score-reset.js"></script>
+</body>
+</html>

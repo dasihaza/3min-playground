@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150" role="img" aria-label="빨간 목도리를 두른 불꽃 요정 따끈이">
+  <circle cx="75" cy="78" r="66" fill="#22335A"/>
+  <g fill="#fff"><circle cx="30" cy="48" r="3"/><circle cx="122" cy="40" r="2.5"/><circle cx="118" cy="104" r="3"/><circle cx="26" cy="100" r="2"/><circle cx="96" cy="22" r="2"/></g>
+  <path d="M75 14 C96 40 116 58 112 88 C109 114 92 130 75 130 C58 130 41 114 38 88 C35 66 50 56 56 40 C62 50 64 54 66 58 C66 42 70 28 75 14Z" fill="#FF7A2F"/>
+  <path d="M75 52 C88 68 98 78 96 96 C94 112 85 122 75 122 C65 122 56 112 54 96 C52 82 62 74 75 52Z" fill="#FFC93D"/>
+  <circle cx="65" cy="92" r="5" fill="#2F2A3D"/><circle cx="85" cy="92" r="5" fill="#2F2A3D"/>
+  <circle cx="66.500" cy="90.500" r="1.600" fill="#fff"/><circle cx="86.500" cy="90.500" r="1.600" fill="#fff"/>
+  <path d="M68 102 Q75 109 82 102" stroke="#2F2A3D" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <circle cx="57" cy="101" r="4.500" fill="#FF9A7A" opacity=".8"/><circle cx="93" cy="101" r="4.500" fill="#FF9A7A" opacity=".8"/>
+  <path d="M44 112 Q75 126 106 112 L106 122 Q75 137 44 122Z" fill="#E8483C"/>
+  <path d="M92 120 L104 142 L92 140 L88 124Z" fill="#E8483C"/>
+  <path d="M52 117 v8 M64 121 v8 M76 122 v8 M88 121 v8" stroke="#fff" stroke-width="2.500" opacity=".7"/>
+</svg>
