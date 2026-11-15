@@ -20,13 +20,14 @@
     ["farm_rankings/balloon_prince_top", "top"],    // 딱 맞게 부풀려라
     ["farm_rankings/gas_hero_top", "top"],          // 기체 히어로 출동!
     ["farm_rankings/sound_post_top", "top"],        // 또롱이의 소리 우체국
+    ["farm_rankings/climate_hero_top", "top"],      // 기후 히어로: 지구를 구해 줘!
     ["flag_rankings/diff_8", "top3"],               // 세계 국기 짝 맞추기
     ["flag_rankings/diff_15", "top3"],
     ["flag_rankings/diff_25", "top3"]
   ];
 
   /* 이 기기에 남은 점수 : 최고 기록은 지우고, 진행 기록은 열린 단계만 남겨요 */
-  var BEST_KEYS = ["farmking-best", "getbeol-best", "getbeol-best-easy"];
+  var BEST_KEYS = ["farmking-best", "getbeol-best", "getbeol-best-easy", "climateHeroSave", "climateHeroRank"];
   var PROGRESS_KEYS = ["bubble-prince-v1", "gas-hero-v1", "sound-post-progress", "baramgil"];
 
   function clearLocal(){
