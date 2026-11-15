@@ -105,6 +105,16 @@ button{font-family:'Jua',sans-serif;cursor:pointer;border:none}
 #cineSkip{position:absolute;right:14px;top:10px;font-size:clamp(14px,1.8vw,18px);padding:8px 18px;border-radius:999px;color:#4a3b5c;background:#fffffff0;box-shadow:0 4px 0 #d9cdee}
 #cineSkip:active{transform:translateY(3px)}
 #cinePlay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:clamp(20px,3vw,28px)}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:10px}
+.vcard{background:#fff;border-radius:18px;padding:0 0 8px;box-shadow:0 5px 0 #e3d3f3;cursor:pointer;overflow:hidden;border:3px solid #fff;text-align:center;font-family:'Jua';transition:transform .15s}
+.vcard:hover{transform:translateY(-3px)}
+.vcard:active{transform:translateY(2px)}
+.vcard .vth{position:relative;aspect-ratio:16/9;background:#2a2340}
+.vcard .vth img{width:100%;height:100%;object-fit:cover;display:block}
+.vcard .vth b{position:absolute;inset:0;margin:auto;width:46px;height:46px;border-radius:50%;background:#ffffffdd;color:#e5578a;display:grid;place-items:center;font-size:20px;padding-left:3px;box-shadow:0 3px 8px rgba(0,0,0,.25)}
+.vcard .vno{display:inline-block;margin-top:7px;font-size:12px;color:#fff;background:linear-gradient(90deg,#ff8fb1,#b08cff);padding:1px 10px;border-radius:10px}
+.vcard .vt{font-size:16px;color:#4a3b5c;margin-top:3px;padding:0 6px}
+.vcard.end{border-color:#ffd36b;box-shadow:0 5px 0 #ffd36b}
 #cineBar{position:absolute;left:0;bottom:0;height:6px;width:0;background:linear-gradient(90deg,#7fe0c3,#8fd3ff,#ff9ec0);border-radius:0 6px 6px 0}
 #judge{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);font-family:'Jua';font-size:clamp(44px,8vw,76px);-webkit-text-stroke:4px #fff;paint-order:stroke fill;opacity:0;pointer-events:none;z-index:33;text-shadow:0 6px 14px rgba(0,0,0,.18);white-space:nowrap}
 #judge.show{animation:judgePop .9s ease-out forwards}
@@ -464,6 +474,7 @@ button{font-family:'Jua',sans-serif;cursor:pointer;border:none}
     <button class="bigbtn" id="bStart">🎮 새로 시작</button>
     <button class="bigbtn green hidden" id="bContinue">▶ 이어 하기</button>
     <button class="bigbtn yellow" id="bRank">🏆 랭킹 TOP 5</button>
+    <button class="bigbtn blue hidden" id="bVideos">🎬 영상 모아 보기</button>
   </div>
   <a class="scrollHint" href="#pg-guide">▼ 게임 소개 보기</a>
 </div>
@@ -475,7 +486,7 @@ button{font-family:'Jua',sans-serif;cursor:pointer;border:none}
     <span class="pgd__deco pgd__deco--b" aria-hidden="true">🌱</span>
     <span class="pgd__deco pgd__deco--c" aria-hidden="true">✨</span>
     <div class="pgd__head">
-      <div class="pgd__mascot"><img src="../assets/guide/climate-hero.webp" alt="새싹이 돋은 채 활짝 웃는 귀여운 지구 그림" width="150" height="150" loading="lazy" decoding="async"></div>
+      <div class="pgd__mascot"><img src="../assets/climate-hero/img/earth_happy.webp" alt="새싹이 돋은 채 활짝 웃는 귀여운 지구 그림" width="150" height="150" loading="lazy" decoding="async"></div>
       <div>
         <h2 class="pgd__title" id="pgd-title"><mark>기후 히어로: 지구를 구해 줘!</mark>, 이렇게 활용해요</h2>
         <p class="pgd__lead">기후 변화로 아파하는 지구를 구하러 떠나는 RPG 모험이에요. <b>감축·적응·지구공학</b> 중 한 가지 힘을 가진 히어로가 되어, 다섯 마을을 돌며 기후 변화의 <b>모습 → 원인 → 영향 → 사회의 대응 → 나의 실천</b>을 차례로 익혀요.</p>
@@ -2631,6 +2642,18 @@ async function openRank(){
 // ======================= CHAPTER FLOW =======================
 // ======================= CUTSCENES (인트로·엔딩 영상) =======================
 // 영상에는 글자가 없고, 자막은 여기서 시간에 맞춰 보여 줘요. [시작초, 끝초, 자막]
+const VID_BASE='../assets/climate-hero/vid/';
+const CLEAR_KEY='climateHeroCleared';      // 엔딩을 본 기기에만 '영상 모아 보기'가 열려요
+function hasCleared(){ try{ return localStorage.getItem(CLEAR_KEY)==='1'; }catch(e){ return false; } }
+function markCleared(){ try{ localStorage.setItem(CLEAR_KEY,'1'); }catch(e){} }
+const VIDEO_LIST=[['intro1','프롤로그 · 지구를 구해 줘!','1장 시작'],['intro2','콜록콜록 회색 도시','2장 시작'],['intro3','녹아내리는 빙하 섬','3장 시작'],['intro4','반짝반짝 에코 시티','4장 시작'],['intro5','나부터 실천! 우리 마을','5장 시작'],['ending','에필로그 · 끝나지 않은 이야기','엔딩']];
+function openVideos(){
+  if(!hasCleared()) return;
+  const b=openModal(`<button class="mclose" id="x">✕</button><h3>🎬 기후 히어로 영상 모아 보기</h3><p style="font-size:15px">지구를 구한 기후 히어로만 볼 수 있는 영상관이에요! 보고 싶은 영상을 눌러요.</p>
+    <div class="vgrid">${VIDEO_LIST.map(([k,t,n],i)=>`<div class="vcard ${k==='ending'?'end':''}" data-k="${k}"><div class="vth"><img src="${VID_BASE}${k}.webp" alt="" loading="lazy"><b>▶</b></div><span class="vno">${i+1}. ${n}</span><div class="vt">${t}</div></div>`).join('')}</div>`);
+  b.querySelector('#x').onclick=closeModal;
+  b.querySelectorAll('.vcard').forEach(c=>c.onclick=async()=>{ audioInit(); closeModal(); await playCutscene(c.dataset.k); openVideos(); });
+}
 const CINE = {
   intro1:{tag:'🎬 프롤로그 · 지구를 구해 줘!', caps:[[0.3,2.5,'지구가 <em>기후 변화</em> 때문에 아파하고 있어요…'],[2.8,6.3,'<em>산불, 태풍, 가뭄, 녹는 빙하</em>… 곳곳에서 재난이 일어나요!'],[6.7,11,'그때! 지구를 구하러 <em>기후 히어로</em>들이 나타났어요!'],[11.4,14.8,'<em>감축 · 적응 · 지구공학</em>의 힘으로, 출발!']]},
   intro2:{tag:'🎬 2장 · 콜록콜록 회색 도시', caps:[[0.4,3.8,'매연과 쓰레기로 뒤덮인 <em>회색 도시</em>…'],[4.2,8.8,'공장과 자동차가 <em>화석 연료</em>를 태워 온실가스를 내뿜어요.'],[9.6,14.6,'기후 변화의 <em>원인</em>을 찾으러 가자!']]},
@@ -2649,7 +2672,7 @@ function playCutscene(key){
     let guard=setTimeout(()=>{ if(!v.currentTime) finish(); },9000);          // 영상이 안 불러와지면 그냥 넘어가요
     G.cine=true; box.classList.remove('hidden','fade'); pb.classList.add('hidden'); bar.style.width='0';
     $('cineTag').textContent=info.tag; cap.className=info.warn?'warn':''; cap.innerHTML='';
-    v.muted=!G.sound; v.volume=.8; v.src='../assets/climate-hero/vid/'+key+'.mp4';
+    v.muted=!G.sound; v.volume=.8; v.src=VID_BASE+key+'.mp4';
     v.ontimeupdate=()=>{ const t=v.currentTime; bar.style.width=(t/(v.duration||15)*100)+'%';
       const i=info.caps.findIndex(c=>t>=c[0]&&t<c[1]);
       if(i!==shown){ shown=i; if(i<0) cap.classList.remove('on'); else { cap.innerHTML=info.caps[i][2]; cap.classList.add('on'); } } };
@@ -2710,11 +2733,13 @@ async function finalBattle(){
   G.addM('earth');
   sfx.card(); confetti(60);
   await new Promise(res=>{ const b=openModal(`<h3>🌏 지구가 웃음을 되찾았어요!</h3>${earthArt(1)}<p>고마워, 기후 히어로! 💚</p><button class="bigbtn" id="go">엔딩 보기 🎬</button>`); b.querySelector('#go').onclick=()=>{closeModal();res();}; });
+  markCleared();
   await playCutscene('ending');
   await dialog([L(FAIRY,FF,'우리가 해냈어! 지구가 다시 푸르게 빛나고 있어! 🌏✨'),L(FAIRY,FF,'하지만 기억해. 기후 변화는 아직 끝나지 않았어.'),L(FAIRY,FF,'<em>국가</em>와 <em>기업</em>은 원인을 줄이는 방법을 연구하고, <em>우리</em>는 생활 속에서 작은 실천을 이어 가야 해.'),L(FAIRY,FF,'양치 컵, 분리배출, 코드 뽑기, 자전거 타기, 나무 심기… 오늘부터 진짜 세상에서도 기후 히어로가 되어 줘! 💚')]);
   await ending();
 }
 async function ending(){
+  markCleared();
   const timeBonus=Math.max(0,3000-Math.floor(G.elapsed));
   const cardBonus=G.cards.size===Object.keys(CARDS).length?500:0;
   G.score+=timeBonus+cardBonus; updateHUD();
@@ -2734,6 +2759,7 @@ async function ending(){
 function goTitle(){
   G.screen='title'; $('hud').classList.add('hidden'); $('hzBanner').classList.remove('show'); $('select').classList.add('hidden'); $('title').classList.remove('hidden');
   $('bContinue').classList.toggle('hidden',!loadSave());
+  $('bVideos').classList.toggle('hidden',!hasCleared());
 }
 let selAnim=null;
 function goSelect(){
@@ -2793,6 +2819,7 @@ document.querySelector('#missions .mh').onclick=()=>{ $('missions').classList.to
 document.querySelector('.scrollHint').onclick=e=>{ e.preventDefault(); $('pg-guide').scrollIntoView({behavior:'smooth'}); };
 $('bStart').onclick=()=>{ audioInit(); goSelect(); };
 $('bContinue').onclick=()=>{ startGame(true); };
+$('bVideos').onclick=()=>{ audioInit(); openVideos(); };
 $('bRank').onclick=()=>{ audioInit(); openRank(); };
 $('bGo').onclick=()=>{ const n=$('nick').value.trim(); if(!n){ $('nick').focus(); toast('이름(닉네임)을 입력해 주세요!'); return; } G.name=n.slice(0,8); startGame(false); };
 $('titleEarth').innerHTML=`<div class="titleEarth">${earthSVG(1)}</div>`;
