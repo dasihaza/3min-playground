@@ -2061,7 +2061,7 @@ setInterval(()=>{
   bgmStep++;
 },300);
 // ======================= RENDER =======================
-function emoji(e,x,y,size){ ctx.font=`${size}px ${EMOJI_FONT}`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(e,x,y); }
+function emoji(e,x,y,size){ ctx.fillStyle='#000'; ctx.font=`${size}px ${EMOJI_FONT}`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(e,x,y); }
 function shadow(x,y,w,h=w*.35){ ctx.fillStyle='rgba(60,40,80,.16)'; ctx.beginPath(); ctx.ellipse(x,y,w,h,0,0,Math.PI*2); ctx.fill(); }
 function circle(x,y,r,c){ if(!(r>0)) return; ctx.fillStyle=c; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); }
 function rrect(x,y,w,h,r,c,stroke){ ctx.beginPath(); ctx.roundRect?ctx.roundRect(x,y,w,h,r):ctx.rect(x,y,w,h); if(c){ctx.fillStyle=c;ctx.fill();} if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=2;ctx.stroke();} }
