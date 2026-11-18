@@ -319,7 +319,13 @@ function isNoise(t){
 
   /* 배송·구매 안내 문구 */
   if(/원\s*이상.*(무료|배송|구매)/.test(t)) return true;
-  if(/(배송비|무료배송|도착보장|배송예정|출고)/.test(t) && t.length <= 30) return true;
+  /* 배송 문구를 빼고 나면 남는 글자가 거의 없을 때만 안내 문구로 본다
+     ('무료배송', '내일(목) 도착보장' 은 거르고,
+      '매일 헬로엔요 플레인 200mlx24팩 무료배송' 같은 상품명은 살린다) */
+  if(/(배송비|무료배송|도착보장|배송예정|출고)/.test(t)){
+    var rest = t.replace(/배송비|무료배송|무료|도착보장|배송예정|출고|배송|내일|오늘|모레|판매자|스타|\([월화수목금토일]\)|[\d,]+\s*원?|[^가-힣A-Za-z]/g,'');
+    if(rest.length <= 4) return true;
+  }
 
   /* 광고·안내 문장 — 상품명은 '~있어요!' 처럼 끝나지 않는다
      예) '전환하면 바로 사용할 수 있어요!', '쿠폰을 적용해보세요!' */
@@ -416,7 +422,7 @@ function startsByAmount(lines){
   for(var e=0;e<ends.length;e++){
     var stop=ends[e];
     for(k=prev;k<ends[e];k++) if(/^\s*(수량|상품\s*수량)/.test(lines[k])){ stop=k; break; }
-    var best='', bestIdx=prev;
+    var best='', bestIdx=prev, dupBest='', dupIdx=-1;
     for(k=prev;k<stop;k++){
       var t=lines[k].replace(/^\s*\*+\s*/,'').trim();
       /* 링크 줄이면 링크 글자만 */
@@ -428,7 +434,17 @@ function startsByAmount(lines){
       if(/^\(?https?:\/\//.test(t)) continue;
       if(!t || isNoise(t)) continue;
       if(t.length>best.length){ best=t; bestIdx=k; }
+      /* G마켓은 상품명을 두 줄 연달아 똑같이 보여 준다.
+         바로 다음 글자줄과 같은 줄은 상품명일 가능성이 가장 높다
+         (판매자명·옵션 줄이 상품명으로 잡히는 것을 막는다) */
+      for(var nx=k+1; nx<stop; nx++){
+        var nt=lines[nx].replace(/^\s*\*+\s*/,'').trim();
+        if(!nt) continue;
+        if(nt.replace(/\s+/g,' ')===t.replace(/\s+/g,' ') && t.length>dupBest.length){ dupBest=t; dupIdx=k; }
+        break;
+      }
     }
+    if(dupBest){ best=dupBest; bestIdx=dupIdx; }
     if(best) a.push({ i:bestIdx, name:best });
     prev=ends[e]+1;
   }
