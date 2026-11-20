@@ -2,7 +2,27 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://3min-playground.com/</loc>
-    <lastmod>2026-09-22</lastmod>
+    <lastmod>2026-11-20</lastmod>
+  </url>
+  <url>
+    <loc>https://3min-playground.com/playground.html</loc>
+    <lastmod>2026-11-20</lastmod>
+  </url>
+  <url>
+    <loc>https://3min-playground.com/lab.html</loc>
+    <lastmod>2026-11-20</lastmod>
+  </url>
+  <url>
+    <loc>https://3min-playground.com/office.html</loc>
+    <lastmod>2026-11-20</lastmod>
+  </url>
+  <url>
+    <loc>https://3min-playground.com/meeting.html</loc>
+    <lastmod>2026-11-20</lastmod>
+  </url>
+  <url>
+    <loc>https://3min-playground.com/council.html</loc>
+    <lastmod>2026-11-20</lastmod>
   </url>
   <url>
     <loc>https://3min-playground.com/privacy.html</loc>

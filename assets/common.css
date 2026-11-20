@@ -1,0 +1,85 @@
+/* 3분 놀이터 — 모든 장소가 함께 쓰는 스타일 */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  font-family: 'Gowun Dodum', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  color: #2b2f3a;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, .jua { font-family: 'Jua', 'Gowun Dodum', sans-serif; font-weight: 400; }
+a { color: inherit; }
+img, svg { display: block; }
+
+:focus-visible { outline: 3px solid #ffb703; outline-offset: 3px; border-radius: 6px; }
+
+/* ---------- 실 페이지 상단: 돌아가기 + 실명판 ---------- */
+.room-top {
+  position: relative; z-index: 5;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  max-width: 1120px; margin: 0 auto; padding: 18px 20px 0;
+}
+.back-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: 'Jua', sans-serif; font-size: 17px; text-decoration: none;
+  padding: 9px 16px; border-radius: 999px;
+  background: rgba(255,255,255,.88); color: #2b2f3a;
+  box-shadow: 0 3px 0 rgba(0,0,0,.12);
+  transition: transform .15s;
+}
+.back-link:hover { transform: translateX(-3px); }
+
+/* 학교 복도에 붙어 있는 실명판 */
+.nameplate {
+  display: inline-flex; align-items: stretch;
+  border-radius: 6px; overflow: hidden;
+  box-shadow: 0 2px 0 rgba(0,0,0,.15), 0 6px 14px rgba(0,0,0,.12);
+  font-family: 'Jua', sans-serif;
+  background: #fff;
+}
+.np-floor { background: #1f3c74; color: #fff; padding: 6px 10px; font-size: 14px; display: flex; align-items: center; }
+.np-name { padding: 4px 14px; display: flex; flex-direction: column; justify-content: center; line-height: 1.1; font-size: 19px; color: #1f3c74; }
+.np-name small { font-family: 'Gowun Dodum', sans-serif; font-size: 10px; letter-spacing: .12em; color: #8a93a8; }
+
+.new-badge {
+  display: inline-block; font-family: 'Jua', sans-serif; font-size: 11px; letter-spacing: .05em;
+  background: #ff3d6e; color: #fff; border-radius: 6px; padding: 1px 6px; margin-left: 6px; vertical-align: 3px;
+}
+
+/* ---------- 하단: 다른 장소 이동 ---------- */
+.room-nav { max-width: 1120px; margin: 56px auto 0; padding: 0 20px 48px; }
+.room-nav-title { font-size: 20px; margin: 0 0 14px; text-align: center; }
+.room-nav ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+.door {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  text-decoration: none; padding: 14px 8px 12px; border-radius: 14px 14px 6px 6px;
+  background: #fff; border: 2px solid rgba(0,0,0,.08); border-top: 6px solid var(--accent, #999);
+  transition: transform .15s, box-shadow .15s;
+}
+.door:hover { transform: translateY(-3px); box-shadow: 0 8px 18px rgba(0,0,0,.12); }
+.door.here { background: #fffbe8; pointer-events: none; }
+.door-emoji { font-size: 26px; }
+.door-name { font-family: 'Jua', sans-serif; font-size: 17px; color: #2b2f3a; }
+.door-menu { font-size: 12px; color: #7a8091; }
+.home-door { border-top-color: #2b2f3a; }
+
+/* ---------- 안내 토스트 ---------- */
+.toast {
+  position: fixed; left: 50%; bottom: 24px; z-index: 100;
+  transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+  background: #2b2f3a; color: #fff; padding: 12px 18px; border-radius: 12px;
+  font-size: 14px; max-width: min(92vw, 460px); text-align: center;
+  transition: opacity .25s, transform .25s;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+.site-foot { text-align: center; font-size: 13px; color: #7a8091; padding: 18px 20px 36px; }
+.site-foot p { margin: 4px 0; }
+.foot-links { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 4px 10px; }
+.site-foot a { color: inherit; font-weight: 700; text-decoration: none; border-bottom: 1px dashed currentColor; }
+.site-foot a:hover { border-bottom-style: solid; }
+.foot-sep { opacity: .5; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

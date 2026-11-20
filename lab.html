@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>연구실 · 수업 도구 — 3분 놀이터</title>
+<meta name="description" content="3분 놀이터의 연구실. 수업이 즐거워지는 교실 도구를 모았어요.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/common.css">
+<style>
+  body {
+    color: #eaf6ff; min-height: 100vh;
+    background-color: #17345f;
+    background-image:
+      linear-gradient(rgba(255,255,255,.12) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.12) 1px, transparent 1px),
+      linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
+  }
+  .mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; letter-spacing: .06em; }
+  .hero { max-width: 1120px; margin: 0 auto; padding: 30px 20px 10px; display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center; }
+  .hero .mono { font-size: 12px; color: #8fd8f0; }
+  .hero h1 { margin: 6px 0 6px; font-size: clamp(34px, 6vw, 54px); color: #fff; }
+  .hero h1 span { color: #7fe3ff; }
+  .hero p { margin: 0; color: #b9d7ee; max-width: 520px; }
+  .note {
+    margin-top: 16px; display: inline-block; border: 1.5px dashed rgba(255,255,255,.5); border-radius: 8px;
+    padding: 8px 14px; font-size: 14px; color: #d8efff;
+  }
+  .beaker { width: 220px; height: 220px; }
+  .bubble { animation: rise 2.6s ease-in infinite; }
+  @keyframes rise { 0% { transform: translateY(0); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateY(-70px); opacity: 0; } }
+  .liquid { animation: slosh 3s ease-in-out infinite alternate; }
+  @keyframes slosh { to { transform: translateX(-30px); } }
+  @media (max-width: 640px) { .hero { grid-template-columns: 1fr; } .beaker { width: 150px; height: 150px; justify-self: center; } }
+
+  main { max-width: 1120px; margin: 0 auto; padding: 18px 20px 0; }
+  .shelf-title { display: flex; align-items: center; gap: 10px; margin: 10px 0 18px; font-size: 13px; color: #8fd8f0; }
+  .shelf-title::after { content: ''; flex: 1; border-top: 1.5px dashed rgba(255,255,255,.35); }
+  .programs { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 18px; }
+  .card {
+    position: relative; display: grid; grid-template-columns: 64px 1fr; gap: 14px; align-items: start;
+    text-decoration: none; color: #fff; padding: 20px 18px 18px;
+    border: 1.5px dashed rgba(255,255,255,.55); border-radius: 6px;
+    background: rgba(10,30,60,.35);
+    transition: border-color .2s, background .2s, transform .2s, box-shadow .2s;
+  }
+  /* 도면 모서리 표시 */
+  .card::before, .card::after { content: ''; position: absolute; width: 14px; height: 14px; border-color: #7fe3ff; border-style: solid; }
+  .card::before { top: -4px; left: -4px; border-width: 3px 0 0 3px; }
+  .card::after { bottom: -4px; right: -4px; border-width: 0 3px 3px 0; }
+  .card:hover { border-style: solid; border-color: #7fe3ff; background: rgba(127,227,255,.1); transform: translateY(-4px); box-shadow: 0 0 0 4px rgba(127,227,255,.12), 0 14px 30px rgba(0,0,0,.25); }
+  .tag { position: absolute; top: -11px; right: 14px; font-size: 11px; background: #17345f; padding: 1px 8px; color: #7fe3ff; border: 1.5px solid #7fe3ff; border-radius: 4px; }
+  .flask {
+    width: 64px; height: 64px; display: grid; place-items: center; font-size: 32px;
+    border: 2px solid rgba(255,255,255,.7); border-radius: 50%; background: radial-gradient(circle at 50% 75%, rgba(127,227,255,.35) 0 45%, transparent 46%);
+  }
+  .card h3 { margin: 0 0 4px; font-size: 21px; }
+  .card p { margin: 0; font-size: 14px; color: #c3dcef; }
+  .card .go { display: inline-block; margin-top: 10px; font-size: 12px; color: #7fe3ff; }
+  .room-nav-title { color: #fff; }
+  .ptag { display: inline-block; margin: 10px 8px 0 0; font-size: 11px; padding: 1px 8px; border-radius: 4px; background: rgba(127,227,255,.18); color: #bff1ff; }
+  .site-foot { color: #8fb3d0; }
+</style>
+</head>
+<body class="room room-lab">
+
+<header class="room-top">
+  <a class="back-link" href="index.html">← 학교 지도로</a>
+  <div class="nameplate"><span class="np-floor">3층</span><span class="np-name">연구실<small>LAB</small></span></div>
+</header>
+
+<section class="hero">
+  <div>
+    <div class="mono">// 3MIN-LAB · CLASSROOM TOOLS</div>
+    <h1>연구실의 <span>수업 도구</span></h1>
+    <p>수업이 3분 더 즐거워지도록 연구하고 만든 교실 도구들이에요. 필요한 도구를 꺼내 바로 써 보세요.</p>
+    <div class="note">🧪 오늘의 실험: 도구 <b data-count>0</b>개로 수업 분위기 바꾸기</div>
+  </div>
+  <svg class="beaker" viewBox="0 0 200 200" aria-hidden="true">
+    <defs><clipPath id="bk"><path d="M70 30 V80 L30 170 Q26 182 40 182 H160 Q174 182 170 170 L130 80 V30Z"/></clipPath></defs>
+    <g clip-path="url(#bk)">
+      <path class="liquid" d="M0 120 Q25 110 50 120 T100 120 T150 120 T200 120 T250 120 V200 H0Z" fill="#7fe3ff" opacity=".75"/>
+      <circle class="bubble" cx="90" cy="165" r="6" fill="#fff" opacity=".8"/>
+      <circle class="bubble" style="animation-delay:.7s" cx="112" cy="170" r="4" fill="#fff"/>
+      <circle class="bubble" style="animation-delay:1.4s" cx="100" cy="160" r="5" fill="#fff"/>
+      <circle class="bubble" style="animation-delay:2s" cx="80" cy="172" r="3" fill="#fff"/>
+    </g>
+    <path d="M70 30 V80 L30 170 Q26 182 40 182 H160 Q174 182 170 170 L130 80 V30" fill="none" stroke="#fff" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M60 30 H140" stroke="#fff" stroke-width="6" stroke-linecap="round"/>
+    <path d="M132 100 h10 M140 120 h10 M148 140 h10" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  </svg>
+</section>
+
+<main>
+  <div class="shelf-title mono">TOOL SHELF</div>
+  <div id="programs" class="programs"></div>
+</main>
+
+<nav class="room-nav" id="roomNav" aria-label="다른 장소"></nav>
+<footer class="site-foot">
+  <p class="foot-copy">© 2026 3분 놀이터. 콘텐츠는 재미로 즐겨주세요.</p>
+  <p class="foot-links">
+    <a class="site-link" href="privacy.html">개인정보처리방침</a>
+    <span class="foot-sep" aria-hidden="true">|</span>
+    <span>문의: <a href="mailto:dasihaza@gmail.com">dasihaza@gmail.com</a></span>
+  </p>
+</footer>
+
+<script src="assets/rooms.js"></script>
+<script>
+  mountPrograms('lab', (p, i) => `
+    <a class="card prog-link" href="${p.href}" data-title="${esc(p.title)}">
+      <span class="tag mono">TOOL-${String(i + 1).padStart(2, '0')}</span>
+      <span class="flask">${p.emoji}</span>
+      <span>
+        <h3>${esc(p.title)}${p.isNew ? '<span class="new-badge">NEW</span>' : ''}</h3>
+        <p>${esc(p.desc)}</p>
+        ${p.tag ? `<span class="ptag">${esc(p.tag)}</span>` : ''} <span class="go mono">OPEN →</span>
+      </span>
+    </a>`);
+  mountRoomNav('lab');
+</script>
+</body>
+</html>

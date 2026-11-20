@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>교무실 · 업무 꾸러미 — 3분 놀이터</title>
+<meta name="description" content="3분 놀이터의 교무실. 선생님의 업무 시간을 줄여 주는 자동완성 도구 모음.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&family=Nanum+Myeongjo:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/common.css">
+<style>
+  body {
+    min-height: 100vh;
+    background: #efe4cf;
+    background-image:
+      linear-gradient(180deg, transparent 0 380px, #c79a64 380px, #b8895a 100%),
+      repeating-linear-gradient(90deg, rgba(0,0,0,.025) 0 2px, transparent 2px 60px);
+  }
+  /* 공문서 모양 */
+  .doc {
+    position: relative; max-width: 860px; margin: 26px auto 0; background: #fffdf7;
+    padding: 34px 40px 30px; border-radius: 4px;
+    box-shadow: 0 1px 0 #e6dcc6, 0 18px 40px rgba(80,55,20,.18);
+    transform: rotate(-.6deg);
+  }
+  .doc::before { content: ''; position: absolute; inset: 10px; border: 1px solid #e4d9c2; pointer-events: none; }
+  .doc-top { display: flex; justify-content: space-between; gap: 18px; align-items: flex-start; flex-wrap: wrap; }
+  .doc .kicker { font-size: 13px; color: #9a8665; }
+  .doc h1 { font-family: 'Nanum Myeongjo', serif; font-weight: 700; margin: 4px 0 6px; font-size: clamp(30px, 5vw, 44px); color: #2c2416; letter-spacing: -.01em; }
+  .doc p { margin: 0; color: #5c5040; }
+  /* 결재란 */
+  .sign-box { border-collapse: collapse; font-size: 12px; text-align: center; }
+  .sign-box th { background: #f3ead8; font-weight: 400; padding: 3px 10px; border: 1px solid #b9a888; color: #5c5040; }
+  .sign-box td { width: 60px; height: 52px; border: 1px solid #b9a888; position: relative; }
+  .stamp {
+    position: absolute; inset: 0; margin: auto; width: 42px; height: 42px; border-radius: 50%;
+    border: 2.5px solid #d6362f; color: #d6362f; font-family: 'Jua', sans-serif; font-size: 13px;
+    display: grid; place-items: center; transform: rotate(-12deg); opacity: 0;
+    animation: stamp .35s cubic-bezier(.3,1.8,.5,1) forwards;
+  }
+  .sign-box td:nth-child(2) .stamp { animation-delay: .5s; } .sign-box td:nth-child(3) .stamp { animation-delay: .9s; } .sign-box td:nth-child(4) .stamp { animation-delay: 1.3s; }
+  @keyframes stamp { from { opacity: 0; transform: scale(2.2) rotate(-12deg); } to { opacity: .85; transform: scale(1) rotate(-12deg); } }
+  .doc-meta { margin-top: 18px; padding-top: 12px; border-top: 2px solid #2c2416; display: flex; gap: 22px; flex-wrap: wrap; font-size: 14px; color: #5c5040; }
+  .doc-meta b { font-weight: 400; color: #9a8665; margin-right: 6px; }
+
+  main { max-width: 1120px; margin: 0 auto; padding: 50px 20px 0; }
+  .programs { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 34px 26px; }
+  /* 서류철 */
+  .folder { position: relative; display: block; text-decoration: none; padding-top: 26px; }
+  .folder-tab {
+    position: absolute; top: 0; left: 18px; height: 30px; padding: 5px 16px 0;
+    background: #f1c876; border-radius: 10px 10px 0 0; font-family: 'Jua', sans-serif; font-size: 14px; color: #7a5a1e;
+  }
+  .folder-body {
+    position: relative; background: #f6d48c; border-radius: 4px 12px 12px 12px; padding: 22px 18px 18px; min-height: 170px;
+    box-shadow: inset 0 2px 0 rgba(255,255,255,.4), 0 10px 0 -4px #d9b066, 0 18px 26px rgba(60,40,10,.25);
+    overflow: hidden;
+  }
+  .paper {
+    position: relative; background: #fff; border-radius: 3px; padding: 14px 14px 12px; margin-top: -2px;
+    background-image: repeating-linear-gradient(#fff 0 25px, #e8eef6 25px 26px);
+    box-shadow: 0 2px 6px rgba(0,0,0,.12);
+    transition: transform .25s cubic-bezier(.3,1.5,.5,1);
+  }
+  .folder:hover .paper { transform: translateY(-12px) rotate(-1.5deg); }
+  .paper .emoji { position: absolute; right: 10px; top: -18px; font-size: 34px; filter: drop-shadow(0 3px 2px rgba(0,0,0,.15)); }
+  .paper h3 { margin: 0 0 4px; font-size: 21px; color: #2c2416; }
+  .paper p { margin: 0; font-size: 14px; color: #5c5040; line-height: 26px; }
+  .paper .go { display: inline-block; margin-top: 8px; font-family: 'Jua', sans-serif; color: #c0392b; border: 2px solid #c0392b; border-radius: 6px; padding: 1px 8px; font-size: 13px; transform: rotate(-3deg); }
+  .room-nav-title { color: #fff8ec; }
+  .ptag { font-size: 12px; color: #9a8665; margin-left: 6px; }
+  .site-foot { color: #f3e2c4; }
+</style>
+</head>
+<body class="room room-office">
+
+<header class="room-top">
+  <a class="back-link" href="index.html">← 학교 지도로</a>
+  <div class="nameplate"><span class="np-floor">1층</span><span class="np-name">교무실<small>TEACHERS' OFFICE</small></span></div>
+</header>
+
+<section class="doc">
+  <div class="doc-top">
+    <div>
+      <div class="kicker">3분 놀이터 교무실 · 업무 지원</div>
+      <h1>업무 꾸러미</h1>
+      <p>선생님의 업무 시간을 줄여 드리는 자동완성 도구를 서류철에 담아 두었어요.</p>
+    </div>
+    <table class="sign-box" aria-label="결재란">
+      <tr><th>담당</th><th>부장</th><th>교감</th><th>교장</th></tr>
+      <tr><td><span class="stamp">완료</span></td><td><span class="stamp">완료</span></td><td><span class="stamp">완료</span></td><td><span class="stamp">완료</span></td></tr>
+    </table>
+  </div>
+  <div class="doc-meta">
+    <span><b>문서 번호</b>3분-교무-<span data-count>0</span></span>
+    <span><b>처리 기한</b>3분 이내</span>
+    <span><b>공개 여부</b>모든 선생님께 공개</span>
+  </div>
+</section>
+
+<main>
+  <div id="programs" class="programs"></div>
+</main>
+
+<nav class="room-nav" id="roomNav" aria-label="다른 장소"></nav>
+<footer class="site-foot">
+  <p class="foot-copy">© 2026 3분 놀이터. 콘텐츠는 재미로 즐겨주세요.</p>
+  <p class="foot-links">
+    <a class="site-link" href="privacy.html">개인정보처리방침</a>
+    <span class="foot-sep" aria-hidden="true">|</span>
+    <span>문의: <a href="mailto:dasihaza@gmail.com">dasihaza@gmail.com</a></span>
+  </p>
+</footer>
+
+<script src="assets/rooms.js"></script>
+<script>
+  mountPrograms('office', (p, i) => `
+    <a class="folder prog-link" href="${p.href}" data-title="${esc(p.title)}">
+      <span class="folder-tab">업무-${String(i + 1).padStart(2, '0')}</span>
+      <div class="folder-body">
+        <div class="paper">
+          <span class="emoji">${p.emoji}</span>
+          <h3>${esc(p.title)}${p.isNew ? '<span class="new-badge">NEW</span>' : ''}</h3>
+          <p>${esc(p.desc)}</p>
+          <span class="go">바로 처리 →</span> ${p.tag ? `<span class="ptag">${esc(p.tag)}</span>` : ''}
+        </div>
+      </div>
+    </a>`);
+  mountRoomNav('office');
+</script>
+</body>
+</html>
