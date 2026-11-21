@@ -19,7 +19,8 @@ button{font-family:'Jua',sans-serif;cursor:pointer;border:none}
 .hidden{display:none!important}
 
 /* ---------- screens ---------- */
-.screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:auto;z-index:20}
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;overflow:auto;z-index:20;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+.screen>:first-child{margin-top:auto}.screen>:last-child{margin-bottom:auto}
 #title{display:block;touch-action:pan-y;-webkit-overflow-scrolling:touch;background:radial-gradient(circle at 20% 20%,#ffffff 0 2px,transparent 3px) 0 0/34px 34px,radial-gradient(circle at 70% 60%,#ffffffaa 0 3px,transparent 4px) 0 0/52px 52px,linear-gradient(180deg,#9ad8ff 0%,#c9f0ff 45%,#ffe9f3 75%,#fff3d6 100%)}
 #title .heroes{display:flex;gap:2px;align-items:flex-end;justify-content:center;margin:6px 0 6px;position:relative;z-index:1}
 #title .heroes img{height:min(20vh,150px);max-width:28vw;object-fit:contain;filter:drop-shadow(0 6px 4px rgba(90,60,120,.18));animation:hop 1.6s ease-in-out infinite}
@@ -428,6 +429,80 @@ button{font-family:'Jua',sans-serif;cursor:pointer;border:none}
 }
 
 .pgd__tip{line-height:1.6}
+
+/* ---------- 휴대폰 가로 모드 (세로 높이가 짧은 화면) ---------- */
+@media (max-height:500px) and (orientation:landscape){
+  /* 첫 화면 */
+  .titleMain{padding:6px 0 26px}
+  .titleEarth{width:24vh}
+  #title .fairyT{width:13vh}
+  #title .logo{font-size:10.5vh;margin:0;-webkit-text-stroke:1.5px #ff8fb1}
+  #title .heroes{margin:2px 0}
+  #title .heroes img{height:21vh}#title .heroes img:nth-child(2){height:23vh}
+  .bigbtn{font-size:17px;padding:9px 22px;margin:4px}
+  .scrollHint{bottom:4px;font-size:12px}
+  .homeBtn{font-size:13px;padding:4px 11px;left:8px;top:8px}
+  /* 히어로 고르기: 이름 칸과 출발 버튼이 늘 보이게 위쪽에 모아요 */
+  #select{padding:6px 10px 10px}
+  #select h2{font-size:20px;margin:0 0 2px}
+  #select .nameRow{margin:2px 0 6px;padding:4px 12px}
+  #select .nameRow input{font-size:17px;width:150px}
+  #select .goRow{order:2;margin:0 0 6px!important}
+  #select .goRow .bigbtn{font-size:16px;padding:7px 22px;margin:0}
+  #select h2{order:0}#select .nameRow{order:1}#select .jobs{order:3;margin-bottom:auto}
+  .jobs{gap:8px;flex-wrap:nowrap;padding:0}
+  .job{width:31vw;min-width:0;padding:6px 8px 8px;border-radius:20px;border-width:3px}
+  .job canvas{width:min(84px,21vh);height:min(84px,21vh)}
+  .job .para{font-size:13px;padding:1px 10px;margin-bottom:2px}
+  .job .jn{font-size:18px;margin:2px 0 0}
+  .job .js{font-size:11.5px;line-height:1.35}
+  .job .pd,.job .pas,.job .js:last-child{display:none}
+  .job .tag{font-size:11px;padding:1px 8px;margin:3px 1px 0}
+  .job.sel{transform:translateY(-2px) scale(1.02)}
+  /* 게임 화면 */
+  #gaugeWrap{width:min(36vw,250px);padding:4px 10px}
+  #chapName{font-size:12px}#gaugeWrap .lab{font-size:11px}
+  .bar{height:10px}
+  .iconbtn{width:36px;height:36px;font-size:17px}#rightTop{gap:4px}#score{font-size:14px;padding:4px 9px}
+  #mini{width:110px;top:50px;border-width:3px}
+  #hzStat{top:auto;bottom:118px;right:8px;font-size:11.5px}
+  #missions{font-size:12px;width:min(34vw,230px)}#missions .mh{font-size:13px}
+  #joy{width:104px;height:104px;left:14px;bottom:12px}#joyKnob{left:23px;top:23px;width:46px;height:46px}
+  #btns{right:12px;bottom:12px;gap:10px}
+  .actbtn{width:66px;height:66px;font-size:13px}.actbtn b{font-size:24px}#btnSkill{width:80px;height:80px}
+  #carry{bottom:10px;font-size:13px}
+  #aim{bottom:8px;width:min(52vw,480px);padding:5px 12px 4px;border-width:4px}
+  .aimTitle{font-size:12px}.aimBar{height:30px;margin:5px 0 1px}#aimDot{width:26px;height:26px;margin:-13px 0 0 -13px}.aimLab{font-size:9px}
+  #judge{top:34%}
+  #dialog{bottom:8px;width:min(78vw,760px);gap:8px}
+  #dlgFace{width:70px;height:70px;font-size:38px;border-width:4px}
+  #dlgBox{min-height:74px;padding:8px 14px 10px;border-width:4px}
+  #dlgWho{font-size:15px;margin-top:-24px}
+  #dlgText{font-size:15px;line-height:1.45}
+  #toast{top:52px;font-size:15px}
+  #hzBanner{top:50px;padding:5px 12px 5px 6px}#hzBanner img{width:44px;height:44px}#hzBanner b{font-size:16px}#hzBanner span{font-size:12px}
+  /* 팝업 창: 낮은 화면에 맞게 작게 */
+  #modal{padding:6px}
+  .mbox{padding:10px 16px;max-height:calc(100vh - 12px);border-width:4px;border-radius:22px}
+  .mbox h3{font-size:20px;margin:2px 0 4px}
+  .mbox p{font-size:14px;margin:3px 0;line-height:1.45}
+  .mclose{width:34px;height:34px;font-size:17px;top:6px;right:8px}
+  .qtext{font-size:16px;margin:4px 0 0;line-height:1.4}.qnum{font-size:13px}
+  .opts{gap:6px;margin-top:8px}.opt{font-size:15px;padding:8px 12px;border-radius:14px}
+  .fb{margin-top:6px;padding:6px 10px;font-size:14px}
+  .chapCard h3{font-size:24px!important}.goal{padding:6px 10px;margin-top:4px}
+  .ccard{width:200px;padding:8px}.ccard .ce{font-size:44px}.ccard .ct{font-size:20px}.ccard .cx{font-size:13px}
+  .wgrid{grid-template-columns:repeat(5,1fr);gap:6px}.wp{padding:4px;font-size:11px}.wp img{height:62px}.wp .wn{font-size:13px}
+  .sortItem{font-size:56px;margin:2px 0}.sortName{font-size:19px}.bins{margin-top:6px}.bin{width:96px;padding:6px 4px;font-size:15px}.bin b{font-size:26px}
+  .blankQ{font-size:16px;padding:6px 10px;margin:6px 0}
+  .stats{margin:4px 0;gap:6px}.stat{padding:4px 10px}.stat b{font-size:19px}
+  .reward img{height:110px}
+  .earthArt{width:min(30vw,34vh)}
+  .vgrid{grid-template-columns:repeat(3,1fr);gap:8px}.vcard .vt{font-size:13px}
+  #cineCap{bottom:6%;font-size:clamp(15px,5vh,26px)}
+}
+/* 손가락으로 하는 기기에서는 키보드 안내를 숨겨요 */
+@media (pointer:coarse){ #keyhint{display:none} }
 </style>
 </head>
 <body>
@@ -538,9 +613,9 @@ button{font-family:'Jua',sans-serif;cursor:pointer;border:none}
 
 <div id="select" class="screen hidden">
   <h2>🌟 나의 기후 히어로를 골라요!</h2>
-  <div class="nameRow"><span class="jua">이름</span><input id="nick" maxlength="8" placeholder="닉네임 (8자)"></div>
+  <div class="nameRow"><span class="jua">이름</span><input id="nick" maxlength="8" placeholder="닉네임 (8자)" enterkeyhint="go" autocomplete="off"></div>
   <div class="jobs" id="jobs"></div>
-  <div style="margin:14px 0 18px"><button class="bigbtn" id="bGo">🚀 모험 떠나기</button></div>
+  <div class="goRow" style="margin:14px 0 18px"><button class="bigbtn" id="bGo">🚀 모험 떠나기</button></div>
 </div>
 <script>
 // ======================= DATA =======================
@@ -1040,7 +1115,8 @@ const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
 function resize(){
   DPR = Math.min(2, window.devicePixelRatio || 1); W = innerWidth; H = innerHeight;
   cvs.width = W*DPR; cvs.height = H*DPR; cvs.style.width = W+'px'; cvs.style.height = H+'px';
-  const tw = W<H ? 8.5 : 15; SCALE = clamp(Math.min(W/(tw*TILE), H/(10.5*TILE)), .5, 2);
+  const shortLand = W>H && H<500;                     // 휴대폰 가로: 조금 더 가까이 보여요
+  const tw = W<H ? 8.5 : 15, th = shortLand ? 8 : 10.5; SCALE = clamp(Math.min(W/(tw*TILE), H/(th*TILE)), .5, 2);
 }
 addEventListener('resize', resize); resize();
 
@@ -2783,7 +2859,7 @@ async function startGame(cont){
   if(cont){ const s=loadSave(); Object.assign(G,{name:s.name,job:OLD_JOB[s.job]||s.job,wIdx:s.wIdx,unlocked:s.unlocked,score:s.score,elapsed:s.elapsed}); G.cards=new Set(s.cards); loadChapter(s.chIdx); }
   else { G.score=0; G.elapsed=0; G.cards=new Set(); G.wIdx=0; G.unlocked=1; G.hintSkill=false; loadChapter(0); }
   G._readyToast=0;
-  if(innerWidth<640) { $('missions').classList.add('fold'); $('mfold').textContent='▼'; }
+  if(innerWidth<640 || innerHeight<500) { $('missions').classList.add('fold'); $('mfold').textContent='▼'; }
   G.busy=false;
   enqueue(chapterIntro);
 }
@@ -2821,6 +2897,8 @@ $('bStart').onclick=()=>{ audioInit(); goSelect(); };
 $('bContinue').onclick=()=>{ startGame(true); };
 $('bVideos').onclick=()=>{ audioInit(); openVideos(); };
 $('bRank').onclick=()=>{ audioInit(); openRank(); };
+$('nick').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); $('nick').blur(); $('bGo').click(); } });
+$('nick').addEventListener('focus',()=>setTimeout(()=>{ try{ $('nick').scrollIntoView({block:'center',behavior:'smooth'}); }catch(e){} },300));
 $('bGo').onclick=()=>{ const n=$('nick').value.trim(); if(!n){ $('nick').focus(); toast('이름(닉네임)을 입력해 주세요!'); return; } G.name=n.slice(0,8); startGame(false); };
 $('titleEarth').innerHTML=`<div class="titleEarth">${earthSVG(1)}</div>`;
 $('titleEarth').querySelector('svg').style.width='100%';
