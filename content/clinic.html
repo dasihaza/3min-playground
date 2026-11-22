@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>튼튼 소아과 병원놀이 | 3분 놀이터</title>
 <meta name="description" content="3학년 과학 '감염병과 건강한 생활' 1인칭 병원놀이 웹게임. 소아과 전문의 시험을 보고, 병원을 열어 3일 동안 어린이 환자를 진찰해요. 청진기와 질문으로 독감·결핵·수두·식중독·유행성 각결막염·파상풍·수족구병·무좀·폐렴·아데노바이러스 감염증을 알아맞혀요.">
+<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
 <style>
@@ -213,6 +215,13 @@ button{font-family:'Jua',sans-serif;cursor:pointer;border:none;color:inherit}
 .tips{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:10px 0;text-align:center}
 .tip{background:#fff;border-radius:16px;padding:10px 8px;box-shadow:0 4px 0 #d8f0e6;font-size:14.5px;line-height:1.4}
 .tip b{display:block;font-size:28px}
+.rank{width:100%;max-width:520px;margin:6px auto;border-collapse:separate;border-spacing:0 6px;font-size:16.5px}
+.rank td{background:#fff5f9;padding:8px 8px;font-weight:700}
+.rank td:first-child{border-radius:14px 0 0 14px;font-family:'Jua';font-size:21px;text-align:center;width:44px}
+.rank td:last-child{border-radius:0 14px 14px 0}
+.rank tr.me td{background:#ffe0ea}
+.rankBox{background:#fff;border-radius:18px;padding:10px 12px;margin:12px auto;max-width:560px;box-shadow:0 4px 0 #f0dbe4}
+.rankBox h4{font-family:'Jua';margin:4px 0;font-size:20px;color:#e5578a}
 .confetti{position:fixed;top:-20px;width:10px;height:14px;z-index:95;pointer-events:none;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
 .toast{position:fixed;left:50%;top:18%;transform:translateX(-50%);background:#fff;border-radius:20px;padding:12px 22px;font-family:'Jua';font-size:clamp(18px,3vw,26px);z-index:75;box-shadow:0 6px 0 #f0c6d6,0 12px 24px rgba(0,0,0,.18);animation:pop .3s;text-align:center;pointer-events:none}
@@ -260,7 +269,7 @@ button{font-family:'Jua',sans-serif;cursor:pointer;border:none;color:inherit}
     <div class="tSub">3학년 과학 · 감염병과 건강한 생활</div>
     <div class="tKids" id="tKids"></div>
     <div class="nameBox">👩‍⚕️ 의사 선생님 이름 <input id="docName" maxlength="6" placeholder="이름" value=""> 원장님</div>
-    <button class="bigbtn" id="startBtn">진료 놀이 시작! ▶</button>
+    <div><button class="bigbtn" id="startBtn">진료 놀이 시작! ▶</button><button class="bigbtn yellow" id="rankBtn">🏆 랭킹</button></div>
     <div class="best" id="bestTxt"></div>
     <div class="howCard">
       <h3>🩺 이렇게 놀아요</h3>
@@ -808,10 +817,13 @@ function finalResult(){
      <tr class="tot"><td>⭐ 최종 점수</td><td><b>${total}점</b></td></tr>
     </table>
     ${isBest?'<p class="jua" style="color:#7a58c9;font-size:18px">🎉 나의 최고 점수 갱신!</p>':`<p class="jua" style="color:#7a58c9">🏆 나의 최고 점수: ${Math.max(best,total)}점</p>`}
+    <div class="rankBox"><h4>🏆 명의 랭킹 TOP 5</h4><div id="rk"><p>랭킹에 등록하는 중… ⏳</p></div></div>
     <p>그런데 원장님… 감염병이 <b>널리 퍼지면</b> 어떤 일이 생길까요?</p>
     <button class="bigbtn" id="goEnd">🎬 엔딩 보기</button>
    </div></div>`;
   $('review').scrollTop=0;
+  const en={id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),name:G.doc,score:total,ok,date:new Date().toISOString().slice(0,10)};
+  Rank.add(en).then(()=>rankTable(en.id)).then(h=>{ const rk=$('rk'); if(rk) rk.innerHTML=h; });
   $('goEnd').onclick=async()=>{ sfx.pop(); await playCine('ending'); endingCard(total); };
 }
 function endingCard(total){
@@ -837,6 +849,43 @@ function endingCard(total){
   $('review').scrollTop=0;
   $('again').onclick=()=>{ sfx.pop(); show('title'); };
 }
+
+/* ================= 랭킹 (다른 게임과 같은 Firestore 문서 방식, TOP 30 저장) ================= */
+const FB={ ref:null,
+  init(){ if(this.ref!==null) return this.ref; this.ref=false;
+    try{ if(!window.firebase) return false;
+      if(!firebase.apps.length) firebase.initializeApp({ apiKey:"AIzaSyAqXsG8npxettrCRH3MbZwFZGLg5aehxdw", authDomain:"min-playground.firebaseapp.com", projectId:"min-playground", storageBucket:"min-playground.firebasestorage.app", messagingSenderId:"472071492052", appId:"1:472071492052:web:00263046925133e55a4641" });
+      this.ref=firebase.firestore().collection('farm_rankings').doc('clinic_top');
+    }catch(e){ this.ref=false; } return this.ref; },
+  clean(r){ return r&&typeof r.score==='number'&&isFinite(r.score)&&r.score>-5000&&r.score<5000; },
+  async top(){ const ref=this.init(); if(!ref) throw new Error('no firebase'); const d=await ref.get(); return ((d.exists&&d.data().top)||[]).filter(r=>this.clean(r)).sort((a,b)=>b.score-a.score); },
+  async add(en){ const ref=this.init(); if(!ref) return; const d=await ref.get(); const arr=((d.exists&&d.data().top)||[]).filter(r=>this.clean(r)&&r.id!==en.id);
+    arr.push({id:en.id,name:String(en.name||'튼튼').slice(0,6),score:Math.round(en.score),ok:en.ok,date:en.date}); arr.sort((a,b)=>b.score-a.score); await ref.set({top:arr.slice(0,30)}); }
+};
+const Rank={
+  local(){ try{ return JSON.parse(localStorage.getItem('clinicRank')||'[]'); }catch(e){ return []; } },
+  async top(){
+    if(FB.init()){ try{ const l=await Promise.race([FB.top(),wait(8000).then(()=>{throw new Error('timeout')})]); return {list:l.slice(0,5),shared:true}; }catch(e){ console.warn('rank fb',e); } }
+    return {list:this.local().sort((a,b)=>b.score-a.score).slice(0,5),shared:false};
+  },
+  async add(en){
+    try{ const l=this.local(); l.push(en); l.sort((a,b)=>b.score-a.score); localStorage.setItem('clinicRank',JSON.stringify(l.slice(0,20))); }catch(e){}
+    if(FB.init()){ try{ await Promise.race([FB.add(en),wait(8000)]); }catch(e){ console.warn('rank fb save',e); } }
+  }
+};
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function rankTable(myId){
+  const {list,shared}=await Rank.top();
+  const medal=['🥇','🥈','🥉','4','5'];
+  if(!list.length) return '<p>아직 기록이 없어요. 첫 번째 명의가 되어 보세요! 🩺</p>';
+  const mine=myId&&!list.some(r=>r.id===myId)?'<p style="font-size:14px;color:#9a8aa8">이번 기록은 TOP 5 밖이에요. 다시 도전해 봐요!</p>':'';
+  return `<table class="rank">${list.map((r,i)=>`<tr class="${r.id===myId?'me':''}"><td>${medal[i]}</td><td style="text-align:left">👩‍⚕️ ${esc(r.name||'튼튼')} 원장님</td><td style="color:#e5578a;text-align:right">${r.score}점</td><td style="font-size:13px;color:#999;text-align:right">바른 진료 ${typeof r.ok==='number'?r.ok:'-'}/21</td></tr>`).join('')}</table>${mine}<p style="font-size:12px;color:#aaa;margin:2px">${shared?'🌐 3분 놀이터에서 함께하는 모두의 랭킹':'💾 이 기기에 저장된 랭킹'}</p>`;
+}
+$('rankBtn').onclick=async()=>{ ac(); sfx.pop();
+  const b=openModal('<button class="mclose" id="x">✕</button><h3>🏆 명의 랭킹 TOP 5</h3><p style="margin:0">3일 진료를 마치면 입력한 이름으로 자동 등록돼요!</p><div id="rk2"><p>불러오는 중… ⏳</p></div>');
+  b.querySelector('#x').onclick=closeModal;
+  const h=await rankTable(); const rk=$('rk2'); if(rk) rk.innerHTML=h; };
 </script>
+<script src="../assets/score-reset.js"></script>
 </body>
 </html>
