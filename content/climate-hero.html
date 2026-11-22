@@ -151,7 +151,9 @@ button{font-family:'Jua',sans-serif;cursor:pointer;border:none}
 .job .pas{font-size:12.5px;color:#8a5aa8;margin-top:4px}
 .paraTag{display:inline-block;font-family:'Jua';color:#fff;border-radius:12px;padding:2px 10px;font-size:14px;margin:2px}
 .wp img{height:104px;max-width:100%;object-fit:contain;display:block;margin:0 auto}
+.wp .wfit{font-family:'Jua';font-size:11.5px;color:#8a7aa8;background:#f3ecff;border-radius:8px;padding:1px 6px;margin:2px 0}.wp .wfit.now{color:#fff;background:#4fb4f0}
 .wp .wtag{font-family:'Jua';color:#4f9a6a;font-size:12px}
+.fitBox{background:#eaf6ff;border:3px dashed #8fd3ff;border-radius:16px;padding:8px 12px;margin:6px auto;max-width:520px;font-size:14.5px;line-height:1.5;font-weight:700}.fitBox b{font-family:'Jua';font-weight:400;color:#2f86c0}.fitBox span{font-size:12.5px;color:#4f9a6a}
 .reward img{height:160px;animation:bob 2s infinite}
 #crisis>i{background:linear-gradient(90deg,#ffe27a,#ffb347,#ff6f8f)}
 #crisis.danger{animation:shake .6s infinite}
@@ -668,29 +670,34 @@ const JOB_KEYS=['mitig','adapt','geo'];
 const OLD_JOB={warrior:'mitig', archer:'adapt', mage:'geo'};
 
 const SV = b => `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">${b}</svg>`;
+// 무기 순서 = 그 무기를 처음 들고 가는 장(1~5장). 맵 내용에 맞춰 배치했어요.
+// orig: 그림·필살기 파일 번호(처음 만든 순서), fit: 이 장에 딱 맞는 까닭
 const WEAPONS = {
  mitig:[
-  {name:'새싹 묘목 삽', icon:'🌱', tag:'나무 심기 (조림 사업)', fx:'sprout', motion:'새싹이 동글동글 솟아나 이산화 탄소를 흡수해요'},
-  {name:'태양광 패널 방패', icon:'☀️', tag:'재생에너지 전환', fx:'sunray', motion:'햇빛을 모아 깨끗한 전기로 바꾸는 빛이 퍼져요'},
-  {name:'풍력 날개 대검', icon:'🌬️', tag:'재생에너지 전환', fx:'pinwheel', motion:'풍력 날개가 빙글빙글! 바람으로 깨끗한 에너지를 만들어요'},
-  {name:'탄소 배출권 도장 망치', icon:'🔨', tag:'탄소 배출권 거래제', fx:'stamp', motion:'쾅! 배출 허용량 도장을 찍어 온실가스를 줄여요'},
-  {name:'세계수 숲의 창', icon:'🌳', tag:'삼림 벌채 방지', fx:'tree', motion:'황금빛 세계수가 자라 숲을 지켜요'}
+  {orig:0, name:'새싹 묘목 삽', icon:'🌱', tag:'나무 심기 (조림 사업)', fx:'sprout', motion:'새싹이 동글동글 솟아나 이산화 탄소를 흡수해요', fit:'메마르고 뜨거워진 무지개 마을에 새싹을 심어 땅을 식히고 촉촉하게 지켜요'},
+  {orig:3, name:'탄소 배출권 도장 망치', icon:'🔨', tag:'탄소 배출권 거래제', fx:'stamp', motion:'쾅! 배출 허용량 도장을 찍어 온실가스를 줄여요', fit:'매연을 뿜는 회색 도시의 공장마다 배출 허용량 도장을 쾅! 기후 변화의 원인을 줄여요'},
+  {orig:2, name:'풍력 날개 대검', icon:'🌬️', tag:'재생에너지 전환', fx:'pinwheel', motion:'풍력 날개가 빙글빙글! 바람으로 깨끗한 에너지를 만들어요', fit:'바닷바람이 센 빙하 섬에서 풍력 발전으로 깨끗한 전기를! 빙하를 녹이는 온실가스를 줄여요'},
+  {orig:1, name:'태양광 패널 방패', icon:'☀️', tag:'재생에너지 전환', fx:'sunray', motion:'햇빛을 모아 깨끗한 전기로 바꾸는 빛이 퍼져요', fit:'햇빛 가득한 에코 시티! 태양광 발전으로 도시를 반짝반짝 밝혀요'},
+  {orig:4, name:'세계수 숲의 창', icon:'🌳', tag:'삼림 벌채 방지', fx:'tree', motion:'황금빛 세계수가 자라 숲을 지켜요', fit:'우리 마을 학교 정원에 숲을 가꿔요. 나무 한 그루가 지구를 지키는 첫걸음!'}
  ],
  adapt:[
-  {name:'치유의 물뿌리개', icon:'🚿', tag:'가뭄 대비 물 관리', fx:'rain', motion:'촉촉한 치유의 물방울이 톡톡 떨어져요'},
-  {name:'튼튼 벼 품종 지팡이', icon:'🌾', tag:'가뭄·폭우에 강한 품종 개발', fx:'seedrain', motion:'어떤 날씨에도 끄떡없는 튼튼한 새싹이 돋아요'},
-  {name:'조기 경보 확성기', icon:'📢', tag:'조기 경보 시스템', fx:'siren', motion:'삐용삐용! 경보 물결이 퍼져 모두를 미리 지켜요'},
-  {name:'방파제 블록 방패', icon:'🧱', tag:'방파제 증축', fx:'dome', motion:'튼튼한 방파제 보호막이 파도를 막아요'},
-  {name:'빗물 정원 우산', icon:'☂️', tag:'홍수 대비 빗물 관리', fx:'rainbow', motion:'우산 정원이 빗물을 모으고 무지개가 떠요'}
+  {orig:0, name:'치유의 물뿌리개', icon:'🚿', tag:'가뭄 대비 물 관리', fx:'rain', motion:'촉촉한 치유의 물방울이 톡톡 떨어져요', fit:'가뭄과 폭염에 시든 무지개 마을을 촉촉한 물로 돌봐요'},
+  {orig:4, name:'빗물 정원 우산', icon:'☂️', tag:'홍수 대비 빗물 관리', fx:'rainbow', motion:'우산 정원이 빗물을 모으고 무지개가 떠요', fit:'콘크리트뿐인 회색 도시에 빗물 정원을! 폭우에도 물이 넘치지 않는 초록 도시로 바꿔요'},
+  {orig:3, name:'방파제 블록 방패', icon:'🧱', tag:'방파제 증축', fx:'dome', motion:'튼튼한 방파제 보호막이 파도를 막아요', fit:'차오르는 바닷물을 막는 방파제! 해수면 상승에서 빙하 섬 친구들을 지켜요'},
+  {orig:1, name:'튼튼 벼 품종 지팡이', icon:'🌾', tag:'가뭄·폭우에 강한 품종 개발', fx:'seedrain', motion:'어떤 날씨에도 끄떡없는 튼튼한 새싹이 돋아요', fit:'에코 시티 친환경 농장에서 가뭄·폭우에도 끄떡없는 품종을 키워요'},
+  {orig:2, name:'조기 경보 확성기', icon:'📢', tag:'조기 경보 시스템', fx:'siren', motion:'삐용삐용! 경보 물결이 퍼져 모두를 미리 지켜요', fit:'폭염 특보와 기후 뉴스를 미리 알려 우리 마을 모두를 안전하게 지켜요'}
  ],
  geo:[
-  {name:'탄소 포집 지팡이', icon:'🌀', tag:'이산화 탄소 포집·제거', fx:'vacuum', motion:'회색 이산화 탄소 방울을 쏙쏙 빨아들여요'},
-  {name:'햇빛 반사 거울 양산', icon:'🪞', tag:'태양 복사열 관리', fx:'mirror', motion:'반짝이는 거울이 뜨거운 햇빛을 우주로 되돌려 보내요'},
-  {name:'구름 씨앗 로켓', icon:'🚀', tag:'구름 씨뿌리기', fx:'cloud', motion:'로켓이 구름 씨앗을 뿌려 시원한 비구름을 만들어요'},
-  {name:'성층권 반사 풍선 완드', icon:'🎈', tag:'성층권 에어로졸 주입', fx:'stars', motion:'높은 하늘에 반짝이 입자를 뿌려 햇빛을 살짝 가려요'},
-  {name:'우주 차양 오브', icon:'🛰️', tag:'우주 태양 가리개', fx:'orbit', motion:'우주에 커다란 차양을 펼쳐 지구를 시원하게 해요'}
+  {orig:2, name:'구름 씨앗 로켓', icon:'🚀', tag:'구름 씨뿌리기', fx:'cloud', motion:'로켓이 구름 씨앗을 뿌려 시원한 비구름을 만들어요', fit:'가뭄과 폭염에 시달리는 무지개 마을 하늘에 구름 씨앗을 뿌려 단비를 내려요'},
+  {orig:0, name:'탄소 포집 지팡이', icon:'🌀', tag:'이산화 탄소 포집·제거', fx:'vacuum', motion:'회색 이산화 탄소 방울을 쏙쏙 빨아들여요', fit:'회색 도시의 매연 속 이산화 탄소를 쏙쏙 빨아들여 공기를 맑게 해요'},
+  {orig:1, name:'햇빛 반사 거울 양산', icon:'🪞', tag:'태양 복사열 관리', fx:'mirror', motion:'반짝이는 거울이 뜨거운 햇빛을 우주로 되돌려 보내요', fit:'뜨거운 햇빛을 우주로 되돌려 빙하 섬의 빙하가 녹지 않게 시원하게 지켜요'},
+  {orig:3, name:'성층권 반사 풍선 완드', icon:'🎈', tag:'성층권 에어로졸 주입', fx:'stars', motion:'높은 하늘에 반짝이 입자를 뿌려 햇빛을 살짝 가려요', fit:'에코 시티의 관측 풍선처럼 높이 올라가 햇빛을 살짝 가리는 실험을 해요'},
+  {orig:4, name:'우주 차양 오브', icon:'🛰️', tag:'우주 태양 가리개', fx:'orbit', motion:'우주에 커다란 차양을 펼쳐 지구를 시원하게 해요', fit:'마지막 장! 우주 차양으로 지구 전체를 시원하게 감싸요'}
  ]
 };
+function heroKey(j,i){ const w=WEAPONS[j][i]; return 'hero_'+j+'_'+(w?w.orig:0); }
+const FIT_BONUS=1.2;   // 그 장에 맞는 무기(무기 번호 = 장 번호)를 들면 스킬 20% 강화
+function fitWeapon(){ return G.wIdx===G.chIdx; }
 for(const j in WEAPONS) WEAPONS[j].forEach(w=>{ w.svg=SV(`<circle cx="32" cy="32" r="29" fill="#fff6fb" stroke="#ffc0d6" stroke-width="3"/><text x="32" y="44" font-size="32" text-anchor="middle">${w.icon}</text>`); });
 const WPOW = [1, 1.25, 1.5, 1.8, 2.2], WRANGE = [0, .3, .6, .9, 1.3];
 // 타이밍 판정
@@ -1456,7 +1463,8 @@ function performSkill(g){
   unseen.forEach(o=>{ targets.splice(targets.indexOf(o),1); G.floats.push({x:o.px,y:o.py-70,txt:'먼저 💬조사해 봐요!',t:0,c:'#e5578a'}); });
   const seeds = Array.from({length:24},()=>({a:Math.random()*Math.PI*2,r:Math.random(),s:Math.random(),c:Math.floor(Math.random()*6)}));
   const dur = archer?1.7:1.4;
-  G.fx.push({kind:w.fx, job:G.job, x:cx, y:cy, R, t:0, dur, applyAt:archer?.75:.5, archer, sx:p.x, sy:p.y-20, seeds, targets, patches, gpow:g.pow});
+  const fitB=fitWeapon()?FIT_BONUS:1; if(fitB>1) G.floats.push({x:p.x,y:p.y-96,txt:'📍 맵 맞춤 +20%',t:0,c:'#2f86c0'});
+  G.fx.push({kind:w.fx, job:G.job, x:cx, y:cy, R, t:0, dur, applyAt:archer?.75:.5, archer, sx:p.x, sy:p.y-20, seeds, targets, patches, gpow:g.pow*fitB});
   if(g.k==='perfect') pushUltFx(cx,cy,R);
   sfx.skill(G.job, G.wIdx);
   const fireNear = G.hz.some(h=>h.type==='fire'&&!h.out&&Math.hypot(h.x-cx,h.y-cy)<R+h.r);
@@ -1936,7 +1944,7 @@ function takeCarry(c){ if(G.carry) dropCarry(); G.carry=c; updateCarryHUD(); sfx
 function startAim(){
   const jp=jobP();
   G.aim={p:Math.random()*.2, dir:1, t:0, v:1.05+G.chIdx*.12, max:3.6};
-  $('aim').classList.remove('hidden'); $('aimSkill').textContent=`${WEAPONS[G.job][G.wIdx].icon} ${jp.skill}`;
+  $('aim').classList.remove('hidden'); $('aimSkill').textContent=`${WEAPONS[G.job][G.wIdx].icon} ${jp.skill}${fitWeapon()?' · 📍맵 맞춤 +20%':''}`;
   sfx.talk();
 }
 function updateAim(dt){
@@ -2137,7 +2145,7 @@ function pushUltFx(cx,cy,R){
   // 필살기 연출은 화면 안쪽에 보이게 (멀리 조준해도 잘리지 않게)
   const vw=W/SCALE, vh=H/SCALE, mx=Math.min(vw*.32,R*.9), my=Math.min(vh*.3,R*.7);
   cx=clamp(cx,G.cam.x-vw/2+mx,G.cam.x+vw/2-mx); cy=clamp(cy,G.cam.y-vh/2+my+60,G.cam.y+vh/2-my);
-  G.fx.push({kind:curUlt().fx, job:G.job, w:G.wIdx, x:cx, y:cy, R:clamp(R,TILE*3,TILE*4.3), t:0, dur:2.6, applyAt:99, seeds:ultSeeds(80), targets:[]});
+  G.fx.push({kind:curUlt().fx, job:G.job, w:curOrig(), x:cx, y:cy, R:clamp(R,TILE*3,TILE*4.3), t:0, dur:2.6, applyAt:99, seeds:ultSeeds(80), targets:[]});
   G.shake=Math.max(G.shake,.55); G.uflash=1;
 }
 // 가운데 기준 + 덧셈 혼합(빛나는 마법진·돔용)
@@ -2213,8 +2221,9 @@ const ULTS = {
     {name:'우주 차양 빔', sub:'지구의 열을 식혀라!', fx:'ult_geo', cut:'ult_cut_geo', emo:[]}
   ]
 };
-function curUlt(){ return ULTS[G.job][G.wIdx]||ULTS[G.job][0]; }
-function cutKey(){ const u=curUlt(); return u.cut||`ult_cut_${G.job}_${G.wIdx}`; }
+function curOrig(){ const w=WEAPONS[G.job][G.wIdx]; return w?w.orig:0; }
+function curUlt(){ return ULTS[G.job][curOrig()]||ULTS[G.job][0]; }
+function cutKey(){ const u=curUlt(); return u.cut||`ult_cut_${G.job}_${curOrig()}`; }
 // 마법진(직업별) + 링 + 아이콘: 모든 필살기 공통 바탕
 function ultBase(e,p,ringA,ringB,rot=1){
   const f=fadeOf(p);
@@ -2589,7 +2598,7 @@ function drawEarth(x,y,r,heal,t){
 function drawHero(c, x, y, job, dir, walk, wIdx, cast=0, sc=1){
   const C=c; C.save(); C.translate(x,y); C.scale(sc,sc);
   const J=JOBS[job], bobY=Math.abs(Math.sin(walk))*2.5, step=Math.sin(walk)*4;
-  const hk=imgOk(`hero_${job}_${wIdx}`)?`hero_${job}_${wIdx}`:`hero_${job}_0`;
+  const hk=imgOk(heroKey(job,wIdx))?heroKey(job,wIdx):heroKey(job,0);
   if(imgOk(hk)){
     C.fillStyle='rgba(60,40,80,.18)'; C.beginPath(); C.ellipse(0,18,18,5.5,0,0,Math.PI*2); C.fill();
     const breathe=Math.sin(G.t*3)*.02, hop=walk?Math.abs(Math.sin(walk))*4:0, jump=cast>0?Math.sin((.5-cast)/.5*Math.PI)*12:0;
@@ -2929,8 +2938,8 @@ function openBag(){
   if(G.screen!=='play'||G.busy||G.aim) return; G.busy=true;
   const ws=WEAPONS[G.job], jp=jobP();
   const render=()=>{
-    const b=openModal(`<button class="mclose" id="x">✕</button><h3>🎒 ${jp.name}의 무기 가방</h3><p style="font-size:14px"><span class="paraTag" style="background:${jp.color}">${jp.icon} ${jp.para}</span> 스킬 <b>「${jp.skill}」</b><br>${jp.passive}<br>무기를 바꾸면 <b>캐릭터 모습</b>과 스킬 모양이 바뀌어요! 높은 등급일수록 회복력과 범위가 커져요.</p>
-      <div class="wgrid">${ws.map((w,i)=>`<div class="wp ${i===G.wIdx?'eq':''} ${i>=G.unlocked?'lock':''}" data-i="${i}">${imgOk(`hero_${G.job}_${i}`)?`<img src="${IMG[`hero_${G.job}_${i}`].src}" alt="">`:w.svg}<div class="wn">${i>=G.unlocked?'🔒 ':''}${w.icon} ${w.name}</div><div>${'★'.repeat(i+1)}</div><div class="wtag">🔬 ${w.tag}</div><div>${i<G.unlocked?w.motion:`${i}장 클리어 시 획득`}</div>${i===G.wIdx?'<div class="jua" style="color:#e5578a">장착 중</div>':''}</div>`).join('')}</div>`);
+    const b=openModal(`<button class="mclose" id="x">✕</button><h3>🎒 ${jp.name}의 무기 가방</h3><p style="font-size:14px"><span class="paraTag" style="background:${jp.color}">${jp.icon} ${jp.para}</span> 스킬 <b>「${jp.skill}」</b><br>${jp.passive}<br>무기를 바꾸면 <b>캐릭터 모습</b>과 스킬 모양이 바뀌어요! 무기마다 <b>딱 맞는 장소</b>가 있어서, 지금 장소에 맞는 무기를 들면 스킬이 <b>20% 강해져요</b>.</p>
+      <div class="wgrid">${ws.map((w,i)=>`<div class="wp ${i===G.wIdx?'eq':''} ${i>=G.unlocked?'lock':''}" data-i="${i}">${imgOk(heroKey(G.job,i))?`<img src="${IMG[heroKey(G.job,i)].src}" alt="">`:w.svg}<div class="wn">${i>=G.unlocked?'🔒 ':''}${w.icon} ${w.name}</div><div>${'★'.repeat(i+1)}</div><div class="wtag">🔬 ${w.tag}</div><div class="wfit ${i===G.chIdx?'now':''}">📍 ${i+1}장 ${CHAPTERS[i].place}${i===G.chIdx?' · 지금 +20%':''}</div><div>${i<G.unlocked?w.motion:`${i}장 클리어 시 획득`}</div>${i===G.wIdx?'<div class="jua" style="color:#e5578a">장착 중</div>':''}</div>`).join('')}</div>`);
     b.querySelector('#x').onclick=()=>{closeModal();G.busy=false;};
     b.querySelectorAll('.wp').forEach(d=>d.onclick=()=>{ const i=+d.dataset.i; if(i>=G.unlocked){ sfx.no(); return; } G.wIdx=i; sfx.ok(); render(); });
   };
@@ -3045,7 +3054,7 @@ async function chapterClear(){
   const w = newW!==null? WEAPONS[G.job][newW] : null;
   await new Promise(res=>{ const b=openModal(`<span class="chapNo">CHAPTER ${ch.no} CLEAR!</span><h3>🎉 ${ch.place} 회복 완료!</h3>
     <div class="stats"><div class="stat">현재 점수<b>${G.score.toLocaleString()}</b></div><div class="stat">기후 카드<b>${G.cards.size}/${Object.keys(CARDS).length}</b></div><div class="stat">플레이 시간<b style="font-size:18px">${fmtTime(G.elapsed)}</b></div></div>
-    ${w?`<div class="reward"><p class="jua" style="color:#e5578a;font-size:20px">✨ 새 무기 획득! ✨</p>${imgOk(`hero_${G.job}_${newW}`)?`<img src="${IMG[`hero_${G.job}_${newW}`].src}" alt="">`:w.svg}<p><span class="paraTag" style="background:${jobP().color}">🔬 ${w.tag}</span><br><b>${w.icon} ${w.name}</b> ${'★'.repeat(newW+1)}<br><span style="font-size:14px">${w.motion}</span><br><span style="font-size:13px;color:#9a8aa8">(자동 장착! 🎒가방에서 바꿀 수 있어요)</span></p></div>`:''}
+    ${w?`<div class="reward"><p class="jua" style="color:#e5578a;font-size:20px">✨ 새 무기 획득! ✨</p>${imgOk(heroKey(G.job,newW))?`<img src="${IMG[heroKey(G.job,newW)].src}" alt="">`:w.svg}<p><span class="paraTag" style="background:${jobP().color}">🔬 ${w.tag}</span><br><b>${w.icon} ${w.name}</b> ${'★'.repeat(newW+1)}<br><span style="font-size:14px">${w.motion}</span></p><div class="fitBox">📍 <b>다음 장소 「${CHAPTERS[newW].place}」에 딱 맞는 무기!</b><br>${w.fit}<br><span>맞는 장소에서 쓰면 스킬 +20%</span></div><p><span style="font-size:13px;color:#9a8aa8">(자동 장착! 🎒가방에서 바꿀 수 있어요)</span></p></div>`:''}
     <button class="bigbtn" id="go">다음 장으로 ▶</button>`); b.querySelector('#go').onclick=()=>{closeModal();res();}; });
   G._readyToast=0;
   loadChapter(G.chIdx+1);
