@@ -152,7 +152,8 @@ button{font-family:'Jua',sans-serif;cursor:pointer;border:none;color:inherit}
 .q{background:#fffaf0;border:2px solid #ffe1a6;border-radius:14px;padding:7px 10px;font-size:15px;text-align:left;font-family:'Gowun Dodum';font-weight:bold}
 .q:active{transform:translateY(2px)}
 .q.asked{opacity:.45;text-decoration:line-through}
-.qbar{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+.qbar{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap;min-height:48px}
+.qhint{font-family:'Jua';font-size:15px;color:#7a58c9;margin-right:auto}
 .lock{position:absolute;inset:0;background:#ffffffd9;display:flex;align-items:center;justify-content:center;text-align:center;font-family:'Jua';font-size:18px;color:#d1567f;z-index:2;padding:10px;border-radius:20px}
 .manualBtn{background:#e9e0ff;border-radius:999px;padding:8px 14px;font-size:15px;box-shadow:0 3px 0 #c6b6f0}
 
@@ -266,7 +267,8 @@ button{font-family:'Jua',sans-serif;cursor:pointer;border:none;color:inherit}
       <b>1단계 · 소아과 전문의 시험</b> — 태블릿 PC로 감염병 필기시험 8문제를 풀어요. (5문제 이상 맞히면 합격!)<br>
       <b>2단계 · 우리 병원 개업</b> — 3일 동안 어린이 환자를 진찰해요. (1일차 5명 · 2일차 7명 · 3일차 9명)<br>
       ① <b>청진기</b>를 들고 아이 몸에 꾹 대면 <b>호흡기 증상 가능성(%)</b>이 올라가요.<br>
-      ② 화면 아래 <b>질문</b>을 골라 물어봐요. (1일차 5번 · 2일차 4번 · 3일차 3번)<br>
+      ② 화면 아래 <b>질문</b>을 골라 물어봐요. (환자마다 최대 5번)<br>
+      ⚡ 질문을 <b>3개</b> 하면 <b>빠른 진단</b> 버튼이 나와요. 확신이 들면 바로 진단해 시간을 아껴요!<br>
       ③ <b>진료 매뉴얼</b>에 체크된 증상과 아이의 <b>그림</b>을 보고 어떤 감염병인지 진단해요.<br>
       ⏱️ 하루 180초! 남은 시간만큼 점수를 받아요. 다음 날 <b>병원 리뷰</b>에서 진료 결과를 확인해요.<br>
       🏆 3일이 끝나면 바른 진료 <b class="plus">+30점</b>, 오진 <b class="minus">−50점</b>!
@@ -317,7 +319,7 @@ button{font-family:'Jua',sans-serif;cursor:pointer;border:none;color:inherit}
       <div class="qtop"><h5>② 질문하기</h5><button class="manualBtn" id="manualBtn">📖 진료 매뉴얼</button><span class="qleft" id="qLeft"></span></div>
       <div class="cats" id="cats"></div>
       <div class="qs" id="qs"></div>
-      <div class="qbar"><button class="bigbtn small yellow" id="diagBtn">③ 진단하기 ✍️</button></div>
+      <div class="qbar"><span class="qhint" id="qHint"></span><button class="bigbtn small yellow" id="diagBtn">③ 진단하기 ✍️</button></div>
       <div class="lock" id="qLock">🩺 먼저 청진기로 진찰해 주세요!</div>
     </div>
   </div>
@@ -394,7 +396,8 @@ function answer(dk,qk){
   return ['y',a];
 }
 const NAMES={b:['민준','서준','도윤','하준','지호','시우','준우','건우','유찬','이안','태오','로운','은우','선우'],g:['서윤','지우','하윤','서아','하은','지아','수아','아린','유나','채원','소율','다인','예린','라희']};
-const DAYS=[{n:5,q:5},{n:7,q:4},{n:9,q:3}];
+const DAYS=[{n:5,q:5},{n:7,q:5},{n:9,q:5}];
+const QUICK=3;   // 질문을 이만큼 하면 '빠른 진단' 버튼이 나와요
 const DAY_TIME=180;
 
 /* ================= 상태 ================= */
@@ -569,8 +572,8 @@ function startDay(d){
   $('hDay').textContent=`🏥 ${d+1}일차`; updHud();
   $('patient').className='patient out'; $('bubble').classList.add('hidden'); $('chart').innerHTML='';
   const b=openModal(`<h3>🏥 소아과 의사 ${d+1}일차</h3>
-    <div class="sumRow"><div class="sum">오늘의 환자<b>${D.n}명</b></div><div class="sum">환자마다 질문<b>${D.q}번</b></div><div class="sum">진료 시간<b>${DAY_TIME}초</b></div></div>
-    <p>① <b>청진기</b>로 진찰 → ② <b>질문</b>하기 → ③ <b>진단</b>하기!<br>남은 시간은 그대로 점수가 돼요. 서둘러요, 원장님!</p>
+    <div class="sumRow"><div class="sum">오늘의 환자<b>${D.n}명</b></div><div class="sum">환자마다 질문<b>최대 ${D.q}번</b></div><div class="sum">진료 시간<b>${DAY_TIME}초</b></div></div>
+    <p>① <b>청진기</b>로 진찰 → ② <b>질문</b>하기 → ③ <b>진단</b>하기!<br>⚡ 질문 3개를 하면 <b>빠른 진단</b>으로 바로 진단할 수 있어요.<br>남은 시간은 그대로 점수가 돼요. 서둘러요, 원장님!</p>
     <button class="bigbtn green" id="go">진료 시작! 🩺</button>`);
   b.querySelector('#go').onclick=()=>{ closeModal(); sfx.pop(); startTimer(); nextPatient(); };
 }
@@ -659,7 +662,12 @@ function finishListen(){
 
 /* ----- 질문 ----- */
 let curCat='body';
-function renderQLeft(){ const c=G.cur,max=DAYS[G.day].q; $('qLeft').innerHTML='남은 질문 '+Array.from({length:max},(_,i)=>`<i class="${i<c.qLeft?'':'used'}"></i>`).join(''); }
+function renderQLeft(){ const c=G.cur,max=DAYS[G.day].q; $('qLeft').innerHTML='남은 질문 '+Array.from({length:max},(_,i)=>`<i class="${i<c.qLeft?'':'used'}"></i>`).join('');
+  const n=c.asked.length, d=$('diagBtn'), h=$('qHint');
+  d.classList.toggle('hidden',n<QUICK&&c.qLeft>0);
+  d.innerHTML=c.qLeft>0?'⚡ 빠른 진단하기':'③ 진단하기 ✍️';
+  h.textContent=n<QUICK&&c.qLeft>0?`💡 질문 ${QUICK-n}개 더 하면 빠른 진단 버튼이 나와요`:'';
+  if(n===QUICK&&c.qLeft>0&&!c.quickShown){ c.quickShown=true; toast('⚡ 빠른 진단 버튼이 생겼어요!<br><span style="font-size:.7em">더 물어봐도 되고, 바로 진단해도 돼요</span>',1800); } }
 function renderQs(cat){
   curCat=cat;
   $('cats').innerHTML=CATS.map(c=>`<button class="cat ${c.id===cat?'on':''}" data-c="${c.id}">${c.name}</button>`).join('');
@@ -695,6 +703,7 @@ $('manualBtn').onclick=()=>{ sfx.pop(); const b=openModal(manualHtml()); b.query
 function openDiag(){
   const c=G.cur; if(!c||G.phase==='leaving') return;
   if(!c.steth){ toast('🩺 먼저 청진기로 진찰해 주세요!'); return; }
+  if(c.asked.length<QUICK&&c.qLeft>0){ toast(`💬 질문을 ${QUICK}개 이상 해야 진단할 수 있어요!`); return; }
   sfx.pop();
   const b=openModal(`<button class="mclose" id="x">✕</button><h3>✍️ ${c.name}의 진단</h3>
    <p style="margin:0 0 4px">이 아이는 어떤 감염병일까요? <span style="font-size:14px;color:#9a8aa8">(차트와 그림을 잘 살펴봐요)</span></p>
