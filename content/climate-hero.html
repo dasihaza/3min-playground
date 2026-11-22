@@ -19,7 +19,8 @@ button{font-family:'Jua',sans-serif;cursor:pointer;border:none}
 .hidden{display:none!important}
 
 /* ---------- screens ---------- */
-.screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:auto;z-index:20}
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;overflow:auto;z-index:20;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+.screen>:first-child{margin-top:auto}.screen>:last-child{margin-bottom:auto}
 #title{display:block;touch-action:pan-y;-webkit-overflow-scrolling:touch;background:radial-gradient(circle at 20% 20%,#ffffff 0 2px,transparent 3px) 0 0/34px 34px,radial-gradient(circle at 70% 60%,#ffffffaa 0 3px,transparent 4px) 0 0/52px 52px,linear-gradient(180deg,#9ad8ff 0%,#c9f0ff 45%,#ffe9f3 75%,#fff3d6 100%)}
 #title .heroes{display:flex;gap:2px;align-items:flex-end;justify-content:center;margin:6px 0 6px;position:relative;z-index:1}
 #title .heroes img{height:min(20vh,150px);max-width:28vw;object-fit:contain;filter:drop-shadow(0 6px 4px rgba(90,60,120,.18));animation:hop 1.6s ease-in-out infinite}
@@ -105,7 +106,39 @@ button{font-family:'Jua',sans-serif;cursor:pointer;border:none}
 #cineSkip{position:absolute;right:14px;top:10px;font-size:clamp(14px,1.8vw,18px);padding:8px 18px;border-radius:999px;color:#4a3b5c;background:#fffffff0;box-shadow:0 4px 0 #d9cdee}
 #cineSkip:active{transform:translateY(3px)}
 #cinePlay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:clamp(20px,3vw,28px)}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:10px}
+.vcard{background:#fff;border-radius:18px;padding:0 0 8px;box-shadow:0 5px 0 #e3d3f3;cursor:pointer;overflow:hidden;border:3px solid #fff;text-align:center;font-family:'Jua';transition:transform .15s}
+.vcard:hover{transform:translateY(-3px)}
+.vcard:active{transform:translateY(2px)}
+.vcard .vth{position:relative;aspect-ratio:16/9;background:#2a2340}
+.vcard .vth img{width:100%;height:100%;object-fit:cover;display:block}
+.vcard .vth b{position:absolute;inset:0;margin:auto;width:46px;height:46px;border-radius:50%;background:#ffffffdd;color:#e5578a;display:grid;place-items:center;font-size:20px;padding-left:3px;box-shadow:0 3px 8px rgba(0,0,0,.25)}
+.vcard .vno{display:inline-block;margin-top:7px;font-size:12px;color:#fff;background:linear-gradient(90deg,#ff8fb1,#b08cff);padding:1px 10px;border-radius:10px}
+.vcard .vt{font-size:16px;color:#4a3b5c;margin-top:3px;padding:0 6px}
+.vcard.end{border-color:#ffd36b;box-shadow:0 5px 0 #ffd36b}
 #cineBar{position:absolute;left:0;bottom:0;height:6px;width:0;background:linear-gradient(90deg,#7fe0c3,#8fd3ff,#ff9ec0);border-radius:0 6px 6px 0}
+#ult{position:fixed;inset:0;z-index:33;pointer-events:none;overflow:hidden;--uc1:#ff8fb1;--uc2:#ffe27a}
+#ult .ultBg{position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,#ffffffcc,var(--uc1) 70%);opacity:0}
+#ult .ultBand{position:absolute;left:-8%;right:-8%;top:16%;height:60%;transform:skewY(-7deg) translateX(110%);overflow:hidden;border-top:7px solid #fff;border-bottom:7px solid #fff;box-shadow:0 0 0 5px var(--uc1),0 18px 40px rgba(0,0,0,.35);background:var(--uc1)}
+#ult .ultBand img{position:absolute;inset:-6%;width:112%;height:112%;object-fit:cover;transform:skewY(7deg)}
+#ult .ultLines{position:absolute;inset:0;background:repeating-linear-gradient(-7deg,transparent 0 46px,rgba(255,255,255,.18) 46px 50px);mix-blend-mode:screen}
+#ult .ultName{position:absolute;left:0;right:0;bottom:6%;text-align:center;font-family:'Jua';transform:scale(.3);opacity:0;white-space:nowrap}
+#ult .ultName small{display:block;font-size:clamp(14px,2.6vw,22px);color:#fff;-webkit-text-stroke:4px var(--uc1);paint-order:stroke fill;letter-spacing:2px}
+#ult .ultName b{display:block;font-weight:400;font-size:clamp(34px,7vw,74px);color:var(--uc2);-webkit-text-stroke:7px #4a3b5c;paint-order:stroke fill;text-shadow:0 6px 0 var(--uc1),0 12px 24px rgba(0,0,0,.35);line-height:1.05}
+#ult .ultName span{display:inline-block;margin-top:4px;font-size:clamp(14px,2.2vw,20px);color:#fff;background:var(--uc1);padding:2px 14px;border-radius:999px;border:3px solid #fff}
+#ult.in .ultBg{animation:ultBg 1.45s ease-out forwards}
+#ult.in .ultBand{animation:ultBand .32s cubic-bezier(.2,1.4,.4,1) forwards}
+#ult.in .ultBand img{animation:ultZoom 1.45s ease-out forwards}
+#ult.in .ultName{animation:ultName .4s .18s cubic-bezier(.2,1.6,.4,1) forwards}
+#ult.out .ultBand{animation:ultBandOut .3s ease-in forwards}
+#ult.out .ultName{animation:ultNameOut .3s ease-in forwards}
+@keyframes ultBg{0%{opacity:0}12%{opacity:.85}70%{opacity:.45}100%{opacity:0}}
+@keyframes ultBand{to{transform:skewY(-7deg) translateX(0)}}
+@keyframes ultZoom{from{transform:skewY(7deg) scale(1.12) translateX(3%)}to{transform:skewY(7deg) scale(1) translateX(-3%)}}
+@keyframes ultName{to{transform:scale(1);opacity:1}}
+@keyframes ultBandOut{from{transform:skewY(-7deg) translateX(0)}to{transform:skewY(-7deg) translateX(-115%)}}
+@keyframes ultNameOut{from{transform:scale(1);opacity:1}to{transform:scale(1.4);opacity:0}}
+@media (max-height:500px) and (orientation:landscape){ #ult .ultBand{top:10%;height:62%} #ult .ultName{bottom:3%} #ult .ultName b{font-size:9vh;-webkit-text-stroke:5px #4a3b5c} }
 #judge{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);font-family:'Jua';font-size:clamp(44px,8vw,76px);-webkit-text-stroke:4px #fff;paint-order:stroke fill;opacity:0;pointer-events:none;z-index:33;text-shadow:0 6px 14px rgba(0,0,0,.18);white-space:nowrap}
 #judge.show{animation:judgePop .9s ease-out forwards}
 #judge.perfect{font-size:clamp(54px,10vw,92px)}
@@ -418,6 +451,80 @@ button{font-family:'Jua',sans-serif;cursor:pointer;border:none}
 }
 
 .pgd__tip{line-height:1.6}
+
+/* ---------- 휴대폰 가로 모드 (세로 높이가 짧은 화면) ---------- */
+@media (max-height:500px) and (orientation:landscape){
+  /* 첫 화면 */
+  .titleMain{padding:6px 0 26px}
+  .titleEarth{width:24vh}
+  #title .fairyT{width:13vh}
+  #title .logo{font-size:10.5vh;margin:0;-webkit-text-stroke:1.5px #ff8fb1}
+  #title .heroes{margin:2px 0}
+  #title .heroes img{height:21vh}#title .heroes img:nth-child(2){height:23vh}
+  .bigbtn{font-size:17px;padding:9px 22px;margin:4px}
+  .scrollHint{bottom:4px;font-size:12px}
+  .homeBtn{font-size:13px;padding:4px 11px;left:8px;top:8px}
+  /* 히어로 고르기: 이름 칸과 출발 버튼이 늘 보이게 위쪽에 모아요 */
+  #select{padding:6px 10px 10px}
+  #select h2{font-size:20px;margin:0 0 2px}
+  #select .nameRow{margin:2px 0 6px;padding:4px 12px}
+  #select .nameRow input{font-size:17px;width:150px}
+  #select .goRow{order:2;margin:0 0 6px!important}
+  #select .goRow .bigbtn{font-size:16px;padding:7px 22px;margin:0}
+  #select h2{order:0}#select .nameRow{order:1}#select .jobs{order:3;margin-bottom:auto}
+  .jobs{gap:8px;flex-wrap:nowrap;padding:0}
+  .job{width:31vw;min-width:0;padding:6px 8px 8px;border-radius:20px;border-width:3px}
+  .job canvas{width:min(84px,21vh);height:min(84px,21vh)}
+  .job .para{font-size:13px;padding:1px 10px;margin-bottom:2px}
+  .job .jn{font-size:18px;margin:2px 0 0}
+  .job .js{font-size:11.5px;line-height:1.35}
+  .job .pd,.job .pas,.job .js:last-child{display:none}
+  .job .tag{font-size:11px;padding:1px 8px;margin:3px 1px 0}
+  .job.sel{transform:translateY(-2px) scale(1.02)}
+  /* 게임 화면 */
+  #gaugeWrap{width:min(36vw,250px);padding:4px 10px}
+  #chapName{font-size:12px}#gaugeWrap .lab{font-size:11px}
+  .bar{height:10px}
+  .iconbtn{width:36px;height:36px;font-size:17px}#rightTop{gap:4px}#score{font-size:14px;padding:4px 9px}
+  #mini{width:110px;top:50px;border-width:3px}
+  #hzStat{top:auto;bottom:118px;right:8px;font-size:11.5px}
+  #missions{font-size:12px;width:min(34vw,230px)}#missions .mh{font-size:13px}
+  #joy{width:104px;height:104px;left:14px;bottom:12px}#joyKnob{left:23px;top:23px;width:46px;height:46px}
+  #btns{right:12px;bottom:12px;gap:10px}
+  .actbtn{width:66px;height:66px;font-size:13px}.actbtn b{font-size:24px}#btnSkill{width:80px;height:80px}
+  #carry{bottom:10px;font-size:13px}
+  #aim{bottom:8px;width:min(52vw,480px);padding:5px 12px 4px;border-width:4px}
+  .aimTitle{font-size:12px}.aimBar{height:30px;margin:5px 0 1px}#aimDot{width:26px;height:26px;margin:-13px 0 0 -13px}.aimLab{font-size:9px}
+  #judge{top:34%}
+  #dialog{bottom:8px;width:min(78vw,760px);gap:8px}
+  #dlgFace{width:70px;height:70px;font-size:38px;border-width:4px}
+  #dlgBox{min-height:74px;padding:8px 14px 10px;border-width:4px}
+  #dlgWho{font-size:15px;margin-top:-24px}
+  #dlgText{font-size:15px;line-height:1.45}
+  #toast{top:52px;font-size:15px}
+  #hzBanner{top:50px;padding:5px 12px 5px 6px}#hzBanner img{width:44px;height:44px}#hzBanner b{font-size:16px}#hzBanner span{font-size:12px}
+  /* 팝업 창: 낮은 화면에 맞게 작게 */
+  #modal{padding:6px}
+  .mbox{padding:10px 16px;max-height:calc(100vh - 12px);border-width:4px;border-radius:22px}
+  .mbox h3{font-size:20px;margin:2px 0 4px}
+  .mbox p{font-size:14px;margin:3px 0;line-height:1.45}
+  .mclose{width:34px;height:34px;font-size:17px;top:6px;right:8px}
+  .qtext{font-size:16px;margin:4px 0 0;line-height:1.4}.qnum{font-size:13px}
+  .opts{gap:6px;margin-top:8px}.opt{font-size:15px;padding:8px 12px;border-radius:14px}
+  .fb{margin-top:6px;padding:6px 10px;font-size:14px}
+  .chapCard h3{font-size:24px!important}.goal{padding:6px 10px;margin-top:4px}
+  .ccard{width:200px;padding:8px}.ccard .ce{font-size:44px}.ccard .ct{font-size:20px}.ccard .cx{font-size:13px}
+  .wgrid{grid-template-columns:repeat(5,1fr);gap:6px}.wp{padding:4px;font-size:11px}.wp img{height:62px}.wp .wn{font-size:13px}
+  .sortItem{font-size:56px;margin:2px 0}.sortName{font-size:19px}.bins{margin-top:6px}.bin{width:96px;padding:6px 4px;font-size:15px}.bin b{font-size:26px}
+  .blankQ{font-size:16px;padding:6px 10px;margin:6px 0}
+  .stats{margin:4px 0;gap:6px}.stat{padding:4px 10px}.stat b{font-size:19px}
+  .reward img{height:110px}
+  .earthArt{width:min(30vw,34vh)}
+  .vgrid{grid-template-columns:repeat(3,1fr);gap:8px}.vcard .vt{font-size:13px}
+  #cineCap{bottom:6%;font-size:clamp(15px,5vh,26px)}
+}
+/* 손가락으로 하는 기기에서는 키보드 안내를 숨겨요 */
+@media (pointer:coarse){ #keyhint{display:none} }
 </style>
 </head>
 <body>
@@ -450,6 +557,7 @@ button{font-family:'Jua',sans-serif;cursor:pointer;border:none}
   <div class="aimBar"><i class="z bad"></i><i class="z good"></i><i class="z great"></i><i class="z perfect"></i><div id="aimDot"></div></div>
   <div class="aimLab"><span>미스</span><span>배드</span><span>굿</span><span>그레이트</span><span class="pf">퍼펙트</span><span>그레이트</span><span>굿</span><span>배드</span><span>미스</span></div></div>
 <div id="judge"></div>
+<div id="ult" class="hidden"><div class="ultBg"></div><div class="ultBand"><img id="ultImg" alt=""><div class="ultLines"></div></div><div class="ultName"><small>✨ PERFECT 필살기 ✨</small><b id="ultTxt"></b><span id="ultSub"></span></div></div>
 <div id="cine" class="hidden"><video id="cineV" playsinline webkit-playsinline preload="auto"></video><div id="cineTag"></div><div id="cineCap"></div><button id="cineSkip">건너뛰기 ⏭</button><button id="cinePlay" class="bigbtn hidden">▶ 영상 보기</button><div id="cineBar"></div></div>
 
 <div id="title" class="screen"><div class="titleMain">
@@ -464,6 +572,7 @@ button{font-family:'Jua',sans-serif;cursor:pointer;border:none}
     <button class="bigbtn" id="bStart">🎮 새로 시작</button>
     <button class="bigbtn green hidden" id="bContinue">▶ 이어 하기</button>
     <button class="bigbtn yellow" id="bRank">🏆 랭킹 TOP 5</button>
+    <button class="bigbtn blue hidden" id="bVideos">🎬 영상 모아 보기</button>
   </div>
   <a class="scrollHint" href="#pg-guide">▼ 게임 소개 보기</a>
 </div>
@@ -475,7 +584,7 @@ button{font-family:'Jua',sans-serif;cursor:pointer;border:none}
     <span class="pgd__deco pgd__deco--b" aria-hidden="true">🌱</span>
     <span class="pgd__deco pgd__deco--c" aria-hidden="true">✨</span>
     <div class="pgd__head">
-      <div class="pgd__mascot"><img src="../assets/guide/climate-hero.webp" alt="새싹이 돋은 채 활짝 웃는 귀여운 지구 그림" width="150" height="150" loading="lazy" decoding="async"></div>
+      <div class="pgd__mascot"><img src="../assets/climate-hero/img/earth_happy.webp" alt="새싹이 돋은 채 활짝 웃는 귀여운 지구 그림" width="150" height="150" loading="lazy" decoding="async"></div>
       <div>
         <h2 class="pgd__title" id="pgd-title"><mark>기후 히어로: 지구를 구해 줘!</mark>, 이렇게 활용해요</h2>
         <p class="pgd__lead">기후 변화로 아파하는 지구를 구하러 떠나는 RPG 모험이에요. <b>감축·적응·지구공학</b> 중 한 가지 힘을 가진 히어로가 되어, 다섯 마을을 돌며 기후 변화의 <b>모습 → 원인 → 영향 → 사회의 대응 → 나의 실천</b>을 차례로 익혀요.</p>
@@ -527,9 +636,9 @@ button{font-family:'Jua',sans-serif;cursor:pointer;border:none}
 
 <div id="select" class="screen hidden">
   <h2>🌟 나의 기후 히어로를 골라요!</h2>
-  <div class="nameRow"><span class="jua">이름</span><input id="nick" maxlength="8" placeholder="닉네임 (8자)"></div>
+  <div class="nameRow"><span class="jua">이름</span><input id="nick" maxlength="8" placeholder="닉네임 (8자)" enterkeyhint="go" autocomplete="off"></div>
   <div class="jobs" id="jobs"></div>
-  <div style="margin:14px 0 18px"><button class="bigbtn" id="bGo">🚀 모험 떠나기</button></div>
+  <div class="goRow" style="margin:14px 0 18px"><button class="bigbtn" id="bGo">🚀 모험 떠나기</button></div>
 </div>
 <script>
 // ======================= DATA =======================
@@ -586,7 +695,7 @@ for(const j in WEAPONS) WEAPONS[j].forEach(w=>{ w.svg=SV(`<circle cx="32" cy="32
 const WPOW = [1, 1.25, 1.5, 1.8, 2.2], WRANGE = [0, .3, .6, .9, 1.3];
 // 타이밍 판정
 const GRADES = [
-  {k:'perfect', n:'퍼펙트!', d:.045, pow:1.6, sc:40, rng:1.15, c:'#ff5fa2'},
+  {k:'perfect', n:'퍼펙트!', d:.045, pow:1.6, sc:40, rng:1.3, c:'#ff5fa2'},
   {k:'great',   n:'그레이트!', d:.11, pow:1.3, sc:25, rng:1.06, c:'#ff9a3c'},
   {k:'good',    n:'굿!',      d:.20, pow:1.0, sc:12, rng:1,    c:'#3fb35d'},
   {k:'bad',     n:'배드…',    d:.34, pow:.5,  sc:3,  rng:.9,   c:'#8a7aa8'},
@@ -1029,7 +1138,8 @@ const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
 function resize(){
   DPR = Math.min(2, window.devicePixelRatio || 1); W = innerWidth; H = innerHeight;
   cvs.width = W*DPR; cvs.height = H*DPR; cvs.style.width = W+'px'; cvs.style.height = H+'px';
-  const tw = W<H ? 8.5 : 15; SCALE = clamp(Math.min(W/(tw*TILE), H/(10.5*TILE)), .5, 2);
+  const shortLand = W>H && H<500;                     // 휴대폰 가로: 조금 더 가까이 보여요
+  const tw = W<H ? 8.5 : 15, th = shortLand ? 8 : 10.5; SCALE = clamp(Math.min(W/(tw*TILE), H/(th*TILE)), .5, 2);
 }
 addEventListener('resize', resize); resize();
 
@@ -1040,7 +1150,7 @@ const ease = t=>1-Math.pow(1-t,3);
 const sleep = ms=>new Promise(r=>setTimeout(r,ms));
 
 // ======================= IMAGES (Higgsfield로 그린 그림) =======================
-const IMG_LIST=[...['mitig','adapt','geo'].flatMap(j=>[0,1,2,3,4].map(i=>`hero_${j}_${i}`)),'p_tree','p_bush','p_flower','p_house','p_building','fairy','npc_chief','npc_doc','npc_peng','npc_bot','npc_panda','earth_happy','earth_sad','hz_fire','hz_typhoon','hz_flood','hz_drought','hz_sea'];
+const IMG_LIST=[...['mitig','adapt','geo'].flatMap(j=>[0,1,2,3,4].map(i=>`hero_${j}_${i}`)),'p_tree','p_bush','p_flower','p_house','p_building',...['mitig','adapt','geo'].flatMap(j=>['ult_cut_'+j,'ult_fx_'+j,'ult_big_'+j]),'fairy','npc_chief','npc_doc','npc_peng','npc_bot','npc_panda','earth_happy','earth_sad','hz_fire','hz_typhoon','hz_flood','hz_drought','hz_sea'];
 const IMG={};
 for(const k of IMG_LIST){ const i=new Image(); i.onload=()=>{ i.ok=true; if(k.startsWith('hero')||k.startsWith('earth')||k==='fairy') titleArt(); }; i.src='../assets/climate-hero/img/'+k+'.webp'; IMG[k]=i; }
 const NPC_IMG={chief:'npc_chief',doc:'npc_doc',peng:'npc_peng',bot:'npc_bot',panda:'npc_panda'};
@@ -1137,6 +1247,8 @@ function update(dt){
   G.t += dt;
   if(G.screen!=='play') return;
   if(G.aim){ updateAim(dt); G.player.moving=false; hudEnergy(); return; }
+  if(G.ult){ G.player.moving=false; return; }
+  if(G.uflash>0) G.uflash=Math.max(0,G.uflash-dt*2.2);
   G.elapsed += dt;
   const jp = jobP();
   G.energy = Math.min(jp.energyMax, G.energy + jp.regen*(G.glob.drought>0?.35:1)*(G.envSt==='smog'?0:1)*dt);
@@ -1220,7 +1332,7 @@ function flow(fn){ if(G.busy) return; enqueue(fn); }
 function ownerLine(o, t){ return L(o.ownerName||o.name, o.owner||o.emoji||'💬', t); }
 
 function tryInteract(){
-  if(G.screen!=='play'||G.busy||G.aim) return;
+  if(G.screen!=='play'||G.busy||G.aim||G.ult) return;
   const o = nearest();
   if(!o){ toast('가까이에 조사할 것이 없어요'); return; }
   flow(()=>interact(o));
@@ -1314,7 +1426,7 @@ function checkReady(){
 
 // ======================= SKILL =======================
 function castSkill(){
-  if(G.screen!=='play'||G.busy||G.cool>0) return;
+  if(G.screen!=='play'||G.busy||G.cool>0||G.ult) return;
   if(G.aim){ judgeAim(); return; }
   if(G.energy<20){ toast('✨ 에코 에너지가 부족해요! ⭐에코 별을 모아요'); sfx.no(); return; }
   startAim();
@@ -1345,6 +1457,7 @@ function performSkill(g){
   const seeds = Array.from({length:24},()=>({a:Math.random()*Math.PI*2,r:Math.random(),s:Math.random(),c:Math.floor(Math.random()*6)}));
   const dur = archer?1.7:1.4;
   G.fx.push({kind:w.fx, job:G.job, x:cx, y:cy, R, t:0, dur, applyAt:archer?.75:.5, archer, sx:p.x, sy:p.y-20, seeds, targets, patches, gpow:g.pow});
+  if(g.k==='perfect') pushUltFx(cx,cy,R);
   sfx.skill(G.job, G.wIdx);
   const fireNear = G.hz.some(h=>h.type==='fire'&&!h.out&&Math.hypot(h.x-cx,h.y-cy)<R+h.r);
   if(!targets.length && !patches.length && farZone && !unseen.length) setTimeout(()=>{ if(!G.busy) toast(`${ZONE_INFO[farZone.zone].e} 재난 지역 중앙까지 치유하며 들어가야 해요!`); },500);
@@ -1837,7 +1950,8 @@ function judgeAim(timeout=false){
   const d=Math.abs(a.p-.5); const g=timeout?GRADES[4]:GRADES.find(x=>d<=x.d);
   G.aim=null; $('aim').classList.add('hidden');
   popJudge(g);
-  performSkill(g);
+  if(g.k==='perfect') ultCutIn().then(()=>performSkill(g));
+  else performSkill(g);
 }
 function popJudge(g){
   const el=$('judge'); el.textContent=g.n; el.style.color=g.c; el.className='show '+g.k; void el.offsetWidth;
@@ -1999,6 +2113,84 @@ const FX_EXTRA=({
     for(let i=0;i<10;i++){ const s=e.seeds[i]; circle(e.x+(s.a-3)*e.R*.3,e.y-s.r*e.R*.6,3,'#bfe9ff'); } ctx.globalAlpha=1; ring(e,p,'#8fd3ff'); }
 });
 
+// ======================= PERFECT 필살기 (직업별 컷인 + 대형 이펙트) =======================
+// 타이밍 바에서 '퍼펙트'가 나오면 직업별 필살기 컷인이 잠깐 나오고, 맵 위에 거대한 마법진과 이펙트가 터져요.
+const ULT = {
+  mitig:{ c1:'#4fbf6a', c2:'#ffe27a', glow:'rgba(120,230,120,', name:'세계수의 숲 폭풍', sub:'원인을 뿌리째 줄여라!' },
+  adapt:{ c1:'#4fb4f0', c2:'#b8f3ff', glow:'rgba(120,210,255,', name:'무지개 방파 실드', sub:'모두를 지키는 대비의 힘!' },
+  geo:  { c1:'#9b7ae8', c2:'#ffd86b', glow:'rgba(255,215,120,', name:'우주 차양 빔', sub:'지구의 열을 식혀라!' }
+};
+function ultCutIn(){
+  return new Promise(res=>{
+    const u=ULT[G.job], box=$('ult'), img=$('ultImg'), k='ult_cut_'+G.job;
+    G.ult=true; sfx.ult();
+    box.style.setProperty('--uc1',u.c1); box.style.setProperty('--uc2',u.c2);
+    $('ultTxt').textContent=u.name; $('ultSub').textContent=u.sub;
+    if(imgOk(k)){ img.src=IMG[k].src; img.style.display=''; } else img.style.display='none';
+    box.classList.remove('hidden','out'); void box.offsetWidth; box.classList.add('in');
+    setTimeout(()=>{ box.classList.add('out'); },1150);
+    setTimeout(()=>{ box.classList.add('hidden'); box.classList.remove('in','out'); G.ult=false; res(); },1450);
+  });
+}
+function ultSeeds(n){ return Array.from({length:n},()=>({a:Math.random()*Math.PI*2,r:Math.random(),s:Math.random(),c:Math.floor(Math.random()*6),d:Math.random()})); }
+function pushUltFx(cx,cy,R){
+  G.fx.push({kind:'ult_'+G.job, x:cx, y:cy, R:Math.max(R,TILE*3), t:0, dur:2.6, applyAt:99, seeds:ultSeeds(80), targets:[]});
+  G.shake=Math.max(G.shake,.55); G.uflash=1;
+}
+// 가운데 기준 + 덧셈 혼합(빛나는 마법진·돔용)
+function glowSprite(k,x,y,size,rot,alpha,sy=1){
+  if(!imgOk(k)||alpha<=0) return false;
+  const i=IMG[k], w=size, h=size*i.naturalHeight/i.naturalWidth;
+  ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=Math.min(1,alpha)*.78; ctx.translate(x,y); ctx.scale(1,sy); ctx.rotate(rot); ctx.drawImage(i,-w/2,-h/2,w,h); ctx.restore(); return true;
+}
+function lightPillars(e,p,color,n){
+  const a=Math.sin(Math.min(1,p*1.6)*Math.PI);
+  ctx.save(); ctx.globalCompositeOperation='lighter';
+  for(let i=0;i<n;i++){ const s=e.seeds[i], ang=i/n*Math.PI*2+p*.8, x=e.x+Math.cos(ang)*e.R*.82, y=e.y+Math.sin(ang)*e.R*.5, h=e.R*(1.4+s.r);
+    const g=ctx.createLinearGradient(x,y,x,y-h); g.addColorStop(0,color+(.75*a)+')'); g.addColorStop(1,color+'0)'); ctx.fillStyle=g; ctx.fillRect(x-7-s.s*6,y-h,14+s.s*12,h); }
+  ctx.restore();
+}
+function ultRing(e,p,color,delay=0){ const k=clamp((p-delay)*1.6,0,1); if(k<=0||k>=1) return; ctx.save(); ctx.globalAlpha=(1-k)*.6; ctx.strokeStyle=color; ctx.lineWidth=7*(1-k)+2; ctx.beginPath(); ctx.ellipse(e.x,e.y,e.R*1.5*k,e.R*.9*k,0,0,Math.PI*2); ctx.stroke(); ctx.restore(); }
+function fadeOf(p){ return Math.min(1,p*5)*(1-Math.max(0,p-.72)/.28); }
+const FX_ULT = {
+  // 감축전사: 초록 잎 마법진 + 솟아오르는 황금 세계수 + 잎사귀 폭풍
+  ult_mitig(e,p){ const f=fadeOf(p);
+    if(!glowSprite('ult_fx_mitig',e.x,e.y,e.R*2.3*ease(Math.min(1,p*2.2)),p*2.2,f,.62)){ ctx.globalAlpha=f; ctx.strokeStyle='#7fe08a'; ctx.lineWidth=6; ctx.beginPath(); ctx.ellipse(e.x,e.y,e.R*1.2,e.R*.7,0,0,6.3); ctx.stroke(); ctx.globalAlpha=1; }
+    lightPillars(e,p,'rgba(150,240,140,',8);
+    ultRing(e,p,'#bfffb0',0); ultRing(e,p,'#ffe27a',.18);
+    const g=ease(clamp((p-.08)*2.2,0,1)), tk='ult_big_mitig';
+    if(imgOk(tk)){ const i=IMG[tk], h=e.R*2.3*g, w=h*i.naturalWidth/i.naturalHeight; ctx.save(); ctx.globalAlpha=f; ctx.translate(e.x,e.y+e.R*.25); ctx.scale(1+Math.sin(p*14)*.02*(1-p),1); ctx.drawImage(i,-w/2,-h,w,h); ctx.restore(); }
+    else drawTree(e.x,e.y+e.R*.25,2.4*g,'#4fc46f');
+    for(let i=0;i<60;i++){ const s=e.seeds[i], a=s.a+p*(4+s.s*4), d=e.R*(.2+p*1.3)*(.4+s.r*.8), x=e.x+Math.cos(a)*d, y=e.y-e.R*.4-p*e.R*.8*s.d+Math.sin(a)*d*.55;
+      ctx.save(); ctx.globalAlpha=f*(.6+.4*s.s); ctx.translate(x,y); ctx.rotate(a*3); ctx.fillStyle=['#6cd47f','#9be59b','#ffe27a','#3fb35d','#c8f7a0','#ffcf33'][s.c]; ctx.beginPath(); ctx.ellipse(0,0,8+s.s*6,3.5+s.s*2,0,0,6.3); ctx.fill(); ctx.restore(); }
+    ctx.globalAlpha=f; for(let i=0;i<6;i++){ const s=e.seeds[60+i]; emoji(['🌱','☀️','🌬️','🌳','♻️','💚'][i],e.x+Math.cos(s.a+p*2)*e.R*1.1,e.y-e.R*.6-p*60*s.r+Math.sin(s.a+p*2)*e.R*.4,22+s.s*10); } ctx.globalAlpha=1; },
+  // 적응치료사: 물빛 육각 마법진 + 무지개 방파 실드 돔 + 치유의 빗방울
+  ult_adapt(e,p){ const f=fadeOf(p);
+    if(!glowSprite('ult_fx_adapt',e.x,e.y,e.R*2.3*ease(Math.min(1,p*2.2)),-p*1.8,f,.62)){ ctx.globalAlpha=f; ctx.strokeStyle='#8fd3ff'; ctx.lineWidth=6; ctx.beginPath(); ctx.ellipse(e.x,e.y,e.R*1.2,e.R*.7,0,0,6.3); ctx.stroke(); ctx.globalAlpha=1; }
+    ultRing(e,p,'#bff0ff',0); ultRing(e,p,'#ffffff',.15); ultRing(e,p,'#8fd3ff',.3);
+    const g=ease(clamp((p-.05)*2.4,0,1)), pulse=1+Math.sin(p*18)*.025;
+    if(!glowSprite('ult_big_adapt',e.x,e.y-e.R*.3,e.R*2.1*g*pulse,0,f*.5)){ ctx.save(); ctx.globalAlpha=.35*f; ctx.fillStyle='#8fd3ff'; ctx.beginPath(); ctx.arc(e.x,e.y,e.R*1.1*g,Math.PI,0); ctx.fill(); ctx.restore(); }
+    ctx.save(); ctx.globalAlpha=f*.85; ['#ff7a7a','#ffb347','#ffe27a','#7fe0a0','#8fd3ff','#b99cff'].forEach((c,i)=>{ ctx.strokeStyle=c; ctx.lineWidth=9; ctx.beginPath(); ctx.arc(e.x,e.y-e.R*.1,e.R*1.25-i*9,Math.PI,Math.PI+Math.PI*ease(clamp(p*2-.2,0,1))); ctx.stroke(); }); ctx.restore();
+    ctx.strokeStyle='rgba(150,220,255,.9)'; ctx.lineWidth=3; for(let i=0;i<50;i++){ const s=e.seeds[i], x=e.x+(s.a/Math.PI-1)*e.R*1.3, y=e.y-e.R*1.6+((p*2.4+s.r)%1)*e.R*1.9; ctx.globalAlpha=f*.8; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x-3,y+14); ctx.stroke(); }
+    ctx.globalAlpha=f; for(let i=0;i<6;i++){ const s=e.seeds[60+i]; emoji(['💧','🛡️','🌈','🧱','📢','💙'][i],e.x+Math.cos(s.a+p*2)*e.R*1.15,e.y-e.R*.5+Math.sin(s.a+p*2)*e.R*.45-p*40*s.r,22+s.s*10); } ctx.globalAlpha=1; },
+  // 지구공학법사: 우주 궤도 마법진 + 하늘에서 내려오는 위성의 황금 빔
+  ult_geo(e,p){ const f=fadeOf(p);
+    if(!glowSprite('ult_fx_geo',e.x,e.y,e.R*2.3*ease(Math.min(1,p*2.2)),p*1.5,f,.62)){ ctx.globalAlpha=f; ctx.strokeStyle='#d6b6ff'; ctx.lineWidth=6; ctx.beginPath(); ctx.ellipse(e.x,e.y,e.R*1.2,e.R*.7,0,0,6.3); ctx.stroke(); ctx.globalAlpha=1; }
+    const top=G.cam.y-H/SCALE/2+80, sy=Math.max(top+(1-ease(Math.min(1,p*2.5)))*-120, e.y-e.R*1.35), beamOn=clamp((p-.22)*4,0,1)*(1-Math.max(0,p-.78)/.22);
+    if(beamOn>0){ ctx.save(); ctx.globalCompositeOperation='lighter'; const bw=e.R*.55*(.7+.3*Math.sin(p*40)); const g=ctx.createLinearGradient(e.x-bw,0,e.x+bw,0); g.addColorStop(0,'rgba(255,215,120,0)'); g.addColorStop(.5,`rgba(255,226,150,${.7*beamOn})`); g.addColorStop(1,'rgba(255,215,120,0)'); ctx.fillStyle=g; ctx.beginPath(); ctx.moveTo(e.x-bw*.35,sy); ctx.lineTo(e.x+bw*.35,sy); ctx.lineTo(e.x+bw,e.y); ctx.lineTo(e.x-bw,e.y); ctx.closePath(); ctx.fill();
+      const cg=ctx.createRadialGradient(e.x,e.y,4,e.x,e.y,e.R*1.1); cg.addColorStop(0,`rgba(255,236,180,${.55*beamOn})`); cg.addColorStop(1,'rgba(255,220,140,0)'); ctx.fillStyle=cg; ctx.beginPath(); ctx.ellipse(e.x,e.y,e.R*1.2,e.R*.7,0,0,6.3); ctx.fill(); ctx.restore(); }
+    ultRing(e,p,'#ffe9a8',.25); ultRing(e,p,'#d6b6ff',.38);
+    if(imgOk('ult_big_geo')){ const i=IMG.ult_big_geo, w=Math.min(e.R*1.2,220), h=w*i.naturalHeight/i.naturalWidth; ctx.save(); ctx.globalAlpha=f; ctx.translate(e.x,sy); ctx.rotate(Math.sin(p*6)*.08); ctx.drawImage(i,-w/2,-h/2,w,h); ctx.restore(); }
+    else { ctx.globalAlpha=f; emoji('🛰️',e.x,sy,70); ctx.globalAlpha=1; }
+    for(let i=0;i<40;i++){ const s=e.seeds[i], d=e.R*ease(clamp(p*1.4-.2,0,1))*(.5+s.r*1.1), x=e.x+Math.cos(s.a)*d, y=e.y+Math.sin(s.a)*d*.6-20; ctx.globalAlpha=f*(1-p*.5); ctx.fillStyle=s.c%2?'#ffe27a':'#e9dcff'; starPath(ctx,x,y,7+s.s*6,3); ctx.fill(); }
+    ctx.globalAlpha=f; for(let i=0;i<6;i++){ const s=e.seeds[60+i]; emoji(['🪞','🚀','🎈','🌀','⭐','💜'][i],e.x+Math.cos(s.a+p*2)*e.R*1.15,e.y-e.R*.4+Math.sin(s.a+p*2)*e.R*.45,22+s.s*10); } ctx.globalAlpha=1; }
+};
+function drawUltFlash(){
+  if(!(G.uflash>0)) return; const u=ULT[G.job]||ULT.mitig;
+  ctx.save(); ctx.globalAlpha=Math.min(1,G.uflash)*.4; ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H);
+  const g=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*.2,W/2,H/2,Math.max(W,H)*.75); g.addColorStop(0,'rgba(255,255,255,0)'); g.addColorStop(1,u.c1); ctx.globalAlpha=Math.min(1,G.uflash)*.6; ctx.fillStyle=g; ctx.fillRect(0,0,W,H); ctx.restore();
+}
+
 // ======================= AMBIENT =======================
 function initAmb(){ G.amb=[]; for(let i=0;i<34;i++) G.amb.push({x:Math.random(),y:Math.random(),s:rand(.5,1.2),p:Math.random()*6}); }
 function updateAmb(dt){ const k=G.chIdx; for(const a of G.amb){ const v=[ [.01,.03],[.004,.01],[.004,.05],[0,-.02],[.015,.035] ][k]; a.x+=v[0]*dt*a.s+Math.sin(G.t+a.p)*.0006; a.y+=v[1]*dt*a.s; if(a.y>1.05)a.y=-.05; if(a.y<-.05)a.y=1.05; if(a.x>1.05)a.x=-.05; } }
@@ -2047,6 +2239,7 @@ const sfx={
   card(){[67,72,76,79,84,88].forEach((n,i)=>tone(mf(n),.25,'triangle',.09,i*.07));},
   build(){[48,55,60].forEach((n,i)=>tone(mf(n),.2,'square',.05,i*.1));},
   alarm(){[0,1,2].forEach(i=>{tone(mf(81),.12,'square',.04,i*.22);tone(mf(76),.12,'square',.04,i*.22+.11);});},
+  ult(){ [60,64,67,72,76,79,84].forEach((n,i)=>tone(mf(n),.22,'triangle',.08,i*.05)); tone(mf(91),.8,'sine',.07,.38); tone(mf(48),.6,'sawtooth',.03,0,.5); },
   hurt(){tone(420,.22,'triangle',.08,0,.45);tone(220,.18,'sine',.06,.06,.6);},
   skill(job,w){ const base=({mitig:60,geo:67,adapt:72}[job]||64)+w*2;
     if(JOBS[job]&&JOBS[job].ranged){ tone(500,.35,'sine',.07,0,2.5); }
@@ -2329,7 +2522,7 @@ const FX = {
   aurora(e,p){ ctx.globalAlpha=Math.min(1,p*3)*(1-Math.max(0,p-.6)*2.5); ['#7fe0c3','#8fd3ff','#b99cff'].forEach((c,i)=>{ ctx.strokeStyle=c; ctx.lineWidth=10-i*2; ctx.beginPath(); for(let k=0;k<=30;k++){ const x=e.x-e.R+k/30*e.R*2, y=e.y-30-i*14+Math.sin(k*.5+p*10+i)*10; k?ctx.lineTo(x,y):ctx.moveTo(x,y);} ctx.stroke(); });
     for(let i=0;i<10;i++){ const s=e.seeds[i]; circle(e.x+(s.a-3)*e.R*.3,e.y-40+s.r*40,2,'#fff'); } ctx.globalAlpha=1; ring(e,p,'#7fe0c3'); }
 };
-Object.assign(FX,FX_EXTRA);
+Object.assign(FX,FX_EXTRA,FX_ULT);
 FX.zonewave=(e,p)=>{ for(let i=0;i<3;i++){ const k=clamp(p*1.3-i*.15,0,1); ctx.globalAlpha=(1-k)*.8; ctx.strokeStyle=['#7fe0c3','#8fd3ff','#ffe27a'][i]; ctx.lineWidth=6; ctx.beginPath(); ctx.ellipse(e.x,e.y,e.R*k,e.R*.8*k,0,0,6.3); ctx.stroke(); }
   for(let i=0;i<20;i++){ const s=e.seeds[i], d=e.R*ease(p)*(.3+s.r*.7); ctx.globalAlpha=1-p; ctx.fillStyle=s.c%2?'#ffe27a':'#fff'; starPath(ctx,e.x+Math.cos(s.a)*d,e.y+Math.sin(s.a)*d*.8,6+s.s*4,2.5); ctx.fill(); } ctx.globalAlpha=1; };
 function ring(e,p,c){ ctx.globalAlpha=(1-p)*.6; ctx.strokeStyle=c; ctx.lineWidth=3; ctx.setLineDash([8,8]); ctx.beginPath(); ctx.ellipse(e.x,e.y,e.R,e.R*.62,0,0,Math.PI*2); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha=1; }
@@ -2423,6 +2616,7 @@ function render(){
     else { ctx.fillStyle=a.p>3?'rgba(255,190,120,.8)':'rgba(140,210,120,.8)'; ctx.beginPath(); ctx.ellipse(x,y,5*a.s,2.6*a.s,G.t*2+a.p,0,Math.PI*2); ctx.fill(); }
   }
   drawHzScreen();
+  drawUltFlash();
   drawMini();
   // sea level indicator
   if(G.ch.sea){ const lv=clamp(G.ring/(G.ringMax||1),0,1); ctx.fillStyle='rgba(255,255,255,.85)'; rrectC(ctx,W-44,H*.3,26,H*.3,13); ctx.fillStyle='#5fb4ea'; rrectC(ctx,W-40,H*.3+4+(H*.3-8)*(1-lv),18,(H*.3-8)*lv+.1,9); emoji('🌊',W-31,H*.3-14,18); ctx.fillStyle='#3b6a9a'; ctx.font='11px Jua'; ctx.textAlign='center'; ctx.fillText('해수면',W-31,H*.6+12); }
@@ -2631,6 +2825,18 @@ async function openRank(){
 // ======================= CHAPTER FLOW =======================
 // ======================= CUTSCENES (인트로·엔딩 영상) =======================
 // 영상에는 글자가 없고, 자막은 여기서 시간에 맞춰 보여 줘요. [시작초, 끝초, 자막]
+const VID_BASE='../assets/climate-hero/vid/';
+const CLEAR_KEY='climateHeroCleared';      // 엔딩을 본 기기에만 '영상 모아 보기'가 열려요
+function hasCleared(){ try{ return localStorage.getItem(CLEAR_KEY)==='1'; }catch(e){ return false; } }
+function markCleared(){ try{ localStorage.setItem(CLEAR_KEY,'1'); }catch(e){} }
+const VIDEO_LIST=[['intro1','프롤로그 · 지구를 구해 줘!','1장 시작'],['intro2','콜록콜록 회색 도시','2장 시작'],['intro3','녹아내리는 빙하 섬','3장 시작'],['intro4','반짝반짝 에코 시티','4장 시작'],['intro5','나부터 실천! 우리 마을','5장 시작'],['ending','에필로그 · 끝나지 않은 이야기','엔딩']];
+function openVideos(){
+  if(!hasCleared()) return;
+  const b=openModal(`<button class="mclose" id="x">✕</button><h3>🎬 기후 히어로 영상 모아 보기</h3><p style="font-size:15px">지구를 구한 기후 히어로만 볼 수 있는 영상관이에요! 보고 싶은 영상을 눌러요.</p>
+    <div class="vgrid">${VIDEO_LIST.map(([k,t,n],i)=>`<div class="vcard ${k==='ending'?'end':''}" data-k="${k}"><div class="vth"><img src="${VID_BASE}${k}.webp" alt="" loading="lazy"><b>▶</b></div><span class="vno">${i+1}. ${n}</span><div class="vt">${t}</div></div>`).join('')}</div>`);
+  b.querySelector('#x').onclick=closeModal;
+  b.querySelectorAll('.vcard').forEach(c=>c.onclick=async()=>{ audioInit(); closeModal(); await playCutscene(c.dataset.k); openVideos(); });
+}
 const CINE = {
   intro1:{tag:'🎬 프롤로그 · 지구를 구해 줘!', caps:[[0.3,2.5,'지구가 <em>기후 변화</em> 때문에 아파하고 있어요…'],[2.8,6.3,'<em>산불, 태풍, 가뭄, 녹는 빙하</em>… 곳곳에서 재난이 일어나요!'],[6.7,11,'그때! 지구를 구하러 <em>기후 히어로</em>들이 나타났어요!'],[11.4,14.8,'<em>감축 · 적응 · 지구공학</em>의 힘으로, 출발!']]},
   intro2:{tag:'🎬 2장 · 콜록콜록 회색 도시', caps:[[0.4,3.8,'매연과 쓰레기로 뒤덮인 <em>회색 도시</em>…'],[4.2,8.8,'공장과 자동차가 <em>화석 연료</em>를 태워 온실가스를 내뿜어요.'],[9.6,14.6,'기후 변화의 <em>원인</em>을 찾으러 가자!']]},
@@ -2649,7 +2855,7 @@ function playCutscene(key){
     let guard=setTimeout(()=>{ if(!v.currentTime) finish(); },9000);          // 영상이 안 불러와지면 그냥 넘어가요
     G.cine=true; box.classList.remove('hidden','fade'); pb.classList.add('hidden'); bar.style.width='0';
     $('cineTag').textContent=info.tag; cap.className=info.warn?'warn':''; cap.innerHTML='';
-    v.muted=!G.sound; v.volume=.8; v.src='../assets/climate-hero/vid/'+key+'.mp4';
+    v.muted=!G.sound; v.volume=.8; v.src=VID_BASE+key+'.mp4';
     v.ontimeupdate=()=>{ const t=v.currentTime; bar.style.width=(t/(v.duration||15)*100)+'%';
       const i=info.caps.findIndex(c=>t>=c[0]&&t<c[1]);
       if(i!==shown){ shown=i; if(i<0) cap.classList.remove('on'); else { cap.innerHTML=info.caps[i][2]; cap.classList.add('on'); } } };
@@ -2710,11 +2916,13 @@ async function finalBattle(){
   G.addM('earth');
   sfx.card(); confetti(60);
   await new Promise(res=>{ const b=openModal(`<h3>🌏 지구가 웃음을 되찾았어요!</h3>${earthArt(1)}<p>고마워, 기후 히어로! 💚</p><button class="bigbtn" id="go">엔딩 보기 🎬</button>`); b.querySelector('#go').onclick=()=>{closeModal();res();}; });
+  markCleared();
   await playCutscene('ending');
   await dialog([L(FAIRY,FF,'우리가 해냈어! 지구가 다시 푸르게 빛나고 있어! 🌏✨'),L(FAIRY,FF,'하지만 기억해. 기후 변화는 아직 끝나지 않았어.'),L(FAIRY,FF,'<em>국가</em>와 <em>기업</em>은 원인을 줄이는 방법을 연구하고, <em>우리</em>는 생활 속에서 작은 실천을 이어 가야 해.'),L(FAIRY,FF,'양치 컵, 분리배출, 코드 뽑기, 자전거 타기, 나무 심기… 오늘부터 진짜 세상에서도 기후 히어로가 되어 줘! 💚')]);
   await ending();
 }
 async function ending(){
+  markCleared();
   const timeBonus=Math.max(0,3000-Math.floor(G.elapsed));
   const cardBonus=G.cards.size===Object.keys(CARDS).length?500:0;
   G.score+=timeBonus+cardBonus; updateHUD();
@@ -2734,6 +2942,7 @@ async function ending(){
 function goTitle(){
   G.screen='title'; $('hud').classList.add('hidden'); $('hzBanner').classList.remove('show'); $('select').classList.add('hidden'); $('title').classList.remove('hidden');
   $('bContinue').classList.toggle('hidden',!loadSave());
+  $('bVideos').classList.toggle('hidden',!hasCleared());
 }
 let selAnim=null;
 function goSelect(){
@@ -2757,7 +2966,7 @@ async function startGame(cont){
   if(cont){ const s=loadSave(); Object.assign(G,{name:s.name,job:OLD_JOB[s.job]||s.job,wIdx:s.wIdx,unlocked:s.unlocked,score:s.score,elapsed:s.elapsed}); G.cards=new Set(s.cards); loadChapter(s.chIdx); }
   else { G.score=0; G.elapsed=0; G.cards=new Set(); G.wIdx=0; G.unlocked=1; G.hintSkill=false; loadChapter(0); }
   G._readyToast=0;
-  if(innerWidth<640) { $('missions').classList.add('fold'); $('mfold').textContent='▼'; }
+  if(innerWidth<640 || innerHeight<500) { $('missions').classList.add('fold'); $('mfold').textContent='▼'; }
   G.busy=false;
   enqueue(chapterIntro);
 }
@@ -2766,6 +2975,7 @@ async function startGame(cont){
 addEventListener('keydown',e=>{
   if(document.activeElement && document.activeElement.tagName==='INPUT') return;
   const k=e.key;
+  if(G.ult){ e.preventDefault(); return; }
   if(G.cine){ if(k==='Escape'){ e.preventDefault(); $('cineSkip').click(); } return; }
   if(G.aim && [' ','Enter','z','Z','k','K'].includes(k)){ e.preventDefault(); if(!e.repeat) judgeAim(); return; }
   if(!$('dialog').classList.contains('hidden') && [' ','Enter','z','Z','k','K'].includes(k)){ e.preventDefault(); dialog._adv&&dialog._adv(); return; }
@@ -2793,7 +3003,10 @@ document.querySelector('#missions .mh').onclick=()=>{ $('missions').classList.to
 document.querySelector('.scrollHint').onclick=e=>{ e.preventDefault(); $('pg-guide').scrollIntoView({behavior:'smooth'}); };
 $('bStart').onclick=()=>{ audioInit(); goSelect(); };
 $('bContinue').onclick=()=>{ startGame(true); };
+$('bVideos').onclick=()=>{ audioInit(); openVideos(); };
 $('bRank').onclick=()=>{ audioInit(); openRank(); };
+$('nick').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); $('nick').blur(); $('bGo').click(); } });
+$('nick').addEventListener('focus',()=>setTimeout(()=>{ try{ $('nick').scrollIntoView({block:'center',behavior:'smooth'}); }catch(e){} },300));
 $('bGo').onclick=()=>{ const n=$('nick').value.trim(); if(!n){ $('nick').focus(); toast('이름(닉네임)을 입력해 주세요!'); return; } G.name=n.slice(0,8); startGame(false); };
 $('titleEarth').innerHTML=`<div class="titleEarth">${earthSVG(1)}</div>`;
 $('titleEarth').querySelector('svg').style.width='100%';
