@@ -280,7 +280,8 @@ button{font-family:'Jua',sans-serif;cursor:pointer;border:none;color:inherit}
       ⚡ 질문을 <b>3개</b> 하면 <b>빠른 진단</b> 버튼이 나와요. 확신이 들면 바로 진단해 시간을 아껴요!<br>
       ③ <b>진료 매뉴얼</b>에 체크된 증상과 아이의 <b>그림</b>을 보고 어떤 감염병인지 진단해요.<br>
       ⏱️ 하루 180초! 남은 시간만큼 점수를 받아요. 다음 날 <b>병원 리뷰</b>에서 진료 결과를 확인해요.<br>
-      🏆 3일이 끝나면 바른 진료 <b class="plus">+30점</b>, 오진 <b class="minus">−50점</b>!
+      🏆 3일이 끝나면 바른 진료 <b class="plus">+30점</b>, 오진 <b class="minus">−50점</b>!<br>
+      📝 수업용 학습지: <a href="clinic-worksheet.html" style="font-family:Jua;color:#e5578a">꼬마 의사 수첩 학습지 (A4 인쇄용) ▶</a>
     </div>
   </div>
 </div>
@@ -844,6 +845,7 @@ function endingCard(total){
     </div>
     <p class="jua" style="font-size:20px;color:#7a58c9">오늘의 최종 점수: ${total}점</p>
     <button class="bigbtn" id="again">다시 진료하기 🔁</button>
+    <a class="bigbtn green" href="clinic-worksheet.html" style="display:inline-block;text-decoration:none">📝 학습지</a>
     <a class="bigbtn blue" href="../playground.html" style="display:inline-block;text-decoration:none">🛝 놀이터로</a>
    </div></div>`;
   $('review').scrollTop=0;
