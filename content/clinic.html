@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>튼튼 소아과 병원놀이 | 3분 놀이터</title>
+<meta name="description" content="3학년 과학 '감염병과 건강한 생활' 1인칭 병원놀이 웹게임. 소아과 전문의 시험을 보고, 병원을 열어 3일 동안 어린이 환자를 진찰해요. 청진기와 질문으로 독감·결핵·수두·식중독·유행성 각결막염·파상풍·수족구병·무좀·폐렴·아데노바이러스 감염증을 알아맞혀요.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+:root{--pink:#ff8fb1;--pink2:#ff6f9f;--mint:#7fe0c3;--mint2:#3cc79c;--sky:#8fd3ff;--sky2:#4fb4f0;--yellow:#ffe27a;--purple:#b99cff;--ink:#4a3b5c;--cream:#fffaf0;--red:#ff6b6b}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+html,body{margin:0;height:100%;overflow:hidden;background:#ffeef4;font-family:'Gowun Dodum','Jua',sans-serif;color:var(--ink)}
+.jua{font-family:'Jua',sans-serif}
+button{font-family:'Jua',sans-serif;cursor:pointer;border:none;color:inherit}
+.hidden{display:none!important}
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+.bigbtn{font-family:"Jua",sans-serif;font-size:clamp(18px,2.6vw,24px);padding:13px 32px;border-radius:999px;margin:6px;color:#fff;background:linear-gradient(180deg,#ff9ec0,#ff6f9f);box-shadow:0 6px 0 #d14f7d,0 10px 16px rgba(0,0,0,.15);transition:transform .1s}
+.bigbtn:active{transform:translateY(4px);box-shadow:0 2px 0 #d14f7d}
+.bigbtn.blue{background:linear-gradient(180deg,#8fd8ff,#4fb4f0);box-shadow:0 6px 0 #2f86c0,0 10px 16px rgba(0,0,0,.15)}
+.bigbtn.green{background:linear-gradient(180deg,#9be5c0,#3cc79c);box-shadow:0 6px 0 #22936f,0 10px 16px rgba(0,0,0,.15)}
+.bigbtn.yellow{background:linear-gradient(180deg,#ffe58a,#ffc531);box-shadow:0 6px 0 #d89a10,0 10px 16px rgba(0,0,0,.15);color:#7a4b00}
+.bigbtn.small{font-size:17px;padding:9px 20px}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes pop{0%{transform:scale(.4);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+@keyframes hop{0%,100%{transform:translateY(0) scale(1,1)}45%{transform:translateY(-12px) scale(.97,1.03)}90%{transform:translateY(0) scale(1.04,.96)}}
+@keyframes wob{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.soundBtn{position:fixed;right:12px;top:12px;z-index:90;width:44px;height:44px;border-radius:50%;background:#fffffff0;font-size:22px;box-shadow:0 4px 0 #f0c6d6}
+.homeBtn{position:fixed;left:12px;top:12px;z-index:90;font-family:'Jua';font-size:15px;color:var(--ink);background:#fffffff0;padding:8px 14px;border-radius:999px;text-decoration:none;box-shadow:0 4px 0 #f0c6d6}
+
+/* ---------- 타이틀 ---------- */
+#title{background:url(../assets/clinic/img/k4.webp) center/cover;overflow:auto;justify-content:flex-start}
+#title:before{content:'';position:fixed;inset:0;background:linear-gradient(180deg,#fff0f6cc,#ffffff55 40%,#fff6e8dd)}
+.tWrap{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;padding:60px 16px 30px;margin:auto 0;width:100%}
+.logo{font-family:'Jua';font-size:clamp(36px,7vw,76px);color:#fff;-webkit-text-stroke:2px #ff6f9f;paint-order:stroke fill;text-shadow:0 4px 0 #ff7fa8,0 8px 0 #c95a86,0 12px 18px rgba(0,0,0,.18);letter-spacing:2px;text-align:center;line-height:1.1;margin:4px 0}
+.logo small{display:block;font-size:.42em;-webkit-text-stroke:1px #3cc79c;text-shadow:0 3px 0 #3cc79c;color:#fff;letter-spacing:1px}
+.tSub{font-family:'Jua';font-size:clamp(15px,2.3vw,21px);color:#d1567f;background:#ffffffdd;padding:6px 18px;border-radius:30px;margin:8px 0 10px;text-align:center}
+.tKids{display:flex;justify-content:center;align-items:flex-end;gap:0;margin:4px 0 4px}
+.tKids img{height:min(20vh,150px);animation:hop 1.8s ease-in-out infinite;filter:drop-shadow(0 6px 5px rgba(120,60,90,.2))}
+.tKids img:nth-child(2){animation-delay:-.4s}.tKids img:nth-child(3){animation-delay:-.8s;height:min(22vh,165px)}.tKids img:nth-child(4){animation-delay:-1.2s}.tKids img:nth-child(5){animation-delay:-1.6s}
+.nameBox{background:#fff;border-radius:22px;padding:12px 18px;box-shadow:0 6px 0 #f6c9d8;margin:8px 0 12px;text-align:center;font-family:'Jua';font-size:18px}
+.nameBox input{font-family:'Jua';font-size:20px;width:150px;text-align:center;border:3px solid #ffc2d6;border-radius:14px;padding:6px 8px;margin:0 6px;color:var(--ink);outline:none;user-select:text;-webkit-user-select:text}
+.howCard{background:#ffffffee;border-radius:22px;padding:14px 20px;max-width:640px;margin-top:14px;font-size:15.5px;line-height:1.65;box-shadow:0 6px 0 #f2d5e0}
+.howCard h3{font-family:'Jua';margin:0 0 6px;color:#e5578a;font-size:20px}
+.howCard b{color:#d1567f}
+.best{font-family:'Jua';color:#7a58c9;margin-top:6px}
+
+/* ---------- 영상 ---------- */
+#cine{background:#000;z-index:80}
+#cine video,#cine .cposter{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+#cine .cposter{object-fit:cover;animation:kb 6s ease-out forwards}
+@keyframes kb{from{transform:scale(1)}to{transform:scale(1.12)}}
+#cineTag{position:absolute;left:16px;top:14px;font-family:'Jua';color:#fff;background:#ff6f9fcc;padding:6px 14px;border-radius:999px;font-size:15px;z-index:2}
+#cineCap{position:absolute;left:50%;bottom:8%;transform:translateX(-50%);width:min(92%,880px);text-align:center;font-family:'Jua';font-size:clamp(18px,3vw,30px);color:#fff;background:#00000088;padding:12px 20px;border-radius:18px;line-height:1.4;z-index:2;opacity:0;transition:opacity .4s}
+#cineCap.on{opacity:1}
+#cineCap em{font-style:normal;color:#ffe27a}
+#cineSkip{position:absolute;right:66px;top:14px;z-index:3;background:#ffffffcc;font-size:15px;padding:8px 16px;border-radius:999px}
+#cineBar{position:absolute;left:0;bottom:0;height:6px;background:linear-gradient(90deg,#ff9ec0,#ffe27a);width:0;z-index:2}
+#cineEnd{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;pointer-events:none}
+
+/* ---------- 1단계: 태블릿 시험 ---------- */
+#exam{background:url(../assets/clinic/img/k3.webp) center/cover}
+#exam:before{content:'';position:absolute;inset:0;backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);background:#ffffff40}
+.tablet{position:relative;width:min(94vw,860px);height:min(88vh,600px);background:#2e2a3a;border-radius:38px;padding:22px;box-shadow:0 0 0 4px #4b4560,0 24px 50px rgba(40,20,60,.45);display:flex}
+.tablet:before{content:'';position:absolute;left:50%;top:8px;width:8px;height:8px;border-radius:50%;background:#5b5470;transform:translateX(-50%)}
+.tscreen{flex:1;background:linear-gradient(180deg,#f4fbff,#fff6fa);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;position:relative}
+.tHead{display:flex;align-items:center;gap:10px;padding:10px 16px;background:linear-gradient(90deg,#8fd8ff,#b99cff);color:#fff;font-family:'Jua';font-size:15px}
+.tHead .tt{flex:1;font-size:17px}
+.tHead .pill{background:#ffffff40;border-radius:999px;padding:3px 10px}
+.tDots{display:flex;gap:6px;justify-content:center;padding:10px 0 2px}
+.tDots i{width:26px;height:8px;border-radius:9px;background:#e3dcef}
+.tDots i.now{background:#ff9ec0}.tDots i.o{background:#3cc79c}.tDots i.x{background:#ff6b6b}
+.tBody{flex:1;overflow:auto;padding:10px 22px 16px;display:flex;flex-direction:column}
+.qNo{font-family:'Jua';color:#ff6f9f;font-size:18px}
+.qText{font-family:'Jua';font-size:clamp(19px,2.6vw,25px);margin:4px 0 10px;line-height:1.4}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.chip{background:#fff;border:2px solid #ffc2d6;border-radius:999px;padding:6px 14px;font-family:'Jua';font-size:17px;color:#d1567f}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{background:#fff;border:3px solid #dfe8f7;border-radius:18px;padding:12px 14px;font-size:clamp(15px,2vw,19px);text-align:left;display:flex;gap:10px;align-items:center;box-shadow:0 4px 0 #dfe8f7;font-family:'Gowun Dodum';font-weight:bold;transition:transform .1s}
+.opt b{font-family:'Jua';flex:none;width:30px;height:30px;border-radius:50%;background:#8fd8ff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px}
+.opt:hover{border-color:#ffc2d6}
+.opt:active{transform:translateY(3px)}
+.opt.right{border-color:#3cc79c;background:#e6fff5}.opt.right b{background:#3cc79c}
+.opt.wrong{border-color:#ff6b6b;background:#fff0f0}.opt.wrong b{background:#ff6b6b}
+.opt[disabled]{cursor:default}
+.stamp{position:absolute;right:26px;top:70px;font-family:'Jua';font-size:84px;line-height:1;animation:pop .35s;pointer-events:none}
+.stamp.o{color:#3cc79c;text-shadow:0 4px 0 #a8ecd3}.stamp.x{color:#ff6b6b;text-shadow:0 4px 0 #ffc9c9}
+.expl{margin-top:12px;background:#fff8e1;border-radius:14px;padding:10px 14px;font-size:16px;line-height:1.5;animation:fadeUp .3s}
+.tFoot{display:flex;justify-content:flex-end;padding:0 18px 14px}
+.result{text-align:center;margin:auto}
+.result h2{font-family:'Jua';font-size:clamp(30px,5vw,46px);margin:6px 0;color:#ff6f9f}
+.license{position:relative;display:inline-block;background:#fffdf3;border:6px double #e0b44a;border-radius:16px;padding:16px 26px;margin:10px 0;text-align:center;box-shadow:0 8px 20px rgba(180,140,40,.2);animation:pop .5s}
+.license h4{font-family:'Jua';font-size:24px;margin:0 0 6px;color:#b07c00}
+.license p{margin:4px 0;font-size:16px}
+.license .seal{position:absolute;right:-14px;bottom:-14px;width:64px;height:64px;border-radius:50%;background:#ff6b6b;color:#fff;font-family:'Jua';display:flex;align-items:center;justify-content:center;font-size:15px;transform:rotate(-14deg);box-shadow:0 4px 0 #c94747;text-align:center;line-height:1.1}
+
+/* ---------- 2단계: 진료실 ---------- */
+#clinic{background:#fde7ef;justify-content:flex-start}
+.hud{position:relative;z-index:5;width:100%;display:flex;align-items:center;gap:8px;padding:8px 66px 8px 120px;flex-wrap:wrap;font-family:'Jua'}
+.hud .p{background:#fffffff0;border-radius:999px;padding:6px 14px;font-size:16px;box-shadow:0 3px 0 #f0c6d6;white-space:nowrap}
+.hud .p.time{font-size:19px;min-width:96px;text-align:center}
+.hud .p.time.hurry{background:#ff6b6b;color:#fff;animation:wob .5s infinite}
+.scene{position:relative;flex:1;width:100%;background:url(../assets/clinic/img/room.webp) center 62%/cover;overflow:hidden;min-height:0}
+.patient{position:absolute;left:50%;bottom:-2%;height:92%;max-height:560px;transform:translateX(-50%);transition:transform .7s cubic-bezier(.3,1.4,.5,1),opacity .5s;filter:drop-shadow(0 10px 8px rgba(120,60,90,.25));cursor:pointer;touch-action:none;-webkit-user-drag:none}
+.patient.out{transform:translateX(-260%);opacity:0}
+.patient.leave{transform:translateX(-260%) rotate(-6deg);opacity:0}
+.patient.idle{animation:breathe 2.4s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:translateX(-50%) scale(1,1)}50%{transform:translateX(-50%) scale(1.01,.99)}}
+.bubble{position:absolute;left:50%;top:5%;transform:translateX(8%);max-width:min(44vw,330px);background:#fff;border-radius:22px;padding:12px 16px;font-family:'Jua';font-size:clamp(15px,2.1vw,20px);line-height:1.4;box-shadow:0 6px 0 #f4c4d4,0 10px 18px rgba(0,0,0,.1);animation:pop .3s;z-index:3}
+.bubble:after{content:'';position:absolute;left:18px;bottom:-14px;border:10px solid transparent;border-top:14px solid #fff;border-bottom:0}
+.bubble .nm{display:block;font-size:13px;color:#ff6f9f}
+.chart{position:absolute;left:10px;top:10px;width:220px;max-height:calc(100% - 20px);background:#fffdf5;border-radius:16px;box-shadow:0 0 0 5px #c89b6d,0 8px 18px rgba(0,0,0,.18);padding:22px 12px 12px;font-size:14.5px;overflow:auto;z-index:4}
+.chart:before{content:'';position:absolute;left:50%;top:-6px;width:70px;height:16px;border-radius:6px;background:#9aa3b5;transform:translateX(-50%);box-shadow:0 2px 0 #6e7688}
+.chart h4{font-family:'Jua';margin:0 0 4px;font-size:17px;color:#d1567f}
+.chart .who{font-family:'Jua';font-size:15px;margin-bottom:6px}
+.chart ul{list-style:none;padding:0;margin:0}
+.chart li{padding:4px 0;border-bottom:1px dashed #e9dcc8;animation:fadeUp .3s}
+.chart li .mk{font-family:'Jua';display:inline-block;width:22px}
+.chart li.y .mk{color:#3cc79c}.chart li.n .mk{color:#ff6b6b}.chart li.m .mk{color:#e0a33a}
+.chart .empty{color:#a99cb8;font-size:13.5px}
+.chartToggle{display:none}
+.steth{position:absolute;width:96px;height:96px;pointer-events:none;z-index:6;transform:translate(-80%,-82%);display:none;filter:drop-shadow(0 4px 4px rgba(0,0,0,.25))}
+.steth.on{display:block}
+.listenFx{position:absolute;font-family:'Jua';font-size:22px;color:#ff6f9f;pointer-events:none;z-index:6;animation:floatUp 1.2s forwards;text-shadow:0 2px 0 #fff}
+@keyframes floatUp{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-60px)}}
+.listenRing{position:absolute;left:50%;top:50%;width:230px;height:230px;transform:translate(-50%,-50%);border-radius:50%;border:4px dashed #ff9ec0;pointer-events:none;z-index:2;animation:spin 6s linear infinite;display:none}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+
+.desk{position:relative;z-index:5;width:100%;background:linear-gradient(180deg,#ffe3c4,#f6cfa8);border-top:6px solid #e8b98a;padding:10px 12px 12px;display:grid;grid-template-columns:minmax(220px,300px) 1fr;gap:12px;max-height:46vh}
+.tool{background:#fff;border-radius:20px;padding:10px 12px;box-shadow:0 4px 0 #e9c39d;display:flex;flex-direction:column;gap:8px}
+.tool h5,.qbox h5{font-family:'Jua';margin:0;font-size:16px;color:#d1567f}
+.stethBtn{display:flex;align-items:center;gap:10px;background:linear-gradient(180deg,#e6fff5,#bff3df);border-radius:16px;padding:6px 10px;font-size:17px;box-shadow:0 4px 0 #8fd9bd;text-align:left}
+.stethBtn img{width:54px;height:54px;object-fit:contain}
+.stethBtn.glow{animation:glow 1s infinite}
+.stethBtn.done{opacity:.6}
+@keyframes glow{0%,100%{box-shadow:0 4px 0 #8fd9bd,0 0 0 0 #3cc79c88}50%{box-shadow:0 4px 0 #8fd9bd,0 0 0 10px #3cc79c00}}
+.gauge{background:#f2ecf7;border-radius:999px;height:26px;position:relative;overflow:hidden;box-shadow:inset 0 2px 4px rgba(0,0,0,.08)}
+.gauge i{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#8fd8ff,#ff9ec0);border-radius:999px;transition:width .2s}
+.gauge span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Jua';font-size:14.5px}
+.gauge.hi i{background:linear-gradient(90deg,#ffb36b,#ff6b6b)}
+.gres{font-family:'Jua';font-size:15px;min-height:20px;text-align:center}
+.qbox{background:#fff;border-radius:20px;padding:10px 12px;box-shadow:0 4px 0 #e9c39d;display:flex;flex-direction:column;gap:8px;min-width:0;position:relative;overflow:hidden}
+.qtop{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.qleft{margin-left:auto;font-family:'Jua';font-size:15px}
+.qleft i{font-style:normal;display:inline-block;width:18px;height:18px;border-radius:50%;background:#ff9ec0;margin-left:3px;vertical-align:-3px}
+.qleft i.used{background:#e3dcef}
+.cats{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.cat{flex:none;background:#f4effa;border-radius:999px;padding:6px 12px;font-size:15px;box-shadow:0 3px 0 #ddd2ea}
+.cat.on{background:#ff9ec0;color:#fff;box-shadow:0 3px 0 #d14f7d}
+.qs{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px;overflow:auto;min-height:0}
+.q{background:#fffaf0;border:2px solid #ffe1a6;border-radius:14px;padding:7px 10px;font-size:15px;text-align:left;font-family:'Gowun Dodum';font-weight:bold}
+.q:active{transform:translateY(2px)}
+.q.asked{opacity:.45;text-decoration:line-through}
+.qbar{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+.lock{position:absolute;inset:0;background:#ffffffd9;display:flex;align-items:center;justify-content:center;text-align:center;font-family:'Jua';font-size:18px;color:#d1567f;z-index:2;padding:10px;border-radius:20px}
+.manualBtn{background:#e9e0ff;border-radius:999px;padding:8px 14px;font-size:15px;box-shadow:0 3px 0 #c6b6f0}
+
+/* 모달 */
+#modal{position:fixed;inset:0;background:#4a3b5c88;z-index:70;display:flex;align-items:center;justify-content:center;padding:14px}
+.mbox{background:#fffaf6;border-radius:26px;max-width:min(96vw,820px);max-height:92vh;overflow:auto;padding:20px;position:relative;box-shadow:0 10px 0 #f0c6d6,0 20px 40px rgba(0,0,0,.25);animation:pop .3s;text-align:center}
+.mbox h3{font-family:'Jua';font-size:clamp(22px,3.4vw,30px);margin:0 0 8px;color:#e5578a}
+.mbox p{line-height:1.6;font-size:16px}
+.mclose{position:absolute;right:12px;top:10px;width:38px;height:38px;border-radius:50%;background:#ffe0ea;font-size:18px}
+.dgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:8px}
+.dbtn{background:#fff;border:3px solid #ffd5e3;border-radius:18px;padding:10px 4px;font-family:'Jua';font-size:15px;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 4px 0 #ffd5e3;line-height:1.2}
+.dbtn .ic{font-size:30px}
+.dbtn:hover{border-color:#ff9ec0}
+.dbtn.resp{border-color:#bfe6ff;box-shadow:0 4px 0 #bfe6ff}
+.dbtn .rt{font-size:11px;color:#4fb4f0}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;text-align:left;margin-top:8px}
+.mcard{background:#fff;border-radius:16px;padding:10px 12px;box-shadow:0 3px 0 #f0dbe4;border:2px solid #fbe3ec}
+.mcard.resp{border-color:#cfeaff}
+.mcard h6{font-family:'Jua';font-size:17px;margin:0 0 6px;display:flex;align-items:center;gap:6px}
+.mcard h6 .rt{font-size:12px;background:#d8efff;color:#2f86c0;border-radius:999px;padding:2px 8px}
+.mcard h6 .rt.hit{background:#ff9ec0;color:#fff}
+.sy{display:inline-block;margin:2px 3px 2px 0;padding:3px 9px;border-radius:999px;background:#f4effa;font-size:14px;font-weight:bold}
+.sy.y{background:#d9f7ea;color:#16865f}.sy.y:before{content:'✔ '}
+.sy.n{background:#ffe5e5;color:#c94747;text-decoration:line-through}.sy.n:before{content:'✖ '}
+.mnote{font-size:13.5px;color:#7a6b8a;margin:4px 0 0}
+
+/* 하루 끝 / 리뷰 */
+#night{background:linear-gradient(180deg,#2b2259,#5b3f8f 60%,#ffa6c1);color:#fff;text-align:center}
+#night .moon{font-size:90px;animation:bob 2s infinite}
+#night h2{font-family:'Jua';font-size:clamp(28px,5vw,44px);margin:8px}
+#night .star{position:absolute;color:#fff6b0;animation:twk 1.4s infinite}
+@keyframes twk{50%{opacity:.2}}
+#review{background:linear-gradient(180deg,#fff0f6,#eaf6ff);overflow:auto;justify-content:flex-start;padding:20px 14px 30px}
+.board{width:min(96vw,760px);margin:46px auto 0}
+.bHead{background:linear-gradient(90deg,#ff9ec0,#b99cff);color:#fff;border-radius:22px 22px 0 0;padding:14px 18px;font-family:'Jua';font-size:clamp(20px,3vw,27px);display:flex;align-items:center;gap:10px}
+.bHead small{margin-left:auto;font-size:15px;opacity:.9}
+.bBody{background:#fff;border-radius:0 0 22px 22px;padding:10px 14px 16px;box-shadow:0 8px 0 #f0c6d6}
+.post{display:flex;gap:12px;align-items:flex-start;padding:12px 4px;border-bottom:1px dashed #f0dbe4;opacity:0;animation:fadeUp .45s forwards}
+.post img{width:62px;height:62px;border-radius:50%;object-fit:cover;object-position:50% 12%;background:#ffeef4;flex:none;border:3px solid #ffd5e3}
+.post.bad img{border-color:#c9c9d6;filter:saturate(.6)}
+.post .pt{font-family:'Jua';font-size:16.5px}
+.post .stars{color:#ffbf1f;font-size:15px;margin-left:6px}
+.post.bad .stars{color:#c9c9d6}
+.post p{margin:4px 0 0;font-size:15.5px;line-height:1.55}
+.post .tag{font-family:'Jua';font-size:12.5px;border-radius:999px;padding:2px 8px;margin-left:6px;vertical-align:2px}
+.post .tag.ok{background:#d9f7ea;color:#16865f}.post .tag.no{background:#ffe5e5;color:#c94747}.post .tag.miss{background:#eee;color:#777}
+.post .learn{margin-top:6px;background:#fff8e1;border-radius:10px;padding:6px 10px;font-size:14px}
+.sumRow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:10px 0}
+.sum{background:#fff;border-radius:16px;padding:10px 16px;box-shadow:0 4px 0 #f0c6d6;font-family:'Jua';font-size:15px;text-align:center;min-width:110px}
+.sum b{display:block;font-size:26px;color:#ff6f9f}
+.scoreTable{margin:10px auto;border-collapse:separate;border-spacing:0 6px;font-size:17px}
+.scoreTable td{padding:6px 14px;background:#fff;font-family:'Jua'}
+.scoreTable td:first-child{border-radius:12px 0 0 12px;text-align:left}
+.scoreTable td:last-child{border-radius:0 12px 12px 0;text-align:right}
+.scoreTable tr.tot td{background:#ffe0ea;font-size:21px}
+.plus{color:#16865f}.minus{color:#c94747}
+.tips{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:10px 0;text-align:center}
+.tip{background:#fff;border-radius:16px;padding:10px 8px;box-shadow:0 4px 0 #d8f0e6;font-size:14.5px;line-height:1.4}
+.tip b{display:block;font-size:28px}
+.confetti{position:fixed;top:-20px;width:10px;height:14px;z-index:95;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+.toast{position:fixed;left:50%;top:18%;transform:translateX(-50%);background:#fff;border-radius:20px;padding:12px 22px;font-family:'Jua';font-size:clamp(18px,3vw,26px);z-index:75;box-shadow:0 6px 0 #f0c6d6,0 12px 24px rgba(0,0,0,.18);animation:pop .3s;text-align:center;pointer-events:none}
+
+@media (max-width:760px){
+  .hud{padding:6px 58px 6px 12px;padding-top:58px;gap:5px}
+  .hud .p{font-size:13.5px;padding:4px 10px}.hud .p.time{font-size:16px;min-width:80px}
+  .desk{grid-template-columns:1fr;max-height:50vh;overflow:auto;gap:6px;padding:6px 8px 8px}
+  .tool{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:8px;align-items:center}
+  .tool h5{display:none}
+  .stethBtn{font-size:14px;padding:4px 6px;gap:4px}.stethBtn img{width:38px;height:38px}
+  .gauge{height:24px}.gauge span{font-size:12px}
+  .gres{grid-column:1/3;font-size:13.5px;min-height:0}
+  .qbox{padding:8px;gap:6px}
+  .q{font-size:14px;padding:6px 8px}
+  .qs{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+  .chart{display:none;width:min(80vw,260px)}
+  .chart.open{display:block}
+  .chartToggle{display:block;position:absolute;left:10px;top:10px;z-index:5;background:#fffdf5;border-radius:14px;padding:7px 12px;font-size:15px;box-shadow:0 3px 0 #c89b6d}
+  .chart.open + .chartToggle{left:auto;right:10px}
+  .bubble{left:auto;right:3%;top:4%;transform:none;max-width:52vw}
+  .patient{height:96%}
+  .dgrid{grid-template-columns:repeat(2,1fr)}
+  .opts{grid-template-columns:1fr}
+  .tablet{padding:12px;border-radius:26px;height:min(92vh,720px)}
+  .tBody{padding:8px 12px 12px}
+  .stamp{font-size:60px;top:60px}
+}
+@media (max-height:560px) and (min-width:761px){
+  .hud{padding-top:4px;padding-bottom:4px}.hud .p{font-size:14px;padding:3px 10px}
+  .desk{max-height:50vh;padding:6px 10px}
+  .stethBtn img{width:40px;height:40px}
+  .qs{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+}
+</style>
+</head>
+<body>
+<button class="soundBtn" id="soundBtn" title="소리 켜기/끄기">🔊</button>
+
+<!-- 타이틀 -->
+<div id="title" class="screen">
+  <a class="homeBtn" href="../index.html">🏠 3분 놀이터</a>
+  <div class="tWrap">
+    <div class="logo">튼튼 소아과<small>병원놀이 🩺</small></div>
+    <div class="tSub">3학년 과학 · 감염병과 건강한 생활</div>
+    <div class="tKids" id="tKids"></div>
+    <div class="nameBox">👩‍⚕️ 의사 선생님 이름 <input id="docName" maxlength="6" placeholder="이름" value=""> 원장님</div>
+    <button class="bigbtn" id="startBtn">진료 놀이 시작! ▶</button>
+    <div class="best" id="bestTxt"></div>
+    <div class="howCard">
+      <h3>🩺 이렇게 놀아요</h3>
+      <b>1단계 · 소아과 전문의 시험</b> — 태블릿 PC로 감염병 필기시험 8문제를 풀어요. (5문제 이상 맞히면 합격!)<br>
+      <b>2단계 · 우리 병원 개업</b> — 3일 동안 어린이 환자를 진찰해요. (1일차 5명 · 2일차 7명 · 3일차 9명)<br>
+      ① <b>청진기</b>를 들고 아이 몸에 꾹 대면 <b>호흡기 증상 가능성(%)</b>이 올라가요.<br>
+      ② 화면 아래 <b>질문</b>을 골라 물어봐요. (1일차 5번 · 2일차 4번 · 3일차 3번)<br>
+      ③ <b>진료 매뉴얼</b>에 체크된 증상과 아이의 <b>그림</b>을 보고 어떤 감염병인지 진단해요.<br>
+      ⏱️ 하루 180초! 남은 시간만큼 점수를 받아요. 다음 날 <b>병원 리뷰</b>에서 진료 결과를 확인해요.<br>
+      🏆 3일이 끝나면 바른 진료 <b class="plus">+30점</b>, 오진 <b class="minus">−50점</b>!
+    </div>
+  </div>
+</div>
+
+<!-- 영상 -->
+<div id="cine" class="screen hidden">
+  <img class="cposter hidden" id="cineP" alt="">
+  <video id="cineV" playsinline webkit-playsinline muted preload="auto"></video>
+  <div id="cineTag"></div><div id="cineCap"></div>
+  <button id="cineSkip">건너뛰기 ⏭</button>
+  <div id="cineBar"></div>
+</div>
+
+<!-- 1단계 시험 -->
+<div id="exam" class="screen hidden">
+  <div class="tablet"><div class="tscreen" id="tscreen"></div></div>
+</div>
+
+<!-- 2단계 진료실 -->
+<div id="clinic" class="screen hidden">
+  <a class="homeBtn" href="../index.html">🏠</a>
+  <div class="hud">
+    <span class="p" id="hDay">🏥 1일차</span>
+    <span class="p time" id="hTime">⏱️ 180</span>
+    <span class="p" id="hPat">🧒 1/5</span>
+    <span class="p" id="hScore">⭐ 0점</span>
+  </div>
+  <div class="scene" id="scene">
+    <div class="listenRing" id="ring"></div>
+    <img class="patient out" id="patient" alt="환자" draggable="false">
+    <div class="bubble hidden" id="bubble"></div>
+    <div class="chart" id="chart"></div>
+    <button class="chartToggle" id="chartToggle">📋 차트</button>
+    <img class="steth" id="stethCursor" src="../assets/clinic/img/steth.webp" alt="">
+  </div>
+  <div class="desk">
+    <div class="tool">
+      <h5>① 청진기 진찰</h5>
+      <button class="stethBtn glow" id="stethBtn"><img src="../assets/clinic/img/steth.webp" alt="">
+        <span id="stethTxt">청진기를 들고<br>아이 몸에 꾹 대 보세요</span></button>
+      <div class="gauge" id="gauge"><i id="gFill"></i><span id="gTxt">호흡기 증상 가능성 0%</span></div>
+      <div class="gres" id="gRes"></div>
+    </div>
+    <div class="qbox">
+      <div class="qtop"><h5>② 질문하기</h5><button class="manualBtn" id="manualBtn">📖 진료 매뉴얼</button><span class="qleft" id="qLeft"></span></div>
+      <div class="cats" id="cats"></div>
+      <div class="qs" id="qs"></div>
+      <div class="qbar"><button class="bigbtn small yellow" id="diagBtn">③ 진단하기 ✍️</button></div>
+      <div class="lock" id="qLock">🩺 먼저 청진기로 진찰해 주세요!</div>
+    </div>
+  </div>
+</div>
+
+<!-- 밤 -->
+<div id="night" class="screen hidden"><div class="moon">🌙</div><h2 id="nightTxt">하루가 지났어요…</h2><p class="jua" style="font-size:18px">병원 리뷰 게시판에 새 글이 올라왔어요!</p></div>
+
+<!-- 리뷰 -->
+<div id="review" class="screen hidden"></div>
+
+<div id="modal" class="hidden"><div class="mbox" id="mbox"></div></div>
+
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const IMG='../assets/clinic/img/', VID='../assets/clinic/vid/';
+const rnd=n=>Math.floor(Math.random()*n);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;};
+const pick=a=>a[rnd(a.length)];
+// 받침 있으면 true
+const hasJong=s=>{const c=s.charCodeAt(s.length-1);return c>=0xAC00&&c<=0xD7A3&&(c-0xAC00)%28!==0;};
+const iga=s=>s+(hasJong(s)?'이':'가'), eunn=s=>s+(hasJong(s)?'은':'는'), ira=s=>s+(hasJong(s)?'이라':'라'), iyeot=s=>s+(hasJong(s)?'이었':'였');
+
+/* ================= 감염병 데이터 ================= */
+// sym: [매뉴얼에 적힌 증상, 연결된 질문 키]
+const DIS={
+  flu:{name:'독감',ic:'🤒',resp:true,sym:[['높은 열','fever'],['몸살','ache'],['기침','cough']],line:'머리가 뜨겁고 온몸이 아파요…',
+    ans:{fever:'네! 열이 펄펄 엄청 높아요 🥵',ache:'온몸이 쑤시고 몸살이 났어요…',cough:'콜록콜록 기침도 해요.',long:['n','아니요, 기침은 며칠 전부터예요.']},
+    prevent:'독감 예방 주사를 맞고, 손을 깨끗이 씻어요.'},
+  tb:{name:'결핵',ic:'😷',resp:true,sym:[['2주 이상 기침','long'],['열','fever'],['가래','phlegm']],line:'기침이 멈추지 않아요…',
+    ans:{long:'네… 기침한 지 2주도 넘었어요.',fever:'열이 조금 나요.',phlegm:'네, 끈적끈적한 가래가 나와요.',cough:'콜록콜록, 기침이 계속 나요.'},
+    prevent:'기침할 땐 옷소매로 가리고, 기침이 2주 넘으면 꼭 병원에 가요.'},
+  pox:{name:'수두',ic:'🔴',resp:false,sym:[['열','fever'],['가려움','itch'],['붉은 물집','blister']],line:'몸에 뭐가 잔뜩 났어요!',
+    ans:{fever:'열이 조금 나요.',itch:'온몸이 너무너무 가려워요! 😣',blister:'네! 몸이랑 얼굴에 붉은 물집이 잔뜩 생겼어요.'},
+    prevent:'수두 예방 접종을 하고, 물집을 긁지 않아요.'},
+  food:{name:'식중독',ic:'🤢',resp:false,sym:[['배아픔','belly'],['구토','vomit'],['설사','diarrhea']],line:'배가… 배가 너무 아파요…',
+    ans:{belly:'배가 꾸르륵, 너무 아파요… 😖',vomit:'네, 먹은 걸 다 토했어요.',diarrhea:'화장실을 자꾸 가요… 설사를 해요.'},
+    prevent:'음식은 익혀 먹고, 먹기 전에 손을 씻어요.'},
+  eye:{name:'유행성 각결막염',ic:'👁️',resp:false,sym:[['눈곱','gunk'],['눈이 빨개짐','red'],['가려움','eyeitch']],line:'눈이 이상해요…',
+    ans:{gunk:'아침에 눈곱이 잔뜩 꼈어요.',red:'네, 눈이 토끼 눈처럼 빨개요.',eyeitch:'눈이 간질간질 가려워요.',itch:['n','피부 말고… 눈이 가려워요!']},
+    prevent:'더러운 손으로 눈을 비비지 않고, 수건을 따로 써요.'},
+  tet:{name:'파상풍',ic:'🦵',resp:false,sym:[['흙이나 못에 상처가 오염','wound'],['근육이 굳어짐','stiff']],line:'다리가… 으앙! 😭',
+    ans:{wound:'네… 놀이터에서 녹슨 못에 찔렸어요. 흙도 묻었어요 😭',stiff:'다리 근육이 딱딱하게 굳는 것 같아요…'},
+    prevent:'상처가 나면 깨끗이 씻고 소독해요. 예방 접종도 해요.'},
+  hfmd:{name:'수족구병',ic:'✋',resp:false,sym:[['입안 물집','mouth'],['손발 물집','blister']],line:'입이랑 손이 아파요…',
+    ans:{mouth:'입안에 물집이 나서 밥 먹기가 아파요.',blister:'네, 손바닥이랑 발바닥에 물집이 생겼어요!'},
+    prevent:'손을 자주 씻고, 장난감을 깨끗이 닦아요.'},
+  foot:{name:'무좀',ic:'🦶',resp:false,sym:[['피부가 허옇게 됨','white'],['갈라짐','white'],['간지러움','itch']],line:'발이… 발이 이상해요!',
+    ans:{white:'발가락 사이가 허옇게 되고 갈라졌어요.',itch:'발가락이 엄청 간지러워요! 벅벅~'},
+    prevent:'발을 씻은 뒤 발가락 사이까지 잘 말려요.'},
+  pneu:{name:'폐렴',ic:'🫁',resp:true,sym:[['숨이 참','breath'],['호흡이 빨라짐','breath'],['고열','fever'],['흉통','chest']],line:'헉헉… 가슴이 답답해요…',
+    ans:{breath:'헉헉… 숨이 차고 숨을 빨리 쉬어요.',fever:'열이 엄청 높아요 🥵',chest:'가슴이 콕콕 아파요.',cough:['m','기침보다… 숨쉬기가 너무 힘들어요.']},
+    prevent:'손 씻기와 예방 접종으로 미리 막아요.'},
+  adeno:{name:'아데노바이러스 감염증',ic:'🦠',resp:true,sym:[['인후통','throat'],['기침','cough'],['콧물','runny'],['눈곱','gunk'],['충혈','red']],line:'목이 따가워요… 훌쩍',
+    ans:{throat:'목이 따끔따끔 아파요.',cough:'콜록콜록 기침해요.',runny:'콧물이 줄줄 나요 🤧',gunk:'눈곱도 꼈어요.',red:'눈이 빨갛게 충혈됐어요.'},
+    prevent:'손을 자주 씻고, 기침 예절을 지켜요.'}
+};
+const DKEYS=Object.keys(DIS);
+const CATS=[
+  {id:'body',name:'🌡️ 온몸',qs:[['fever','열이 나니?','열'],['ache','몸이 쑤시고 몸살이 나니?','몸살']]},
+  {id:'resp',name:'😮‍💨 기침·코·목',qs:[['cough','기침을 하니?','기침'],['long','기침한 지 2주가 넘었니?','2주 이상 기침'],['phlegm','가래가 나오니?','가래'],['breath','숨이 차고 숨을 빨리 쉬니?','숨이 참'],['chest','가슴이 아프니?','흉통'],['throat','목이 아프니?','인후통'],['runny','콧물이 나니?','콧물']]},
+  {id:'eye',name:'👀 눈',qs:[['gunk','눈곱이 끼니?','눈곱'],['red','눈이 빨개졌니?','눈 충혈'],['eyeitch','눈이 가렵니?','눈 가려움']]},
+  {id:'skin',name:'🖐️ 피부',qs:[['itch','피부가 가렵니?','피부 가려움'],['blister','몸에 물집이 생겼니?','물집'],['white','피부가 허옇게 되고 갈라졌니?','허옇게·갈라짐']]},
+  {id:'tummy',name:'🍚 배',qs:[['belly','배가 아프니?','배아픔'],['vomit','토했니?','구토'],['diarrhea','설사를 하니?','설사']]},
+  {id:'etc',name:'🩹 상처·근육·입',qs:[['wound','흙이나 못에 다친 상처가 있니?','오염된 상처'],['stiff','근육이 뻣뻣하게 굳니?','근육 굳음'],['mouth','입안이 아프거나 물집이 있니?','입안 물집']]}
+];
+const QMAP={};CATS.forEach(c=>c.qs.forEach(q=>QMAP[q[0]]=q));
+const NO_ANS=['아니요, 그건 괜찮아요!','음… 그건 아니에요.','아니요! 그런 건 없어요.','그건 멀쩡해요 🙂','아니요~ 그렇진 않아요.'];
+function answer(dk,qk){
+  const a=DIS[dk].ans[qk];
+  if(a===undefined) return ['n',pick(NO_ANS)];
+  if(Array.isArray(a)) return a;
+  return ['y',a];
+}
+const NAMES={b:['민준','서준','도윤','하준','지호','시우','준우','건우','유찬','이안','태오','로운','은우','선우'],g:['서윤','지우','하윤','서아','하은','지아','수아','아린','유나','채원','소율','다인','예린','라희']};
+const DAYS=[{n:5,q:5},{n:7,q:4},{n:9,q:3}];
+const DAY_TIME=180;
+
+/* ================= 상태 ================= */
+const G={doc:'튼튼',sound:true,day:0,patients:[],pi:0,time:DAY_TIME,timer:null,timeScore:0,dayBonus:[],results:[],usedNames:new Set(),cur:null,phase:''};
+
+/* ================= 사운드 (WebAudio) ================= */
+let AC=null,bgmTimer=null,bgmOn=false;
+function ac(){ if(!AC){ try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} } if(AC&&AC.state==='suspended') AC.resume(); return AC; }
+function tone(f,t=.12,type='sine',v=.15,when=0,slide=0){ if(!G.sound) return; const a=ac(); if(!a) return; const o=a.createOscillator(),g=a.createGain(); const s=a.currentTime+when;
+  o.type=type;o.frequency.setValueAtTime(f,s); if(slide) o.frequency.exponentialRampToValueAtTime(slide,s+t);
+  g.gain.setValueAtTime(0,s);g.gain.linearRampToValueAtTime(v,s+.01);g.gain.exponentialRampToValueAtTime(.0001,s+t);o.connect(g).connect(a.destination);o.start(s);o.stop(s+t+.02); }
+function noise(t=.4,v=.08,freq=1200,q=1,when=0){ if(!G.sound) return; const a=ac(); if(!a) return; const n=a.sampleRate*t,b=a.createBuffer(1,n,a.sampleRate),d=b.getChannelData(0);
+  for(let i=0;i<n;i++) d[i]=(Math.random()*2-1)*Math.sin(Math.PI*i/n); const s=a.createBufferSource();s.buffer=b; const f=a.createBiquadFilter();f.type='bandpass';f.frequency.value=freq;f.Q.value=q;
+  const g=a.createGain();g.gain.value=v;s.connect(f).connect(g).connect(a.destination);s.start(a.currentTime+when); }
+const sfx={
+  pop:()=>tone(660,.08,'triangle',.12,0,990),
+  ok:()=>{tone(784,.12,'triangle',.14);tone(1046,.18,'triangle',.14,.1);},
+  no:()=>{tone(300,.18,'square',.07);tone(220,.25,'square',.07,.12);},
+  beat:()=>{tone(70,.09,'sine',.5);tone(60,.1,'sine',.45,.16);},
+  wheeze:()=>{noise(.5,.06,1700,6);noise(.35,.05,900,3,.5);},
+  breath:()=>noise(.6,.035,500,.7),
+  fan:()=>[523,659,784,1046].forEach((f,i)=>tone(f,.18,'triangle',.13,i*.1)),
+  door:()=>{tone(880,.15,'sine',.12);tone(660,.3,'sine',.12,.15);},
+  tick:()=>tone(1200,.04,'square',.04)
+};
+function bgm(on){ bgmOn=on; clearInterval(bgmTimer); if(!on) return;
+  const mel=[523,659,784,659,587,698,880,698,523,659,784,1046,988,784,659,587]; let i=0;
+  bgmTimer=setInterval(()=>{ if(!G.sound||!bgmOn) return; tone(mel[i%mel.length],.22,'triangle',.035); if(i%4===0) tone(mel[i%mel.length]/2,.4,'sine',.03); i++; },320); }
+$('soundBtn').onclick=()=>{ G.sound=!G.sound; $('soundBtn').textContent=G.sound?'🔊':'🔇'; if(G.sound) ac(); };
+
+/* ================= 공통 ================= */
+function show(id){ ['title','cine','exam','clinic','night','review'].forEach(s=>$(s).classList.toggle('hidden',s!==id)); }
+function openModal(html){ $('mbox').innerHTML=html; $('modal').classList.remove('hidden'); return $('mbox'); }
+function closeModal(){ $('modal').classList.add('hidden'); }
+function toast(html,ms=1400){ const t=document.createElement('div'); t.className='toast'; t.innerHTML=html; document.body.appendChild(t); setTimeout(()=>t.remove(),ms); }
+function confetti(n=50){ const cs=['#ff9ec0','#8fd8ff','#ffe27a','#7fe0c3','#b99cff'];
+  for(let i=0;i<n;i++){ const c=document.createElement('i'); c.className='confetti'; c.style.left=Math.random()*100+'vw'; c.style.background=pick(cs);
+    c.style.animationDuration=(1.6+Math.random()*1.6)+'s'; c.style.animationDelay=Math.random()*.5+'s'; document.body.appendChild(c); setTimeout(()=>c.remove(),4000); } }
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function lsGet(k){ try{return localStorage.getItem(k);}catch(e){return null;} }
+function lsSet(k,v){ try{localStorage.setItem(k,v);}catch(e){} }
+
+/* ================= 영상 (자막은 화면에서 입혀요) ================= */
+const CINE={
+  intro1:{tag:'🎬 프롤로그 · 꿈을 향해',clips:[
+    {v:'i1a',p:'k1',d:5,cap:'의과대학생인 나는 <em>하루하루 정말 열심히</em> 공부했어요 📚'},
+    {v:'i1b',p:'k2',d:5,cap:'어릴 때부터 내 꿈은 단 하나! <em>아이들을 지키는 소아과 의사</em> 🧸'},
+    {v:'i1c',p:'k3',d:5,cap:'졸업 전 마지막 도전, <em>소아과 전문의 시험</em>! 태블릿을 켜고… 시작! 💪'}]},
+  intro2:{tag:'🎬 2단계 · 우리 병원 문을 열어요',clips:[
+    {v:'i2a',p:'k4',d:5,cap:'축하해요! 이제 나는 <em>소아과 전문의</em> 🎉 오늘은 우리 병원 개업식!'},
+    {v:'i2b',p:'k5',d:5,cap:'하얀 가운 입고, 청진기 걸고… <em>{doc} 원장님</em> 출근 완료! 🩺'},
+    {v:'i2c',p:'k6',d:5,cap:'똑똑! 첫 번째 꼬마 환자가 왔어요. <em>진료 시작!</em>'}]},
+  ending:{tag:'🎬 엔딩 · 감염병은 왜 위험할까?',clips:[
+    {v:'e1',p:'e1',d:3,cap:'감염병은 다른 사람에게 옮을 수 있어서 <em>격리</em>해야 해요'},
+    {v:'e2',p:'e2',d:3,cap:'아픈 사람이 많아지면 <em>병원이 붐벼요</em>'},
+    {v:'e3',p:'e3',d:3,cap:'도서관·수영장 같은 <em>공공시설이 문을 닫고</em>'},
+    {v:'e4',p:'e4',d:3,cap:'<em>비행기 운항</em>도 멈춰요'},
+    {v:'e5',p:'e5',d:3,cap:'즐거운 축제와 <em>여러 행사가 취소</em>돼요'},
+    {v:'e6',p:'e6',d:5,cap:'그래서 가장 중요한 것은 바로 <em>감염병 예방</em>이에요! 🧼'}]}
+};
+function playCine(key){
+  const info=CINE[key];
+  return new Promise(res=>{
+    const v=$('cineV'),P=$('cineP'),cap=$('cineCap'),bar=$('cineBar');
+    const total=info.clips.reduce((s,c)=>s+c.d,0); let before=0,idx=-1,done=false,guard=null,fake=null,fakeT0=0;
+    show('cine'); bgm(false); $('cineTag').textContent=info.tag;
+    const finish=()=>{ if(done) return; done=true; clearTimeout(guard); clearInterval(fake); v.pause(); v.removeAttribute('src'); v.load(); cap.classList.remove('on'); res(); };
+    const next=()=>{
+      clearTimeout(guard); clearInterval(fake);
+      if(idx>=0) before+=info.clips[idx].d;
+      idx++; if(idx>=info.clips.length){ finish(); return; }
+      const c=info.clips[idx];
+      cap.classList.remove('on'); setTimeout(()=>{ cap.innerHTML=c.cap.replace('{doc}',G.doc); cap.classList.add('on'); },250);
+      P.src=IMG+c.p+'.webp'; P.classList.add('hidden'); v.classList.remove('hidden');
+      let usedFake=false;
+      const goFake=()=>{ if(usedFake||done) return; usedFake=true; v.pause(); v.classList.add('hidden'); P.classList.remove('hidden'); P.style.animation='none'; void P.offsetWidth; P.style.animation='';
+        fakeT0=performance.now(); fake=setInterval(()=>{ const t=(performance.now()-fakeT0)/1000; bar.style.width=((before+Math.min(t,c.d))/total*100)+'%'; if(t>=c.d) next(); },100); };
+      v.onerror=goFake;
+      v.ontimeupdate=()=>{ if(usedFake) return; bar.style.width=((before+Math.min(v.currentTime,c.d))/total*100)+'%'; };
+      v.onended=()=>{ if(!usedFake) next(); };
+      v.src=VID+c.v+'.mp4'; v.muted=!G.sound; v.volume=.7;
+      const p=v.play(); if(p&&p.catch) p.catch(()=>{ v.muted=true; v.play().catch(goFake); });
+      guard=setTimeout(()=>{ if(!usedFake&&v.currentTime<.2) goFake(); },3500);
+    };
+    $('cineSkip').onclick=()=>{ sfx.pop(); finish(); };
+    next();
+  });
+}
+
+/* ================= 타이틀 ================= */
+(function initTitle(){
+  const kids=['p_flu_g','p_food_b','p_pox_g','p_tet_b','p_foot_g'];
+  $('tKids').innerHTML=kids.map(k=>`<img src="${IMG+k}.webp" alt="">`).join('');
+  $('docName').value=lsGet('clinicDoc')||'';
+  const b=+lsGet('clinicBest'); if(b) $('bestTxt').textContent=`🏆 나의 최고 점수: ${b}점`;
+  // 그림 미리 불러오기
+  DKEYS.forEach(k=>['b','g'].forEach(s=>{const i=new Image();i.src=`${IMG}p_${k}_${s}.webp`;}));
+  ['room','k3','steth'].forEach(k=>{const i=new Image();i.src=IMG+k+'.webp';});
+})();
+$('startBtn').onclick=async()=>{
+  ac(); sfx.fan();
+  G.doc=($('docName').value||'').trim().replace(/[<>&"']/g,'')||'튼튼'; lsSet('clinicDoc',G.doc==='튼튼'?'':G.doc);
+  G.timeScore=0; G.results=[]; G.dayBonus=[]; G.usedNames=new Set();
+  await playCine('intro1');
+  startExam();
+};
+
+/* ================= 1단계: 소아과 전문의 필기시험 ================= */
+const EX={qs:[],i:0,score:0,marks:[],no:''};
+function makeExam(){
+  return shuffle(DKEYS).slice(0,8).map(k=>{
+    const d=DIS[k], others=shuffle(DKEYS.filter(x=>x!==k)).slice(0,3);
+    const symTxt=dk=>[...new Set(DIS[dk].sym.map(s=>s[0]))].join(', ');
+    if(Math.random()<.6){
+      const opts=shuffle([k,...others]);
+      return {type:'A',k,q:'다음 증상이 나타나는 감염병은 무엇일까요?',chips:[...new Set(d.sym.map(s=>s[0]))],opts:opts.map(o=>DIS[o].ic+' '+DIS[o].name),ans:opts.indexOf(k)};
+    }
+    const opts=shuffle([k,...others]);
+    return {type:'B',k,q:`<b style="color:#ff6f9f">${d.ic} ${d.name}</b>의 증상으로 알맞은 것은 무엇일까요?`,chips:[],opts:opts.map(o=>symTxt(o)),ans:opts.indexOf(k)};
+  });
+}
+function startExam(){
+  EX.qs=makeExam(); EX.i=0; EX.score=0; EX.marks=[]; EX.no=String(10000+rnd(89999));
+  show('exam'); bgm(true); renderQ();
+}
+function tHead(){ return `<div class="tHead"><span>🩺</span><span class="tt">소아과 전문의 자격시험 · 필기</span><span class="pill">수험번호 ${EX.no}</span><span class="pill">${G.doc}</span></div>`; }
+function renderQ(){
+  const q=EX.qs[EX.i];
+  $('tscreen').innerHTML=tHead()+`<div class="tDots">${EX.qs.map((_,i)=>`<i class="${i===EX.i?'now':(EX.marks[i]||'')}"></i>`).join('')}</div>
+   <div class="tBody"><div class="qNo">문제 ${EX.i+1} / 8</div><div class="qText">${q.q}</div>
+   ${q.chips.length?`<div class="chips">${q.chips.map(c=>`<span class="chip">${c}</span>`).join('')}</div>`:''}
+   <div class="opts">${q.opts.map((o,i)=>`<button class="opt" data-i="${i}"><b>${'①②③④'[i]}</b><span>${o}</span></button>`).join('')}</div><div id="expl"></div></div>
+   <div class="tFoot"><button class="bigbtn small blue hidden" id="nextQ">${EX.i<7?'다음 문제 ▶':'채점하기 ✍️'}</button></div>`;
+  document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>chooseQ(+b.dataset.i));
+}
+function chooseQ(i){
+  const q=EX.qs[EX.i], ok=i===q.ans, d=DIS[q.k];
+  document.querySelectorAll('.opt').forEach((b,j)=>{ b.disabled=true; if(j===q.ans) b.classList.add('right'); else if(j===i) b.classList.add('wrong'); });
+  EX.marks[EX.i]=ok?'o':'x'; if(ok){EX.score++;sfx.ok();}else sfx.no();
+  const st=document.createElement('div'); st.className='stamp '+(ok?'o':'x'); st.textContent=ok?'⭕':'❌'; $('tscreen').appendChild(st);
+  $('expl').innerHTML=`<div class="expl">${ok?'정답이에요! ':'아쉬워요! '}<b>${d.ic} ${d.name}</b>의 증상은 <b>${[...new Set(d.sym.map(s=>s[0]))].join(', ')}</b>${d.resp?' (호흡기 증상)':''}이에요.</div>`;
+  $('nextQ').classList.remove('hidden');
+  $('nextQ').onclick=()=>{ sfx.pop(); if(EX.i<7){EX.i++;renderQ();} else examResult(); };
+}
+function examResult(){
+  const pass=EX.score>=5;
+  if(pass){ sfx.fan(); confetti(70); } else sfx.no();
+  $('tscreen').innerHTML=tHead()+`<div class="tBody"><div class="result">
+    <div style="font-size:18px" class="jua">8문제 중 <b style="color:#ff6f9f;font-size:30px">${EX.score}</b>문제 맞혔어요</div>
+    <h2>${pass?'🎉 합격! 🎉':'😢 불합격…'}</h2>
+    ${pass?`<div class="license"><h4>🏅 소아과 전문의 자격증</h4><p>성명: <b>${G.doc}</b></p><p>위 사람은 소아과 전문의 시험에<br>합격하였음을 증명합니다.</p><p style="font-size:13px;color:#9a8aa8">감염병 10가지 증상 마스터</p><div class="seal">튼튼<br>합격</div></div>
+      <p class="jua" style="font-size:17px">이제 나만의 소아과 병원을 열 차례예요!</p><button class="bigbtn green" id="goOpen">병원 개업하러 가기 🏥</button>`
+    :`<p class="jua" style="font-size:17px">5문제 이상 맞혀야 합격이에요.<br>틀린 감염병 증상을 다시 떠올려 보고 재시험에 도전해요!</p><button class="bigbtn" id="retry">재시험 보기 🔁</button>`}
+  </div></div>`;
+  if(pass) $('goOpen').onclick=async()=>{ sfx.pop(); await playCine('intro2'); startDay(0); };
+  else $('retry').onclick=()=>{ sfx.pop(); startExam(); };
+}
+
+/* ================= 2단계: 진료 ================= */
+function makePatients(n){
+  return shuffle(DKEYS).slice(0,n).map(k=>{
+    const s=Math.random()<.5?'b':'g'; let nm, tries=0;
+    do{ nm=pick(NAMES[s]); tries++; }while(G.usedNames.has(nm)&&tries<40);
+    G.usedNames.add(nm);
+    return {k,s,name:nm,age:7+rnd(4),img:`${IMG}p_${k}_${s}.webp`};
+  });
+}
+function startDay(d){
+  G.day=d; const D=DAYS[d];
+  G.patients=makePatients(D.n); G.pi=0; G.time=DAY_TIME;
+  show('clinic'); bgm(true);
+  $('hDay').textContent=`🏥 ${d+1}일차`; updHud();
+  $('patient').className='patient out'; $('bubble').classList.add('hidden'); $('chart').innerHTML='';
+  const b=openModal(`<h3>🏥 소아과 의사 ${d+1}일차</h3>
+    <div class="sumRow"><div class="sum">오늘의 환자<b>${D.n}명</b></div><div class="sum">환자마다 질문<b>${D.q}번</b></div><div class="sum">진료 시간<b>${DAY_TIME}초</b></div></div>
+    <p>① <b>청진기</b>로 진찰 → ② <b>질문</b>하기 → ③ <b>진단</b>하기!<br>남은 시간은 그대로 점수가 돼요. 서둘러요, 원장님!</p>
+    <button class="bigbtn green" id="go">진료 시작! 🩺</button>`);
+  b.querySelector('#go').onclick=()=>{ closeModal(); sfx.pop(); startTimer(); nextPatient(); };
+}
+function updHud(){
+  const t=$('hTime'); t.textContent=`⏱️ ${Math.max(0,Math.ceil(G.time))}초`; t.classList.toggle('hurry',G.time<=20&&G.time>0);
+  $('hPat').textContent=`🧒 ${Math.min(G.pi+1,G.patients.length)}/${G.patients.length}명`;
+  $('hScore').textContent=`⭐ 시간 점수 ${G.timeScore}점`;
+}
+function startTimer(){
+  clearInterval(G.timer); let last=performance.now();
+  G.timer=setInterval(()=>{ const now=performance.now(); G.time-=(now-last)/1000; last=now;
+    if(G.time<=10&&G.time>0&&Math.ceil(G.time)!==G._lastTick){ G._lastTick=Math.ceil(G.time); sfx.tick(); }
+    updHud(); if(G.time<=0){ G.time=0; updHud(); timeUp(); } },200);
+}
+function stopTimer(){ clearInterval(G.timer); }
+
+function nextPatient(){
+  if(G.pi>=G.patients.length){ endDay(false); return; }
+  const p=G.patients[G.pi]; G.cur={...p,steth:false,listen:0,resp:0,asked:[],qLeft:DAYS[G.day].q};
+  updHud();
+  const img=$('patient'); img.className='patient out'; img.src=p.img;
+  $('bubble').classList.add('hidden');
+  renderChart(); renderTools(); renderQs('body');
+  sfx.door();
+  setTimeout(()=>{ img.className='patient'; setTimeout(()=>{ if(G.cur&&G.cur.name===p.name) img.classList.add('idle'); },750);
+    say(`의사 선생님, 도와주세요! 😢<br>${DIS[p.k].line}`); },250);
+}
+function say(html){ const b=$('bubble'); b.innerHTML=`<span class="nm">${G.cur.name} (${G.cur.age}살)</span>${html}`; b.classList.remove('hidden'); b.style.animation='none'; void b.offsetWidth; b.style.animation=''; }
+
+function renderChart(){
+  const c=G.cur;
+  $('chart').innerHTML=`<h4>📋 진료 차트</h4><div class="who">${c.name} · ${c.age}살 ${c.s==='b'?'👦':'👧'}</div>
+   <ul>${c.steth?`<li class="${c.resp>=50?'y':'n'}"><span class="mk">🩺</span>호흡기 증상 ${c.resp}%</li>`:''}
+   ${c.asked.map(a=>`<li class="${a.m}"><span class="mk">${a.m==='y'?'✔':a.m==='n'?'✖':'△'}</span>${a.short}</li>`).join('')}</ul>
+   ${!c.steth&&!c.asked.length?'<div class="empty">청진기 진찰과 질문 결과가 여기에 체크돼요.</div>':''}`;
+}
+$('chartToggle').onclick=()=>{ $('chart').classList.toggle('open'); sfx.pop(); };
+
+/* ----- 청진기 ----- */
+let holding=false, stethMode=false, listenLoop=null;
+function renderTools(){
+  const c=G.cur;
+  $('stethBtn').className='stethBtn'+(c.steth?' done':' glow');
+  $('stethTxt').innerHTML=c.steth?'청진기 진찰 완료! ✔':'청진기를 들고<br>아이 몸에 꾹 대 보세요';
+  setGauge(c.steth?c.resp:0); $('gRes').innerHTML=c.steth?resultTxt():'';
+  $('qLock').classList.toggle('hidden',c.steth);
+  $('qLock').innerHTML='🩺 먼저 청진기로 진찰해 주세요!';
+  stethMode=false; $('stethCursor').classList.remove('on'); $('ring').style.display='none';
+  renderQLeft();
+}
+function setGauge(v){ $('gFill').style.width=v+'%'; $('gTxt').textContent=`호흡기 증상 가능성 ${Math.round(v)}%`; $('gauge').classList.toggle('hi',v>=50); }
+function resultTxt(){ return G.cur.resp>=50?'<span style="color:#ff6b6b">쌕쌕… 그르렁! 호흡기 증상이 있어요</span>':'<span style="color:#3cc79c">콩닥콩닥~ 숨소리는 깨끗해요</span>'; }
+$('stethBtn').onclick=()=>{
+  const c=G.cur; if(!c||c.steth||G.phase==='leaving') return;
+  sfx.pop(); stethMode=true; $('stethCursor').classList.add('on'); $('ring').style.display='block';
+  const r=$('scene').getBoundingClientRect(); moveSteth(r.left+r.width*.62,r.top+r.height*.55);
+  $('stethTxt').innerHTML='아이 몸 위를<br><b>꾹 누르고</b> 있어요!';
+  toast('🩺 아이 몸에 청진기를 대고 꾹 누르고 있어요!',1600);
+};
+function moveSteth(x,y){ const r=$('scene').getBoundingClientRect(); const s=$('stethCursor'); s.style.left=(x-r.left)+'px'; s.style.top=(y-r.top)+'px'; }
+const scene=$('scene');
+scene.addEventListener('pointermove',e=>{ if(stethMode) moveSteth(e.clientX,e.clientY); });
+scene.addEventListener('pointerdown',e=>{ if(!stethMode) return; moveSteth(e.clientX,e.clientY);
+  if(e.target===$('patient')||e.target===$('ring')){ e.preventDefault(); holding=true; startListen(); } });
+window.addEventListener('pointerup',()=>{ holding=false; });
+window.addEventListener('pointercancel',()=>{ holding=false; });
+function startListen(){
+  if(listenLoop) return; const c=G.cur;
+  if(!c.target) c.target=DIS[c.k].resp?(78+rnd(19)):(4+rnd(13));
+  let beatT=0,last=performance.now();
+  listenLoop=setInterval(()=>{
+    const now=performance.now(),dt=(now-last)/1000; last=now;
+    if(!holding||!stethMode){ clearInterval(listenLoop); listenLoop=null; return; }
+    c.listen=Math.min(1,c.listen+dt/3.2);
+    setGauge(c.target*c.listen);
+    beatT+=dt; if(beatT>.8){ beatT=0; sfx.beat(); if(DIS[c.k].resp){ sfx.wheeze(); fx(pick(['쌕쌕…','그르렁','콜록!','쌕쌕'])); } else { sfx.breath(); fx(pick(['콩닥','콩닥콩닥','후~'])); } }
+    if(c.listen>=1){ clearInterval(listenLoop); listenLoop=null; holding=false; finishListen(); }
+  },60);
+}
+function fx(t){ const s=$('stethCursor'); const d=document.createElement('div'); d.className='listenFx'; d.textContent=t; d.style.left=s.style.left; d.style.top=(parseFloat(s.style.top)-40)+'px'; scene.appendChild(d); setTimeout(()=>d.remove(),1200); }
+function finishListen(){
+  const c=G.cur; c.steth=true; c.resp=c.target; sfx.ok();
+  renderTools(); renderChart();
+  if(DIS[c.k].resp) say('콜록콜록… 숨 쉴 때 소리가 나요?'); else say('콩닥콩닥… 가슴 소리는 괜찮아요?');
+}
+
+/* ----- 질문 ----- */
+let curCat='body';
+function renderQLeft(){ const c=G.cur,max=DAYS[G.day].q; $('qLeft').innerHTML='남은 질문 '+Array.from({length:max},(_,i)=>`<i class="${i<c.qLeft?'':'used'}"></i>`).join(''); }
+function renderQs(cat){
+  curCat=cat;
+  $('cats').innerHTML=CATS.map(c=>`<button class="cat ${c.id===cat?'on':''}" data-c="${c.id}">${c.name}</button>`).join('');
+  document.querySelectorAll('.cat').forEach(b=>b.onclick=()=>{ sfx.pop(); renderQs(b.dataset.c); });
+  const askedK=G.cur?G.cur.asked.map(a=>a.k):[];
+  $('qs').innerHTML=CATS.find(c=>c.id===cat).qs.map(q=>`<button class="q ${askedK.includes(q[0])?'asked':''}" data-q="${q[0]}">💬 ${q[1]}</button>`).join('');
+  document.querySelectorAll('.q').forEach(b=>b.onclick=()=>ask(b.dataset.q));
+}
+function ask(qk){
+  const c=G.cur; if(!c||!c.steth||G.phase==='leaving') return;
+  if(c.asked.some(a=>a.k===qk)){ toast('이미 물어본 질문이에요!'); return; }
+  if(c.qLeft<=0){ openDiag(); return; }
+  const q=QMAP[qk], [m,txt]=answer(c.k,qk);
+  c.qLeft--; c.asked.push({k:qk,m,short:q[2]+(m==='y'?' 있음':m==='n'?' 없음':' 애매함')});
+  sfx.pop(); say(`<span style="color:#4fb4f0">👩‍⚕️ “${q[1]}”</span><br>${txt}`);
+  renderChart(); renderQs(curCat); renderQLeft();
+  if(c.qLeft<=0){ setTimeout(()=>{ if(G.cur===c&&G.phase!=='leaving'){ toast('💬 질문을 모두 했어요! 이제 진단해요'); setTimeout(()=>{ if(G.cur===c&&G.phase!=='leaving') openDiag(); },900); } },1400); }
+}
+
+/* ----- 매뉴얼 ----- */
+function manualHtml(){
+  const c=G.cur, yes=new Set(), no=new Set();
+  if(c) c.asked.forEach(a=>{ if(a.m==='y') yes.add(a.k); if(a.m==='n') no.add(a.k); });
+  const respHit=c&&c.steth&&c.resp>=50;
+  return `<button class="mclose" id="x">✕</button><h3>📖 소아과 진료 매뉴얼</h3>
+   <p class="mnote">환자가 “네”라고 한 증상은 <b style="color:#16865f">✔</b>, “아니요”라고 한 증상은 <b style="color:#c94747">✖</b>로 체크돼요.${c&&c.steth?` 🩺 청진기 결과: <b>호흡기 증상 ${c.resp}%</b>`:''}</p>
+   <div class="mgrid">${DKEYS.map(k=>{const d=DIS[k];return `<div class="mcard ${d.resp?'resp':''}"><h6>${d.ic} ${d.name}${d.resp?`<span class="rt ${respHit?'hit':''}">호흡기</span>`:''}</h6>
+     ${d.sym.map(s=>`<span class="sy ${yes.has(s[1])?'y':no.has(s[1])?'n':''}">${s[0]}</span>`).join('')}</div>`;}).join('')}</div>`;
+}
+$('manualBtn').onclick=()=>{ sfx.pop(); const b=openModal(manualHtml()); b.querySelector('#x').onclick=closeModal; };
+
+/* ----- 진단 ----- */
+function openDiag(){
+  const c=G.cur; if(!c||G.phase==='leaving') return;
+  if(!c.steth){ toast('🩺 먼저 청진기로 진찰해 주세요!'); return; }
+  sfx.pop();
+  const b=openModal(`<button class="mclose" id="x">✕</button><h3>✍️ ${c.name}의 진단</h3>
+   <p style="margin:0 0 4px">이 아이는 어떤 감염병일까요? <span style="font-size:14px;color:#9a8aa8">(차트와 그림을 잘 살펴봐요)</span></p>
+   <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;font-size:14px">${c.steth?`<span class="sy ${c.resp>=50?'y':''}">🩺 호흡기 ${c.resp}%</span>`:''}${c.asked.map(a=>`<span class="sy ${a.m==='y'?'y':a.m==='n'?'n':''}">${a.short.replace(/ (있음|없음|애매함)$/,'')}</span>`).join('')}</div>
+   <div class="dgrid">${DKEYS.map(k=>`<button class="dbtn ${DIS[k].resp?'resp':''}" data-k="${k}"><span class="ic">${DIS[k].ic}</span>${DIS[k].name}${DIS[k].resp?'<span class="rt">호흡기</span>':''}</button>`).join('')}</div>
+   <button class="bigbtn small blue" id="man" style="margin-top:12px">📖 매뉴얼 보기</button>`);
+  b.querySelector('#x').onclick=closeModal;
+  b.querySelector('#man').onclick=()=>{ const m=openModal(manualHtml()); m.querySelector('#x').onclick=()=>openDiag(); };
+  b.querySelectorAll('.dbtn').forEach(x=>x.onclick=()=>{ closeModal(); diagnose(x.dataset.k); });
+}
+$('diagBtn').onclick=openDiag;
+function diagnose(guess){
+  const c=G.cur; G.phase='leaving';
+  G.results.push({day:G.day,name:c.name,age:c.age,s:c.s,k:c.k,img:c.img,guess,ok:guess===c.k});
+  sfx.fan(); say(`${DIS[guess].name}… 알겠어요!<br>감사합니다, ${G.doc} 원장님! 👋`);
+  stethMode=false; $('stethCursor').classList.remove('on'); $('ring').style.display='none';
+  G.pi++; if(G.pi>=G.patients.length) stopTimer();   // 마지막 환자면 남은 시간을 바로 멈춰요
+  setTimeout(()=>{ $('patient').className='patient leave'; $('bubble').classList.add('hidden'); },1300);
+  setTimeout(()=>{ if(G.phase!=='leaving') return; G.phase=''; if(G.time>0) nextPatient(); },2000);
+}
+function timeUp(){
+  stopTimer(); closeModal(); G.phase='leaving';
+  for(let i=G.pi;i<G.patients.length;i++){ const p=G.patients[i]; G.results.push({day:G.day,name:p.name,age:p.age,s:p.s,k:p.k,img:p.img,guess:null,ok:false,miss:true}); }
+  G.pi=G.patients.length; sfx.no();
+  setTimeout(()=>{ G.phase=''; endDay(true); },300);
+}
+function endDay(timeout){
+  stopTimer(); G.phase='';
+  stethMode=false; $('stethCursor').classList.remove('on'); $('ring').style.display='none';
+  const bonus=timeout?0:Math.max(0,Math.ceil(G.time)); G.dayBonus[G.day]=bonus; G.timeScore+=bonus; updHud();
+  const dayR=G.results.filter(r=>r.day===G.day), seen=dayR.filter(r=>!r.miss).length;
+  if(!timeout){ confetti(40); }
+  const b=openModal(`<h3>${timeout?'⏰ 진료 시간이 끝났어요!':'🎉 오늘 진료 끝!'}</h3>
+    <div class="sumRow"><div class="sum">진료한 환자<b>${seen}/${dayR.length}명</b></div><div class="sum">남은 시간<b>${bonus}초</b></div><div class="sum">시간 점수<b>+${bonus}점</b></div></div>
+    <p>${timeout?'진료를 받지 못한 아이도 있어요… 다음엔 더 빠르게!':'수고했어요, 원장님!'}<br>내가 진료를 잘했을까요? 하루가 지나면 <b>병원 리뷰</b>로 알 수 있어요.</p>
+    <button class="bigbtn yellow" id="go">🌙 하루 보내기</button>`);
+  b.querySelector('#go').onclick=async()=>{ closeModal(); sfx.pop(); await nightAnim(); showReviews(G.day); };
+}
+async function nightAnim(){
+  show('night'); bgm(false);
+  const n=$('night'); n.querySelectorAll('.star').forEach(s=>s.remove());
+  for(let i=0;i<24;i++){ const s=document.createElement('div'); s.className='star'; s.textContent='✦'; s.style.left=Math.random()*100+'%'; s.style.top=Math.random()*55+'%'; s.style.fontSize=(8+Math.random()*16)+'px'; s.style.animationDelay=Math.random()+'s'; n.appendChild(s); }
+  $('nightTxt').textContent=`${G.day+1}일차 밤… 하루가 지났어요 💤`;
+  tone(392,.5,'sine',.08);tone(330,.6,'sine',.08,.4);tone(262,.9,'sine',.08,.9);
+  await wait(2600);
+}
+
+/* ----- 리뷰 게시판 ----- */
+const GOOD=[
+  (r,d)=>`${G.doc} 원장님 덕분에 ${iga(d.name)} 깨끗이 다 나았어요! 정말 감사합니다 💕`,
+  (r,d)=>`원장님이 ${ira(d.name)}고 바로 알아봐 주셔서 금방 나았어요. 오늘 학교도 갔어요! 😆`,
+  (r,d)=>`${d.name} 때문에 너무 힘들었는데 이제 하나도 안 아파요. 최고의 소아과예요 👍`,
+  (r,d)=>`친절한 ${G.doc} 원장님 고맙습니다! 이제 다 나아서 친구들이랑 뛰어놀아요 🏃`
+];
+const BAD=[
+  (r,d,g)=>`원장님은 ${ira(g.name)}고 하셨는데… 더 아파졌어요 😢 다른 병원에 가 보니 ${iyeot(d.name)}대요. 너무 힘들어요…`,
+  (r,d,g)=>`${g.name} 약을 먹었는데 하나도 안 나아요… 엉엉 😭 알고 보니 ${iyeot(d.name)}어요. 더 아프고 힘들어요.`,
+  (r,d,g)=>`밤새 끙끙 앓았어요… ${eunn(g.name)} 아니었고 ${iyeot(d.name)}대요. 원장님, 저 더 힘들어졌어요 😞`
+];
+function showReviews(day){
+  show('review'); bgm(true);
+  const list=G.results.filter(r=>r.day===day);
+  const ok=list.filter(r=>r.ok).length, bad=list.length-ok;
+  const last=day===2;
+  $('review').innerHTML=`<a class="homeBtn" href="../index.html">🏠</a><div class="board">
+    <div class="bHead">💬 튼튼 소아과 리뷰 게시판 <small>${G.doc} 원장님 · ${day+1}일차 환자</small></div>
+    <div class="bBody">
+    <div class="sumRow"><div class="sum">감사 리뷰<b style="color:#16865f">${ok}개</b></div><div class="sum">아파요 리뷰<b style="color:#c94747">${bad}개</b></div></div>
+    ${list.map((r,i)=>{ const d=DIS[r.k], g=r.guess?DIS[r.guess]:null;
+      let txt, tag;
+      if(r.ok){ txt=pick(GOOD)(r,d); tag='<span class="tag ok">바른 진료</span>'; }
+      else if(r.miss){ txt=`한참 기다렸는데 진료를 못 받았어요… 😢 다른 병원에 가 보니 ${iyeot(d.name)}대요. 너무 아프고 힘들어요.`; tag='<span class="tag miss">진료 못 받음</span>'; }
+      else { txt=pick(BAD)(r,d,g); tag='<span class="tag no">오진</span>'; }
+      return `<div class="post ${r.ok?'':'bad'}" style="animation-delay:${.25+i*.35}s"><img src="${r.img}" alt="">
+        <div><div class="pt">${r.name} (${r.age}살)<span class="stars">${r.ok?'★★★★★':'★☆☆☆☆'}</span>${tag}</div><p>${txt}</p>
+        ${r.ok?'':`<div class="learn">📝 <b>${d.ic} ${d.name}</b>의 증상: ${[...new Set(d.sym.map(s=>s[0]))].join(', ')}${d.resp?' (호흡기)':''}</div>`}</div></div>`; }).join('')}
+    <div style="text-align:center;margin-top:16px"><button class="bigbtn ${last?'yellow':'green'}" id="nextDay">${last?'🏆 최종 결과 보기':`☀️ ${day+2}일차 진료하러 가기`}</button></div>
+    </div></div>`;
+  $('review').scrollTop=0;
+  setTimeout(()=>{ if(ok>bad) sfx.ok(); else sfx.no(); },400);
+  $('nextDay').onclick=()=>{ sfx.pop(); if(last) finalResult(); else startDay(day+1); };
+}
+
+/* ----- 최종 결과 ----- */
+function finalResult(){
+  const ok=G.results.filter(r=>r.ok).length, wrong=G.results.filter(r=>!r.ok&&!r.miss).length, miss=G.results.filter(r=>r.miss).length;
+  const total=G.timeScore+ok*30-wrong*50;
+  const best=+lsGet('clinicBest')||0; const isBest=total>best; if(isBest) lsSet('clinicBest',String(total));
+  const title=ok===21?'👑 전설의 명의':ok>=18?'🏆 동네 최고 명의':ok>=14?'🌟 믿음직한 원장님':ok>=9?'🩺 성장하는 새내기 의사':'📚 다시 공부하는 의사';
+  sfx.fan(); confetti(90);
+  show('review');
+  $('review').innerHTML=`<a class="homeBtn" href="../index.html">🏠</a><div class="board">
+   <div class="bHead">🏆 3일 진료 최종 결과 <small>${G.doc} 원장님</small></div>
+   <div class="bBody" style="text-align:center">
+    <h3 class="jua" style="font-size:clamp(26px,4vw,36px);margin:10px 0 4px;color:#e5578a">${title}</h3>
+    <p style="margin:0">21명의 어린이 중 <b>${ok}명</b>을 바르게 진료했어요!</p>
+    <table class="scoreTable">
+     <tr><td>⏱️ 남은 시간 점수 (1·2·3일차)</td><td>${G.dayBonus.map(x=>x||0).join(' + ')} = <b>${G.timeScore}점</b></td></tr>
+     <tr><td>💕 바른 진료 ${ok}명 × 30</td><td class="plus">+${ok*30}점</td></tr>
+     <tr><td>😢 오진 ${wrong}명 × (−50)</td><td class="minus">−${wrong*50}점</td></tr>
+     ${miss?`<tr><td>⌛ 진료 못 받은 환자 ${miss}명</td><td>0점</td></tr>`:''}
+     <tr class="tot"><td>⭐ 최종 점수</td><td><b>${total}점</b></td></tr>
+    </table>
+    ${isBest?'<p class="jua" style="color:#7a58c9;font-size:18px">🎉 나의 최고 점수 갱신!</p>':`<p class="jua" style="color:#7a58c9">🏆 나의 최고 점수: ${Math.max(best,total)}점</p>`}
+    <p>그런데 원장님… 감염병이 <b>널리 퍼지면</b> 어떤 일이 생길까요?</p>
+    <button class="bigbtn" id="goEnd">🎬 엔딩 보기</button>
+   </div></div>`;
+  $('review').scrollTop=0;
+  $('goEnd').onclick=async()=>{ sfx.pop(); await playCine('ending'); endingCard(total); };
+}
+function endingCard(total){
+  show('review'); bgm(true);
+  $('review').innerHTML=`<a class="homeBtn" href="../index.html">🏠</a><div class="board">
+   <div class="bHead">🧼 가장 중요한 것은 감염병 예방!</div>
+   <div class="bBody" style="text-align:center">
+    <p style="font-size:16.5px">감염병은 다른 사람에게 옮아서 <b>격리</b>가 필요하고, <b>병원이 붐비고</b>, <b>공공시설이 문을 닫고</b>, <b>비행기가 멈추고</b>, <b>행사가 취소</b>될 만큼 위험해요.<br>그래서 아프기 전에 <b style="color:#e5578a">미리 예방</b>하는 것이 가장 중요해요!</p>
+    <div class="tips">
+     <div class="tip"><b>🧼</b>비누로 30초<br>손 씻기</div>
+     <div class="tip"><b>💪</b>기침은 옷소매로<br>가리기</div>
+     <div class="tip"><b>💉</b>예방 접종<br>제때 맞기</div>
+     <div class="tip"><b>🍳</b>음식은<br>익혀 먹기</div>
+     <div class="tip"><b>🩹</b>상처는 씻고<br>소독하기</div>
+     <div class="tip"><b>🦶</b>발 씻고<br>잘 말리기</div>
+     <div class="tip"><b>👀</b>더러운 손으로<br>눈 비비지 않기</div>
+     <div class="tip"><b>🏠</b>아프면 집에서<br>푹 쉬기</div>
+    </div>
+    <p class="jua" style="font-size:20px;color:#7a58c9">오늘의 최종 점수: ${total}점</p>
+    <button class="bigbtn" id="again">다시 진료하기 🔁</button>
+    <a class="bigbtn blue" href="../playground.html" style="display:inline-block;text-decoration:none">🛝 놀이터로</a>
+   </div></div>`;
+  $('review').scrollTop=0;
+  $('again').onclick=()=>{ sfx.pop(); show('title'); };
+}
+</script>
+</body>
+</html>
