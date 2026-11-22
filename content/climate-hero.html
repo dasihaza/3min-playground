@@ -1150,7 +1150,7 @@ const ease = t=>1-Math.pow(1-t,3);
 const sleep = ms=>new Promise(r=>setTimeout(r,ms));
 
 // ======================= IMAGES (Higgsfield로 그린 그림) =======================
-const IMG_LIST=[...['mitig','adapt','geo'].flatMap(j=>[0,1,2,3,4].map(i=>`hero_${j}_${i}`)),'p_tree','p_bush','p_flower','p_house','p_building',...['mitig','adapt','geo'].flatMap(j=>['ult_cut_'+j,'ult_fx_'+j,'ult_big_'+j]),'fairy','npc_chief','npc_doc','npc_peng','npc_bot','npc_panda','earth_happy','earth_sad','hz_fire','hz_typhoon','hz_flood','hz_drought','hz_sea'];
+const IMG_LIST=[...['mitig','adapt','geo'].flatMap(j=>[0,1,2,3,4].map(i=>`hero_${j}_${i}`)),'p_tree','p_bush','p_flower','p_house','p_building',...['mitig','adapt','geo'].flatMap(j=>['ult_cut_'+j,'ult_fx_'+j,'ult_big_'+j,...[0,1,2,3,4].flatMap(w=>({mitig:4,adapt:3,geo:4})[j]===w?[]:[`ult_cut_${j}_${w}`,`ult_big_${j}_${w}`])]),'fairy','npc_chief','npc_doc','npc_peng','npc_bot','npc_panda','earth_happy','earth_sad','hz_fire','hz_typhoon','hz_flood','hz_drought','hz_sea'];
 const IMG={};
 for(const k of IMG_LIST){ const i=new Image(); i.onload=()=>{ i.ok=true; if(k.startsWith('hero')||k.startsWith('earth')||k==='fairy') titleArt(); }; i.src='../assets/climate-hero/img/'+k+'.webp'; IMG[k]=i; }
 const NPC_IMG={chief:'npc_chief',doc:'npc_doc',peng:'npc_peng',bot:'npc_bot',panda:'npc_panda'};
@@ -2122,10 +2122,10 @@ const ULT = {
 };
 function ultCutIn(){
   return new Promise(res=>{
-    const u=ULT[G.job], box=$('ult'), img=$('ultImg'), k='ult_cut_'+G.job;
+    const u=ULT[G.job], w=curUlt(), box=$('ult'), img=$('ultImg'), k=cutKey();
     G.ult=true; sfx.ult();
     box.style.setProperty('--uc1',u.c1); box.style.setProperty('--uc2',u.c2);
-    $('ultTxt').textContent=u.name; $('ultSub').textContent=u.sub;
+    $('ultTxt').textContent=w.name; $('ultSub').textContent=w.sub;
     if(imgOk(k)){ img.src=IMG[k].src; img.style.display=''; } else img.style.display='none';
     box.classList.remove('hidden','out'); void box.offsetWidth; box.classList.add('in');
     setTimeout(()=>{ box.classList.add('out'); },1150);
@@ -2134,7 +2134,10 @@ function ultCutIn(){
 }
 function ultSeeds(n){ return Array.from({length:n},()=>({a:Math.random()*Math.PI*2,r:Math.random(),s:Math.random(),c:Math.floor(Math.random()*6),d:Math.random()})); }
 function pushUltFx(cx,cy,R){
-  G.fx.push({kind:'ult_'+G.job, x:cx, y:cy, R:Math.max(R,TILE*3), t:0, dur:2.6, applyAt:99, seeds:ultSeeds(80), targets:[]});
+  // 필살기 연출은 화면 안쪽에 보이게 (멀리 조준해도 잘리지 않게)
+  const vw=W/SCALE, vh=H/SCALE, mx=Math.min(vw*.32,R*.9), my=Math.min(vh*.3,R*.7);
+  cx=clamp(cx,G.cam.x-vw/2+mx,G.cam.x+vw/2-mx); cy=clamp(cy,G.cam.y-vh/2+my+60,G.cam.y+vh/2-my);
+  G.fx.push({kind:curUlt().fx, job:G.job, w:G.wIdx, x:cx, y:cy, R:clamp(R,TILE*3,TILE*4.3), t:0, dur:2.6, applyAt:99, seeds:ultSeeds(80), targets:[]});
   G.shake=Math.max(G.shake,.55); G.uflash=1;
 }
 // 가운데 기준 + 덧셈 혼합(빛나는 마법진·돔용)
@@ -2185,6 +2188,169 @@ const FX_ULT = {
     for(let i=0;i<40;i++){ const s=e.seeds[i], d=e.R*ease(clamp(p*1.4-.2,0,1))*(.5+s.r*1.1), x=e.x+Math.cos(s.a)*d, y=e.y+Math.sin(s.a)*d*.6-20; ctx.globalAlpha=f*(1-p*.5); ctx.fillStyle=s.c%2?'#ffe27a':'#e9dcff'; starPath(ctx,x,y,7+s.s*6,3); ctx.fill(); }
     ctx.globalAlpha=f; for(let i=0;i<6;i++){ const s=e.seeds[60+i]; emoji(['🪞','🚀','🎈','🌀','⭐','💜'][i],e.x+Math.cos(s.a+p*2)*e.R*1.15,e.y-e.R*.4+Math.sin(s.a+p*2)*e.R*.45,22+s.s*10); } ctx.globalAlpha=1; }
 };
+// ----- 무기별 필살기 15종 -----
+// fx: 맵 위 연출 이름, cut/big: 힉스필드 그림 이름, emo: 주변에 떠다니는 아이콘
+const ULTS = {
+  mitig:[
+    {name:'새싹 대지 각성', sub:'땅속 생명을 깨워라!', fx:'ult_m0', emo:['🌱','🌿','🍀','💚','🌼','🪴']},
+    {name:'솔라 프리즘 캐논', sub:'햇빛을 깨끗한 에너지로!', fx:'ult_m1', emo:['☀️','⚡','🔆','💛','✨','🌞']},
+    {name:'윈드 터빈 회오리베기', sub:'바람아, 힘을 빌려줘!', fx:'ult_m2', emo:['🌬️','🍃','💨','🌀','💚','✨']},
+    {name:'탄소 감축 대인장', sub:'배출 허용량, 쾅!', fx:'ult_m3', emo:['🎫','📉','🔨','♻️','💚','✨']},
+    {name:'세계수의 숲 폭풍', sub:'원인을 뿌리째 줄여라!', fx:'ult_mitig', cut:'ult_cut_mitig', emo:[]}
+  ],
+  adapt:[
+    {name:'단비 치유 소나기', sub:'메마른 땅에 단비를!', fx:'ult_a0', emo:['💧','🌸','🌼','💙','🌷','✨']},
+    {name:'황금 들판 대풍년', sub:'어떤 날씨도 끄떡없어!', fx:'ult_a1', emo:['🌾','🌽','🥕','💛','✨','🌻']},
+    {name:'경보 사이렌 대공명', sub:'위험을 미리 알려라!', fx:'ult_a2', emo:['📢','🚨','❗','🔔','💙','✨']},
+    {name:'무지개 방파 실드', sub:'모두를 지키는 대비의 힘!', fx:'ult_a3', cut:'ult_cut_adapt', emo:['💧','🛡️','🌈','🧱','🌊','💙']},
+    {name:'무지개 우산 정원', sub:'빗물을 모아 홍수를 막아라!', fx:'ult_a4', emo:['☂️','🌈','🌷','💧','🌿','✨']}
+  ],
+  geo:[
+    {name:'CO₂ 대흡수 소용돌이', sub:'이산화 탄소, 쏙쏙!', fx:'ult_g0', emo:['🌀','🫧','💜','✨','🔮','⭐']},
+    {name:'천공의 거울 반사', sub:'뜨거운 햇빛은 우주로!', fx:'ult_g1', emo:['🪞','☀️','✨','💎','🔆','💜']},
+    {name:'구름 씨앗 로켓 일제 발사', sub:'비구름아, 모여라!', fx:'ult_g2', emo:['🚀','☁️','🌧️','💧','✨','💜']},
+    {name:'성층권 반짝이 커튼', sub:'햇빛을 살짝 가려 줘!', fx:'ult_g3', emo:['🎈','✨','🌌','💫','⭐','💜']},
+    {name:'우주 차양 빔', sub:'지구의 열을 식혀라!', fx:'ult_geo', cut:'ult_cut_geo', emo:[]}
+  ]
+};
+function curUlt(){ return ULTS[G.job][G.wIdx]||ULTS[G.job][0]; }
+function cutKey(){ const u=curUlt(); return u.cut||`ult_cut_${G.job}_${G.wIdx}`; }
+// 마법진(직업별) + 링 + 아이콘: 모든 필살기 공통 바탕
+function ultBase(e,p,ringA,ringB,rot=1){
+  const f=fadeOf(p);
+  glowSprite('ult_fx_'+e.job,e.x,e.y,e.R*2.3*ease(Math.min(1,p*2.2)),p*1.8*rot,f*(e.job==='geo'?.5:1),.62);
+  ultRing(e,p,ringA,0); ultRing(e,p,ringB,.2);
+  return f;
+}
+function ultEmojis(e,p,f){
+  const em=(ULTS[e.job][e.w]||{}).emo||[]; ctx.globalAlpha=f;
+  em.forEach((m,i)=>{ const s=e.seeds[60+i]; emoji(m,e.x+Math.cos(s.a+p*2)*e.R*1.15,e.y-e.R*.45+Math.sin(s.a+p*2)*e.R*.45-p*40*s.r,22+s.s*10); });
+  ctx.globalAlpha=1;
+}
+// 발 기준 그림(그림이 없으면 이모지로)
+function bigAt(k,x,y,h,alpha,rot=0,fb='✨',sx=1){
+  if(alpha<=0) return;
+  ctx.save(); ctx.globalAlpha=Math.min(1,alpha); ctx.translate(x,y); ctx.rotate(rot); ctx.scale(sx,1);
+  if(imgOk(k)){ const i=IMG[k], w=h*i.naturalWidth/i.naturalHeight; ctx.drawImage(i,-w/2,-h,w,h); }
+  else { ctx.font=`${h*.7}px ${EMOJI_FONT}`; ctx.fillStyle='#000'; ctx.textAlign='center'; ctx.textBaseline='bottom'; ctx.fillText(fb,0,0); }
+  ctx.restore();
+}
+function bigMid(k,x,y,h,alpha,rot=0,fb='✨'){ bigAt(k,x,y+h/2,h,alpha,rot,fb); }
+function sproutAt(x,y,g,c='#6cd47f'){ if(g<=0) return; ctx.strokeStyle='#3d9a4a'; ctx.lineWidth=2.5; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,y-14*g); ctx.stroke(); ctx.fillStyle=c; ctx.beginPath(); ctx.ellipse(x-6*g,y-14*g,6*g,3*g,-.5,0,6.3); ctx.ellipse(x+6*g,y-15*g,6*g,3*g,.5,0,6.3); ctx.fill(); }
+
+Object.assign(FX_ULT,{
+  // 감축 ① 새싹 대지 각성: 땅이 갈라지며 새싹이 물결처럼 세 번 솟고, 가운데 거대 새싹이 자라요
+  ult_m0(e,p){ const f=ultBase(e,p,'#bfffb0','#ffe27a');
+    for(let w=0;w<3;w++){ const k=clamp((p-.08-w*.12)*2.2,0,1); if(k<=0) continue; const rr=e.R*(.35+w*.42);
+      for(let i=0;i<18+w*8;i++){ const a=i/(18+w*8)*Math.PI*2+w; const g=ease(Math.min(1,k*1.6-((i%3)*.1)))*f; sproutAt(e.x+Math.cos(a)*rr,e.y+Math.sin(a)*rr*.6,g*1.3,['#6cd47f','#9be59b','#3fb35d'][i%3]); } }
+    ctx.save(); ctx.globalAlpha=f*.7; ctx.strokeStyle='#8a6a40'; ctx.lineWidth=3; for(let i=0;i<8;i++){ const a=i/8*6.28, l=e.R*ease(Math.min(1,p*3)); ctx.beginPath(); ctx.moveTo(e.x,e.y); ctx.lineTo(e.x+Math.cos(a)*l*.5,e.y+Math.sin(a)*l*.3+5); ctx.lineTo(e.x+Math.cos(a+.2)*l,e.y+Math.sin(a+.2)*l*.6); ctx.stroke(); } ctx.restore();
+    lightPillars(e,p,'rgba(170,255,150,',6);
+    bigAt('ult_big_mitig_0',e.x,e.y+10,e.R*1.6*ease(clamp((p-.1)*2.2,0,1)),f,Math.sin(p*10)*.05,'🌱');
+    ultEmojis(e,p,f); },
+  // 감축 ② 솔라 프리즘 캐논: 태양이 내려와 회전하는 햇살 광선을 쏘고, 바닥 패널이 반짝여요
+  ult_m1(e,p){ const f=ultBase(e,p,'#fff3a8','#8fd3ff');
+    const top=G.cam.y-H/SCALE/2+90, sy=Math.max(top,e.y-e.R*1.5)+(1-ease(Math.min(1,p*2.5)))*-140;
+    ctx.save(); ctx.globalCompositeOperation='lighter';
+    for(let i=0;i<10;i++){ const a=i/10*6.28+p*3, ex=e.x+Math.cos(a)*e.R*1.1, ey=e.y+Math.sin(a)*e.R*.65; const g=ctx.createLinearGradient(e.x,sy,ex,ey); g.addColorStop(0,`rgba(255,240,150,${.6*f})`); g.addColorStop(1,'rgba(255,200,80,0)'); ctx.strokeStyle=g; ctx.lineWidth=14; ctx.beginPath(); ctx.moveTo(e.x,sy); ctx.lineTo(ex,ey); ctx.stroke(); }
+    ctx.restore();
+    for(let i=0;i<14;i++){ const s=e.seeds[i], a=s.a, d=e.R*(.3+s.r*.8), x=e.x+Math.cos(a)*d, y=e.y+Math.sin(a)*d*.6; const k=.5+.5*Math.sin(p*30+i); ctx.globalAlpha=f; ctx.fillStyle='#4f7fd9'; ctx.beginPath(); ctx.moveTo(x-12,y+6); ctx.lineTo(x-6,y-6); ctx.lineTo(x+12,y-6); ctx.lineTo(x+6,y+6); ctx.closePath(); ctx.fill(); ctx.globalAlpha=f*k; ctx.fillStyle='#fff'; starPath(ctx,x+4,y-4,6,2); ctx.fill(); }
+    ctx.globalAlpha=1; bigMid('ult_big_mitig_1',e.x,sy,Math.min(e.R*1.3,230),f,p*.6,'☀️');
+    ultEmojis(e,p,f); },
+  // 감축 ③ 윈드 터빈 회오리베기: 거대한 날개 바퀴가 빙글빙글 돌며 원을 따라 휩쓸어요
+  ult_m2(e,p){ const f=ultBase(e,p,'#d7fff0','#ffffff',-1);
+    ctx.save(); ctx.globalAlpha=f*.75; ctx.lineWidth=5; for(let i=0;i<16;i++){ const s=e.seeds[i], a=s.a+p*9, r=e.R*(.3+s.r*.9); ctx.strokeStyle=i%2?'rgba(255,255,255,.9)':'rgba(140,230,190,.9)'; ctx.beginPath(); ctx.ellipse(e.x,e.y-20,r,r*.55,0,a,a+1.1); ctx.stroke(); } ctx.restore();
+    for(let i=0;i<30;i++){ const s=e.seeds[30+i]; const a=s.a+p*12, r=e.R*(.2+s.r)*(.4+p*.8); ctx.save(); ctx.globalAlpha=f; ctx.translate(e.x+Math.cos(a)*r,e.y-20+Math.sin(a)*r*.55-p*60*s.d); ctx.rotate(a*2); ctx.fillStyle=i%2?'#9be59b':'#6cd47f'; ctx.beginPath(); ctx.ellipse(0,0,7,3,0,0,6.3); ctx.fill(); ctx.restore(); }
+    const oa=p*Math.PI*3, ox=e.x+Math.cos(oa)*e.R*.75, oy=e.y-10+Math.sin(oa)*e.R*.45;
+    bigMid('ult_big_mitig_2',ox,oy-40,Math.min(e.R*1.1,200),f,p*40,'🌀');
+    ultEmojis(e,p,f); },
+  // 감축 ④ 탄소 감축 대인장: 하늘에서 거대한 도장 망치가 쾅! 바닥에 감축 인장이 찍혀요
+  ult_m3(e,p){ const f=ultBase(e,p,'#bfffb0','#ffffff');
+    const hit=.28, k=clamp(p/hit,0,1);
+    if(p<hit+.12){ const yy=e.y-e.R*2.2*(1-ease(k)*ease(k)); bigAt('ult_big_mitig_3',e.x,yy+20,Math.min(e.R*1.4,240),f,-.25*(1-k),'🔨'); }
+    if(p>=hit){ const q=clamp((p-hit)*2.5,0,1);
+      if(!e.hit){ e.hit=1; G.shake=Math.max(G.shake,.6); }
+      ctx.save(); ctx.globalAlpha=f*.9; ctx.translate(e.x,e.y); ctx.scale(1,.6); ctx.rotate(-.1);
+      ctx.lineWidth=10; ctx.strokeStyle='#3fb35d'; ctx.beginPath(); ctx.arc(0,0,e.R*.85*ease(q),0,6.3); ctx.stroke(); ctx.lineWidth=4; ctx.beginPath(); ctx.arc(0,0,e.R*.7*ease(q),0,6.3); ctx.stroke();
+      ctx.fillStyle='#3fb35d'; ctx.font=`bold ${Math.round(e.R*.42*ease(q))}px Jua`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('CO₂↓',0,0); ctx.restore();
+      for(let i=0;i<20;i++){ const s=e.seeds[i], d=e.R*1.2*ease(q)*(.4+s.r), a=s.a; ctx.save(); ctx.globalAlpha=f*(1-q*.6); ctx.translate(e.x+Math.cos(a)*d,e.y+Math.sin(a)*d*.6-q*80*s.d); ctx.rotate(a+q*6); rrect(-10,-6,20,12,2,'#fff6e0','#4fbf6a'); ctx.restore(); }
+      ctx.save(); ctx.globalAlpha=(1-q)*f; ctx.fillStyle='rgba(200,180,140,.6)'; ctx.beginPath(); ctx.ellipse(e.x,e.y+10,e.R*1.3*q,e.R*.5*q,0,0,6.3); ctx.fill(); ctx.restore(); }
+    ultEmojis(e,p,f); },
+  // 적응 ① 단비 치유 소나기: 하늘의 물뿌리개 구름이 기울어 단비를 쏟고, 꽃이 피어나요
+  ult_a0(e,p){ const f=ultBase(e,p,'#bff0ff','#ffffff');
+    const top=G.cam.y-H/SCALE/2+90, sy=Math.max(top,e.y-e.R*1.45);
+    bigMid('ult_big_adapt_0',e.x-e.R*.25,sy,Math.min(e.R*1.2,220),f,-.35*ease(Math.min(1,p*3)),'🚿');
+    ctx.save(); ctx.strokeStyle='rgba(120,200,255,.85)'; ctx.lineWidth=3; for(let i=0;i<70;i++){ const s=e.seeds[i%80], x=e.x+(s.a/Math.PI-1)*e.R*1.1+((i*37)%17), y=sy+30+((p*2.6+s.r+i*.013)%1)*(e.y-sy+e.R*.3); ctx.globalAlpha=f*.85; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x-3,y+16); ctx.stroke(); } ctx.restore();
+    for(let i=0;i<5;i++){ const k=(p*2+i/5)%1; ctx.save(); ctx.globalAlpha=(1-k)*f*.7; ctx.strokeStyle='#8fd3ff'; ctx.lineWidth=3; ctx.beginPath(); ctx.ellipse(e.x+(i-2)*e.R*.35,e.y+(i%2)*14,30*k+6,12*k+3,0,0,6.3); ctx.stroke(); ctx.restore(); }
+    for(let i=0;i<14;i++){ const s=e.seeds[20+i], g=ease(clamp((p-.3-s.s*.3)*3,0,1)); ctx.globalAlpha=f; emoji(['🌸','🌼','🌷','🌺'][i%4],e.x+Math.cos(s.a)*e.R*(.4+s.r*.7),e.y+Math.sin(s.a)*e.R*.5*(.4+s.r*.7),24*g+1); }
+    ctx.globalAlpha=1; ultEmojis(e,p,f); },
+  // 적응 ② 황금 들판 대풍년: 황금 벼가 줄지어 솟아 바람에 물결치고, 가운데 볏단이 빛나요
+  ult_a1(e,p){ const f=ultBase(e,p,'#fff3a8','#ffd36b');
+    for(let r=-3;r<=3;r++) for(let c=-6;c<=6;c++){ const x=e.x+c*e.R*.17+(r%2)*e.R*.085, y=e.y+r*e.R*.16; if(((x-e.x)/e.R)**2+((y-e.y)/(e.R*.62))**2>1.1) continue;
+      const g=ease(clamp((p-.05-Math.hypot(c,r)*.025)*2.4,0,1))*f; if(g<=0) continue; const sw=Math.sin(p*14-c*.6)*6*g;
+      ctx.strokeStyle='#c9a227'; ctx.lineWidth=2.5; ctx.beginPath(); ctx.moveTo(x,y); ctx.quadraticCurveTo(x+sw*.4,y-14*g,x+sw,y-26*g); ctx.stroke();
+      ctx.fillStyle='#ffd23f'; for(let k=0;k<4;k++){ ctx.beginPath(); ctx.ellipse(x+sw-1+(k%2)*3,y-26*g+k*4,2.6*g,4*g,.3,0,6.3); ctx.fill(); } }
+    ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=.45*f; const gg=ctx.createRadialGradient(e.x,e.y,4,e.x,e.y,e.R); gg.addColorStop(0,'rgba(255,220,100,.9)'); gg.addColorStop(1,'rgba(255,220,100,0)'); ctx.fillStyle=gg; ctx.beginPath(); ctx.ellipse(e.x,e.y,e.R,e.R*.62,0,0,6.3); ctx.fill(); ctx.restore();
+    bigAt('ult_big_adapt_1',e.x,e.y+16,e.R*1.2*ease(clamp((p-.15)*2.4,0,1)),f,Math.sin(p*14)*.06,'🌾');
+    ultEmojis(e,p,f); },
+  // 적응 ③ 경보 사이렌 대공명: 사이렌 탑이 빨강·파랑 경보 물결을 연달아 내보내고 경광등이 돌아요
+  ult_a2(e,p){ const f=ultBase(e,p,'#ffb0b0','#9fd8ff');
+    for(let i=0;i<8;i++){ const k=(p*2.4-i*.12); if(k<0||k>1) continue; ctx.save(); ctx.globalAlpha=(1-k)*f*.85; ctx.strokeStyle=i%2?'#ff5f6d':'#4fb4f0'; ctx.lineWidth=8*(1-k)+2; ctx.beginPath(); ctx.ellipse(e.x,e.y-10,e.R*1.4*k,e.R*.85*k,0,0,6.3); ctx.stroke(); ctx.restore(); }
+    ctx.save(); ctx.globalCompositeOperation='lighter'; const a=p*14; for(const [col,off] of [['rgba(255,80,90,',0],['rgba(80,170,255,',Math.PI]]){ ctx.globalAlpha=.55*f; const g=ctx.createRadialGradient(e.x,e.y-e.R*.6,4,e.x,e.y-e.R*.6,e.R*1.4); g.addColorStop(0,col+'.9)'); g.addColorStop(1,col+'0)'); ctx.fillStyle=g; ctx.beginPath(); ctx.moveTo(e.x,e.y-e.R*.6); ctx.arc(e.x,e.y-e.R*.6,e.R*1.4,a+off-.35,a+off+.35); ctx.closePath(); ctx.fill(); } ctx.restore();
+    bigAt('ult_big_adapt_2',e.x,e.y+14,Math.min(e.R*1.4,240),f,Math.sin(p*40)*.03,'📢');
+    for(let i=0;i<6;i++){ const s=e.seeds[i], k=(p*1.5+s.r)%1; ctx.globalAlpha=f*(1-k); emoji('❗',e.x+Math.cos(s.a)*e.R*.9,e.y-e.R*.4-k*60,22); } ctx.globalAlpha=1;
+    ultEmojis(e,p,f); },
+  // 적응 ④ 방파제 소환: 돌 방파제가 둥글게 솟아오르고 물빛 실드 돔이 덮여요(기존 돔 + 돌벽)
+  ult_a3(e,p){ FX_ULT.ult_adapt(e,p); const f=fadeOf(p);
+    for(let i=0;i<16;i++){ const a=i/16*6.28, g=ease(clamp((p-.05-i*.015)*3,0,1))*f; if(g<=0) continue; const x=e.x+Math.cos(a)*e.R*1.05, y=e.y+Math.sin(a)*e.R*.65; ctx.save(); ctx.globalAlpha=Math.min(1,g*1.2); rrect(x-15,y-30*g,30,30*g+6,6,'#a7a2b0','#6e6878'); ctx.fillStyle='rgba(255,255,255,.35)'; ctx.fillRect(x-12,y-28*g,24,4); ctx.restore(); }
+    for(let i=0;i<10;i++){ const s=e.seeds[i], k=(p*1.8+s.r)%1, a=s.a, x=e.x+Math.cos(a)*e.R*1.25, y=e.y+Math.sin(a)*e.R*.78; ctx.save(); ctx.globalAlpha=f*(1-k); ctx.fillStyle='#8fd3ff'; ctx.beginPath(); ctx.arc(x,y-k*30,6*(1-k)+2,0,6.3); ctx.fill(); ctx.restore(); } },
+  // 적응 ⑤ 무지개 우산 정원: 거대한 우산 정원이 펼쳐져 빗물을 모으고, 무지개와 꽃이 둘러요
+  ult_a4(e,p){ const f=ultBase(e,p,'#bff0ff','#ffd6f0');
+    const open=ease(clamp((p-.05)*2.6,0,1)), top=G.cam.y-H/SCALE/2+110, uy=Math.max(top,e.y-e.R*1.0);
+    ctx.save(); ctx.globalAlpha=f*.85; ['#ff7a7a','#ffb347','#ffe27a','#7fe0a0','#8fd3ff','#b99cff'].forEach((c,i)=>{ ctx.strokeStyle=c; ctx.lineWidth=8; ctx.beginPath(); ctx.arc(e.x,e.y,e.R*1.3-i*8,Math.PI,Math.PI+Math.PI*ease(clamp(p*2-.3,0,1))); ctx.stroke(); }); ctx.restore();
+    ctx.strokeStyle='rgba(140,200,255,.8)'; ctx.lineWidth=2.5; for(let i=0;i<40;i++){ const s=e.seeds[i], x=e.x+(s.a/Math.PI-1)*e.R*1.4, y=G.cam.y-H/SCALE/2+((p*2.2+s.r)%1)*(H/SCALE); if(Math.abs(x-e.x)<e.R*.6*open && y>uy-e.R*.6) continue; ctx.globalAlpha=f*.7; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x-3,y+14); ctx.stroke(); }
+    ctx.globalAlpha=1;
+    for(let i=0;i<16;i++){ const a=i/16*6.28, g=ease(clamp((p-.35-i*.01)*3,0,1)); ctx.globalAlpha=f; emoji(['🌷','🌼','🌿','🌸'][i%4],e.x+Math.cos(a)*e.R*.95,e.y+Math.sin(a)*e.R*.6,24*g+1); } ctx.globalAlpha=1;
+    ctx.save(); ctx.translate(e.x,uy); ctx.scale(.25+.75*open,1); bigMid('ult_big_adapt_4',0,0,Math.min(e.R*1.5,250),f,0,'☂️'); ctx.restore();
+    ultEmojis(e,p,f); },
+  // 지구공학 ① CO₂ 대흡수 소용돌이: 회색 CO₂ 방울이 빙글빙글 빨려 들어가 수정구에 모였다가 반짝 터져요
+  ult_g0(e,p){ const f=ultBase(e,p,'#e2d4ff','#b8f3ff',-1);
+    const suck=clamp(p/.7,0,1);
+    for(let i=0;i<60;i++){ const s=e.seeds[i%80], k=clamp(suck*1.3-s.s*.3,0,1), d=e.R*1.6*(1-ease(k))*(.5+s.r*.5), a=s.a+k*7; if(k>=1) continue; const x=e.x+Math.cos(a)*d, y=e.y-30+Math.sin(a)*d*.6; ctx.globalAlpha=f*(.4+.6*(1-k)); circle(x,y,6+s.s*6,'#8f8a98'); if(i%3===0){ ctx.fillStyle='#fff'; ctx.font='bold 8px Jua'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('CO₂',x,y); } }
+    ctx.globalAlpha=1;
+    ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=f*.7; ctx.strokeStyle='#c9a8ff'; ctx.lineWidth=4; for(let i=0;i<5;i++){ ctx.beginPath(); for(let t=0;t<=1;t+=.04){ const a=i*1.256+t*6-p*10, r=e.R*1.3*(1-t); const x=e.x+Math.cos(a)*r, y=e.y-30+Math.sin(a)*r*.6; t?ctx.lineTo(x,y):ctx.moveTo(x,y); } ctx.stroke(); } ctx.restore();
+    const pulse=1+Math.sin(p*30)*.06+(p>.72?(p-.72)*2:0);
+    if(!glowSprite('ult_big_geo_0',e.x,e.y-30,Math.min(e.R*1.1,200)*pulse*ease(Math.min(1,p*3)),p*4,f*1.2)){ circle(e.x,e.y-30,30*pulse,'rgba(200,170,255,.8)'); }
+    if(p>.72){ const q=(p-.72)/.28; for(let i=0;i<24;i++){ const s=e.seeds[i], d=e.R*1.3*ease(q)*(.4+s.r*.6); ctx.globalAlpha=(1-q); ctx.fillStyle=s.c%2?'#fff':'#c9f6ff'; starPath(ctx,e.x+Math.cos(s.a)*d,e.y-30+Math.sin(s.a)*d*.6,8,3); ctx.fill(); } ctx.globalAlpha=1; }
+    ultEmojis(e,p,f); },
+  // 지구공학 ② 천공의 거울 반사: 하늘의 거울 양산이 내리쬐는 햇빛을 받아 우주로 튕겨 내요
+  ult_g1(e,p){ const f=ultBase(e,p,'#fff3c2','#d6e8ff');
+    const top=G.cam.y-H/SCALE/2+100, my=Math.max(top,e.y-e.R*1.3), mx=e.x, srcX=G.cam.x-W/SCALE/2-40, srcY=G.cam.y-H/SCALE/2-40;
+    ctx.save(); ctx.globalCompositeOperation='lighter';
+    for(let i=0;i<6;i++){ const o=(i-2.5)*18, k=ease(clamp(p*3-i*.08,0,1)); ctx.globalAlpha=.55*f; ctx.strokeStyle='rgba(255,200,90,1)'; ctx.lineWidth=10; ctx.beginPath(); ctx.moveTo(srcX+o,srcY); ctx.lineTo(lerp(srcX+o,mx+o*.5,k),lerp(srcY,my,k)); ctx.stroke();
+      const k2=ease(clamp(p*3-1-i*.08,0,1)); if(k2>0){ ctx.strokeStyle='rgba(190,225,255,1)'; ctx.beginPath(); ctx.moveTo(mx+o*.5,my); ctx.lineTo(mx+o*.5+k2*W/SCALE*.6,my-k2*H/SCALE*.8); ctx.stroke(); } }
+    ctx.restore();
+    ctx.save(); ctx.globalAlpha=.35*f; ctx.fillStyle='#9fd8ff'; ctx.beginPath(); ctx.ellipse(e.x,e.y,e.R*1.1,e.R*.68,0,0,6.3); ctx.fill(); ctx.restore();
+    for(let i=0;i<26;i++){ const s=e.seeds[i], y=my+((p*1.6+s.r)%1)*(e.y-my+e.R*.4), x=e.x+(s.a/Math.PI-1)*e.R*1.1; ctx.save(); ctx.globalAlpha=f*.9; ctx.translate(x,y); ctx.rotate(p*8+i); ctx.fillStyle=i%2?'#ffffff':'#cfe8ff'; ctx.beginPath(); ctx.moveTo(0,-6); ctx.lineTo(4,0); ctx.lineTo(0,6); ctx.lineTo(-4,0); ctx.closePath(); ctx.fill(); ctx.restore(); }
+    bigMid('ult_big_geo_1',mx,my,Math.min(e.R*1.3,230),f,-.25+Math.sin(p*6)*.06,'🪞');
+    ultEmojis(e,p,f); },
+  // 지구공학 ③ 구름 씨앗 로켓 일제 발사: 로켓 여러 대가 하늘로 솟아 구름을 만들고 비가 내려요
+  ult_g2(e,p){ const f=ultBase(e,p,'#e2d4ff','#ffffff');
+    const top=G.cam.y-H/SCALE/2+70, cy=Math.max(top+20,e.y-e.R*1.5);
+    for(let i=0;i<7;i++){ const a=i/7*6.28+.3, sx=e.x+Math.cos(a)*e.R*.9, sy=e.y+Math.sin(a)*e.R*.55, tx=e.x+(i-3)*e.R*.32, k=ease(clamp((p-i*.03)*2.2,0,1));
+      if(k<1){ const x=lerp(sx,tx,k), y=lerp(sy,cy,k)-Math.sin(k*Math.PI)*40; ctx.save(); ctx.globalAlpha=f*.6; for(let t=1;t<6;t++) circle(lerp(sx,tx,k-t*.03),lerp(sy,cy,k-t*.03)-Math.sin((k-t*.03)*Math.PI)*40,7-t,'#fff'); ctx.restore(); bigMid('ult_big_geo_2',x,y,Math.min(e.R*.55,90),f,Math.atan2(cy-sy,tx-sx)+Math.PI/2,'🚀'); }
+      else { const q=clamp((p-i*.03-.45)*2,0,1); ctx.save(); ctx.globalAlpha=f; [-22,0,22].forEach((dx,j)=>circle(tx+dx,cy-(j===1?10:0),18+q*6,'#ffffff')); circle(tx,cy+6,18+q*6,'#eef5ff'); ctx.restore(); face(tx,cy,.8,'happy');
+        ctx.strokeStyle='rgba(120,190,255,.85)'; ctx.lineWidth=2.5; for(let r=0;r<6;r++){ const yy=cy+20+((p*2.4+r/6+i*.1)%1)*(e.y-cy+20); ctx.globalAlpha=f; ctx.beginPath(); ctx.moveTo(tx-15+r*6,yy); ctx.lineTo(tx-17+r*6,yy+12); ctx.stroke(); } ctx.globalAlpha=1; } }
+    ultEmojis(e,p,f); },
+  // 지구공학 ④ 성층권 반짝이 커튼: 풍선 다발이 하늘로 올라가 반짝이 커튼과 오로라를 드리워요
+  ult_g3(e,p){ const f=ultBase(e,p,'#e2d4ff','#fff3c2');
+    const top=G.cam.y-H/SCALE/2+Math.min(230,e.R*1.3), by=lerp(e.y,Math.max(top,e.y-e.R*2),ease(clamp(p*1.8,0,1)));
+    ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=f*.55; ['#7fe0c3','#8fd3ff','#b99cff','#ffd6f0'].forEach((c,i)=>{ ctx.strokeStyle=c; ctx.lineWidth=16-i*3; ctx.beginPath(); for(let k=0;k<=30;k++){ const x=e.x-e.R*1.5+k/30*e.R*3, y=by+20+i*16+Math.sin(k*.45+p*9+i)*14; k?ctx.lineTo(x,y):ctx.moveTo(x,y);} ctx.stroke(); }); ctx.restore();
+    for(let i=0;i<70;i++){ const s=e.seeds[i%80], x=e.x+(s.a/Math.PI-1)*e.R*1.5+((i*13)%9), y=by+30+((p*1.4+s.r+i*.011)%1)*(e.y-by+e.R*.3); const tw=.5+.5*Math.sin(p*40+i); ctx.globalAlpha=f*(.4+.6*tw); ctx.fillStyle=i%3?'#fff6c2':'#e6f0ff'; starPath(ctx,x,y,4+s.s*4,1.6); ctx.fill(); }
+    ctx.globalAlpha=1; bigAt('ult_big_geo_3',e.x,by+40,Math.min(e.R*1.4,230),f,Math.sin(p*5)*.06,'🎈');
+    ultEmojis(e,p,f); }
+});
+FX_ULT.ult_a3=FX_ULT.ult_a3; // (방파제는 기존 실드 돔 연출에 돌벽을 더해요)
+
 function drawUltFlash(){
   if(!(G.uflash>0)) return; const u=ULT[G.job]||ULT.mitig;
   ctx.save(); ctx.globalAlpha=Math.min(1,G.uflash)*.4; ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H);
