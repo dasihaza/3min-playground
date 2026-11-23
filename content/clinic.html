@@ -103,8 +103,9 @@ button{font-family:'Jua',sans-serif;cursor:pointer;border:none;color:inherit}
 .hud .p{background:#fffffff0;border-radius:999px;padding:6px 14px;font-size:16px;box-shadow:0 3px 0 #f0c6d6;white-space:nowrap}
 .hud .p.time{font-size:19px;min-width:96px;text-align:center}
 .hud .p.time.hurry{background:#ff6b6b;color:#fff;animation:wob .5s infinite}
-.scene{position:relative;flex:1;width:100%;background:url(../assets/clinic/img/room.webp) center 62%/cover;overflow:hidden;min-height:0}
-.patient{position:absolute;left:50%;bottom:-2%;height:92%;max-height:560px;transform:translateX(-50%);transition:transform .7s cubic-bezier(.3,1.4,.5,1),opacity .5s;filter:drop-shadow(0 10px 8px rgba(120,60,90,.25));cursor:pointer;touch-action:none;-webkit-user-drag:none}
+.scene{position:relative;flex:1;width:100%;touch-action:none;-webkit-touch-callout:none;background:url(../assets/clinic/img/room.webp) center 62%/cover;overflow:hidden;min-height:0}
+.patient{position:absolute;left:50%;bottom:-2%;height:92%;max-height:560px;transform:translateX(-50%);transition:transform .7s cubic-bezier(.3,1.4,.5,1),opacity .5s;filter:drop-shadow(0 10px 8px rgba(120,60,90,.25));pointer-events:none;-webkit-touch-callout:none;-webkit-user-drag:none}
+img{-webkit-touch-callout:none;-webkit-user-drag:none}
 .patient.out{transform:translateX(-260%);opacity:0}
 .patient.leave{transform:translateX(-260%) rotate(-6deg);opacity:0}
 .patient.idle{animation:breathe 2.4s ease-in-out infinite}
@@ -646,10 +647,20 @@ $('stethBtn').onclick=()=>{
 function moveSteth(x,y){ const r=$('scene').getBoundingClientRect(); const s=$('stethCursor'); s.style.left=(x-r.left)+'px'; s.style.top=(y-r.top)+'px'; }
 const scene=$('scene');
 scene.addEventListener('pointermove',e=>{ if(stethMode) moveSteth(e.clientX,e.clientY); });
-scene.addEventListener('pointerdown',e=>{ if(!stethMode) return; moveSteth(e.clientX,e.clientY);
-  if(e.target===$('patient')||e.target===$('ring')){ e.preventDefault(); holding=true; startListen(); } });
-window.addEventListener('pointerup',()=>{ holding=false; });
-window.addEventListener('pointercancel',()=>{ holding=false; });
+// 환자 그림은 눌리지 않게(pointer-events:none) 두고, 장면 전체에서 손가락 위치가 환자 위인지 계산해요.
+// 그래서 휴대폰에서 꾹 눌러도 '이미지 저장' 메뉴가 뜨지 않아요.
+function onPatient(x,y){ const r=$('patient').getBoundingClientRect(); const px=r.width*.08;
+  return x>=r.left-px&&x<=r.right+px&&y>=r.top&&y<=r.bottom; }
+scene.addEventListener('pointerdown',e=>{ if(!stethMode) return; e.preventDefault(); moveSteth(e.clientX,e.clientY);
+  try{ scene.setPointerCapture(e.pointerId); }catch(_){}
+  if(onPatient(e.clientX,e.clientY)){ holding=true; startListen(); } });
+scene.addEventListener('pointermove',e=>{ if(!stethMode||!(e.buttons||e.pointerType==='touch')) return;
+  if(onPatient(e.clientX,e.clientY)){ if(!holding){ holding=true; startListen(); } } else holding=false; });
+const stopHold=()=>{ holding=false; };
+window.addEventListener('pointerup',stopHold); window.addEventListener('pointercancel',stopHold);
+// 길게 누를 때 뜨는 메뉴·끌기·선택을 장면 안에서 막아요
+['contextmenu','dragstart','selectstart'].forEach(t=>scene.addEventListener(t,e=>e.preventDefault()));
+scene.addEventListener('touchstart',e=>{ if(stethMode&&e.cancelable) e.preventDefault(); },{passive:false});
 function startListen(){
   if(listenLoop) return; const c=G.cur;
   if(!c.target) c.target=DIS[c.k].resp?(78+rnd(19)):(4+rnd(13));
