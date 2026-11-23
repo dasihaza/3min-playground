@@ -104,7 +104,7 @@ button{font-family:'Jua',sans-serif;cursor:pointer;border:none;color:inherit}
 .hud .p.time{font-size:19px;min-width:96px;text-align:center}
 .hud .p.time.hurry{background:#ff6b6b;color:#fff;animation:wob .5s infinite}
 .scene{position:relative;flex:1;width:100%;touch-action:none;-webkit-touch-callout:none;background:url(../assets/clinic/img/room.webp) center 62%/cover;overflow:hidden;min-height:0}
-.patient{position:absolute;left:50%;bottom:-2%;height:92%;max-height:560px;transform:translateX(-50%);transition:transform .7s cubic-bezier(.3,1.4,.5,1),opacity .5s;filter:drop-shadow(0 10px 8px rgba(120,60,90,.25));pointer-events:none;-webkit-touch-callout:none;-webkit-user-drag:none}
+.patient{position:absolute;left:50%;bottom:-2%;height:92%;max-height:560px;aspect-ratio:480/637;background:center bottom/contain no-repeat;transform:translateX(-50%);transition:transform .7s cubic-bezier(.3,1.4,.5,1),opacity .5s;filter:drop-shadow(0 10px 8px rgba(120,60,90,.25));pointer-events:none;-webkit-touch-callout:none;-webkit-user-drag:none}
 img{-webkit-touch-callout:none;-webkit-user-drag:none}
 .patient.out{transform:translateX(-260%);opacity:0}
 .patient.leave{transform:translateX(-260%) rotate(-6deg);opacity:0}
@@ -123,7 +123,7 @@ img{-webkit-touch-callout:none;-webkit-user-drag:none}
 .chart li.y .mk{color:#3cc79c}.chart li.n .mk{color:#ff6b6b}.chart li.m .mk{color:#e0a33a}
 .chart .empty{color:#a99cb8;font-size:13.5px}
 .chartToggle{display:none}
-.steth{position:absolute;width:96px;height:96px;pointer-events:none;z-index:6;transform:translate(-80%,-82%);display:none;filter:drop-shadow(0 4px 4px rgba(0,0,0,.25))}
+.steth{position:absolute;width:96px;height:96px;background:url(../assets/clinic/img/steth.webp) center/contain no-repeat;pointer-events:none;z-index:6;transform:translate(-80%,-82%);display:none;filter:drop-shadow(0 4px 4px rgba(0,0,0,.25))}
 .steth.on{display:block}
 .listenFx{position:absolute;font-family:'Jua';font-size:22px;color:#ff6f9f;pointer-events:none;z-index:6;animation:floatUp 1.2s forwards;text-shadow:0 2px 0 #fff}
 @keyframes floatUp{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-60px)}}
@@ -134,7 +134,7 @@ img{-webkit-touch-callout:none;-webkit-user-drag:none}
 .tool{background:#fff;border-radius:20px;padding:10px 12px;box-shadow:0 4px 0 #e9c39d;display:flex;flex-direction:column;gap:8px}
 .tool h5,.qbox h5{font-family:'Jua';margin:0;font-size:16px;color:#d1567f}
 .stethBtn{display:flex;align-items:center;gap:10px;background:linear-gradient(180deg,#e6fff5,#bff3df);border-radius:16px;padding:6px 10px;font-size:17px;box-shadow:0 4px 0 #8fd9bd;text-align:left}
-.stethBtn img{width:54px;height:54px;object-fit:contain}
+.stethBtn .sIcon{flex:none;width:54px;height:54px;background:url(../assets/clinic/img/steth.webp) center/contain no-repeat}
 .stethBtn.glow{animation:glow 1s infinite}
 .stethBtn.done{opacity:.6}
 @keyframes glow{0%,100%{box-shadow:0 4px 0 #8fd9bd,0 0 0 0 #3cc79c88}50%{box-shadow:0 4px 0 #8fd9bd,0 0 0 10px #3cc79c00}}
@@ -233,7 +233,7 @@ img{-webkit-touch-callout:none;-webkit-user-drag:none}
   .desk{grid-template-columns:1fr;max-height:50vh;overflow:auto;gap:6px;padding:6px 8px 8px}
   .tool{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:8px;align-items:center}
   .tool h5{display:none}
-  .stethBtn{font-size:14px;padding:4px 6px;gap:4px}.stethBtn img{width:38px;height:38px}
+  .stethBtn{font-size:14px;padding:4px 6px;gap:4px}.stethBtn .sIcon{width:38px;height:38px}
   .gauge{height:24px}.gauge span{font-size:12px}
   .gres{grid-column:1/3;font-size:13.5px;min-height:0}
   .qbox{padding:8px;gap:6px}
@@ -254,7 +254,7 @@ img{-webkit-touch-callout:none;-webkit-user-drag:none}
 @media (max-height:560px) and (min-width:761px){
   .hud{padding-top:4px;padding-bottom:4px}.hud .p{font-size:14px;padding:3px 10px}
   .desk{max-height:50vh;padding:6px 10px}
-  .stethBtn img{width:40px;height:40px}
+  .stethBtn .sIcon{width:40px;height:40px}
   .qs{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
 }
 </style>
@@ -276,7 +276,7 @@ img{-webkit-touch-callout:none;-webkit-user-drag:none}
       <h3>🩺 이렇게 놀아요</h3>
       <b>1단계 · 소아과 전문의 시험</b> — 태블릿 PC로 감염병 필기시험 8문제를 풀어요. (5문제 이상 맞히면 합격!)<br>
       <b>2단계 · 우리 병원 개업</b> — 3일 동안 어린이 환자를 진찰해요. (1일차 5명 · 2일차 7명 · 3일차 9명)<br>
-      ① <b>청진기</b>를 들고 아이 몸에 꾹 대면 <b>호흡기 증상 가능성(%)</b>이 올라가요.<br>
+      ① <b>청진기</b>를 들고 아이 몸에 톡 대면 <b>호흡기 증상 가능성(%)</b>이 올라가요.<br>
       ② 화면 아래 <b>질문</b>을 골라 물어봐요. (환자마다 최대 5번)<br>
       ⚡ 질문을 <b>3개</b> 하면 <b>빠른 진단</b> 버튼이 나와요. 확신이 들면 바로 진단해 시간을 아껴요!<br>
       ③ <b>진료 매뉴얼</b>에 체크된 증상과 아이의 <b>그림</b>을 보고 어떤 감염병인지 진단해요.<br>
@@ -312,17 +312,17 @@ img{-webkit-touch-callout:none;-webkit-user-drag:none}
   </div>
   <div class="scene" id="scene">
     <div class="listenRing" id="ring"></div>
-    <img class="patient out" id="patient" alt="환자" draggable="false">
+    <div class="patient out" id="patient" role="img" aria-label="환자"></div>
     <div class="bubble hidden" id="bubble"></div>
     <div class="chart" id="chart"></div>
     <button class="chartToggle" id="chartToggle">📋 차트</button>
-    <img class="steth" id="stethCursor" src="../assets/clinic/img/steth.webp" alt="">
+    <div class="steth" id="stethCursor"></div>
   </div>
   <div class="desk">
     <div class="tool">
       <h5>① 청진기 진찰</h5>
-      <button class="stethBtn glow" id="stethBtn"><img src="../assets/clinic/img/steth.webp" alt="">
-        <span id="stethTxt">청진기를 들고<br>아이 몸에 꾹 대 보세요</span></button>
+      <button class="stethBtn glow" id="stethBtn"><i class="sIcon"></i>
+        <span id="stethTxt">청진기를 들고<br>아이 몸에 톡 대 보세요</span></button>
       <div class="gauge" id="gauge"><i id="gFill"></i><span id="gTxt">호흡기 증상 가능성 0%</span></div>
       <div class="gres" id="gRes"></div>
     </div>
@@ -605,7 +605,7 @@ function nextPatient(){
   if(G.pi>=G.patients.length){ endDay(false); return; }
   const p=G.patients[G.pi]; G.cur={...p,steth:false,listen:0,resp:0,asked:[],qLeft:DAYS[G.day].q};
   updHud();
-  const img=$('patient'); img.className='patient out'; img.src=p.img;
+  const img=$('patient'); img.className='patient out'; img.style.backgroundImage=`url(${p.img})`;
   $('bubble').classList.add('hidden');
   renderChart(); renderTools(); renderQs('body');
   sfx.door();
@@ -628,11 +628,11 @@ let holding=false, stethMode=false, listenLoop=null;
 function renderTools(){
   const c=G.cur;
   $('stethBtn').className='stethBtn'+(c.steth?' done':' glow');
-  $('stethTxt').innerHTML=c.steth?'청진기 진찰 완료! ✔':'청진기를 들고<br>아이 몸에 꾹 대 보세요';
+  $('stethTxt').innerHTML=c.steth?'청진기 진찰 완료! ✔':'청진기를 들고<br>아이 몸에 톡 대 보세요';
   setGauge(c.steth?c.resp:0); $('gRes').innerHTML=c.steth?resultTxt():'';
   $('qLock').classList.toggle('hidden',c.steth);
   $('qLock').innerHTML='🩺 먼저 청진기로 진찰해 주세요!';
-  stethMode=false; $('stethCursor').classList.remove('on'); $('ring').style.display='none';
+  stethMode=false; holding=false; $('stethCursor').classList.remove('on'); $('ring').style.display='none';
   renderQLeft();
 }
 function setGauge(v){ $('gFill').style.width=v+'%'; $('gTxt').textContent=`호흡기 증상 가능성 ${Math.round(v)}%`; $('gauge').classList.toggle('hi',v>=50); }
@@ -641,23 +641,19 @@ $('stethBtn').onclick=()=>{
   const c=G.cur; if(!c||c.steth||G.phase==='leaving') return;
   sfx.pop(); stethMode=true; $('stethCursor').classList.add('on'); $('ring').style.display='block';
   const r=$('scene').getBoundingClientRect(); moveSteth(r.left+r.width*.62,r.top+r.height*.55);
-  $('stethTxt').innerHTML='아이 몸 위를<br><b>꾹 누르고</b> 있어요!';
-  toast('🩺 아이 몸에 청진기를 대고 꾹 누르고 있어요!',1600);
+  $('stethTxt').innerHTML='아이 몸을<br><b>톡</b> 눌러 청진기를 대요!';
+  toast('🩺 아이 몸을 톡 누르면 청진기로 소리를 들어요!',1600);
 };
 function moveSteth(x,y){ const r=$('scene').getBoundingClientRect(); const s=$('stethCursor'); s.style.left=(x-r.left)+'px'; s.style.top=(y-r.top)+'px'; }
 const scene=$('scene');
-scene.addEventListener('pointermove',e=>{ if(stethMode) moveSteth(e.clientX,e.clientY); });
-// 환자 그림은 눌리지 않게(pointer-events:none) 두고, 장면 전체에서 손가락 위치가 환자 위인지 계산해요.
-// 그래서 휴대폰에서 꾹 눌러도 '이미지 저장' 메뉴가 뜨지 않아요.
+scene.addEventListener('pointermove',e=>{ if(stethMode&&!holding) moveSteth(e.clientX,e.clientY); });
+// 환자는 <img>가 아닌 배경 그림이고 눌리지도 않아요. 장면에서 손가락 위치가 환자 위인지 계산해요.
+// 한 번 톡 누르면 청진기가 그 자리에 붙어서 손을 떼도 게이지가 끝까지 차요(길게 누를 필요 없음).
 function onPatient(x,y){ const r=$('patient').getBoundingClientRect(); const px=r.width*.08;
   return x>=r.left-px&&x<=r.right+px&&y>=r.top&&y<=r.bottom; }
 scene.addEventListener('pointerdown',e=>{ if(!stethMode) return; e.preventDefault(); moveSteth(e.clientX,e.clientY);
   try{ scene.setPointerCapture(e.pointerId); }catch(_){}
-  if(onPatient(e.clientX,e.clientY)){ holding=true; startListen(); } });
-scene.addEventListener('pointermove',e=>{ if(!stethMode||!(e.buttons||e.pointerType==='touch')) return;
-  if(onPatient(e.clientX,e.clientY)){ if(!holding){ holding=true; startListen(); } } else holding=false; });
-const stopHold=()=>{ holding=false; };
-window.addEventListener('pointerup',stopHold); window.addEventListener('pointercancel',stopHold);
+  if(onPatient(e.clientX,e.clientY)){ holding=true; $('stethTxt').innerHTML='쉿! 청진기로<br><b>소리를 듣는 중…</b> 🎧'; startListen(); } });
 // 길게 누를 때 뜨는 메뉴·끌기·선택을 장면 안에서 막아요
 ['contextmenu','dragstart','selectstart'].forEach(t=>scene.addEventListener(t,e=>e.preventDefault()));
 scene.addEventListener('touchstart',e=>{ if(stethMode&&e.cancelable) e.preventDefault(); },{passive:false});
