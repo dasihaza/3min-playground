@@ -1194,10 +1194,10 @@ const G = {
   cards:new Set(), energy:100, m:{}, objs:[], map:[], fx:[], floats:[], amb:[], t:0, busy:false,
   player:{x:0,y:0,dir:'down',walk:0,moving:false,cast:0}, fairy:{x:0,y:0}, cam:{x:0,y:0}, sea:0, seaT:0, joy:{x:0,y:0},
   keys:{}, cool:0, hintSkill:false, sound:true,
-  hz:[], calm:0, hzNext:7, glob:{drought:0,sea:0}, seaRise:0, hurtCd:{}, slowT:0, shake:0, flash:0, lastHz:null, dryTick:0,
+  introDone:false, hz:[], calm:0, hzNext:7, glob:{drought:0,sea:0}, seaRise:0, hurtCd:{}, slowT:0, shake:0, flash:0, lastHz:null, dryTick:0,
   get ch(){ return CHAPTERS[this.chIdx]; },
   total(id){ const m=this.ch.missions.find(x=>x.id===id); return m?m.total:0; },
-  addM(id,n=1){ const before=this.m[id]||0; this.m[id]=Math.min(this.total(id),before+n); if(this.m[id]>before && !['quiz','meet','earth'].includes(id)){ hzCalm(); seaFall(); } updateHUD(); checkReady(); },
+  addM(id,n=1){ const before=this.m[id]||0; this.m[id]=Math.min(this.total(id),before+n); if(this.m[id]>before && !['quiz','meet','earth'].includes(id)){ hzCalm(); seaFall(); } if(this.m[id]>before) setTimeout(save,0); updateHUD(); checkReady(); },
   async giveCard(id){ if(!id||this.cards.has(id)) return; this.cards.add(id); addScore(50); await showCard(id); }
 };
 function jobP(){ return JOBS[G.job]; }
@@ -2391,7 +2391,45 @@ let toastTimer=0;
 function toast(t){ const e=$('toast'); e.textContent=t; e.style.opacity=1; clearTimeout(toastTimer); toastTimer=setTimeout(()=>e.style.opacity=0,2200); }
 
 // ======================= SAVE =======================
-function save(){ try{ localStorage.setItem('climateHeroSave',JSON.stringify({name:G.name,job:G.job,wIdx:G.wIdx,unlocked:G.unlocked,chIdx:G.chIdx,score:G.score,elapsed:G.elapsed,cards:[...G.cards]})); }catch(e){} }
+// 이어 하기: 장 정보뿐 아니라 그 장 안의 진행 상태(미션·물건·포털·위치 등)까지 통째로 저장해요
+function snapshot(){
+  if(!G.ch||!G.objs.length) return null;
+  const objs={};
+  for(const o of G.objs){ if(!o.id) continue; const st={};
+    if(o.fixed) st.f=1; else if(o.prog>0) st.p=Math.round(o.prog);
+    if(o.gone) st.g=1; if(o.given) st.gv=1; if(o.seen) st.s=1;
+    if(o.kind==='portal'&&(o.active||o.used)) st.a=1;
+    if(o.kind==='rescue'&&o.fixed){ st.x=Math.round(o.px); st.y=Math.round(o.py); }
+    if(Object.keys(st).length) objs[o.id]=st; }
+  return { ch:G.chIdx, intro:!!G.introDone, m:G.m, x:Math.round(G.player.x), y:Math.round(G.player.y), dir:G.player.dir,
+    energy:Math.round(G.energy), carry:G.carry, calm:Math.round(G.calm||0), ring:G.ring||0, ringT:+(G.ringT||0).toFixed(1),
+    hint:G.hintSkill?1:0, ready:G._readyToast||0, objs };
+}
+function save(){ try{ localStorage.setItem('climateHeroSave',JSON.stringify({name:G.name,job:G.job,wIdx:G.wIdx,unlocked:G.unlocked,chIdx:G.chIdx,score:G.score,elapsed:G.elapsed,cards:[...G.cards],snap:snapshot()})); }catch(e){} }
+function applySnap(sn){
+  if(!sn||sn.ch!==G.chIdx) return false;
+  Object.assign(G.m,sn.m||{});
+  const byId={}; G.objs.forEach(o=>{ if(o.id) byId[o.id]=o; });
+  for(const id in (sn.objs||{})){ const o=byId[id], st=sn.objs[id]; if(!o) continue;
+    if(st.f){ o.fixed=true; o.prog=100; o.fixT=99; if(o.kind==='patch') o.solid=false; }
+    else if(st.p){ o.prog=st.p; o.disp=st.p; }
+    if(st.g) o.gone=true; if(st.gv) o.given=true; if(st.s) o.seen=true;
+    if(st.a){ o.active=true; o.used=false; }
+    if(st.x!=null){ o.px=st.x; o.py=st.y; } }
+  if(sn.x!=null && !blocked(sn.x,sn.y)){ G.player.x=sn.x; G.player.y=sn.y; G.player.dir=sn.dir||'down'; }
+  G.fairy.x=G.player.x-30; G.fairy.y=G.player.y-40;
+  G.energy=Math.min(jobP().energyMax,sn.energy??jobP().energyMax);
+  G.carry=sn.carry||null; updateCarryHUD();
+  G.calm=sn.calm||0; G.hintSkill=!!sn.hint; G._readyToast=sn.ready||0;
+  if(G.ch.sea){ G.ring=sn.ring||0; G.ringT=sn.ringT||0; }
+  G.introDone=!!sn.intro;
+  buildMini(); updateHUD(); renderMissions();
+  return true;
+}
+// 진행 중에는 자주, 창을 닫거나 다른 앱으로 갈 때는 바로 저장해요
+setInterval(()=>{ if(G.screen==='play'&&!G.cine) save(); },3000);
+addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden'&&G.screen==='play') save(); });
+addEventListener('pagehide',()=>{ if(G.screen==='play') save(); });
 function loadSave(){ try{ return JSON.parse(localStorage.getItem('climateHeroSave')); }catch(e){ return null; } }
 function clearSave(){ try{ localStorage.removeItem('climateHeroSave'); }catch(e){} }
 
@@ -3042,9 +3080,10 @@ function playCutscene(key){
   });
 }
 async function chapterIntro(){
-  const ch=G.ch, jp=jobP();
+  const ch=G.ch, jp=jobP(); G.introDone=false;
   await playCutscene('intro'+ch.no);
   await new Promise(res=>{ const b=openModal(`<span class="chapNo">CHAPTER ${ch.no}</span><h3 style="font-size:34px">${ch.title}</h3><p>📍 ${ch.place}</p><div class="goal">🎯 학습 목표: ${ch.goal}</div><button class="bigbtn" style="margin-top:14px" id="go">출발! 🚀</button>`,'chapCard'); b.querySelector('#go').onclick=()=>{closeModal();res();}; });
+  G.introDone=true; save();
   await dialog(G.chIdx===0?[...ch.intro.slice(0,2),L(FAIRY,FF,`너는 <em>${jp.icon} ${jp.para}</em>의 힘을 가진 <em>${jp.name}</em>구나! ${jp.paraDesc}`),...ch.intro.slice(2)]:ch.intro);
 }
 async function chapterClear(){
@@ -3116,7 +3155,8 @@ async function ending(){
 // ======================= SCREENS =======================
 function goTitle(){
   G.screen='title'; $('hud').classList.add('hidden'); $('hzBanner').classList.remove('show'); $('select').classList.add('hidden'); $('title').classList.remove('hidden');
-  $('bContinue').classList.toggle('hidden',!loadSave());
+  const sv=loadSave(); $('bContinue').classList.toggle('hidden',!sv);
+  if(sv&&CHAPTERS[sv.chIdx]) $('bContinue').textContent=`▶ 이어 하기 (${sv.chIdx+1}장 ${CHAPTERS[sv.chIdx].place})`;
   $('bVideos').classList.toggle('hidden',!hasCleared());
 }
 let selAnim=null;
@@ -3138,12 +3178,14 @@ async function startGame(cont){
   audioInit();
   $('select').classList.add('hidden'); $('title').classList.add('hidden'); $('hud').classList.remove('hidden');
   G.screen='play'; G.busy=true;
-  if(cont){ const s=loadSave(); Object.assign(G,{name:s.name,job:OLD_JOB[s.job]||s.job,wIdx:s.wIdx,unlocked:s.unlocked,score:s.score,elapsed:s.elapsed}); G.cards=new Set(s.cards); loadChapter(s.chIdx); }
-  else { G.score=0; G.elapsed=0; G.cards=new Set(); G.wIdx=0; G.unlocked=1; G.hintSkill=false; loadChapter(0); }
-  G._readyToast=0;
+  let resumed=false;
+  if(cont){ const s=loadSave(); Object.assign(G,{name:s.name,job:OLD_JOB[s.job]||s.job,wIdx:s.wIdx,unlocked:s.unlocked,score:s.score,elapsed:s.elapsed}); G.cards=new Set(s.cards); G._readyToast=0; loadChapter(s.chIdx); resumed=applySnap(s.snap)&&G.introDone; }
+  else { G.score=0; G.elapsed=0; G.cards=new Set(); G.wIdx=0; G.unlocked=1; G.hintSkill=false; G._readyToast=0; loadChapter(0); }
   if(innerWidth<640 || innerHeight<500) { $('missions').classList.add('fold'); $('mfold').textContent='▼'; }
   G.busy=false;
-  enqueue(chapterIntro);
+  if(resumed){ save(); const portal=G.objs.find(o=>o.kind==='portal'&&o.active);
+    enqueue(()=>dialog([L(FAIRY,FF,`다시 왔구나! <em>${G.ch.no}장 ${G.ch.place}</em>, 하던 곳에서 그대로 이어 할게. ✨`), ...(portal?[L(FAIRY,FF,'포털이 열려 있어! 🌀 준비되면 포털로 들어가자!')]:[])])); }
+  else enqueue(chapterIntro);
 }
 
 // ======================= INPUT =======================
