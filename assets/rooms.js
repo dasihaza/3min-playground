@@ -13,6 +13,7 @@ const ROOMS = {
     page: 'playground.html', accent: '#ff7a59',
     desc: '웹게임, 타자 게임, 상식 퀴즈까지! 3분이면 끝나는 놀이',
     programs: [
+      { emoji: '🌱', title: '초록 부자', desc: '친환경 농사로 기른 작물을 팔아 태양광 패널·1등급 가전으로 집을 초록으로 꾸며요', tag: '경영 게임', href: 'content/eco-rich.html', isNew: true },
       { emoji: '🩺', title: '튼튼 소아과 병원놀이', desc: '소아과 의사가 되어 청진기와 질문으로 어린이 환자의 감염병을 진단해요', tag: '웹게임', href: 'content/clinic.html', isNew: true },
       { emoji: '🦀', title: '갯벌을 지키자!', desc: '갯벌 생물 이름을 타자로 쳐서 갯벌을 넓히고 개발 악당을 물리쳐요', tag: '타자 게임', href: 'content/getbeol-guard.html' },
       { emoji: '🐍', title: '먹이사슬 대작전', desc: '메뚜기·개구리·뱀·사람 중 하나가 되어 3분간 살아남아요 (최대 4명)', tag: '웹게임', href: 'content/food-chain.html' },
