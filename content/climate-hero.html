@@ -230,6 +230,8 @@ button{font-family:'Jua',sans-serif;cursor:pointer;border:none}
 .bk{border-radius:16px;padding:8px 4px;background:#fff;box-shadow:0 4px 0 #eadff7;cursor:pointer;font-family:'Jua';font-size:14px}
 .bk .be{font-size:36px}
 .bk.lock{background:#f1edf5;color:#b9adc6}
+.bkcnt{font-size:13px;color:#fff;background:#4fc46f;border-radius:10px;padding:0 8px;margin-left:4px;vertical-align:2px}
+.bigbtn.purple{background:linear-gradient(180deg,#c6a8ff,#9b7ae8);box-shadow:0 6px 0 #6f52c4,0 10px 16px rgba(0,0,0,.15)}
 .bkch{font-family:'Jua';text-align:left;margin:12px 0 0;color:#4f9a6a;font-size:18px}
 
 /* weapons */
@@ -574,6 +576,7 @@ button{font-family:'Jua',sans-serif;cursor:pointer;border:none}
     <button class="bigbtn" id="bStart">🎮 새로 시작</button>
     <button class="bigbtn green hidden" id="bContinue">▶ 이어 하기</button>
     <button class="bigbtn yellow" id="bRank">🏆 랭킹 TOP 5</button>
+    <button class="bigbtn purple" id="bCards">📖 기후 카드 도감</button>
     <button class="bigbtn blue hidden" id="bVideos">🎬 영상 모아 보기</button>
   </div>
   <a class="scrollHint" href="#pg-guide">▼ 게임 소개 보기</a>
@@ -1198,9 +1201,17 @@ const G = {
   get ch(){ return CHAPTERS[this.chIdx]; },
   total(id){ const m=this.ch.missions.find(x=>x.id===id); return m?m.total:0; },
   addM(id,n=1){ const before=this.m[id]||0; this.m[id]=Math.min(this.total(id),before+n); if(this.m[id]>before && !['quiz','meet','earth'].includes(id)){ hzCalm(); seaFall(); } if(this.m[id]>before) setTimeout(save,0); updateHUD(); checkReady(); },
-  async giveCard(id){ if(!id||this.cards.has(id)) return; this.cards.add(id); addScore(50); await showCard(id); }
+  async giveCard(id){ if(!id||this.cards.has(id)) return; this.cards.add(id); addCollected(id); addScore(50); await showCard(id); }
 };
 function jobP(){ return JOBS[G.job]; }
+const CARD_KEY='climateHeroCards';
+function collectedCards(){
+  const s=new Set();
+  try{ (JSON.parse(localStorage.getItem(CARD_KEY))||[]).forEach(k=>s.add(k)); }catch(e){}
+  try{ const sv=JSON.parse(localStorage.getItem('climateHeroSave')); (sv&&sv.cards||[]).forEach(k=>s.add(k)); }catch(e){}   // 예전 저장 기록의 카드도 포함
+  return new Set([...s].filter(k=>CARDS[k]));
+}
+function addCollected(id){ const s=collectedCards(); s.add(id); try{ localStorage.setItem(CARD_KEY,JSON.stringify([...s])); }catch(e){} }
 
 function addScore(n, x, y){
   G.score += n; updateHUD();
@@ -2983,11 +2994,13 @@ function openBag(){
   };
   render();
 }
-function openBook(){
+function openBook(fromTitle=false){
   const wasBusy=G.busy; if(G.screen==='play') G.busy=true;
+  const have=fromTitle?collectedCards():G.cards, total=Object.keys(CARDS).length;
   const chs=[1,2,3,4,5], names=['기후 변화의 모습','기후 변화의 원인','기후 변화의 영향','사회의 대응','나의 실천'];
-  const b=openModal(`<button class="mclose" id="x">✕</button><h3>📖 기후 카드 도감 (${G.cards.size}/${Object.keys(CARDS).length})</h3><p style="font-size:14px">모은 카드를 눌러 4단원 내용을 복습해요!</p>
-    ${chs.map(c=>`<div class="bkch">${c}장 · ${names[c-1]}</div><div class="bookgrid">${Object.entries(CARDS).filter(([k,v])=>v.ch===c).map(([k,v])=>G.cards.has(k)?`<div class="bk" data-k="${k}"><div class="be">${v.e}</div>${v.t}</div>`:`<div class="bk lock"><div class="be">❔</div>???</div>`).join('')}</div>`).join('')}<div id="det"></div>`);
+  const b=openModal(`<button class="mclose" id="x">✕</button><h3>📖 ${fromTitle?'나의 ':''}기후 카드 도감 (${have.size}/${total})</h3><p style="font-size:14px">${fromTitle?(have.size?'지금까지 게임에서 모은 카드예요. 카드를 눌러 4단원 내용을 복습해요! 아직 못 모은 카드는 <b>❔</b>로 보여요.':'아직 모은 카드가 없어요. 게임을 하며 미션을 해결하면 카드가 하나씩 모여요! 🌏'):'모은 카드를 눌러 4단원 내용을 복습해요!'}</p>
+    ${fromTitle?`<div class="bar" style="max-width:420px;margin:4px auto 2px"><i style="width:${Math.round(have.size/total*100)}%;background:linear-gradient(90deg,#7fe0c3,#8fd3ff,#ff9ec0)"></i></div>`:''}
+    ${chs.map(c=>{ const list=Object.entries(CARDS).filter(([k,v])=>v.ch===c), got=list.filter(([k])=>have.has(k)).length; return `<div class="bkch">${c}장 · ${names[c-1]} <span class="bkcnt">${got}/${list.length}</span></div><div class="bookgrid">${list.map(([k,v])=>have.has(k)?`<div class="bk" data-k="${k}"><div class="be">${v.e}</div>${v.t}</div>`:`<div class="bk lock"><div class="be">❔</div>???</div>`).join('')}</div>`; }).join('')}<div id="det"></div>`);
   b.querySelector('#x').onclick=()=>{closeModal(); if(G.screen==='play') G.busy=wasBusy;};
   b.querySelectorAll('.bk[data-k]').forEach(d=>d.onclick=()=>{ b.querySelector('#det').innerHTML=cardHTML(d.dataset.k); b.querySelector('#det').scrollIntoView({behavior:'smooth'}); });
 }
@@ -3158,6 +3171,7 @@ function goTitle(){
   const sv=loadSave(); $('bContinue').classList.toggle('hidden',!sv);
   if(sv&&CHAPTERS[sv.chIdx]) $('bContinue').textContent=`▶ 이어 하기 (${sv.chIdx+1}장 ${CHAPTERS[sv.chIdx].place})`;
   $('bVideos').classList.toggle('hidden',!hasCleared());
+  $('bCards').textContent=`📖 기후 카드 도감 (${collectedCards().size}/${Object.keys(CARDS).length})`;
 }
 let selAnim=null;
 function goSelect(){
@@ -3221,6 +3235,7 @@ document.querySelector('.scrollHint').onclick=e=>{ e.preventDefault(); $('pg-gui
 $('bStart').onclick=()=>{ audioInit(); goSelect(); };
 $('bContinue').onclick=()=>{ startGame(true); };
 $('bVideos').onclick=()=>{ audioInit(); openVideos(); };
+$('bCards').onclick=()=>{ audioInit(); openBook(true); };
 $('bRank').onclick=()=>{ audioInit(); openRank(); };
 $('nick').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); $('nick').blur(); $('bGo').click(); } });
 $('nick').addEventListener('focus',()=>setTimeout(()=>{ try{ $('nick').scrollIntoView({block:'center',behavior:'smooth'}); }catch(e){} },300));
