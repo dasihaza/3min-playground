@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>초록 부자 | 3분 놀이터</title>
+<title>친환경 농부 | 3분 놀이터</title>
 <meta name="description" content="친환경 농사로 기른 토마토·수박을 팔아 태양광 패널, 친환경 벽지, 1등급 가전으로 집을 꾸며요. 천연 방제·천적·윤작·녹비작물·우렁이 농법을 배우는 동화 같은 전원생활 게임.">
 <meta property="og:image" content="https://3min-playground.com/assets/eco-rich/bg_title.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -453,7 +453,7 @@
   <section id="intro">
     <div class="title-wrap">
       <div class="logo">
-        <h1><span class="lf">🌱</span>초록 부자</h1>
+        <h1><span class="lf">🌱</span>친환경 농부</h1>
         <p>친환경 농사로 돈 벌고 · 집은 초록으로 꾸미고!</p>
       </div>
     </div>
@@ -477,11 +477,11 @@
         <button class="btn orange" id="btnNew">🌱 새로 시작</button>
       </div>
       <p class="small" style="text-align:center;margin:12px 0 0;">⏳ 30일 안에 <b>탄소중립 마스터(만족도 100)</b>가 되고 3일 동안 유지하면 엔딩! 빨리 해낼수록 점수가 높아요.</p>
-      <div class="intro-extra"><button class="btn ghost" id="btnNotes">📒 내 친환경 노트 <span id="nbCount"></span></button></div>
+      <div class="intro-extra" style="gap:10px;flex-wrap:wrap;"><button class="btn ghost" id="btnNotes">📒 내 친환경 노트 <span id="nbCount"></span></button><a class="btn ghost" href="eco-farm-worksheet.html" style="text-decoration:none;">📝 수업용 학습지</a></div>
     </div>
     <div class="card" style="margin:20px 10px 0;">
       <span class="tape y"></span>
-      <h2 class="sec" style="justify-content:center;">🏆 초록 부자 랭킹 TOP 5</h2>
+      <h2 class="sec" style="justify-content:center;">🏆 친환경 농부 랭킹 TOP 5</h2>
       <div class="rank-list" id="rankIntro"></div>
       <p class="rank-note" id="rankNoteIntro"></p>
     </div>
@@ -1863,7 +1863,7 @@ function initRanks(){
 }
 function rankHtml(){
   if(!rankReady) return '<div class="rank-empty">순위표를 불러오는 중이에요… 🌱</div>';
-  if(!topList.length) return '<div class="rank-empty">아직 기록이 없어요.<br>첫 번째 초록 부자가 되어 보세요! 🏆</div>';
+  if(!topList.length) return '<div class="rank-empty">아직 기록이 없어요.<br>첫 번째 친환경 농부 랭킹에 이름을 올려 보세요! 🏆</div>';
   var pos = ['👑','🥈','🥉','4','5'], h = '';
   topList.slice(0,TOP_N).forEach(function(r,i){
     var nm = window.Badwords ? Badwords.mask(r.name) : r.name;

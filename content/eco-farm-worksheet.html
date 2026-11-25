@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>친환경 농부 학습지 · 지속가능한 미래를 위한 친환경 농업 | 3분 놀이터</title>
+<meta name="description" content="6학년 실과 '지속가능한 미래를 위한 친환경 농업' 학습지. 친환경 농부 웹게임 그림으로 꾸민 A4 인쇄용 학습지로 천연 방제, 천적, 돌려짓기, 녹비작물, 탄소 격리, 친환경 생활 실천을 공부해요.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#4E3D2F; --soft:#9A8770; --line:#EADBC0; --paper:#FFFCF4;
+  --leaf:#6CBF62; --leaf-d:#469A45; --leaf-l:#E4F4D8; --leaf-ll:#F3FAEA;
+  --wood:#B98559; --wood-d:#8A5D3B; --wood-l:#E7C9A0;
+  --sun:#FFD267; --sun-l:#FFF3CC; --rose:#F49CB0; --rose-l:#FFE9EE; --sky:#8CCBEB; --sky-l:#E6F5FC; --red:#E0645A;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:#EFF6E6;color:var(--ink);font-family:'Gowun Dodum',sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+img{display:block}
+/* 도구 막대 */
+.bar{position:sticky;top:0;z-index:10;display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center;padding:10px 12px;background:#fffffff0;box-shadow:0 3px 12px rgba(80,120,60,.15)}
+.bar h1{font-family:'Jua';font-size:20px;margin:0 8px 0 0;color:var(--leaf-d);display:flex;align-items:center;gap:6px}
+.bar h1 img{width:28px;height:28px}
+.bar button,.bar a{font-family:'Jua';font-size:16px;border:none;border-radius:999px;padding:9px 16px;cursor:pointer;text-decoration:none;color:#fff;background:linear-gradient(180deg,#8fd685,#5cb554);box-shadow:0 4px 0 #3f8f3e}
+.bar .b2{background:linear-gradient(180deg,#ffbb8a,#ff925f);box-shadow:0 4px 0 #d26a3b}
+.bar .b3{background:linear-gradient(180deg,#a5dcf5,#5aa6d1);box-shadow:0 4px 0 #3f86b3}
+.bar .b4{background:#fff;color:var(--wood-d);box-shadow:0 4px 0 var(--line);border:2px solid var(--line)}
+.bar button:active,.bar a:active{transform:translateY(3px);box-shadow:none}
+.bar .hint{font-size:13px;color:var(--soft);width:100%;text-align:center}
+
+/* A4 종이 */
+.page{width:210mm;height:297mm;margin:18px auto;background:var(--paper);border-radius:6px;box-shadow:0 8px 24px rgba(80,110,60,.18);padding:10mm 11mm 12mm;position:relative;overflow:hidden}
+.page:before{content:'';position:absolute;inset:0;background:radial-gradient(rgba(154,135,112,.16) 1px,transparent 1.3px) 0 0/5px 5px;pointer-events:none}
+.page:after{content:'';position:absolute;left:0;right:0;bottom:0;height:16mm;background:url('../assets/eco-rich/bg_farm.webp') center bottom/100% auto no-repeat;opacity:.22;pointer-events:none}
+.page>*{position:relative;z-index:1}
+.head{display:flex;align-items:center;gap:9px;margin-bottom:4mm}
+.badge{font-family:'Jua';background:var(--leaf-d);color:#fff;border-radius:12px;padding:4px 10px;font-size:12.5px;white-space:nowrap;text-align:center;line-height:1.25;box-shadow:0 3px 0 #2f6f2f}
+.title{font-family:'Jua';font-size:23px;line-height:1.15;flex:1;color:var(--wood-d)}
+.title small{display:block;font-family:'Gaegu';font-weight:700;font-size:16px;color:var(--soft)}
+.who{display:flex;gap:6px;font-family:'Jua';font-size:14px;flex:none}
+.who span{border-bottom:2px dashed var(--wood-l);padding:0 2px 2px;min-width:50px}
+.who span.nm{min-width:80px}
+.sec{font-family:'Jua';font-size:18px;margin:4mm 0 2.5mm;display:flex;align-items:center;gap:7px;color:var(--ink)}
+.sec i{font-style:normal;display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--sun);color:#7a4b00;font-size:15px;box-shadow:0 2px 0 #E2A93A;flex:none}
+.sec em{font-style:normal;font-family:'Gaegu';font-weight:700;font-size:15.5px;color:var(--soft);margin-left:2px}
+.box{background:#fff;border-radius:16px;padding:8px 12px;box-shadow:0 0 0 2px var(--line)}
+.tipbox{display:flex;gap:8px;align-items:center;font-family:'Gaegu';font-weight:700;font-size:15.5px;background:var(--sun-l);border-radius:14px;padding:6px 12px;line-height:1.35;margin:0 0 3mm}
+.tipbox img{width:40px;height:40px;object-fit:contain;flex:none}
+.foot{position:absolute;left:11mm;right:11mm;bottom:5mm;display:flex;justify-content:space-between;font-family:'Jua';font-size:11.5px;color:#9FB78F;z-index:2}
+/* 빈칸·정답 */
+.blank{display:inline-block;min-width:62px;border-bottom:2px solid var(--wood-l);text-align:center;padding:0 4px;margin:0 2px;line-height:1.2}
+.blank .a{color:#D9534F;font-family:'Jua';visibility:hidden}
+.show .blank .a,.show .ans{visibility:visible}
+.ans{color:#D9534F;font-family:'Jua';visibility:hidden}
+.wline{border-bottom:2px dashed var(--wood-l);height:9mm}
+.wline.s{height:8mm}
+
+/* 1쪽 */
+.hero{position:relative;border-radius:18px;overflow:hidden;height:54mm;box-shadow:0 0 0 3px #fff,0 0 0 5px var(--wood-l)}
+.hero img{width:100%;height:100%;object-fit:cover}
+.hero .speech{position:absolute;left:4mm;bottom:4mm;right:42%;background:rgba(255,252,244,.94);border-radius:16px 16px 16px 4px;padding:6px 10px;font-family:'Gaegu';font-weight:700;font-size:15px;line-height:1.35}
+.hero .gm{position:absolute;right:3mm;bottom:0;width:30mm}
+.compare{display:grid;grid-template-columns:24mm .8fr 1.25fr;gap:0;border-radius:14px;overflow:hidden;box-shadow:0 0 0 2px var(--line);font-size:13.5px;background:#fff}
+.compare div{padding:6px 8px;border-bottom:1.5px dashed var(--line);display:flex;align-items:center;min-height:11mm}
+.compare .c2{display:block;line-height:1.75;padding-top:7px}
+.compare .h{font-family:'Jua';font-size:15px;justify-content:center;border-bottom:2px solid var(--line)}
+.compare .h.k{background:#F1F1EC} .compare .h.e{background:var(--leaf-l);color:var(--leaf-d)}
+.compare .r{font-family:'Jua';background:var(--paper);justify-content:center;color:var(--wood-d)}
+.compare .last{border-bottom:0}
+.five{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+.five .c{background:#fff;border-radius:16px;padding:6px 6px 8px;text-align:center;box-shadow:0 0 0 2px var(--line),0 3px 0 var(--line)}
+.five .c img{width:20mm;height:18mm;object-fit:contain;margin:0 auto 2px}
+.five .n{display:inline-block;font-family:'Jua';font-size:12px;color:#fff;background:var(--leaf);border-radius:99px;padding:0 8px;margin-bottom:3px}
+.five .t{font-family:'Jua';font-size:13.5px;line-height:1.25;min-height:9mm}
+.five .d{font-size:11.5px;line-height:1.45;color:var(--ink);margin-top:3px}
+.bank{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:3mm 0 0}
+.bank span{font-family:'Jua';font-size:14px;background:var(--leaf-ll);border:2px dashed #CDE6BC;border-radius:10px;padding:2px 10px}
+
+/* 2쪽 */
+.match{display:grid;grid-template-columns:1fr 16mm 1fr;gap:5px 0;align-items:center}
+.mcard{display:flex;align-items:center;gap:8px;background:#fff;border-radius:14px;padding:5px 10px;box-shadow:0 0 0 2px var(--line);min-height:16mm;font-size:13.5px;position:relative}
+.mcard img{width:15mm;height:13mm;object-fit:contain;flex:none}
+.mcard b{font-family:'Jua';font-weight:400;font-size:15px;display:block}
+.dot{width:12px;height:12px;border-radius:50%;background:var(--wood-l);box-shadow:0 0 0 3px #fff,0 0 0 4px var(--wood-l);position:absolute;top:50%;margin-top:-6px}
+.mcard.l .dot{right:-6px} .mcard.r .dot{left:-6px}
+.mcard.r{padding-left:14px}
+.ansline{display:block;font-size:11.5px;font-family:'Jua';color:#D9534F;visibility:hidden;margin-top:1px}
+.show .ansline{visibility:visible}
+.enemies{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.enemy{background:#fff;border-radius:16px;padding:6px 8px;box-shadow:0 0 0 2px var(--line);display:flex;gap:6px;align-items:center;font-size:13px;line-height:1.45}
+.enemy img{width:17mm;height:15mm;object-fit:contain;flex:none}
+.enemy b{font-family:'Jua';font-weight:400;font-size:15px}
+.rot{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center}
+.rot .h{font-family:'Jua';font-size:13px;color:var(--soft)}
+.plot{border-radius:14px;padding:5px 4px;font-size:12.5px;line-height:1.35;min-height:24mm;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:linear-gradient(180deg,#B88457,#93603A);color:#fff;box-shadow:inset 0 0 0 3px rgba(120,78,44,.55),0 3px 0 rgba(96,64,36,.35)}
+.plot img{width:15mm;height:13mm;object-fit:contain}
+.plot.q{background:#fff;color:var(--ink);box-shadow:0 0 0 2px var(--line);border:2px dashed var(--wood-l)}
+.plot b{font-family:'Jua';font-weight:400;font-size:14px}
+.seedrow{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:3mm}
+.seedrow span{display:flex;align-items:center;gap:4px;background:#fff;border-radius:12px;padding:2px 9px 2px 3px;box-shadow:0 0 0 2px var(--line);font-size:12.5px}
+.seedrow img{width:9mm;height:9mm;object-fit:contain}
+.seedrow small{font-family:'Jua';color:var(--leaf-d);font-size:11.5px}
+
+/* 3쪽 */
+.ox{width:100%;border-collapse:separate;border-spacing:0 5px;font-size:13.5px}
+.ox td{background:#fff;padding:6px 10px;box-shadow:0 0 0 2px var(--line)}
+.ox td:first-child{border-radius:12px 0 0 12px;width:9mm;text-align:center;font-family:'Jua';color:var(--leaf-d);font-size:15px}
+.ox td:last-child{border-radius:0 12px 12px 0;width:24mm;text-align:center;font-family:'Jua';color:var(--soft);white-space:nowrap}
+.ox .ans{margin-left:4px}
+.eco3{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.eco3 .c{background:#fff;border-radius:16px;padding:6px 8px 8px;box-shadow:0 0 0 2px var(--line);font-size:12.5px;line-height:1.45}
+.eco3 .c .t{display:flex;align-items:center;gap:6px;font-family:'Jua';font-size:14.5px;margin-bottom:2px}
+.eco3 .c .t img{width:11mm;height:10mm;object-fit:contain}
+.dilemma{display:flex;gap:10px;align-items:stretch}
+.dilemma .pic{flex:none;width:36mm;background:var(--rose-l);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Gaegu';font-weight:700;font-size:13px;text-align:center;padding:6px;line-height:1.3}
+.dilemma .pic img{width:20mm;height:18mm;object-fit:contain}
+.choice{display:flex;gap:8px;margin:2mm 0}
+.choice span{flex:1;background:#fff;border-radius:12px;padding:5px 8px;box-shadow:0 0 0 2px var(--line);font-size:13px;display:flex;align-items:center;gap:6px}
+.choice span:before{content:'';width:14px;height:14px;border-radius:4px;border:2px solid var(--wood);flex:none}
+
+/* 4쪽 */
+.record{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.record .c{background:#fff;border-radius:16px;padding:6px 10px;box-shadow:0 0 0 2px var(--line);font-size:13px;display:flex;align-items:center;gap:8px}
+.record .c img{width:12mm;height:11mm;object-fit:contain;flex:none}
+.record .c b{font-family:'Jua';font-weight:400;font-size:14.5px;white-space:nowrap}
+.record .c .fill{flex:1;border-bottom:2px dashed var(--wood-l);height:7mm;text-align:right;font-family:'Jua';color:var(--soft);padding-top:2px}
+.cre{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;text-align:center}
+.cre div{background:#fff;border-radius:14px;padding:4px 2px 6px;box-shadow:0 0 0 2px var(--line);font-family:'Jua';font-size:12.5px}
+.cre img{width:13mm;height:11mm;object-fit:contain;margin:0 auto}
+.cre div:after{content:'';display:block;width:12px;height:12px;border:2px solid var(--wood);border-radius:4px;margin:3px auto 0}
+.items{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.items div{background:#fff;border-radius:14px;padding:4px 3px;box-shadow:0 0 0 2px var(--line);text-align:center;font-size:11.5px;line-height:1.25;position:relative}
+.items img{width:13mm;height:11mm;object-fit:contain;margin:0 auto 2px}
+.items div:before{content:'';position:absolute;top:4px;left:4px;width:11px;height:11px;border:2px solid var(--wood);border-radius:4px;background:#fff}
+.promise{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+.promise .c{background:#fff;border-radius:16px;padding:6px 8px;box-shadow:0 0 0 2px var(--line)}
+.promise .c .t{font-family:'Jua';font-size:14px;display:flex;align-items:center;gap:5px;margin-bottom:2px}
+.promise .c .t img{width:10mm;height:9mm;object-fit:contain}
+.stamp{position:absolute;right:11mm;bottom:15mm;width:30mm;height:30mm;border-radius:50%;border:3px dashed var(--leaf);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Jua';color:var(--leaf-d);font-size:12px;background:rgba(255,255,255,.85);transform:rotate(-8deg);z-index:3}
+.stamp img{width:14mm}
+
+/* 정답지 */
+.anspage h3{font-family:'Jua';font-size:16px;margin:4mm 0 2mm;color:var(--leaf-d)}
+.anspage .box{font-size:13.5px;line-height:1.7}
+.anspage .ans{visibility:visible}
+
+@media screen and (max-width:820px){
+  .page{width:auto;height:auto;min-height:0;margin:10px;padding:16px 14px 46px}
+  .five{grid-template-columns:repeat(3,1fr)} .enemies,.eco3,.promise{grid-template-columns:1fr} .cre{grid-template-columns:repeat(3,1fr)} .items{grid-template-columns:repeat(3,1fr)}
+  .head{flex-wrap:wrap} .record{grid-template-columns:1fr} .stamp{position:static;margin:10px auto 0}
+  .dilemma{flex-direction:column} .dilemma .pic{width:auto}
+}
+@media print{
+  html,body{background:#fff}
+  .bar{display:none}
+  .page{margin:0;box-shadow:none;border-radius:0;width:210mm;height:297mm;page-break-after:always;break-after:page}
+  .page:last-child{page-break-after:auto;break-after:auto}
+  @page{size:A4;margin:0}
+}
+</style>
+</head>
+<body>
+<div class="bar">
+  <h1><img src="../assets/eco-rich/sprout.webp" alt="">친환경 농부 학습지</h1>
+  <button onclick="window.print()">🖨️ 인쇄하기</button>
+  <button class="b2" id="ansBtn">👀 정답 보이기</button>
+  <a class="b3" href="eco-rich.html">🎮 게임하러 가기</a>
+  <a class="b4" href="../index.html">🏠 3분 놀이터</a>
+  <div class="hint">A4 4쪽 학습지 + 정답지 1쪽 · 학생용은 정답을 숨긴 채로, 선생님용은 '정답 보이기'를 누른 뒤 인쇄하세요.</div>
+</div>
+<main id="pages"></main>
+
+<script>
+const I = n => `<img src="../assets/eco-rich/${n}.webp" alt="">`;
+const B = a => `<span class="blank"><span class="a">${a}</span></span>`;
+const head = (no, title, sub, noWho) => `<div class="head"><span class="badge">🌱 친환경 농부<br>${no}</span><div class="title">${title}<small>${sub}</small></div>${noWho?'':'<div class="who"><span>6학년</span><span>반</span><span>번</span><span class="nm">이름</span></div>'}</div>`;
+const foot = n => `<div class="foot"><span>6학년 실과 · 지속가능한 미래를 위한 친환경 농업</span><span>🌱 친환경 농부 · 3분 놀이터 · ${n}</span></div>`;
+const pages = [];
+
+/* ---------- 1쪽: 친환경 농업이란? ---------- */
+pages.push(`<section class="page">${head('1쪽','① 친환경 농업이란?','땅과 물, 생물을 함께 살리는 농사를 알아봐요')}
+<div class="hero">${I('bg_title')}
+  <div class="speech">“손주야, 농약 없이 <b>땅을 살리는 농사</b>를 지어 보렴. 땅이 건강해야 사람도, 생물도, 지구도 오래오래 건강하단다.”</div>
+  <img class="gm" src="../assets/eco-rich/grandma.webp" alt="">
+</div>
+
+<div class="sec"><i>1</i>관행 농업과 친환경 농업을 비교해 봐요 <em>빈칸에 알맞은 말을 써요</em></div>
+<div class="compare">
+  <div class="h"></div><div class="h k">🧪 관행 농업</div><div class="h e">🌱 친환경 농업</div>
+  <div class="r">해충 막기</div><div class="c2">합성 ${B('농약')}을 뿌려요</div><div class="c2">마늘·님오일 같은 ${B('천연')} 추출물, 천적 곤충을 써요</div>
+  <div class="r">양분 주기</div><div class="c2">화학비료를 많이 줘요</div><div class="c2">완숙 ${B('퇴비')}, 깻묵, 볏짚 같은 유기질 비료를 줘요</div>
+  <div class="r">잡초 없애기</div><div class="c2">제초제를 뿌려요</div><div class="c2">손으로 김매기, 볏짚 덮기, ${B('우렁이')}·오리를 이용해요</div>
+  <div class="r last">땅 관리</div><div class="c2 last">같은 작물을 계속 심기도 해요</div><div class="c2 last">${B('돌려짓기')}(윤작)와 녹비작물로 땅의 힘을 길러요</div>
+</div>
+
+<div class="sec"><i>2</i>친환경 농업의 다섯 가지 특징 <em>게임 속 그림을 보며 읽어 봐요</em></div>
+<div class="five">
+  <div class="c">${I('t_garlic')}<span class="n">특징 1</span><div class="t">합성농약·화학비료 줄이기</div><div class="d">천연 추출물, 미생물 제제, 페로몬 트랩, 유기질 비료를 써요.</div></div>
+  <div class="c">${I('t_lady')}<span class="n">특징 2</span><div class="t">생태계 순환과 천적 활용</div><div class="d">무당벌레·우렁이·오리 같은 생물이 해충과 잡초를 줄여요.</div></div>
+  <div class="c">${I('bean')}<span class="n">특징 3</span><div class="t">토양의 자생력 강화</div><div class="d">돌려짓기와 녹비작물로 흙이 스스로 건강해져요.</div></div>
+  <div class="c">${I('c_loach')}<span class="n">특징 4</span><div class="t">환경오염 줄이기·탄소 격리</div><div class="d">하천과 지하수를 지키고, 흙 속에 탄소를 저장해요.</div></div>
+  <div class="c">${I('t_weed')}<span class="n">특징 5</span><div class="t">높은 노동력·높은 가격</div><div class="d">손이 많이 가고 수확량이 적을 수 있어 값이 더 비싸요.</div></div>
+</div>
+<div class="bank">${['농약','천연','퇴비','우렁이','돌려짓기'].sort().map(w=>`<span>${w}</span>`).join('')}</div>
+<div class="tipbox" style="margin-top:3mm">${I('seal')}<span>친환경 농산물 인증에는 농약을 쓰지 않은 <b>무농약</b>, 농약과 화학비료를 모두 쓰지 않은 <b>유기농</b> 등이 있어요. 장 볼 때 포장에서 인증 표시를 찾아보세요!</span></div>
+${foot('1쪽')}</section>`);
+
+/* ---------- 2쪽: 친환경 농업의 방법 ---------- */
+pages.push(`<section class="page">${head('2쪽','② 친환경 농업의 방법','농약 대신 자연의 힘으로 농사를 지어요')}
+<div class="sec"><i>1</i>해충·병과 천연 방제를 알맞게 이어 봐요 <em>선으로 이어요</em></div>
+<div class="match">
+  <div class="mcard l">${I('p_aphid')}<div><b>진딧물</b>잎과 줄기의 즙을 빨아 먹어요<span class="ansline">→ 님오일 (마늘 추출액·무당벌레도 OK)</span></div><span class="dot"></span></div><div></div>
+  <div class="mcard r"><span class="dot"></span>${I('t_microbe')}<div><b>미생물 제제</b>좋은 미생물이 병균을 이겨요</div></div>
+  <div class="mcard l">${I('p_worm')}<div><b>나방 애벌레</b>잎을 갉아 먹어 구멍을 내요<span class="ansline">→ 마늘 추출액 (은행잎 추출액도 OK)</span></div><span class="dot"></span></div><div></div>
+  <div class="mcard r"><span class="dot"></span>${I('t_neem')}<div><b>님오일</b>님나무 씨앗에서 짠 기름</div></div>
+  <div class="mcard l">${I('p_mold')}<div><b>곰팡이병</b>비 오는 날 잎에 하얀 곰팡이가 펴요<span class="ansline">→ 미생물 제제</span></div><span class="dot"></span></div><div></div>
+  <div class="mcard r"><span class="dot"></span>${I('t_garlic')}<div><b>마늘 추출액</b>매운 냄새로 해충을 쫓아요</div></div>
+</div>
+<div class="tipbox" style="margin-top:3mm">${I('t_trap')}<span><b>페로몬 트랩</b>은 곤충이 짝을 찾을 때 내는 냄새로 나방을 꾀어 잡아요. 해충을 <b>미리 막는</b> 방법이에요.</span></div>
+
+<div class="sec"><i>2</i>농약 대신 일하는 생물 친구들 <em>빈칸을 채워요</em></div>
+<div class="enemies">
+  <div class="enemy">${I('t_lady')}<div><b>무당벌레</b><br>${B('진딧물')}을 하루에 수십 마리씩 잡아먹어요.</div></div>
+  <div class="enemy">${I('t_chile')}<div><b>칠레이리응애</b><br>해충인 ${B('응애')}를 잡아먹는 천적이에요.</div></div>
+  <div class="enemy">${I('t_duck')}<div><b>우렁이 · 오리</b><br>논의 ${B('잡초')}를 먹어 제초제가 필요 없어요.</div></div>
+</div>
+
+<div class="sec"><i>3</i>돌려짓기 계획 세우기 <em>같은 '과' 작물을 연달아 심으면 연작이에요</em></div>
+<div class="rot">
+  <div class="h">밭</div><div class="h">작년에 심은 작물</div><div class="h">올해 심고 싶은 작물</div><div class="h">연작일까요?</div>
+  <div class="plot"><b>1번 밭</b></div><div class="plot">${I('tomato')}토마토 (가지과)</div><div class="plot q">${I('potato')}감자 (가지과)</div><div class="plot q"><b style="color:var(--ink)">O / X</b><span class="ans">O (같은 가지과)</span></div>
+  <div class="plot"><b>2번 밭</b></div><div class="plot">${I('melon')}수박 (박과)</div><div class="plot q">${I('bean')}콩 (콩과)</div><div class="plot q"><b style="color:var(--ink)">O / X</b><span class="ans">X</span></div>
+</div>
+<div class="box" style="margin-top:3mm;font-size:13.5px;line-height:1.8">
+  ✏️ 1번 밭에 감자 대신 심으면 좋은 작물을 아래에서 하나 골라 쓰고, 그 까닭을 써 봐요.<br>
+  작물: ${B('콩 / 헤어리베치 등')} &nbsp; 까닭: <span class="ans">콩과 작물은 뿌리혹박테리아가 공기 중 질소를 흙에 저장해 땅이 기름져져요.</span>
+  <div class="wline s"></div>
+</div>
+<div class="seedrow">
+  <span>${I('bean')}콩 <small>콩과</small></span><span>${I('lettuce')}상추 <small>국화과</small></span><span>${I('berry')}딸기 <small>장미과</small></span><span>${I('broc')}브로콜리 <small>십자화과</small></span><span>${I('vetch')}헤어리베치 <small>녹비</small></span><span>${I('milk')}자운영 <small>녹비</small></span><span>${I('rye')}호밀 <small>녹비</small></span>
+</div>
+<div class="tipbox" style="margin-top:3mm">${I('milk')}<span><b>녹비작물</b>은 쉬는 땅에 키워 그대로 갈아엎는 '초록 비료'예요. 헤어리베치·자운영은 질소를 더해 주고, 호밀은 흙을 부드럽게 하고 잡초를 막아 줘요.</span></div>
+${foot('2쪽')}</section>`);
+
+/* ---------- 3쪽: 지속가능한 미래 ---------- */
+pages.push(`<section class="page">${head('3쪽','③ 친환경 농업과 지속가능한 미래','친환경 농업이 환경과 우리 생활에 주는 도움을 생각해요')}
+<div class="sec"><i>1</i>친환경 농업이 지구를 돕는 방법 <em>읽고 빈칸을 채워요</em></div>
+<div class="eco3">
+  <div class="c"><div class="t">${I('c_loach')}물을 지켜요</div>화학 농약과 비료가 빗물에 씻겨 ${B('하천')}과 지하수로 흘러가는 것을 막아요.</div>
+  <div class="c"><div class="t">${I('c_frog')}생물이 돌아와요</div>지렁이, 미꾸라지, 메뚜기, 개구리가 사는 건강한 ${B('생태계')}가 유지돼요.</div>
+  <div class="c"><div class="t">${I('t_compost')}탄소를 저장해요</div>흙 속 유기물이 늘어 공기 중 탄소를 땅속에 저장하는 ${B('탄소 격리')} 효과가 커요.</div>
+</div>
+
+<div class="sec"><i>2</i>O, X 퀴즈 <em>맞으면 O, 틀리면 X</em></div>
+<table class="ox">
+  <tr><td>1</td><td>토마토와 감자는 같은 가지과라서 번갈아 심어도 연작이 될 수 있다.</td><td>O · X <span class="ans">O</span></td></tr>
+  <tr><td>2</td><td>친환경 농업은 일손이 적게 들고 수확량도 항상 더 많다.</td><td>O · X <span class="ans">X</span></td></tr>
+  <tr><td>3</td><td>해충 알을 미리 찾아내는 '예찰'은 농약을 쓰지 않는 농사에서 특히 중요하다.</td><td>O · X <span class="ans">O</span></td></tr>
+  <tr><td>4</td><td>화학 농약을 뿌리면 해충만 죽고 무당벌레 같은 천적은 살아남는다.</td><td>O · X <span class="ans">X</span></td></tr>
+  <tr><td>5</td><td>콩을 기른 땅은 뿌리혹박테리아 덕분에 양분(질소)이 늘어난다.</td><td>O · X <span class="ans">O</span></td></tr>
+</table>
+
+<div class="sec"><i>3</i>친환경 농산물은 왜 더 비쌀까요? <em>까닭을 두 가지 써요</em></div>
+<div class="box" style="font-size:13.5px;line-height:1.7">
+  <span class="ans">예) 손으로 김매기·예찰을 해야 해서 일손이 많이 들어요. / 병해충과 날씨에 약해 수확량이 적을 수 있어요.</span>
+  <div class="wline s"></div><div class="wline s"></div>
+</div>
+
+<div class="sec"><i>4</i>나라면 어떻게 할까요? <em>게임 속 고민 상황</em></div>
+<div class="dilemma">
+  <div class="pic">${I('p_aphid')}진딧물이 잔뜩!<br>옆 마을 아저씨가 화학 농약을 공짜로 준대요</div>
+  <div style="flex:1">
+    <div class="choice"><span>받아서 뿌린다</span><span>거절하고 천연 방제를 한다</span></div>
+    <div class="box" style="font-size:13.5px;line-height:1.7">내 선택과 그 까닭, 그리고 그 선택이 <b>생물·물·우리 농장</b>에 어떤 영향을 줄지 써 봐요.
+      <div class="wline s"></div><div class="wline s"></div><div class="wline s"></div>
+    </div>
+  </div>
+</div>
+<div class="sec"><i>5</i>우리 학교 텃밭을 친환경으로 가꾼다면? <em>배운 방법을 골라 써요</em></div>
+<div class="promise">
+  <div class="c"><div class="t">${I('p_worm')}해충이 생기면</div><span class="ans" style="font-size:12.5px">예) 매일 살피기, 마늘 추출액 뿌리기, 무당벌레 풀기</span><div class="wline s"></div><div class="wline s"></div></div>
+  <div class="c"><div class="t">${I('p_weed')}잡초가 나면</div><span class="ans" style="font-size:12.5px">예) 손으로 뽑기, 볏짚 덮기, 호밀 심기</span><div class="wline s"></div><div class="wline s"></div></div>
+  <div class="c"><div class="t">${I('t_compost')}흙이 힘이 없으면</div><span class="ans" style="font-size:12.5px">예) 완숙 퇴비 주기, 콩·녹비작물 심기</span><div class="wline s"></div><div class="wline s"></div></div>
+</div>
+${foot('3쪽')}</section>`);
+
+/* ---------- 4쪽: 게임 기록 + 실천 ---------- */
+pages.push(`<section class="page">${head('4쪽','④ 친환경 농부 활동 기록과 나의 실천','게임 기록을 남기고, 생활 속 실천을 다짐해요')}
+<div class="sec"><i>1</i>나의 친환경 농장 기록 <em>게임을 마친 뒤 써요</em></div>
+<div class="record">
+  <div class="c">${I('i_house')}<b>엔딩을 본 날</b><span class="fill">일째</span></div>
+  <div class="c">${I('coins')}<b>최종 점수</b><span class="fill">점</span></div>
+  <div class="c">${I('c_hopper')}<b>생물다양성</b><span class="fill">/ 100</span></div>
+  <div class="c">${I('t_compost')}<b>땅속에 저장한 탄소</b><span class="fill">kg</span></div>
+  <div class="c">${I('seal')}<b>받은 인증</b><span class="fill">무농약 · 유기농</span></div>
+  <div class="c">${I('packet')}<b>모은 농업 노트</b><span class="fill">/ 14장</span></div>
+</div>
+
+<div class="sec"><i>2</i>우리 농장에 돌아온 생물에 ✔ 해요</div>
+<div class="cre">
+  <div>${I('c_worm')}지렁이</div><div>${I('c_spider')}거미</div><div>${I('c_loach')}미꾸라지</div><div>${I('c_hopper')}메뚜기</div><div>${I('c_frog')}개구리</div><div>${I('c_firefly')}반딧불이</div>
+</div>
+
+<div class="sec"><i>3</i>우리 집을 초록 집으로! 산 물건에 ✔ 해요 <em>실제 우리 집에 있는 것에는 ○</em></div>
+<div class="items">
+  <div>${I('i_solar')}태양광 패널</div><div>${I('i_led')}LED 조명</div><div>${I('i_insul')}친환경 단열재</div><div>${I('i_fridge')}1등급 냉장고</div><div>${I('i_rain')}빗물 저금통</div>
+  <div>${I('i_tumbler')}텀블러</div><div>${I('i_bag')}장바구니</div><div>${I('i_composter')}음식물 퇴비통</div><div>${I('i_ebike')}전기 자전거</div><div>${I('i_ecar')}친환경 자동차</div>
+</div>
+
+<div class="sec"><i>4</i>지속가능한 미래를 위한 나의 실천 다짐</div>
+<div class="promise">
+  <div class="c"><div class="t">${I('basket')}먹을거리</div><span style="font-size:12px;color:var(--soft)">예) 친환경·제철 농산물 고르기</span><div class="wline s"></div><div class="wline s"></div></div>
+  <div class="c"><div class="t">${I('i_led')}에너지</div><span style="font-size:12px;color:var(--soft)">예) 안 쓰는 플러그 뽑기</span><div class="wline s"></div><div class="wline s"></div></div>
+  <div class="c"><div class="t">${I('i_tumbler')}쓰레기</div><span style="font-size:12px;color:var(--soft)">예) 텀블러·장바구니 쓰기</span><div class="wline s"></div><div class="wline s"></div></div>
+</div>
+<div class="box" style="margin-top:3mm;margin-right:36mm;font-size:13.5px;line-height:1.7">💬 친환경 농부가 되어 보며 새롭게 알게 된 점이나 느낀 점을 써 봐요.
+  <div class="wline s"></div><div class="wline s"></div>
+</div>
+<div class="stamp">${I('sprout')}참 잘했어요</div>
+${foot('4쪽')}</section>`);
+
+/* ---------- 정답지 ---------- */
+pages.push(`<section class="page anspage">${head('정답지','✅ 선생님용 정답과 도움말','학생 답이 조금 달라도 뜻이 맞으면 정답으로 인정해 주세요',true)}
+<h3>① 친환경 농업이란?</h3>
+<div class="box">1. 농약 / 천연 / 퇴비 / 우렁이 / 돌려짓기<br>
+  · 무농약 농산물은 농약을 쓰지 않고 화학비료를 권장량의 일부만 쓴 것, 유기농산물은 농약과 화학비료를 모두 쓰지 않은 것이에요. 실제 유기농 인증은 여러 해의 전환 기간이 필요해요(게임에서는 짧게 줄였어요).</div>
+<h3>② 친환경 농업의 방법</h3>
+<div class="box">1. 진딧물 → 님오일(마늘 추출액·무당벌레도 정답) · 나방 애벌레 → 마늘 추출액(은행잎 추출액도 정답) · 곰팡이병 → 미생물 제제<br>
+  2. 진딧물 / 응애 / 잡초<br>
+  3. 1번 밭: O(토마토와 감자는 둘 다 가지과) · 2번 밭: X(박과 → 콩과)<br>
+  · 감자 대신: 콩, 헤어리베치, 자운영(콩과 → 질소 고정), 호밀(흙을 부드럽게, 잡초 억제), 상추·딸기·브로콜리(다른 과)도 연작은 아니에요.</div>
+<h3>③ 친환경 농업과 지속가능한 미래</h3>
+<div class="box">1. 하천 / 생태계 / 탄소 격리<br>
+  2. O · X · O · X · O<br>
+  3. 예) 손으로 김매기·예찰을 해야 해서 일손이 많이 든다 / 병해충과 날씨에 약해 수확량이 적을 수 있다 / 천연 재료와 인증에 비용이 든다<br>
+  4. 정답은 없어요. 화학 농약을 쓰면 천적과 생물이 함께 사라지고 하천이 오염되며 친환경 인증을 잃는다는 점, 천연 방제는 시간이 걸리지만 생태계를 지킨다는 점을 근거로 들었는지 살펴보세요.<br>
+  5. 해충: 예찰, 천연 방제(마늘·은행잎 추출액, 님오일), 천적, 페로몬 트랩 · 잡초: 손 김매기, 볏짚 덮기, 호밀 · 흙: 완숙 퇴비·깻묵, 콩과 작물, 녹비작물, 돌려짓기</div>
+<h3>④ 활동 기록과 실천</h3>
+<div class="box">· 게임 기록은 학생마다 달라요. 메인 화면의 '📒 내 친환경 노트'에서 모은 노트를 함께 읽으며 정리하면 좋아요.<br>
+  · 토론 질문 예) "농약을 쓰면 왜 메뚜기와 개구리가 사라질까?", "우리 학교 텃밭에서 할 수 있는 친환경 농사 방법은?", "우리 집에서 할 수 있는 탄소중립 실천은?"</div>
+<div class="tipbox" style="margin-top:5mm">${I('grandma')}<span>게임: 3min-playground.com/content/eco-rich.html · 구글·네이버에서 '3분 놀이터' 검색 → 놀이·퀴즈 → '친환경 농부'</span></div>
+${foot('정답지')}</section>`);
+
+document.getElementById('pages').innerHTML = pages.join('');
+const btn = document.getElementById('ansBtn');
+btn.onclick = () => { const on = document.body.classList.toggle('show'); btn.textContent = on ? '🙈 정답 숨기기' : '👀 정답 보이기'; };
+</script>
+</body>
+</html>
