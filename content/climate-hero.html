@@ -7,6 +7,7 @@
 <meta name="description" content="기후 변화로 아파하는 지구를 구하는 초등학생용 RPG 웹게임. 감축·적응·지구공학 중 하나의 힘을 가진 히어로가 되어 가뭄·폭염·스모그·해수면 상승을 해결하며 기후 변화의 모습, 원인, 영향, 사회의 대응, 나의 실천을 배워요.">
 <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
+<script src="../assets/badwords.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
 <style>
@@ -3040,7 +3041,7 @@ async function rankTable(myId){
   const {list,shared}=await Rank.top();
   const medal=['🥇','🥈','🥉','4','5'];
   if(!list.length) return `<p>아직 기록이 없어요. 첫 번째 기후 히어로가 되어 보세요! 🌏</p>`;
-  return `<table class="rank">${list.map((r,i)=>`<tr class="${r.id===myId?'me':''}"><td>${medal[i]}</td><td style="text-align:left">${JOBS[r.job]?JOBS[r.job].icon:({warrior:'🌱',mage:'☁️',archer:'🏹'}[r.job]||'')} ${esc(r.name||'히어로')}</td><td style="color:#e5578a">${(r.score||0).toLocaleString()}점</td><td style="font-size:13px;color:#999">${fmtTime(r.time||0)}</td></tr>`).join('')}</table><p style="font-size:12px;color:#aaa">${shared?'🌐 3분 놀이터에서 함께하는 모두의 랭킹':'💾 이 기기에 저장된 랭킹'}</p>`;
+  return `<table class="rank">${list.map((r,i)=>`<tr class="${r.id===myId?'me':''}"><td>${medal[i]}</td><td style="text-align:left">${JOBS[r.job]?JOBS[r.job].icon:({warrior:'🌱',mage:'☁️',archer:'🏹'}[r.job]||'')} ${esc((window.Badwords ? Badwords.mask((r.name||'히어로')) : (r.name||'히어로')))}</td><td style="color:#e5578a">${(r.score||0).toLocaleString()}점</td><td style="font-size:13px;color:#999">${fmtTime(r.time||0)}</td></tr>`).join('')}</table><p style="font-size:12px;color:#aaa">${shared?'🌐 3분 놀이터에서 함께하는 모두의 랭킹':'💾 이 기기에 저장된 랭킹'}</p>`;
 }
 async function openRank(){
   const b=openModal(`<button class="mclose" id="x">✕</button><h3>🏆 기후 히어로 랭킹 TOP 5</h3><div id="rk"><p>불러오는 중… ⏳</p></div>`);
@@ -3153,7 +3154,7 @@ async function ending(){
   const timeBonus=Math.max(0,3000-Math.floor(G.elapsed));
   const cardBonus=G.cards.size===Object.keys(CARDS).length?500:0;
   G.score+=timeBonus+cardBonus; updateHUD();
-  const en={id:'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,7),name:G.name,job:G.job,score:G.score,time:Math.floor(G.elapsed),date:new Date().toISOString().slice(0,10)};
+  const en={id:'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,7),name:(window.Badwords ? Badwords.mask(G.name) : G.name),job:G.job,score:G.score,time:Math.floor(G.elapsed),date:new Date().toISOString().slice(0,10)};
   clearSave();
   const b=openModal(`<h3 style="font-size:32px">🏆 미션 컴플리트!</h3><p><b>${esc(G.name)}</b> 님은 진정한 <b>${jobP().name}</b>예요!</p>
     <div class="stats"><div class="stat">최종 점수<b>${G.score.toLocaleString()}</b></div><div class="stat">시간 보너스<b>+${timeBonus}</b></div><div class="stat">도감 완성 보너스<b>+${cardBonus}</b></div><div class="stat">플레이 시간<b style="font-size:18px">${fmtTime(G.elapsed)}</b></div></div>
@@ -3239,7 +3240,7 @@ $('bCards').onclick=()=>{ audioInit(); openBook(true); };
 $('bRank').onclick=()=>{ audioInit(); openRank(); };
 $('nick').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); $('nick').blur(); $('bGo').click(); } });
 $('nick').addEventListener('focus',()=>setTimeout(()=>{ try{ $('nick').scrollIntoView({block:'center',behavior:'smooth'}); }catch(e){} },300));
-$('bGo').onclick=()=>{ const n=$('nick').value.trim(); if(!n){ $('nick').focus(); toast('이름(닉네임)을 입력해 주세요!'); return; } G.name=n.slice(0,8); startGame(false); };
+$('bGo').onclick=()=>{ const n=$('nick').value.trim(); if(!n){ $('nick').focus(); toast('이름(닉네임)을 입력해 주세요!'); return; } if(window.Badwords && Badwords.has(n)){ $('nick').value=''; $('nick').focus(); toast(Badwords.MESSAGE); return; } G.name=n.slice(0,8); startGame(false); };
 $('titleEarth').innerHTML=`<div class="titleEarth">${earthSVG(1)}</div>`;
 $('titleEarth').querySelector('svg').style.width='100%';
 titleArt();

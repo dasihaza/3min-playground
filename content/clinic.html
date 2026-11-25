@@ -7,6 +7,7 @@
 <meta name="description" content="3학년 과학 '감염병과 건강한 생활' 1인칭 병원놀이 웹게임. 소아과 전문의 시험을 보고, 병원을 열어 3일 동안 어린이 환자를 진찰해요. 청진기와 질문으로 독감·결핵·수두·식중독·유행성 각결막염·파상풍·수족구병·무좀·폐렴·아데노바이러스 감염증을 알아맞혀요.">
 <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
+<script src="../assets/badwords.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
 <style>
@@ -510,6 +511,7 @@ function playCine(key){
 })();
 $('startBtn').onclick=async()=>{
   ac(); sfx.fan();
+  if(window.Badwords && Badwords.has($('docName').value)){ alert(Badwords.MESSAGE); $('docName').value=''; $('docName').focus(); return; }
   G.doc=($('docName').value||'').trim().replace(/[<>&"']/g,'')||'튼튼'; lsSet('clinicDoc',G.doc==='튼튼'?'':G.doc);
   G.timeScore=0; G.results=[]; G.dayBonus=[]; G.usedNames=new Set();
   await playCine('intro1');
@@ -892,7 +894,7 @@ async function rankTable(myId){
   const medal=['🥇','🥈','🥉','4','5'];
   if(!list.length) return '<p>아직 기록이 없어요. 첫 번째 명의가 되어 보세요! 🩺</p>';
   const mine=myId&&!list.some(r=>r.id===myId)?'<p style="font-size:14px;color:#9a8aa8">이번 기록은 TOP 5 밖이에요. 다시 도전해 봐요!</p>':'';
-  return `<table class="rank">${list.map((r,i)=>`<tr class="${r.id===myId?'me':''}"><td>${medal[i]}</td><td style="text-align:left">👩‍⚕️ ${esc(r.name||'튼튼')} 원장님</td><td style="color:#e5578a;text-align:right">${r.score}점</td><td style="font-size:13px;color:#999;text-align:right">바른 진료 ${typeof r.ok==='number'?r.ok:'-'}/21</td></tr>`).join('')}</table>${mine}<p style="font-size:12px;color:#aaa;margin:2px">${shared?'🌐 3분 놀이터에서 함께하는 모두의 랭킹':'💾 이 기기에 저장된 랭킹'}</p>`;
+  return `<table class="rank">${list.map((r,i)=>`<tr class="${r.id===myId?'me':''}"><td>${medal[i]}</td><td style="text-align:left">👩‍⚕️ ${esc((window.Badwords ? Badwords.mask((r.name||'튼튼')) : (r.name||'튼튼')))} 원장님</td><td style="color:#e5578a;text-align:right">${r.score}점</td><td style="font-size:13px;color:#999;text-align:right">바른 진료 ${typeof r.ok==='number'?r.ok:'-'}/21</td></tr>`).join('')}</table>${mine}<p style="font-size:12px;color:#aaa;margin:2px">${shared?'🌐 3분 놀이터에서 함께하는 모두의 랭킹':'💾 이 기기에 저장된 랭킹'}</p>`;
 }
 $('rankBtn').onclick=async()=>{ ac(); sfx.pop();
   const b=openModal('<button class="mclose" id="x">✕</button><h3>🏆 명의 랭킹 TOP 5</h3><p style="margin:0">3일 진료를 마치면 입력한 이름으로 자동 등록돼요!</p><div id="rk2"><p>불러오는 중… ⏳</p></div>');

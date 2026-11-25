@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
+<script src="../assets/badwords.js"></script>
 <style>
   :root{
     --sky:#E4F5FF; --cream:#FFF9EF; --card:#FFFFFF;
@@ -1829,7 +1830,7 @@ function rankHtml(m){
     var mine = (r.key && r.key === myRowKey) ? " me" : "";
     h += '<div class="rank-row' + (i === 0 ? " first" : "") + mine + '">' +
            '<span class="pos">' + pos[i] + '</span>' +
-           '<span class="who">' + esc(r.name) + '</span>' +
+           '<span class="who">' + esc((window.Badwords ? Badwords.mask(r.name) : r.name)) + '</span>' +
            '<span class="amt">' + (Number(r.score) || 0).toLocaleString("ko-KR") + '점</span>' +
          '</div>';
   }
@@ -1864,6 +1865,7 @@ function submitRank(){
   var inp = $("name-input");
   var nick = (inp.value || "").trim().slice(0, 8);
   if(!nick){ alert("이름을 적어 주세요!"); inp.focus(); return; }
+  if(window.Badwords && Badwords.has(nick)){ alert(Badwords.MESSAGE); inp.value = ""; inp.focus(); return; }
   var btn = $("btn-save");
   btn.disabled = true; btn.textContent = "올리는 중…";
   saveRank(nick, score).then(function(ok){
