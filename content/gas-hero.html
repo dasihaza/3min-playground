@@ -933,7 +933,10 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
     const g = GAS[id];
     progress.found[id] = true; saveProgress(); renderDex();
     const fb = $("fb"); fb.textContent = `정답! ${g.name}${josa(g.name, "은", "는")} ${g.feat}`; fb.className = "fb ok";
-    setTimeout(() => { $("ov").hidden = true; Sound.duck(false); G.mode = "solve"; G.solveT = 0; Sound.hiss(); }, 1500);
+    // 정답 뒤 1.5초 사이에 '다시'·단계 버튼을 눌러 새 판이 시작됐으면 이 타이머는 아무것도 하지 않아요
+    // (그러지 않으면 새 판이 체력 100인 채로 바로 통과돼 점수가 비정상적으로 높아져요)
+    const g0 = G;
+    setTimeout(() => { if (G !== g0 || G.mode !== "quiz") return; $("ov").hidden = true; Sound.duck(false); G.mode = "solve"; G.solveT = 0; Sound.hiss(); }, 1500);
   }
 
   function totalScore() { return STAGES.reduce((a, _, i) => a + (progress.scores[i] || 0), 0); }
@@ -1032,7 +1035,9 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
       for (const i of $("card").querySelectorAll(".bossbar i")) i.className = "";
       $("card").querySelectorAll(".bossbar i").forEach((i, k) => { if (k >= G.bossHP) i.className = "off"; });
       const b = bossPos(); burst(b.x, b.y, 18, [g.c, "#fff"], 260, .8, true);
+      const g0 = G;
       setTimeout(() => {
+        if (G !== g0 || G.mode !== "quiz") return;   // 그사이 새 판이 시작됐으면 무시해요
         G.qi++;
         $("ov").hidden = true; Sound.duck(false);
         if (G.qi < BOSS_N) { G.mode = "play"; kickBack(); }
