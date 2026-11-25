@@ -572,13 +572,15 @@ var CROPS = {
   tomato:  {name:'토마토', emoji:'🍅', fam:'가지과', seed:15, days:5, yield:5, price:26, use:25},
   potato:  {name:'감자', emoji:'🥔', fam:'가지과', seed:12, days:4, yield:5, price:19, use:20},
   melon:   {name:'수박', emoji:'🍉', fam:'박과',   seed:25, days:7, yield:2, price:90, use:30},
+  berry:   {name:'딸기', emoji:'🍓', fam:'장미과', seed:22, days:6, yield:3, price:45, use:25},
+  broc:    {name:'브로콜리', emoji:'🥦', fam:'십자화과', seed:18, days:5, yield:2, price:55, use:25},
   bean:    {name:'콩',   emoji:'🫘', fam:'콩과',   seed:6,  days:4, yield:3, price:20, use:0, fix:true},
   vetch:   {name:'헤어리베치', emoji:'🍃', fam:'녹비', seed:5, days:3, gm:true, soil:15, nut:32, desc:'콩과 녹비. 질소를 듬뿍'},
   milk:    {name:'자운영', emoji:'🌸', fam:'녹비', seed:5, days:3, gm:true, soil:12, nut:28, desc:'콩과 녹비. 꽃도 예뻐요'},
   rye:     {name:'호밀', emoji:'🌾', fam:'녹비', seed:5, days:3, gm:true, soil:20, nut:10, block:6, desc:'흙을 부드럽게, 잡초를 막아요'}
 };
 var RICE = {name:'쌀', emoji:'🍚', seed:15, days:8, yield:8, price:22, use:20};
-var SELLABLE = ['lettuce','tomato','potato','melon','bean','rice'];
+var SELLABLE = ['lettuce','tomato','potato','melon','berry','broc','bean','rice'];
 
 var PESTS = {
   aphid: {name:'진딧물', emoji:'🟢', fix:'님오일 · 마늘 추출액 · 무당벌레'},
@@ -645,7 +647,7 @@ var CREATURES = [
 ];
 
 var UNIQUES = [
-  {id:'u_bee', name:'토종벌 벌통', icon:'🐝', sat:4, eff:'토마토·수박 수확 +1', desc:'산속 빈집에서 찾은 토종벌 가족! 벌이 꽃가루를 옮겨 줘서 토마토·수박 수확이 +1개씩 늘어요.'},
+  {id:'u_bee', name:'토종벌 벌통', icon:'🐝', sat:4, eff:'토마토·수박·딸기 수확 +1', desc:'산속 빈집에서 찾은 토종벌 가족! 벌이 꽃가루를 옮겨 줘서 토마토·수박·딸기 수확이 +1개씩 늘어요.'},
   {id:'u_seed', name:'할머니의 토종 씨앗 보따리', icon:'🌰', sat:4, eff:'매일 아침 씨앗 1봉지', desc:'헛간 깊숙이 숨겨진 대대로 이어 온 토종 씨앗. 매일 아침 씨앗 1봉지가 가방에 들어와요.'},
   {id:'u_wind', name:'고쳐 쓴 작은 풍력 발전기', icon:'🌬️', sat:4, eff:'바람 전기 판매 +12/일', desc:'재활용 센터에서 찾아 고쳐 쓰는 바람개비 발전기. 바람으로 전기를 만들어 하루 +12를 벌어요.'}
 ];
@@ -706,7 +708,7 @@ function newGame(){
   return s;
 }
 function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(S)); }catch(e){} }
-function load(){ try{ var d = localStorage.getItem(SAVE_KEY); if(d){ var o = JSON.parse(d); if(o && o.v===1){ o.bag=o.bag||{}; o.exLog=o.exLog||[]; o.exCount=o.exCount||0; return o; } } }catch(e){} return null; }
+function load(){ try{ var d = localStorage.getItem(SAVE_KEY); if(d){ var o = JSON.parse(d); if(o && o.v===1){ SELLABLE.forEach(function(k){ if(!o.inv[k]) o.inv[k]={n:0,sp:0}; if(!o.prices[k]) o.prices[k]=1; }); o.bag=o.bag||{}; o.exLog=o.exLog||[]; o.exCount=o.exCount||0; return o; } } }catch(e){} return null; }
 
 /* ================= 계산 도우미 ================= */
 function $(id){ return document.getElementById(id); }
@@ -1230,7 +1232,7 @@ function harvest(p, el){
     note('green'); render(); return;
   }
   if(!useSt(1)) return;
-  var y = c.yield * (0.6 + p.soil/250 + p.nut/250) - Math.floor(p.dmg/2) + (own('u_bee') && (p.crop==='tomato'||p.crop==='melon') ? 1 : 0);
+  var y = c.yield * (0.6 + p.soil/250 + p.nut/250) - Math.floor(p.dmg/2) + (own('u_bee') && (p.crop==='tomato'||p.crop==='melon'||p.crop==='berry') ? 1 : 0);
   y = Math.max(1, Math.round(y));
   var sp = 0;
   if(p.dmg===0) sp = p.soil>=75 ? y : p.soil>=60 ? Math.ceil(y/2) : 0;
@@ -1466,7 +1468,7 @@ function nightProcess(){
   log.push(['🏠','생활비 -'+lv+(savings()?' (친환경 집 덕분에 '+savings()+' 절약)':'')]);
   if(own('solar')){ S.money += 20; log.push(['☀️','태양광 전기 판매 +20']); }
   if(own('u_wind')){ S.money += 12; log.push(['🌬️','풍력 발전기 전기 판매 +12']); }
-  if(own('u_seed')){ var sk = Object.keys(CROPS)[Math.floor(rnd()*8)]; S.bag['s_'+sk]=bagN('s_'+sk)+1; log.push(['🌰','토종 씨앗 보따리에서 '+CROPS[sk].emoji+' '+CROPS[sk].name+' 씨앗이 나왔어요']); }
+  if(own('u_seed')){ var sk = Object.keys(CROPS)[Math.floor(rnd()*Object.keys(CROPS).length)]; S.bag['s_'+sk]=bagN('s_'+sk)+1; log.push(['🌰','토종 씨앗 보따리에서 '+CROPS[sk].emoji+' '+CROPS[sk].name+' 씨앗이 나왔어요']); }
 
   // 2) 천적이 먼저 일해요
   if(S.lady>0) activePlots().forEach(function(p){ p.probs = p.probs.filter(function(q){ return q.t!=='aphid'; }); });
@@ -1587,8 +1589,8 @@ function rollEvent(){
   if(e==='heat'){ S.tomorrow = 'heat'; return {log:['📻','일기 예보: 내일 폭염! 볏짚을 덮어 두면 흙이 촉촉해요']}; }
   if(e==='order'){
     var who = ['학교 급식실','동네 반찬 가게','도시 꾸러미 가족','어린이집'][Math.floor(rnd()*4)];
-    var ks = ['lettuce','tomato','potato','bean','rice','melon'], k = ks[Math.floor(rnd()*ks.length)];
-    var n = k==='melon' ? 2 : 3 + Math.floor(rnd()*4);
+    var ks = ['lettuce','tomato','potato','bean','rice','melon','berry','broc'], k = ks[Math.floor(rnd()*ks.length)];
+    var n = k==='melon' ? 2 : (k==='berry'||k==='broc') ? 2 + Math.floor(rnd()*2) : 3 + Math.floor(rnd()*4);
     S.order = {who:who, k:k, n:n, left:4};
     return {log:['📦', who+'에서 친환경 '+cinfo(k).name+' '+n+'개를 주문했어요! (시장에서 확인)']};
   }
