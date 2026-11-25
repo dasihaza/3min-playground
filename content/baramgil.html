@@ -7,6 +7,7 @@
 <meta name="description" content="바람은 고기압에서 저기압으로 불어요. 고기압은 밀어내고 저기압은 빨아들이는 바람을 타고 꼬마 기상 풍선을 관측소까지 보내는 초등학생용 일기도 퍼즐 게임.">
 <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
+<script src="../assets/badwords.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
@@ -1007,7 +1008,7 @@ kbd { font-family: var(--f-display); font-size: 13px; border-radius: 7px; paddin
     if (!msg.dataset.sticky) { msg.textContent = note; msg.className = "msg " + cls; btn.disabled = !can; }
     nick.disabled = !writable;
     btn.textContent = mine ? "기록 갱신" : "랭킹 등록";
-    if (mine && !nick.value && document.activeElement !== nick) nick.value = cleanNick(mine.nick);
+    if (mine && !nick.value && document.activeElement !== nick) nick.value = (window.Badwords ? Badwords.mask(cleanNick(mine.nick)) : cleanNick(mine.nick));
 
     const board = $("board");
     if (Rank.status !== "ready") {
@@ -1028,7 +1029,7 @@ kbd { font-family: var(--f-display); font-size: 13px; border-radius: 7px; paddin
       const no = document.createElement("span"); no.className = "no"; no.textContent = i + 1;
       const img = document.createElement("img"); img.alt = "";
       if (ps[r.id]) img.src = ps[r.id].avatarUrl; else img.style.visibility = "hidden";
-      const nm = document.createElement("span"); nm.className = "nm"; nm.textContent = cleanNick(r.nick);
+      const nm = document.createElement("span"); nm.className = "nm"; nm.textContent = (window.Badwords ? Badwords.mask(cleanNick(r.nick)) : cleanNick(r.nick));
       if (r.id === Rank.uid) { const me = document.createElement("small"); me.textContent = "나"; nm.appendChild(me); }
       const sc = document.createElement("span"); sc.className = "sc"; sc.textContent = cleanScore(r.score) + "점";
       li.append(no, img, nm, sc); board.appendChild(li);
@@ -1040,6 +1041,7 @@ kbd { font-family: var(--f-display); font-size: 13px; border-radius: 7px; paddin
     const msg = $("rankMsg"), btn = $("rankBtn");
     const nick = cleanNick($("nick").value);
     if (!nick) { msg.textContent = "별명을 한 글자 이상 적어 주세요."; msg.className = "msg err"; return; }
+    if (window.Badwords && Badwords.has(nick)) { msg.textContent = Badwords.MESSAGE; msg.className = "msg err"; $("nick").value = ""; $("nick").focus(); return; }
     if (!Rank.save || !Rank.uid || clearedCount() < LEVELS.length) return;
     btn.disabled = true; msg.dataset.sticky = "1"; msg.textContent = "등록하는 중…"; msg.className = "msg";
     const body = { nick, score: totalScore(), levels: LEVELS.map((_, i) => (progress.scores || [])[i] || 0), at: new Date().toISOString() };

@@ -7,6 +7,7 @@
 <meta name="description" content="고체·액체·기체에서 열은 어떻게 이동할까요? 냄비 손잡이 고르기, 욕조 물 데우기, 거실 난방 미션을 깨며 한파 대왕 꽁꽁이에게서 우리 집을 지키는 5학년 과학 웹게임.">
 <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
+<script src="../assets/badwords.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
@@ -886,13 +887,14 @@ button:disabled { opacity: .5; cursor: default; }
     if (Rank.status === "loading") return;
     if (Rank.status === "off") { board.innerHTML = `<li class="empty">순위표를 불러오지 못했어요.</li>`; return; }
     const rows = Rank.rows.slice().sort((a, b) => cleanScore(b.score) - cleanScore(a.score)).slice(0, 5);
-    board.innerHTML = rows.length ? rows.map((r, i) => `<li class="${r.id === Rank.uid ? "me" : ""}"><span class="no">${["🥇", "🥈", "🥉"][i] || (i + 1)}</span><span class="nm">${esc(r.nick)}</span><span>${cleanScore(r.score)}점</span></li>`).join("")
+    board.innerHTML = rows.length ? rows.map((r, i) => `<li class="${r.id === Rank.uid ? "me" : ""}"><span class="no">${["🥇", "🥈", "🥉"][i] || (i + 1)}</span><span class="nm">${esc((window.Badwords ? Badwords.mask(r.nick) : r.nick))}</span><span>${cleanScore(r.score)}점</span></li>`).join("")
       : `<li class="empty">아직 등록된 기록이 없어요. 첫 번째 주인공이 되어 보세요!</li>`;
   }
   $("rankForm").addEventListener("submit", async e => {
     e.preventDefault();
     const nick = $("nick").value.trim().slice(0, 12), msg = $("rankMsg");
     if (!nick || !Rank.save || progress.scores.some(s => !s)) return;
+    if (window.Badwords && Badwords.has(nick)) { msg.textContent = Badwords.MESSAGE; msg.className = "msg err"; $("nick").value = ""; $("nick").focus(); return; }
     $("rankBtn").disabled = true; msg.dataset.sticky = "1"; msg.className = "msg"; msg.textContent = "등록하는 중이에요…";
     try { await Rank.save({ nick, score: total(), levels: progress.scores.slice(), at: Date.now() }); msg.textContent = "✅ 등록했어요!"; msg.className = "msg ok"; }
     catch (err) { msg.textContent = "등록하지 못했어요. 잠시 뒤에 다시 눌러 주세요."; msg.className = "msg err"; }
