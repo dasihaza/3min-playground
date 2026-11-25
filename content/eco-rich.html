@@ -10,6 +10,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="../assets/eco-rich/bg_title.webp">
+<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
+<script src="../assets/badwords.js"></script>
 <style>
   :root{
     --paper:#FFFAF0; --paper2:#FBF1DC; --paper3:#F5E6C8;
@@ -336,6 +339,46 @@
   .bolts i.bonus{background:radial-gradient(circle at 35% 30%,#E6F7FF,var(--sky) 45%,var(--sky-d));box-shadow:0 2px 0 #3F86B3;}
   .dock .btn{white-space:nowrap;}
 
+  /* ===== 랭킹 · 결과 · 엔딩 ===== */
+  .intro-extra{display:flex;justify-content:center;margin-top:14px;}
+  .rank-list{display:grid;gap:7px;}
+  .rank-row{display:flex;align-items:center;gap:10px;background:#fff;border-radius:16px;padding:8px 12px;box-shadow:0 0 0 2px var(--line);}
+  .rank-row .pos{width:30px;text-align:center;font-family:'Jua',sans-serif;font-size:18px;color:var(--wood-d);flex:none;}
+  .rank-row .who{flex:1;min-width:0;font-family:'Jua',sans-serif;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .rank-row .who small{font-family:'Gowun Dodum',sans-serif;font-size:12px;color:var(--ink-soft);margin-left:4px;}
+  .rank-row .amt{font-family:'Jua',sans-serif;font-size:17px;color:var(--leaf-d);flex:none;}
+  .rank-row.first{background:linear-gradient(180deg,#FFF6D6,#FFE9A8);box-shadow:0 0 0 2px #F2C94C;}
+  .rank-row.me{outline:3px dashed var(--rose);outline-offset:1px;}
+  .rank-empty{text-align:center;font-family:'Gaegu',cursive;font-weight:700;font-size:17px;color:var(--ink-soft);padding:10px;}
+  .rank-note{font-size:12px;color:var(--ink-soft);text-align:center;margin:8px 0 0;}
+  .result{position:fixed;inset:0;z-index:92;overflow:auto;padding:20px 14px 40px;display:none;
+    background:linear-gradient(180deg,rgba(255,250,240,.86),var(--paper) 60%),url('../assets/eco-rich/bg_title.webp') center top/cover;}
+  .result.on{display:block;animation:fade .4s;}
+  .result .card{max-width:520px;margin:10px auto 0;text-align:center;}
+  .result .rimg{width:130px;height:130px;object-fit:contain;margin:-4px auto 0;display:block;animation:bob 2.6s ease-in-out infinite;}
+  .result h2{font-family:'Jua',sans-serif;font-weight:400;font-size:26px;margin:4px 0 2px;color:var(--wood-d);}
+  .result .sub{margin:0 0 10px;color:var(--ink-soft);}
+  .result .score{font-family:'Jua',sans-serif;font-size:52px;color:var(--leaf-d);line-height:1.1;text-shadow:0 3px 0 #fff;}
+  .result .score small{font-size:20px;}
+  .result .brk{text-align:left;font-size:14px;margin:10px 0 14px;background:#fff;border-radius:16px;padding:8px 14px;box-shadow:0 0 0 2px var(--line);}
+  .result .brk div{display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:2px dashed var(--line);}
+  .result .brk div:last-child{border-bottom:0;}
+  .result .brk b{font-family:'Jua',sans-serif;font-weight:400;}
+  .namebox{display:flex;gap:8px;margin:0 0 14px;}
+  .namebox input{flex:1;min-width:0;border:0;border-radius:14px;padding:10px 14px;font:inherit;font-size:16px;box-shadow:0 0 0 2px var(--line);background:#fff;}
+  .result .rbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;}
+  .result .rbtns .btn{flex:1 1 140px;font-size:16px;white-space:nowrap;padding:12px 10px;}
+  .endfx{position:fixed;inset:0;z-index:99;background:#1c1a16;display:none;align-items:center;justify-content:center;}
+  .endfx.on{display:flex;}
+  .endfx video{width:100%;height:100%;object-fit:contain;background:#1c1a16;}
+  .endtxt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;pointer-events:none;opacity:0;transition:opacity 1.2s ease;}
+  .endtxt.on{opacity:1;}
+  .endtxt img{width:min(120px,24vw);animation:sway 3s ease-in-out infinite;}
+  .endtxt p{margin:0;text-align:center;font-family:'Jua',sans-serif;font-size:clamp(30px,7vw,62px);line-height:1.25;color:#3E8A3D;
+    text-shadow:0 3px 0 #fff,0 0 24px rgba(255,255,255,.9);}
+  .endskip{position:absolute;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));border:0;border-radius:99px;padding:8px 16px;
+    background:rgba(255,255,255,.85);font-family:'Jua',sans-serif;font-size:15px;color:var(--wood-d);}
+
   /* ===== 설명 말풍선 ===== */
   .tip{position:fixed;z-index:97;max-width:260px;background:#fff;color:var(--ink);border-radius:16px;padding:9px 12px 10px;
     font-size:13px;line-height:1.5;pointer-events:none;opacity:0;transform:translateY(4px);transition:opacity .12s, transform .12s;
@@ -433,6 +476,14 @@
         <button class="btn" id="btnContinue">▶ 이어 하기</button>
         <button class="btn orange" id="btnNew">🌱 새로 시작</button>
       </div>
+      <p class="small" style="text-align:center;margin:12px 0 0;">⏳ 30일 안에 <b>탄소중립 마스터(만족도 100)</b>가 되고 3일 동안 유지하면 엔딩! 빨리 해낼수록 점수가 높아요.</p>
+      <div class="intro-extra"><button class="btn ghost" id="btnNotes">📒 내 친환경 노트 <span id="nbCount"></span></button></div>
+    </div>
+    <div class="card" style="margin:20px 10px 0;">
+      <span class="tape y"></span>
+      <h2 class="sec" style="justify-content:center;">🏆 초록 부자 랭킹 TOP 5</h2>
+      <div class="rank-list" id="rankIntro"></div>
+      <p class="rank-note" id="rankNoteIntro"></p>
     </div>
   </section>
 
@@ -479,7 +530,7 @@
         </div>
         <div class="card skyc">
           <img src="../assets/eco-rich/sign.webp" alt="">
-          <div><h2 class="sec" style="margin-bottom:4px;">밭 넓히기</h2>
+          <div><h2 class="sec" style="margin-bottom:4px;">밭 넓히기 <small>1칸 💰200</small></h2>
           <p class="small" style="margin:0 0 8px;">더 많이 벌지만, 그만큼 일손도 많이 필요해요.</p>
           <button class="btn blue sm" id="buyLand"></button></div>
         </div>
@@ -576,6 +627,12 @@
 <div class="veil" id="veil"><div class="modal" id="modal"></div></div>
 <div class="toast" id="toast"></div>
 <div class="tip" id="tip"></div>
+<div class="result" id="result"></div>
+<div class="endfx" id="endfx">
+  <video id="endVid" playsinline preload="none" poster="../assets/eco-rich/ending_poster.jpg"></video>
+  <div class="endtxt" id="endTxt"><img src="../assets/eco-rich/sprout.webp" alt=""><p>친환경 생활을<br>실천합시다.</p></div>
+  <button class="endskip" id="endSkip">건너뛰기 ▶</button>
+</div>
 <div class="night" id="night">🌙 밤이 지나가요…</div>
 
 <script>
@@ -584,18 +641,18 @@
 
 /* ================= 데이터 ================= */
 var CROPS = {
-  lettuce: {name:'상추', emoji:'🥬', fam:'국화과', seed:8,  days:3, yield:4, price:17, use:15},
-  tomato:  {name:'토마토', emoji:'🍅', fam:'가지과', seed:15, days:5, yield:5, price:26, use:25},
-  potato:  {name:'감자', emoji:'🥔', fam:'가지과', seed:12, days:4, yield:5, price:19, use:20},
-  melon:   {name:'수박', emoji:'🍉', fam:'박과',   seed:25, days:7, yield:2, price:90, use:30},
-  berry:   {name:'딸기', emoji:'🍓', fam:'장미과', seed:22, days:6, yield:3, price:45, use:25},
-  broc:    {name:'브로콜리', emoji:'🥦', fam:'십자화과', seed:18, days:5, yield:2, price:55, use:25},
-  bean:    {name:'콩',   emoji:'🫘', fam:'콩과',   seed:6,  days:4, yield:3, price:20, use:0, fix:true},
+  lettuce: {name:'상추', emoji:'🥬', fam:'국화과', seed:8,  days:3, yield:8, price:17, use:15},
+  tomato:  {name:'토마토', emoji:'🍅', fam:'가지과', seed:15, days:5, yield:9, price:26, use:25},
+  potato:  {name:'감자', emoji:'🥔', fam:'가지과', seed:12, days:4, yield:9, price:19, use:20},
+  melon:   {name:'수박', emoji:'🍉', fam:'박과',   seed:25, days:7, yield:3, price:90, use:30},
+  berry:   {name:'딸기', emoji:'🍓', fam:'장미과', seed:22, days:6, yield:5, price:45, use:25},
+  broc:    {name:'브로콜리', emoji:'🥦', fam:'십자화과', seed:18, days:5, yield:4, price:55, use:25},
+  bean:    {name:'콩',   emoji:'🫘', fam:'콩과',   seed:6,  days:4, yield:5, price:20, use:0, fix:true},
   vetch:   {name:'헤어리베치', emoji:'🍃', fam:'녹비', seed:5, days:3, gm:true, soil:15, nut:32, desc:'콩과 녹비. 질소를 듬뿍'},
   milk:    {name:'자운영', emoji:'🌸', fam:'녹비', seed:5, days:3, gm:true, soil:12, nut:28, desc:'콩과 녹비. 꽃도 예뻐요'},
   rye:     {name:'호밀', emoji:'🌾', fam:'녹비', seed:5, days:3, gm:true, soil:20, nut:10, block:6, desc:'흙을 부드럽게, 잡초를 막아요'}
 };
-var RICE = {name:'쌀', emoji:'🍚', seed:15, days:8, yield:8, price:22, use:20};
+var RICE = {name:'쌀', emoji:'🍚', seed:15, days:8, yield:15, price:22, use:20};
 var SELLABLE = ['lettuce','tomato','potato','melon','berry','broc','bean','rice'];
 
 var PESTS = {
@@ -635,21 +692,21 @@ var TOOLS = [
 var TOOLMAP = {}; TOOLS.forEach(function(g){ g.items.forEach(function(t){ TOOLMAP[t.id]=t; }); });
 
 var ITEMS = [
-  {id:'led', cat:'home', name:'고효율 LED 조명', icon:'💡', cost:150, sat:6, save:4, desc:'형광등보다 전기를 훨씬 적게 쓰고 오래가요.'},
-  {id:'paper', cat:'home', name:'친환경 벽지', icon:'🖼️', cost:260, sat:7, desc:'해로운 화학 물질이 적은 천연 소재 벽지예요. 실내 공기가 맑아져요.'},
-  {id:'floor', cat:'home', name:'친환경 바닥재', icon:'🪵', cost:320, sat:7, desc:'원목·천연 소재로 만든 바닥재예요. 맨발이 행복해요.'},
-  {id:'insul', cat:'home', name:'친환경 단열재', icon:'🧱', cost:450, sat:9, save:8, desc:'여름엔 시원, 겨울엔 따뜻! 냉난방 에너지가 크게 줄어요.'},
-  {id:'fridge', cat:'home', name:'1등급 냉장고', icon:'🧊', cost:380, sat:7, save:4, desc:'에너지소비효율 1등급이라 전기요금이 줄어요.'},
-  {id:'washer', cat:'home', name:'1등급 세탁기', icon:'🫧', cost:340, sat:6, save:3, stam:1, desc:'전기·물을 아끼고, 집안일 시간이 줄어 일손이 늘어요.'},
-  {id:'aircon', cat:'home', name:'1등급 에어컨', icon:'❄️', cost:420, sat:7, save:4, desc:'같은 시원함을 더 적은 전기로 만들어요.'},
-  {id:'solar', cat:'home', name:'태양광 패널', icon:'☀️', cost:700, sat:12, income:20, desc:'지붕에서 햇빛으로 전기를 만들어요. 남는 전기는 팔아요!'},
-  {id:'rain', cat:'home', name:'빗물 저금통', icon:'🛢️', cost:180, sat:4, save:2, desc:'빗물을 모아 텃밭과 청소에 써요.'},
-  {id:'tumbler', cat:'goods', name:'보온병 · 텀블러', icon:'🥤', cost:30, sat:3, desc:'일회용 컵 대신 내 컵! 음료도 오래 따뜻해요.'},
-  {id:'bag', cat:'goods', name:'장바구니', icon:'🛍️', cost:20, sat:3, desc:'비닐봉지를 쓰지 않아요.'},
-  {id:'brush', cat:'goods', name:'대나무 칫솔 · 고체 비누', icon:'🪥', cost:40, sat:3, desc:'플라스틱 쓰레기를 줄여요.'},
-  {id:'composter', cat:'goods', name:'음식물 퇴비통', icon:'🪣', cost:250, sat:5, desc:'음식물 찌꺼기가 퇴비로! 매일 퇴비 1번은 공짜예요.'},
-  {id:'ebike', cat:'goods', name:'전기 자전거', icon:'🚲', cost:450, sat:6, stam:1, desc:'밭까지 쌩쌩! 이동 시간이 줄어 일손이 늘어요.'},
-  {id:'ecar', cat:'goods', name:'친환경 전기차', icon:'🚙', cost:1200, sat:15, desc:'배기가스 없이 도시까지 직접 배달! 판매 가격 +15%.'}
+  {id:'led', cat:'home', name:'고효율 LED 조명', icon:'💡', cost:250, sat:6, save:4, desc:'형광등보다 전기를 훨씬 적게 쓰고 오래가요.'},
+  {id:'paper', cat:'home', name:'친환경 벽지', icon:'🖼️', cost:360, sat:7, desc:'해로운 화학 물질이 적은 천연 소재 벽지예요. 실내 공기가 맑아져요.'},
+  {id:'floor', cat:'home', name:'친환경 바닥재', icon:'🪵', cost:420, sat:7, desc:'원목·천연 소재로 만든 바닥재예요. 맨발이 행복해요.'},
+  {id:'insul', cat:'home', name:'친환경 단열재', icon:'🧱', cost:550, sat:9, save:8, desc:'여름엔 시원, 겨울엔 따뜻! 냉난방 에너지가 크게 줄어요.'},
+  {id:'fridge', cat:'home', name:'1등급 냉장고', icon:'🧊', cost:480, sat:7, save:4, desc:'에너지소비효율 1등급이라 전기요금이 줄어요.'},
+  {id:'washer', cat:'home', name:'1등급 세탁기', icon:'🫧', cost:440, sat:6, save:3, stam:1, desc:'전기·물을 아끼고, 집안일 시간이 줄어 일손이 늘어요.'},
+  {id:'aircon', cat:'home', name:'1등급 에어컨', icon:'❄️', cost:520, sat:7, save:4, desc:'같은 시원함을 더 적은 전기로 만들어요.'},
+  {id:'solar', cat:'home', name:'태양광 패널', icon:'☀️', cost:800, sat:12, income:20, desc:'지붕에서 햇빛으로 전기를 만들어요. 남는 전기는 팔아요!'},
+  {id:'rain', cat:'home', name:'빗물 저금통', icon:'🛢️', cost:280, sat:4, save:2, desc:'빗물을 모아 텃밭과 청소에 써요.'},
+  {id:'tumbler', cat:'goods', name:'보온병 · 텀블러', icon:'🥤', cost:130, sat:3, desc:'일회용 컵 대신 내 컵! 음료도 오래 따뜻해요.'},
+  {id:'bag', cat:'goods', name:'장바구니', icon:'🛍️', cost:120, sat:3, desc:'비닐봉지를 쓰지 않아요.'},
+  {id:'brush', cat:'goods', name:'대나무 칫솔 · 고체 비누', icon:'🪥', cost:140, sat:3, desc:'플라스틱 쓰레기를 줄여요.'},
+  {id:'composter', cat:'goods', name:'음식물 퇴비통', icon:'🪣', cost:350, sat:5, desc:'음식물 찌꺼기가 퇴비로! 매일 퇴비 1번은 공짜예요.'},
+  {id:'ebike', cat:'goods', name:'전기 자전거', icon:'🚲', cost:550, sat:6, stam:1, desc:'밭까지 쌩쌩! 이동 시간이 줄어 일손이 늘어요.'},
+  {id:'ecar', cat:'goods', name:'친환경 전기차', icon:'🚙', cost:1300, sat:15, desc:'배기가스 없이 도시까지 직접 배달! 판매 가격 +15%.'}
 ];
 var ITEMMAP = {}; ITEMS.forEach(function(it){ ITEMMAP[it.id]=it; });
 
@@ -698,7 +755,7 @@ var WEATHERS = {
 var CERTS = ['관행 농산물','무농약 인증','유기농 인증'];
 var CERT_MUL = [1.0, 1.3, 1.6];
 var TITLES = [[0,'🌱 새싹 귀농인'],[20,'🌿 초록 이웃'],[45,'🍀 친환경 살림꾼'],[70,'🌳 초록 부자'],[100,'🌏 탄소중립 마스터']];
-var LAND_COST = [300, 550];
+var LAND_COST = 200; var MAX_DAY = 30;
 var BASE_LIVING = 30;
 var SAVE_KEY = 'eco-rich-v1';
 
@@ -714,7 +771,7 @@ function newGame(){
     paddy:{crop:null, g:0, soil:50, nut:50, dmg:0, probs:[], helper:null},
     inv:{}, prices:{}, lady:0, chile:0, ladyEver:false, helperEver:false,
     chemFree:0, chemCount:0, carbon:0, water:100,
-    owned:{}, notes:{}, cre:{}, order:null, compFree:true, bag:{}, exLog:[], exCount:0, exLast:null,
+    owned:{}, notes:{}, cre:{}, order:null, compFree:true, keep:0, nextEv:2, over:false, bag:{}, exLog:[], exCount:0, exLast:null,
     ended:false, earned:0, sold:0, buffPrice:0
   };
   for(var i=0;i<12;i++) s.plots.push(newPlot());
@@ -724,7 +781,7 @@ function newGame(){
   return s;
 }
 function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(S)); }catch(e){} }
-function load(){ try{ var d = localStorage.getItem(SAVE_KEY); if(d){ var o = JSON.parse(d); if(o && o.v===1){ SELLABLE.forEach(function(k){ if(!o.inv[k]) o.inv[k]={n:0,sp:0}; if(!o.prices[k]) o.prices[k]=1; }); o.bag=o.bag||{}; o.exLog=o.exLog||[]; o.exCount=o.exCount||0; return o; } } }catch(e){} return null; }
+function load(){ try{ var d = localStorage.getItem(SAVE_KEY); if(d){ var o = JSON.parse(d); if(o && o.v===1){ SELLABLE.forEach(function(k){ if(!o.inv[k]) o.inv[k]={n:0,sp:0}; if(!o.prices[k]) o.prices[k]=1; }); o.bag=o.bag||{}; if(o.keep==null) o.keep=0; if(o.nextEv==null) o.nextEv=o.day+1; o.exLog=o.exLog||[]; o.exCount=o.exCount||0; return o; } } }catch(e){} return null; }
 
 /* ================= 계산 도우미 ================= */
 function $(id){ return document.getElementById(id); }
@@ -787,6 +844,7 @@ function plotTip(p, i){
   if(p.rep) b.push('⚠ 연작 중: 병해충이 2배로 생겨요.');
   if(hasWeed(p)) b.push('🌿 잡초가 양분을 빼앗고 있어요 → 손 김매기');
   if(p.mulch>0) b.push('볏짚 덮개 '+p.mulch+'일 남음');
+  if(p.melon) b.push('🍉 수박을 이미 심은 밭이에요 (다시 못 심어요)');
   m = p.dmg>0 ? '피해 '+p.dmg+' · 수확량이 줄어요' : '';
   return TIP(t, b.join('\n'), m);
 }
@@ -830,9 +888,13 @@ function showModal(){
   $('veil').classList.add('on');
 }
 var NOTE_IMG = {natural:'t_garlic', trap:'t_trap', fert:'t_compost', enemy:'t_lady', paddy:'t_snail', bio:'c_frog', rotation:'tomato', legume:'bean', green:'milk', carbon:'t_compost', water:'c_loach', labor:'t_weed', scout:'t_scout', price:'seal'};
+var NOTEBOOK_KEY = 'eco-rich-notes';
+function noteBook(){ try{ return JSON.parse(localStorage.getItem(NOTEBOOK_KEY)||'{}')||{}; }catch(e){ return {}; } }
+function saveNoteBook(id){ try{ var nb = noteBook(); if(!nb[id]){ nb[id] = Date.now(); localStorage.setItem(NOTEBOOK_KEY, JSON.stringify(nb)); } }catch(e){} }
 function note(id){
   if(S.notes[id]) return;
   S.notes[id] = S.day;
+  saveNoteBook(id);
   var n = NOTES[id];
   modal({icon:'img:'+NOTE_IMG[id], tag:'📒 새 노트 · '+n.ch, title:n.t, body:n.b});
 }
@@ -840,7 +902,8 @@ function note(id){
 function renderStatus(){
   var c = certLv();
   $('status').innerHTML =
-    '<span class="chip"><span class="ic">📅</span>'+S.day+'일째</span>'+
+    '<span class="chip"><span class="ic">📅</span>'+S.day+'<small>/'+MAX_DAY+'일</small></span>'+
+    (sat()>=100 ? '<span class="chip" style="background:#E1F5D6"><span class="ic">🌏</span>탄소중립 유지 '+S.keep+'/3</span>' : '')+
     '<span class="chip money">'+IM('coins')+S.money.toLocaleString()+'</span>'+
     '<span class="chip cert-'+c+'">'+IM('seal','', c===0?'filter:grayscale(1)':'')+CERTS[c]+'</span>'+
     '<span class="chip"><span class="ic">💗</span>'+sat()+' <small>'+title().split(' ').slice(1).join(' ')+'</small></span>'+
@@ -951,9 +1014,9 @@ function renderTools(){
       Object.keys(CROPS).forEach(function(k){
         var c = CROPS[k], bn = bagN('s_'+k);
         var sb = c.gm ? c.desc+'. 다 자라면 갈아엎어 흙 +'+c.soil+', 양분 +'+c.nut+(c.block?', 잡초 '+c.block+'일 예방':'')+'. 연작 걱정도 없애 줘요.'
-          : c.fam+' 작물 · '+c.days+'일 · 기본 '+c.yield+'개 수확 · 기본가 '+c.price+'원'+(c.fix?'\n뿌리혹박테리아 덕분에 거두면 양분 +25, 흙 +6!':'')+(k==='berry'||k==='tomato'||k==='melon'?'\n토종벌 벌통이 있으면 +1개':'');
+          : c.fam+' 작물 · '+c.days+'일 · 기본 '+c.yield+'개 수확 · 기본가 '+c.price+'원'+(c.fix?'\n뿌리혹박테리아 덕분에 거두면 양분 +25, 흙 +6!':'')+(k==='berry'||k==='tomato'||k==='melon'?'\n토종벌 벌통이 있으면 +1개':'')+(k==='melon'?'\n⚠ 수박은 연작 피해가 아주 심해서 밭 한 칸에 딱 한 번만 심을 수 있어요':'');
         html += '<button class="seed'+(ui.seed===k?' on':'')+'" data-s="'+k+'"'+TIP(c.name+(c.gm?' (녹비작물)':''), sb, '씨앗 💰'+c.seed+(bn>0?' · 🎒 '+bn+'개':''))+'>'+(bn>0?'<span class="bagn">'+bn+'</span>':'')+IM(cropImg(k))+'<span class="sn">'+c.name+'</span>'+
-          '<span class="sc">'+(bn>0?'🎒공짜':'💰'+c.seed)+' · '+c.days+'일</span><span class="sf">'+(c.gm?'녹비작물':c.fam)+'</span></button>';
+          '<span class="sc">'+(bn>0?'🎒공짜':'💰'+c.seed)+' · '+c.days+'일</span>'+(k==='melon'?'<span class="sf" style="background:#FFE7E2">칸당 1번</span>':'')+'<span class="sf">'+(c.gm?'녹비작물':c.fam)+'</span></button>';
       });
       html += '</div>';
     }
@@ -1010,7 +1073,7 @@ function renderMarket(){
   $('hire').textContent = S.hired ? '오늘은 이미 구했어요' : '일손 +3 (💰25)';
   $('hire').disabled = S.hired;
   if(S.land>=12){ $('buyLand').textContent='모두 넓혔어요'; $('buyLand').disabled=true; }
-  else { var lc = LAND_COST[(S.land-6)/3]; $('buyLand').textContent='밭 3칸 (💰'+lc+')'; $('buyLand').disabled=false; }
+  else { $('buyLand').textContent='밭 1칸 (💰'+LAND_COST+')'; $('buyLand').disabled=false; }
 }
 
 /* 우리 집 장면: [그림, left/top/width 또는 bottom/height] */
@@ -1188,11 +1251,13 @@ function tapPlot(i, el){
     if(p.crop && p.g >= CROPS[p.crop].days) return harvest(p, el);
     if(p.crop) return toast('이미 작물이 자라고 있어요');
     var c = CROPS[ui.seed];
+    if(ui.seed==='melon' && p.melon) return toast('🍉 이 밭엔 이미 수박을 심었어요. 수박은 연작 피해가 아주 심해서 한 칸에 딱 한 번만 심을 수 있어요');
     var fromBag = bagN('s_'+ui.seed)>0;
     if(!fromBag && S.money < c.seed) return toast('💰 씨앗 살 돈이 모자라요');
     if(!useSt(1)) return;
     if(fromBag){ S.bag['s_'+ui.seed]--; fly(el,'🎒 -1','g'); } else pay(c.seed, el);
     p.crop = ui.seed; p.g = 0; p.dmg = 0; p.dead = false;
+    if(ui.seed==='melon') p.melon = true;
     p.probs = p.probs.filter(function(q){ return q.t==='weed'; });
     p.rep = !c.gm && p.last && p.last===c.fam;
     if(p.rep){
@@ -1389,9 +1454,8 @@ function hire(){
 }
 function buyLand(){
   if(S.land>=12) return;
-  var lc = LAND_COST[(S.land-6)/3];
-  if(!pay(lc, $('buyLand'))) return;
-  S.land += 3;
+  if(!pay(LAND_COST, $('buyLand'))) return;
+  S.land += 1;
   toast('🗺️ 밭이 '+S.land+'칸으로 넓어졌어요!'); render();
 }
 function buy(id){
@@ -1409,17 +1473,15 @@ function buy(id){
   TITLES.forEach(function(t){ if(before < t[0] && sat() >= t[0] && t[0]>0){
     modal({icon:'🎖️', tag:'새 칭호', title:t[1], body:'<p>만족도가 '+t[0]+'을 넘었어요! 친환경 살림이 점점 풍족해지고 있어요.</p>'});
   }});
-  if(sat()>=100 && !S.ended){ S.ended = true; ending(); }
+  if(sat()>=100 && !S.ended){ S.ended = true; masterReached(); }
   render();
 }
 
-function ending(){
-  modal({icon:'img:i_house', tag:'엔딩', title:'탄소중립 마스터가 되었어요!',
-    body:'<p>할머니의 낡은 집이 햇빛으로 전기를 만들고, 맑은 공기가 흐르는 <b>초록 집</b>이 되었어요.</p>'+
-      '<div class="box">📅 걸린 날: <b>'+S.day+'일</b><br>💰 번 돈: <b>'+S.earned.toLocaleString()+'</b><br>🥕 판 농산물: <b>'+S.sold+'개</b><br>'+
-      '🌳 땅속 탄소: <b>'+Math.round(S.carbon)+'kg</b><br>🦋 생물다양성: <b>'+bio()+'</b><br>🏷️ '+CERTS[certLv()]+'<br>🧪 화학 농약·비료 사용: <b>'+S.chemCount+'번</b></div>'+
-      '<p>계속 농사를 지으며 생물 도감과 농업 노트를 모두 모아 보세요!</p>',
-    btns:[{t:'계속 농사짓기'}]});
+function masterReached(){
+  modal({icon:'img:i_house', tag:'🌏 탄소중립 마스터', title:'만족도 100 달성!',
+    body:'<p>우리 집이 햇빛과 바람으로 전기를 만드는 <b>초록 집</b>이 되었어요!</p>'+
+      '<div class="box">이제 <b>3일 동안 탄소중립 생활을 유지</b>하면 엔딩이에요.<br>그동안 화학 농약·비료를 쓰면 유지가 끊겨요.</div>'+
+      '<p class="small">빨리 엔딩을 볼수록 점수가 높아요. ('+MAX_DAY+'일 안에!)</p>'});
 }
 
 /* ================= 탐색 ================= */
@@ -1429,7 +1491,7 @@ function grantItem(it, how){
   var before = sat() - it.sat;
   TITLES.forEach(function(t){ if(t[0]>0 && before < t[0] && sat() >= t[0])
     modal({icon:'🎖️', tag:'새 칭호', title:t[1], body:'<p>만족도가 '+t[0]+'을 넘었어요! 친환경 살림이 점점 풍족해지고 있어요.</p>'}); });
-  if(sat()>=100 && !S.ended){ S.ended = true; ending(); }
+  if(sat()>=100 && !S.ended){ S.ended = true; masterReached(); }
 }
 function explore(){
   if(modalQ.length) return;
@@ -1611,8 +1673,20 @@ function nightProcess(){
 
   if(S.money < 5 && !SELLABLE.some(function(k){ return S.inv[k].n>0; })){ S.money += 40; log.push(['👵','할머니가 씨앗값 하라고 용돈 💰40을 보내 주셨어요']); }
 
-  // 9) 사건
-  var ev = rollEvent();
+  // 9) 탄소중립 유지 · 30일 끝
+  var fin = null;
+  if(sat()>=100 && certLv()>=1){
+    S.keep++;
+    log.push(['🌏','탄소중립 마스터 유지 <b>'+S.keep+'/3일</b>'+(S.keep>=3?' — 해냈어요!':'')]);
+    if(S.keep>=3) fin = 'clear';
+  } else if(S.keep>0){
+    S.keep = 0; log.push(['⚠️','친환경 인증을 잃어 탄소중립 유지가 끊겼어요. 다시 3일을 지켜야 해요']);
+  }
+  if(!fin && S.day > MAX_DAY) fin = 'timeup';
+  else if(!fin && S.day >= MAX_DAY-2) log.push(['⏳','남은 날: <b>'+(MAX_DAY-S.day+1)+'일</b>']);
+
+  // 10) 사건 (1~2일마다)
+  var ev = fin ? null : rollEvent();
   if(ev && ev.log) log.push(ev.log);
 
   S.st = maxSt() + S.bonus;
@@ -1620,6 +1694,12 @@ function nightProcess(){
   var body = log.map(function(l){ return '<div class="log-line"><span>'+l[0]+'</span><span>'+l[1]+'</span></div>'; }).join('');
   var w = WEATHERS[S.weather];
   body += '<p style="margin:10px 0 0;text-align:center;font-weight:700;">오늘 날씨 '+w.e+' '+w.name+(w.tip?' · <span class="small">'+w.tip+'</span>':'')+'</p>';
+  if(fin){
+    S.over = true; save();
+    modal({icon:fin==='clear'?'img:i_house':'img:w_cloud', title:fin==='clear'?'탄소중립 마스터 3일 유지!':MAX_DAY+'일이 모두 지났어요', body:body,
+      btns:[{t:fin==='clear'?'🎬 엔딩 보기':'📊 결과 보기', fn:function(){ finishGame(fin); }}]});
+    render(); return;
+  }
   modal({icon:'img:w_'+S.weather, title:S.day+'일째 아침이 밝았어요', body:body, btns:[{t:'☀️ 오늘도 힘내자!'}]});
   if(newCre.length) later.push('bio');
   later.forEach(note);
@@ -1628,33 +1708,91 @@ function nightProcess(){
 }
 
 function rollEvent(){
-  if(S.day < 3 || rnd() > 0.42) return null;
+  if(S.day < S.nextEv) return null;
+  S.nextEv = S.day + 1 + Math.floor(rnd()*2);
+  var planted = activePlots().filter(function(p){ return p.crop && !CROPS[p.crop].gm; });
+  var growing = planted.filter(function(p){ return p.g < CROPS[p.crop].days; });
   var visPest = activePlots().some(function(p){ return p.probs.some(function(q){ return q.t!=='weed' && !q.hid; }); });
-  var opts = {pumasi:3, review:certLv()===2?3:1, heat:2, order:S.order?0:4, chemFert:2};
-  if(visPest) opts.chemPest = 4;
-  if(bio()>=40) opts.trip = has('firefly') ? 5 : 3;
-  var e = pick(opts);
-  if(e==='pumasi'){ S.bonus += 3; return {log:['🤝','이웃이 품앗이를 와 줬어요! 오늘 일손 +3']}; }
-  if(e==='review'){ S.buffPrice = 2; return {log:['⭐','“농약 없이 키워서 믿고 먹어요!” 좋은 후기 덕분에 이틀간 가격 ×1.2']}; }
-  if(e==='heat'){ S.tomorrow = 'heat'; return {log:['📻','일기 예보: 내일 폭염! 볏짚을 덮어 두면 흙이 촉촉해요']}; }
+  var anyWeed = activePlots().concat([S.paddy]).some(hasWeed);
+  var good = rnd() < 0.7, e;
+  if(good){
+    var g = {pumasi:3, review:2, compost:3, seeds:3, subsidy:2, trip:2};
+    if(!S.order) g.order = 3;
+    if(growing.length) g.rain = 2;
+    if(anyWeed) g.volunteer = 2;
+    e = pick(g);
+  } else {
+    var bd = {heat:2, price:2, chemFert:2};
+    if(planted.length) bd.typhoon = 2;
+    if(planted.length) bd.outbreak = 3;
+    if(planted.length) bd.monsoon = 2;
+    if(growing.length) bd.boar = 1;
+    if(visPest) bd.chemPest = 3;
+    e = pick(bd);
+  }
+  function G(i,t){ return {log:[i,'<b style="color:var(--leaf-d)">좋은 일!</b> '+t]}; }
+  function B(i,t){ return {log:[i,'<b style="color:var(--red)">궂은 일!</b> '+t]}; }
+  if(e==='pumasi'){ S.bonus += 3; return G('🤝','이웃이 품앗이를 와 줬어요. 오늘 일손 +3'); }
+  if(e==='review'){ S.buffPrice = 2; return G('⭐','“농약 없이 키워서 믿고 먹어요!” 좋은 후기 덕분에 이틀간 가격 ×1.2'); }
+  if(e==='compost'){ S.bag.compost = bagN('compost')+3; return G('💩','이웃 축산 농가에서 잘 발효된 완숙 퇴비 3포대를 나눠 줬어요 (🎒 가방)'); }
+  if(e==='seeds'){
+    var ks = ['lettuce','tomato','potato','berry','broc','bean','vetch','milk','rye'], k = ks[Math.floor(rnd()*ks.length)], n = 2 + Math.floor(rnd()*2);
+    S.bag['s_'+k] = bagN('s_'+k) + n;
+    return G('🌰','마을 토종 씨앗 나눔 장터에서 '+CROPS[k].name+' 씨앗 '+n+'봉지를 받았어요 (🎒 가방)');
+  }
+  if(e==='subsidy'){ var m = 40 + Math.min(S.chemFree,20)*3; S.money += m; S.earned += m; return G('🏛️','농약 없이 농사지은 덕분에 친환경농업 직불금 💰'+m+'을 받았어요'); }
+  if(e==='trip'){ var fee = 20 + bio() + (has('firefly')?40:0); S.money += fee; S.earned += fee; return G('🎒','초등학생들이 생태 체험 학습을 왔어요! “와, 메뚜기다!” 체험비 💰'+fee); }
   if(e==='order'){
     var who = ['학교 급식실','동네 반찬 가게','도시 꾸러미 가족','어린이집'][Math.floor(rnd()*4)];
-    var ks = ['lettuce','tomato','potato','bean','rice','melon','berry','broc'], k = ks[Math.floor(rnd()*ks.length)];
-    var n = k==='melon' ? 2 : (k==='berry'||k==='broc') ? 2 + Math.floor(rnd()*2) : 3 + Math.floor(rnd()*4);
-    S.order = {who:who, k:k, n:n, left:4};
-    return {log:['📦', who+'에서 친환경 '+cinfo(k).name+' '+n+'개를 주문했어요! (시장에서 확인)']};
+    var ok = ['lettuce','tomato','potato','bean','rice','berry','broc'], k2 = ok[Math.floor(rnd()*ok.length)];
+    var n2 = (k2==='berry'||k2==='broc') ? 2 + Math.floor(rnd()*2) : 3 + Math.floor(rnd()*4);
+    S.order = {who:who, k:k2, n:n2, left:4};
+    return G('📦', who+'에서 친환경 '+cinfo(k2).name+' '+n2+'개를 주문했어요! (시장에서 확인, 보상 ×1.8)');
   }
-  if(e==='trip'){
-    var fee = 20 + bio() + (has('firefly')?40:0);
-    S.money += fee; S.earned += fee;
-    return {log:['🎒','초등학생들이 생태 체험 학습을 왔어요! “와, 메뚜기다!” 체험비 +'+fee]};
+  if(e==='rain'){
+    growing.forEach(function(p){ p.g = Math.min(CROPS[p.crop].days, p.g+1); });
+    if(S.paddy.crop) S.paddy.g = Math.min(RICE.days, S.paddy.g+1);
+    return G('🌦️','밤새 단비가 내렸어요. 자라는 작물이 모두 하루 더 자랐어요');
   }
-  if(e==='chemPest') return {modal:{icon:'🧴', tag:'고민되는 선택', title:'옆 마을 아저씨의 제안',
+  if(e==='volunteer'){
+    activePlots().concat([S.paddy]).forEach(function(p){ p.probs = p.probs.filter(function(q){ return q.t!=='weed'; }); });
+    return G('🧑‍🎓','대학생 농촌 봉사단이 와서 잡초를 모두 뽑아 줬어요');
+  }
+  if(e==='heat'){ S.weather = 'heat'; return B('🥵','폭염 경보! 오늘 볏짚을 덮지 않은 밭은 반만 자라요'); }
+  if(e==='price'){ SELLABLE.forEach(function(k){ S.prices[k] = Math.round(S.prices[k]*0.8*100)/100; }); return B('📉','수입 농산물 할인 행사로 오늘 농산물 시세가 떨어졌어요 (×0.8)'); }
+  if(e==='typhoon'){
+    planted.forEach(function(p){ p.dmg++; p.mulch = 0; });
+    if(S.paddy.crop) S.paddy.dmg++;
+    return B('🌀','태풍이 지나갔어요. 작물마다 피해 +1, 볏짚 덮개도 날아갔어요');
+  }
+  if(e==='outbreak'){
+    var n3 = 0;
+    planted.slice().sort(function(){ return rnd()-0.5; }).slice(0,3).forEach(function(p){
+      var t = pick({aphid:3, mite:2, worm:3});
+      var blocked = (t==='aphid'&&S.lady>0) || (t==='mite'&&S.chile>0) || (t==='worm'&&p.trap>0);
+      if(!blocked && !p.probs.some(function(q){ return q.t===t; })){ p.probs.push({t:t, st:1, hid:true}); n3++; }
+    });
+    return B('🐛', n3 ? '해충 대발생 소식! 밭 곳곳에 해충 알이 숨어 있어요. 오늘 꼭 🔍 예찰하세요' : '해충 대발생 소식이 있었지만, 천적과 트랩 덕분에 우리 밭은 무사했어요');
+  }
+  if(e==='monsoon'){
+    S.weather = 'rain';
+    planted.slice().sort(function(){ return rnd()-0.5; }).slice(0,2).forEach(function(p){
+      if(!p.probs.some(function(q){ return q.t==='mold'; })) p.probs.push({t:'mold', st:1, hid:false});
+    });
+    return B('☔','장마가 시작됐어요. 축축한 밭에 곰팡이병이 생겼어요 → 🧫 미생물 제제');
+  }
+  if(e==='boar'){
+    var v = growing[Math.floor(rnd()*growing.length)], nm = CROPS[v.crop].name;
+    v.crop = null; v.g = 0; v.dmg = 0; v.dead = true; v.rep = false;
+    v.probs = v.probs.filter(function(q){ return q.t==='weed'; });
+    return B('🐗','산에서 멧돼지가 내려와 '+nm+' 밭을 헤집어 놓았어요');
+  }
+  if(e==='chemPest') return {log:['🧴','<b style="color:var(--red)">궂은 일!</b> 옆 마을 아저씨가 찾아왔어요…'], modal:{icon:'🧴', tag:'고민되는 선택', title:'옆 마을 아저씨의 제안',
     body:'<p>“벌레 때문에 고생이 많지? 이 <b>화학 농약</b> 한 번 뿌리면 벌레가 싹 사라져. 공짜로 줄게!”</p>'+
       '<div class="box bad">뿌리면 오늘 모든 해충·잡초가 사라지지만…<br>친환경 인증을 잃고, 천적과 돌아온 생물들도 함께 사라져요. 하천도 오염돼요.</div>',
     btns:[{t:'🙅 괜찮아요, 천연 방제로 할게요', fn:function(){ note('water'); toast('🌱 땅과 물을 지켰어요!'); }},
           {t:'🧴 뿌린다', c:'red', fn:function(){ chemShock('pest'); }}]}};
-  if(e==='chemFert') return {modal:{icon:'🧪', tag:'고민되는 선택', title:'화학비료 반값 세일!',
+  if(e==='chemFert') return {log:['🧪','<b style="color:var(--red)">궂은 일!</b> 농자재 가게에서 전단지가 왔어요…'], modal:{icon:'🧪', tag:'고민되는 선택', title:'화학비료 반값 세일!',
     body:'<p>농자재 가게에서 <b>화학비료</b>를 반값(💰20)에 판대요. 모든 밭의 양분이 한 번에 +50!</p>'+
       '<div class="box bad">하지만 흙 속 생물이 줄어 흙 건강이 떨어지고, 남은 비료가 빗물에 씻겨 하천을 오염시켜요. 친환경 인증도 잃어요.</div>',
     btns:[{t:'🙅 퇴비와 깻묵으로 충분해요', fn:function(){ note('water'); toast('🌱 땅과 물을 지켰어요!'); }},
@@ -1679,6 +1817,160 @@ function chemShock(kind){
       (lost?'<br>🐸 돌아왔던 생물 '+lost+'종이 사라졌어요':'')+'<br>🐞 천적 곤충도 함께 죽었어요</div>'+
       '<p>6일 동안 농약·화학비료를 쓰지 않으면 다시 무농약 인증을 받을 수 있어요.</p>'});
   render();
+}
+
+/* ================= 점수 · 랭킹 · 엔딩 ================= */
+function calcScore(kind){
+  var days = Math.min(MAX_DAY, S.day-1), parts = [];
+  if(kind==='clear'){
+    parts.push(['🏆 탄소중립 마스터 달성', 3000]);
+    parts.push(['⏱️ 빨리 달성 보너스 (남은 '+(MAX_DAY-days)+'일 × 200)', (MAX_DAY-days)*200]);
+  } else parts.push(['💗 만족도 '+sat()+' × 15', sat()*15]);
+  parts.push(['🦋 생물다양성 '+bio()+' × 5', bio()*5]);
+  parts.push(['🌳 땅속 탄소 '+Math.round(S.carbon)+'kg', Math.round(S.carbon)]);
+  var nc = Object.keys(S.notes).length;
+  parts.push(['📒 농업 노트 '+nc+'장 × 20', nc*20]);
+  if(S.chemCount) parts.push(['🧪 화학 농약·비료 '+S.chemCount+'번 × -300', -300*S.chemCount]);
+  var total = 0; parts.forEach(function(x){ total += x[1]; });
+  return {parts:parts, total:Math.max(0,total), days:days};
+}
+
+var RANK_COL = 'ecorich_rankings', RANK_DOC = 'top5', TOP_N = 5, LOCAL_RANK = 'eco-rich-local-top5';
+var fdb = null, topList = [], rankReady = false, rankShared = false, myKey = '';
+function escH(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function localRanks(){ try{ return JSON.parse(localStorage.getItem(LOCAL_RANK)||'[]')||[]; }catch(e){ return []; } }
+function useLocalRanks(){ if(rankShared) return; rankReady = true; topList = localRanks(); renderRanks(); }
+function initRanks(){
+  try{
+    if(window.firebase){
+      if(!firebase.apps.length) firebase.initializeApp({
+        apiKey: "AIzaSyAqXsG8npxettrCRH3MbZwFZGLg5aehxdw",
+        authDomain: "min-playground.firebaseapp.com",
+        projectId: "min-playground",
+        storageBucket: "min-playground.firebasestorage.app",
+        messagingSenderId: "472071492052",
+        appId: "1:472071492052:web:00263046925133e55a4641"
+      });
+      fdb = firebase.firestore();
+      fdb.collection(RANK_COL).doc(RANK_DOC).onSnapshot(function(doc){
+        topList = (doc.exists && doc.data().top5) ? doc.data().top5 : [];
+        rankReady = true; rankShared = true; renderRanks();
+      }, function(){ fdb = null; useLocalRanks(); });
+    }
+  }catch(e){ fdb = null; }
+  if(!fdb) useLocalRanks();
+  setTimeout(function(){ if(!rankReady) useLocalRanks(); }, 7000);
+}
+function rankHtml(){
+  if(!rankReady) return '<div class="rank-empty">순위표를 불러오는 중이에요… 🌱</div>';
+  if(!topList.length) return '<div class="rank-empty">아직 기록이 없어요.<br>첫 번째 초록 부자가 되어 보세요! 🏆</div>';
+  var pos = ['👑','🥈','🥉','4','5'], h = '';
+  topList.slice(0,TOP_N).forEach(function(r,i){
+    var nm = window.Badwords ? Badwords.mask(r.name) : r.name;
+    h += '<div class="rank-row'+(i===0?' first':'')+(r.key && r.key===myKey?' me':'')+'"><span class="pos">'+pos[i]+'</span>'+
+      '<span class="who">'+escH(nm)+'<small>'+(r.clear?r.day+'일 만에 달성':'미달성')+'</small></span><span class="amt">'+(Number(r.score)||0).toLocaleString()+'점</span></div>';
+  });
+  return h;
+}
+function rankNote(){ return rankShared ? '모두가 함께 보는 순위표예요' : (rankReady ? '⚠ 순위 서버에 연결되지 않아 이 기기의 기록만 보여요' : ''); }
+function renderRanks(){
+  ['rankIntro','rankResult'].forEach(function(id){ var el = $(id); if(el) el.innerHTML = rankHtml(); });
+  ['rankNoteIntro','rankNoteResult'].forEach(function(id){ var el = $(id); if(el) el.textContent = rankNote(); });
+}
+function makesTop(score){ if(score<=0) return false; if(topList.length < TOP_N) return true; return score > (Number(topList[Math.min(topList.length,TOP_N)-1].score)||0); }
+function addRow(arr, row){ arr = arr.slice(); arr.push(row); arr.sort(function(a,b){ return (Number(b.score)||0)-(Number(a.score)||0); }); return arr.slice(0,TOP_N); }
+function saveRank(row){
+  myKey = row.key;
+  function local(){ var a = addRow(localRanks(), row); try{ localStorage.setItem(LOCAL_RANK, JSON.stringify(a)); }catch(e){} if(!rankShared){ topList = a; renderRanks(); } return 'local'; }
+  if(!fdb || !rankShared) return Promise.resolve(local());
+  var ref = fdb.collection(RANK_COL).doc(RANK_DOC);
+  return ref.get().then(function(doc){
+    var arr = (doc.exists && doc.data().top5) ? doc.data().top5 : [];
+    return ref.set({top5: addRow(arr, row)}).then(function(){ local(); return 'shared'; });
+  }).catch(function(){ return local(); });
+}
+
+function finishGame(kind){
+  var sc = calcScore(kind);
+  S.over = true; S.result = {kind:kind, score:sc.total, day:sc.days}; save();
+  if(kind==='clear') playEnding(function(){ showResult(kind, sc); });
+  else showResult(kind, sc);
+}
+function playEnding(done){
+  var fx = $('endfx'), v = $('endVid'), txt = $('endTxt'), finished = false, guard;
+  function end(){
+    if(finished) return; finished = true; clearTimeout(guard);
+    try{ v.pause(); }catch(e){}
+    fx.classList.remove('on'); txt.classList.remove('on');
+    if(done) done();
+  }
+  txt.classList.remove('on');
+  fx.classList.add('on');
+  v.onended = function(){ setTimeout(end, 900); };
+  v.ontimeupdate = function(){ if(v.currentTime >= 12.2) txt.classList.add('on'); };
+  v.onerror = function(){ txt.classList.add('on'); clearTimeout(guard); guard = setTimeout(end, 3500); };
+  $('endSkip').onclick = end;
+  v.src = ART+'ending.mp4';
+  try{ v.currentTime = 0; }catch(e){}
+  v.muted = false;
+  var pr = v.play();
+  if(pr && pr.catch) pr.catch(function(){ v.muted = true; var p2 = v.play(); if(p2 && p2.catch) p2.catch(function(){ v.onerror(); }); });
+  guard = setTimeout(end, 19000);
+}
+function showResult(kind, sc){
+  var clear = kind==='clear', box = $('result');
+  var canRank = makesTop(sc.total);
+  var nameSaved = ''; try{ nameSaved = localStorage.getItem('eco-rich-name')||''; }catch(e){}
+  box.innerHTML = '<div class="card"><span class="tape y"></span>'+IM(clear?'i_house':'w_cloud','rimg')+
+    '<h2>'+(clear?'🌏 탄소중립 마스터!':'⏳ '+MAX_DAY+'일이 지났어요')+'</h2>'+
+    '<p class="sub">'+(clear ? sc.days+'일 만에 초록 집을 완성하고 3일 동안 지켜 냈어요!' : '만족도 '+sat()+'까지 집을 꾸몄어요. 다음엔 더 빨리 도전해 봐요!')+'</p>'+
+    '<div class="score">'+sc.total.toLocaleString()+'<small>점</small></div>'+
+    '<div class="brk">'+sc.parts.map(function(x){ return '<div><span>'+x[0]+'</span><b>'+(x[1]>=0?'+':'')+x[1].toLocaleString()+'</b></div>'; }).join('')+'</div>'+
+    (canRank ? '<p style="margin:0 0 6px;font-weight:700;">🎉 TOP 5에 들었어요! 이름을 올려 볼까요?</p><div class="namebox"><input id="rankName" maxlength="8" placeholder="이름 (8글자까지)" value="'+escH(nameSaved)+'"><button class="btn sm" id="rankSave">올리기</button></div>'
+             : '<p class="small" style="margin:0 0 12px;">TOP 5에 들려면 '+(topList.length?(Number(topList[Math.min(topList.length,TOP_N)-1].score)||0).toLocaleString():'0')+'점보다 높아야 해요</p>')+
+    '<h2 class="sec" style="justify-content:center;font-size:18px;">🏆 랭킹 TOP 5</h2><div class="rank-list" id="rankResult"></div><p class="rank-note" id="rankNoteResult"></p>'+
+    '<div class="rbtns">'+(clear?'<button class="btn ghost" id="rReplay">🎬 엔딩 다시 보기</button>':'')+
+    '<button class="btn orange" id="rNew">🌱 새로 시작</button><button class="btn ghost" id="rHome">🏠 처음 화면</button></div></div>';
+  box.classList.add('on'); box.scrollTop = 0;
+  renderRanks();
+  if(canRank) $('rankSave').onclick = function(){
+    var inp = $('rankName'), nick = (inp.value||'').trim().slice(0,8);
+    if(!nick){ toast('이름을 적어 주세요!'); inp.focus(); return; }
+    if(window.Badwords && Badwords.has(nick)){ toast(Badwords.MESSAGE); inp.value=''; inp.focus(); return; }
+    var btn = $('rankSave'); btn.disabled = true; btn.textContent = '올리는 중…';
+    saveRank({name:nick, score:sc.total, day:sc.days, clear:clear, key:Date.now()+'-'+Math.floor(Math.random()*10000), at:Date.now()}).then(function(where){
+      try{ localStorage.setItem('eco-rich-name', nick); }catch(e){}
+      inp.parentNode.outerHTML = '<p style="font-weight:700;color:var(--leaf-d);margin:0 0 12px;">✔ 순위표에 올렸어요!'+(where==='local'?' (이 기기)':'')+'</p>';
+      renderRanks();
+    });
+  };
+  if(clear) $('rReplay').onclick = function(){ playEnding(null); };
+  $('rNew').onclick = function(){ box.classList.remove('on'); start(true); };
+  $('rHome').onclick = function(){ box.classList.remove('on'); goIntro(); };
+}
+
+/* ================= 처음 화면 ================= */
+function goIntro(){
+  $('game').classList.add('hidden'); $('dock').classList.add('hidden'); $('intro').classList.remove('hidden');
+  var sv = load();
+  $('btnContinue').classList.toggle('hidden', !sv || !!sv.over);
+  renderIntro(); window.scrollTo(0,0);
+}
+function renderIntro(){
+  var nb = noteBook();
+  $('nbCount').textContent = '('+NOTE_ORDER.filter(function(id){ return nb[id]; }).length+'/'+NOTE_ORDER.length+')';
+  renderRanks();
+}
+function openNoteBook(){
+  var nb = noteBook(), got = NOTE_ORDER.filter(function(id){ return nb[id]; });
+  var body = got.length ? '<p class="small" style="text-align:center;">농사를 지으며 알아낸 노트만 볼 수 있어요. 눌러서 읽어 보세요!</p><div class="notes">'+
+      got.map(function(id){ var n = NOTES[id]; return '<button class="note" data-nb="'+id+'"><span class="ne">'+n.e+'</span>'+n.t+'</button>'; }).join('')+'</div>'
+    : '<p style="text-align:center;">아직 모은 노트가 없어요.<br>농사를 지으며 친환경 농업의 비밀을 알아내 보세요! 🌱</p>';
+  if(got.length < NOTE_ORDER.length) body += '<p class="small" style="text-align:center;margin-top:10px;">❔ 아직 모르는 노트 '+(NOTE_ORDER.length-got.length)+'장</p>';
+  modal({icon:'📒', title:'내 친환경 노트 ('+got.length+'/'+NOTE_ORDER.length+')', body:body, btns:[{t:'닫기'}]});
+  $('modal').querySelectorAll('[data-nb]').forEach(function(b){
+    b.onclick = function(){ var id = b.dataset.nb, n = NOTES[id]; modalQ.shift(); modal({icon:'img:'+NOTE_IMG[id], tag:n.ch, title:n.t, body:n.b, btns:[{t:'노트 목록으로', fn:function(){ setTimeout(openNoteBook, 0); }}]}); };
+  });
 }
 
 /* ================= 시작 ================= */
@@ -1749,12 +2041,19 @@ $('sellAll').onclick = sellAll;
 $('hire').onclick = hire;
 $('buyLand').onclick = buyLand;
 $('btnNew').onclick = function(){
-  if(load() && !confirm('저장된 농장이 있어요. 처음부터 새로 시작할까요?')) return;
+  var sv0 = load();
+  if(sv0 && !sv0.over && !confirm('저장된 농장이 있어요. 처음부터 새로 시작할까요?')) return;
   start(true);
 };
-$('btnContinue').onclick = function(){ S = load(); start(false); };
+$('btnContinue').onclick = function(){ S = load(); if(!S || S.over){ S = null; return start(true); } start(false); };
+$('btnNotes').onclick = openNoteBook;
 $('resetBtn').onclick = function(){ if(confirm('정말 처음부터 다시 할까요? 지금 농장은 사라져요.')){ start(true); } };
-if(!load()) $('btnContinue').classList.add('hidden');
+(function(){
+  var sv = load();
+  if(!sv || sv.over) $('btnContinue').classList.add('hidden');
+  if(sv && sv.notes) Object.keys(sv.notes).forEach(saveNoteBook);   // 예전 노트도 노트북에 모아요
+  initRanks(); renderIntro();
+})();
 })();
 </script>
 </body>
