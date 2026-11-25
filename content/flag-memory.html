@@ -10,6 +10,7 @@
 <!-- 파이어베이스 라이브러리 추가 -->
 <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
+<script src="../assets/badwords.js"></script>
 
 <style>
   :root{
@@ -399,7 +400,7 @@ function renderTop3() {
   for(let i=0; i<3; i++) {
       if(currentTop3[i]) {
           html += '<div class="sb-item">' +
-                    '<div><span class="sb-rank">' + medals[i] + '</span> <span class="sb-name">' + esc(currentTop3[i].name) + '</span></div>' +
+                    '<div><span class="sb-rank">' + medals[i] + '</span> <span class="sb-name">' + esc((window.Badwords ? Badwords.mask(currentTop3[i].name) : currentTop3[i].name)) + '</span></div>' +
                     '<span class="sb-score">' + fmt(currentTop3[i].sec) + ' (' + currentTop3[i].tries + '회)</span>' +
                   '</div>';
       }
@@ -606,9 +607,15 @@ function finish(){
       msg += '<br>🏆 <b>글로벌 명예의 전당 TOP 3 달성!</b>';
       
       setTimeout(function() {
-          let nick = prompt("🎉 축하합니다! 글로벌 명예의 전당(TOP 3)에 올랐습니다!\n전광판에 등록할 닉네임을 입력해주세요 (최대 8글자):", "익명");
-          if (nick === null || nick.trim() === '') nick = "익명";
-          nick = nick.substring(0, 8); 
+          let ask = "🎉 축하합니다! 글로벌 명예의 전당(TOP 3)에 올랐습니다!\n전광판에 등록할 닉네임을 입력해주세요 (최대 8글자):";
+          let nick;
+          while (true) {
+              nick = prompt(ask, "익명");
+              if (nick === null || nick.trim() === '') nick = "익명";
+              nick = nick.trim().substring(0, 8);
+              if (!(window.Badwords && Badwords.has(nick))) break;
+              ask = "🚫 " + Badwords.MESSAGE + "\n다른 닉네임을 입력해주세요 (최대 8글자):";
+          }
           
           // 파이어베이스에 새 기록 저장
           saveNewRecord(nick, sec, tries);

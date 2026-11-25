@@ -7,6 +7,7 @@
 <meta name="description" content="소리는 고체, 액체, 기체를 통해 전달돼요. 소리 우체국 배달부 또롱이와 함께 소리 길을 잇고, 소리 도둑 쉿쉿이의 방을 탈출하고, 소리 소포를 분류하는 3학년 과학 웹게임.">
 <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
+<script src="../assets/badwords.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
@@ -1289,7 +1290,7 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
     if (!msg.dataset.sticky) { msg.textContent = note; msg.className = "msg " + cls; btn.disabled = !can; }
     nick.disabled = !writable;
     btn.textContent = mine ? "기록 갱신" : "랭킹 등록";
-    if (mine && !nick.value && document.activeElement !== nick) nick.value = cleanNick(mine.nick);
+    if (mine && !nick.value && document.activeElement !== nick) nick.value = (window.Badwords ? Badwords.mask(cleanNick(mine.nick)) : cleanNick(mine.nick));
     const board = $("board");
     if (Rank.status !== "ready") { board.innerHTML = `<li class="empty">${Rank.status === "off" ? "순위표를 불러올 수 없어요." : "순위표를 불러오는 중이에요…"}</li>`; return; }
     const rows = Rank.rows.filter(r => cleanNick(r.nick))
@@ -1305,7 +1306,7 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
       const no = document.createElement("span"); no.className = "no"; no.textContent = i + 1;
       const img = document.createElement("img"); img.alt = "";
       if (ps[r.id] && ps[r.id].avatarUrl) img.src = ps[r.id].avatarUrl; else img.src = IMG + "torong.webp";
-      const nm = document.createElement("span"); nm.className = "nm"; nm.textContent = cleanNick(r.nick);
+      const nm = document.createElement("span"); nm.className = "nm"; nm.textContent = (window.Badwords ? Badwords.mask(cleanNick(r.nick)) : cleanNick(r.nick));
       if (r.id === Rank.uid) { const me = document.createElement("small"); me.textContent = "나"; nm.appendChild(me); }
       const sc = document.createElement("span"); sc.className = "sc"; sc.textContent = cleanScore(r.score) + "점";
       li.append(no, img, nm, sc); board.appendChild(li);
@@ -1316,6 +1317,7 @@ kbd { font-family: var(--f-display); font-size: 12px; border-radius: 6px; paddin
     const msg = $("rankMsg"), btn = $("rankBtn");
     const nick = cleanNick($("nick").value);
     if (!nick) { msg.textContent = "이름을 한 글자 이상 적어 주세요."; msg.className = "msg err"; return; }
+    if (window.Badwords && Badwords.has(nick)) { msg.textContent = Badwords.MESSAGE; msg.className = "msg err"; $("nick").value = ""; $("nick").focus(); return; }
     if (!Rank.save || !Rank.uid || clearedCount() < STAGES.length) return;
     btn.disabled = true; msg.dataset.sticky = "1"; msg.textContent = "등록하는 중…"; msg.className = "msg";
     const body = { nick, score: totalScore(), levels: progress.scores.slice(), at: new Date().toISOString() };
