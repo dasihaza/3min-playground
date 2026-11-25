@@ -346,7 +346,10 @@
   .tip::after{content:'';position:absolute;left:var(--ax,50%);width:12px;height:12px;background:#fff;transform:translateX(-50%) rotate(45deg);
     box-shadow:2px 2px 0 var(--wood-l);bottom:-6px;}
   .tip.below::after{bottom:auto;top:-6px;box-shadow:-2px -2px 0 var(--wood-l);}
-  @media (hover:none){ .tip{display:none;} }
+  .tiptap{cursor:pointer;position:relative;transition:transform .1s;}
+  .tiptap:active{transform:scale(.95);}
+  .qi{display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;background:var(--leaf-l);color:var(--leaf-d);
+    font-family:'Jua',sans-serif;font-size:11.5px;line-height:1;margin-left:3px;flex:none;box-shadow:0 0 0 1.5px #CDE8BF;}
 
   /* ===== 모달·토스트 ===== */
   .veil{position:fixed;inset:0;background:rgba(60,46,30,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:90;backdrop-filter:blur(3px);}
@@ -446,7 +449,7 @@
 
     <div class="panel on" id="p-farm">
       <div class="farmtop">
-        <div class="weather" id="weather"></div>
+        <div class="weather tiptap" id="weather"></div>
         <div class="guards" id="guards"></div>
       </div>
       <div class="field">
@@ -844,11 +847,11 @@ function renderStatus(){
     '<span class="chip">'+IM('c_hopper')+bio()+'</span>';
   var w = WEATHERS[S.weather];
   $('weather').setAttribute('data-tip-t','오늘 날씨: '+w.name); $('weather').setAttribute('data-tip', {sun:'농사하기 좋은 날이에요.',cloud:'무난한 날이에요.',rain:'비 오는 날은 곰팡이병이 잘 생겨요. 미생물 제제를 준비해요.',heat:'볏짚을 덮지 않은 밭은 반만 자라요.'}[S.weather]);
-  $('weather').innerHTML = IM('w_'+S.weather)+'<span>오늘 '+w.name+(w.tip?'<br><small>'+w.tip+'</small>':'')+'</span>';
+  $('weather').innerHTML = IM('w_'+S.weather)+'<span>오늘 '+w.name+(w.tip?'<br><small>'+w.tip+'</small>':'')+'</span><span class="qi">?</span>';
   var g = [];
-  if(S.lady>0) g.push('<span class="guard"'+TIP('무당벌레 활동 중', S.lady+'일 동안 밭 전체의 진딧물을 잡아먹고, 새 진딧물도 막아요.')+'>'+IM('t_lady')+'무당벌레 '+S.lady+'일</span>');
-  if(S.chile>0) g.push('<span class="guard"'+TIP('칠레이리응애 활동 중', S.chile+'일 동안 밭 전체의 응애를 잡아먹고, 새 응애도 막아요.')+'>'+IM('t_chile')+'칠레이리응애 '+S.chile+'일</span>');
-  if(S.bonus>0) g.push('<span class="guard"'+TIP('품앗이','이웃이 도와줘서 오늘 일손이 늘었어요.')+'>'+IM('t_hand')+'품앗이 +'+S.bonus+'</span>');
+  if(S.lady>0) g.push('<span class="guard tiptap"'+TIP('🐞 무당벌레 활동 중 · '+S.lady+'일 남음', '진딧물의 천적이에요.\n밭 전체에 있는 진딧물을 매일 밤 잡아먹고, 새 진딧물도 생기지 않게 막아요.\n응애·애벌레·곰팡이병은 못 막아요.', '남은 날이 0이 되면 다시 풀어 줘야 해요 (💰30 ⚡1)')+'>'+IM('t_lady')+'무당벌레 '+S.lady+'일<span class="qi">?</span></span>');
+  if(S.chile>0) g.push('<span class="guard tiptap"'+TIP('🟠 칠레이리응애 활동 중 · '+S.chile+'일 남음', '해충 응애의 천적이에요.\n밭 전체에 있는 응애를 매일 밤 잡아먹고, 새 응애도 생기지 않게 막아요.\n진딧물·애벌레·곰팡이병은 못 막아요.', '남은 날이 0이 되면 다시 풀어 줘야 해요 (💰35 ⚡1)')+'>'+IM('t_chile')+'칠레이리응애 '+S.chile+'일<span class="qi">?</span></span>');
+  if(S.bonus>0) g.push('<span class="guard tiptap"'+TIP('🤝 품앗이','이웃이 도와줘서 오늘 일손이 '+S.bonus+'칸 늘었어요.\n하루가 지나면 사라져요.')+'>'+IM('t_hand')+'품앗이 +'+S.bonus+'<span class="qi">?</span></span>');
   $('guards').innerHTML = g.join('');
 }
 
@@ -1713,7 +1716,9 @@ function start(fresh){
     tip.classList.toggle('below', below);
     tip.classList.add('on');
   }
+  var touch = window.matchMedia && window.matchMedia('(hover: none)').matches, timer = null;
   document.addEventListener('mouseover', function(e){
+    if(touch) return;
     var el = e.target.closest && e.target.closest('[data-tip-t]');
     if(el && !$('p-farm').contains(el)) el = null;
     if(el === cur) return;
@@ -1721,13 +1726,20 @@ function start(fresh){
   });
   // 눌러서 화면이 다시 그려지면, 같은 자리의 새 요소로 말풍선을 바꿔요
   document.addEventListener('click', function(e){
+    if(touch){
+      // 휴대폰: 날씨·천적·품앗이 칩을 누르면 말풍선이 4초 동안 보여요
+      var tt = e.target.closest && e.target.closest('.tiptap[data-tip-t]');
+      clearTimeout(timer);
+      if(tt && tt !== cur){ show(tt); timer = setTimeout(hide, 4500); } else hide();
+      return;
+    }
     setTimeout(function(){
       var el = document.elementFromPoint(e.clientX, e.clientY);
       el = el && el.closest && el.closest('[data-tip-t]');
       if(el && $('p-farm').contains(el) && !$('veil').classList.contains('on')) show(el); else hide();
     }, 30);
   });
-  window.addEventListener('scroll', function(){ if(cur){ if(document.body.contains(cur)) show(cur); else hide(); } }, {passive:true});
+  window.addEventListener('scroll', function(){ if(touch){ hide(); return; } if(cur){ if(document.body.contains(cur)) show(cur); else hide(); } }, {passive:true});
 })();
 
 document.querySelectorAll('.tab').forEach(function(t){ t.onclick = function(){ ui.tab=t.dataset.tab; render(); window.scrollTo({top:0,behavior:'smooth'}); }; });
