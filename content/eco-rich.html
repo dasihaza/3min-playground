@@ -13,6 +13,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
 <script src="../assets/badwords.js"></script>
+<script src="../assets/score-reset.js" defer></script>
 <style>
   :root{
     --paper:#FFFAF0; --paper2:#FBF1DC; --paper3:#F5E6C8;
@@ -1835,7 +1836,7 @@ function calcScore(kind){
   return {parts:parts, total:Math.max(0,total), days:days};
 }
 
-var RANK_COL = 'ecorich_rankings', RANK_DOC = 'top5', TOP_N = 5, LOCAL_RANK = 'eco-rich-local-top5';
+var RANK_COL = 'farm_rankings', RANK_DOC = 'eco_rich_top5', TOP_N = 5, LOCAL_RANK = 'eco-rich-local-top5';
 var fdb = null, topList = [], rankReady = false, rankShared = false, myKey = '';
 function escH(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function localRanks(){ try{ return JSON.parse(localStorage.getItem(LOCAL_RANK)||'[]')||[]; }catch(e){ return []; } }
