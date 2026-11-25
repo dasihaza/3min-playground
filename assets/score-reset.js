@@ -13,7 +13,6 @@
 
   /* 지울 순위표 : [문서 경로, 순위 목록 칸 이름] */
   var BOARDS = [
-    ["farm_rankings/top5", "top5"],                 // 농사의 왕
     ["farm_rankings/getbeol_top5", "top5"],         // 갯벌을 지키자! (보통)
     ["farm_rankings/getbeol_easy_top5", "top5"],    // 갯벌을 지키자! (쉬움)
     ["farm_rankings/baramgil_top", "top"],          // 바람길
@@ -29,7 +28,7 @@
   ];
 
   /* 이 기기에 남은 점수 : 최고 기록은 지우고, 진행 기록은 열린 단계만 남겨요 */
-  var BEST_KEYS = ["farmking-best", "getbeol-best", "getbeol-best-easy", "climateHeroSave", "climateHeroRank", "clinicBest", "clinicRank"];
+  var BEST_KEYS = ["getbeol-best", "getbeol-best-easy", "climateHeroSave", "climateHeroRank", "clinicBest", "clinicRank"];
   var PROGRESS_KEYS = ["bubble-prince-v1", "gas-hero-v1", "sound-post-progress", "winter-home-progress", "baramgil"];
 
   function clearLocal(){

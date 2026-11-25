@@ -24,7 +24,6 @@ const ROOMS = {
       { emoji: '🎈', title: '딱 맞게 부풀려라', desc: '온도와 압력으로 열기구·타이어·탁구공 크기를 조절해 왕자를 도와요', tag: '웹게임', href: 'content/balloon-prince.html' },
       { emoji: '🎬', title: '꼬마 폴리 아티스트', desc: '생활 물건으로 효과음을 만들어 소리 없는 장면에 녹음해요', tag: '웹게임', href: 'content/foley-artist.html' },
       { emoji: '🌬️', title: '바람길', desc: '고기압과 저기압의 바람을 타고 기상 풍선을 관측소까지 보내요', tag: '웹게임', href: 'content/baramgil.html' },
-      { emoji: '🌾', title: '농사의 왕', desc: '씨앗을 심고 벌레를 잡고 물을 주며 농사를 지어요', tag: '웹게임', href: 'content/farm-king.html' },
       { emoji: '🚩', title: '세계 국기 짝 맞추기', desc: '국기 카드 50장에서 같은 국기를 찾아 짝을 맞춰요', tag: '기억력 게임', href: 'content/flag-memory.html' },
       { emoji: '👾', title: '몬조운', desc: '몬스터를 조합해 오늘의 운세를 보고 더 강하게 키워요', tag: '웹게임 3분+', href: 'content/core-mixmaster.html' },
       { emoji: '🧠', title: '초등 상식 퀴즈 (만물박사)', desc: '만물박사 선발대회 대비 예상문제, 매일 새 문제가 나와요', tag: '매일 50문제', href: 'content/manmul-quiz.html' }
