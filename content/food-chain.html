@@ -1275,7 +1275,14 @@ function startGame(){
     world = FC.create(app.seed, players);
     lastSim = performance.now(); lastPub = 0; pubK = 0; lastCmdN = {};
     simTimer = setInterval(simTick, 33);
-    if(app.mode === "host") listenCommands();
+    if(app.mode === "host"){
+      listenCommands();
+      try{
+        worldRef().onDisconnect().remove();
+        cmdsRef().onDisconnect().remove();
+        roomRef().onDisconnect().update({ st:"closed" });
+      }catch(e){}
+    }
     $("waitNet").classList.add("hidden");
   } else {
     world = null; snaps = []; offEst = null; me = null; lastSnapAt = performance.now();
@@ -1301,7 +1308,11 @@ function simTick(){
   if(app.mode === "host" && (now - lastPub > 380 || world.over)){
     lastPub = now; publish();
   }
-  if(world.over && !ended) onGameOver(world.results, world.counts);
+  if(world.over){
+    // 끝난 뒤에는 더 보낼 게 없어요. 계속 보내면 다운로드 사용량이 폭증해요
+    if(simTimer){ clearInterval(simTimer); simTimer = null; }
+    if(!ended) onGameOver(world.results, world.counts);
+  }
 }
 function publish(){
   pubK++;
@@ -1323,6 +1334,7 @@ function listenCommands(){
   listen(cmdsRef(), "child_changed", onCmds);
 }
 function closeRoom(){
+  try{ worldRef().onDisconnect().cancel(); cmdsRef().onDisconnect().cancel(); roomRef().onDisconnect().cancel(); }catch(e){}
   roomRef().update({ st:"closed" }).catch(function(){});
   worldRef().remove().catch(function(){});
   cmdsRef().remove().catch(function(){});
