@@ -795,7 +795,7 @@ var CREATURES = [
 ];
 
 var UNIQUES = [
-  {id:'u_bee', name:'토종벌 벌통', icon:'🐝', sat:4, eff:'토마토·수박·딸기 수확 +1', desc:'산속 빈집에서 찾은 토종벌 가족! 벌이 꽃가루를 옮겨 줘서 토마토·수박·딸기 수확이 +1개씩 늘어요.'},
+  {id:'u_bee', name:'토종벌 벌통', icon:'🐝', sat:4, eff:'토마토·딸기·수박 2일 빨리 자람 · 특품 증가', desc:'산속 빈집에서 찾은 토종벌 가족! 부지런한 토종벌이 꽃가루를 옮겨 줘서 토마토·딸기·수박이 2일 빨리 자라고, 특품도 훨씬 많이 나와요.'},
   {id:'u_seed', name:'할머니의 토종 씨앗 보따리', icon:'🌰', sat:4, eff:'매일 아침 씨앗 1봉지', desc:'헛간 깊숙이 숨겨진 대대로 이어 온 토종 씨앗. 매일 아침 씨앗 1봉지가 가방에 들어와요.'},
   {id:'u_wind', name:'고쳐 쓴 작은 풍력 발전기', icon:'🌬️', sat:4, eff:'바람 전기 판매 +12/일', desc:'재활용 센터에서 찾아 고쳐 쓰는 바람개비 발전기. 바람으로 전기를 만들어 하루 +12를 벌어요.'}
 ];
@@ -1157,9 +1157,9 @@ function renderTools(){
       Object.keys(CROPS).forEach(function(k){
         var c = CROPS[k], bn = bagN('s_'+k);
         var sb = c.gm ? c.desc+'. 다 자라면 갈아엎어 흙 +'+c.soil+', 양분 +'+c.nut+(c.block?', 잡초 '+c.block+'일 예방':'')+'. 연작 걱정도 없애 줘요.'
-          : c.fam+' 작물 · '+c.days+'일 · 기본 '+c.yield+'개 수확 · 기본가 '+c.price+'원'+(c.fix?'\n뿌리혹박테리아 덕분에 거두면 양분 +25, 흙 +6!':'')+(k==='berry'||k==='tomato'||k==='melon'?'\n토종벌 벌통이 있으면 +1개':'')+(k==='melon'?'\n⚠ 수박은 연작 피해가 아주 심해서 밭 한 칸에 딱 한 번만 심을 수 있어요':'');
+          : c.fam+' 작물 · '+c.days+'일 · 기본 '+c.yield+'개 수확 · 기본가 '+c.price+'원'+(c.fix?'\n뿌리혹박테리아 덕분에 거두면 양분 +25, 흙 +6!':'')+(FRUIT[k]?(own('u_bee')?'\n🐝 토종벌 덕분에 '+(c.days-2)+'일 만에 다 자라고 특품이 많이 나와요':'\n💎 숨겨진 물건 토종벌 벌통이 있으면 2일 빨리 자라요'):'')+(k==='melon'?'\n⚠ 수박은 연작 피해가 아주 심해서 밭 한 칸에 딱 한 번만 심을 수 있어요':'');
         html += '<button class="seed'+(ui.seed===k?' on':'')+'" data-s="'+k+'"'+TIP(c.name+(c.gm?' (녹비작물)':''), sb, '씨앗 💰'+c.seed+(bn>0?' · 🎒 '+bn+'개':''))+'>'+(bn>0?'<span class="bagn">'+bn+'</span>':'')+IM(cropImg(k))+'<span class="sn">'+c.name+'</span>'+
-          '<span class="sc">'+(bn>0?'🎒공짜':'💰'+c.seed)+' · '+c.days+'일</span>'+(k==='melon'?'<span class="sf" style="background:#FFE7E2">칸당 1번</span>':'')+'<span class="sf">'+(c.gm?'녹비작물':c.fam)+'</span></button>';
+          '<span class="sc">'+(bn>0?'🎒공짜':'💰'+c.seed)+' · '+(own('u_bee')&&FRUIT[k]?'🐝'+(c.days-2):c.days)+'일</span>'+(k==='melon'?'<span class="sf" style="background:#FFE7E2">칸당 1번</span>':'')+'<span class="sf">'+(c.gm?'녹비작물':c.fam)+'</span></button>';
       });
       html += '</div>';
     }
@@ -1606,7 +1606,7 @@ function harvest(p, el, idx){
     note('green'); render(); return;
   }
   if(!useSt(1)) return;
-  var y = c.yield * (0.6 + p.soil/250 + p.nut/250) - Math.floor(p.dmg/2) + (own('u_bee') && (p.crop==='tomato'||p.crop==='melon'||p.crop==='berry') ? 1 : 0);
+  var y = c.yield * (0.6 + p.soil/250 + p.nut/250) - Math.floor(p.dmg/2);
   y = Math.max(1, Math.round(y));
   var hs = helpersOf(idx), extra = 0, why = [];
   hs.forEach(function(k){ var E = ECO[k]; if(!E) return;
@@ -1615,7 +1615,9 @@ function harvest(p, el, idx){
   if(hs.length>=2){ var cb = hs.length>=3 ? 2 : 1; extra += cb; why.push('생태 콤보 +'+cb); }
   y += extra;
   var sp = 0;
-  if(p.dmg===0) sp = p.soil>=75 ? y : p.soil>=60 ? Math.ceil(y/2) : 0;
+  var nbee = own('u_bee') && FRUIT[p.crop];
+  if(nbee){ if(p.dmg<=1) sp = p.soil>=55 ? y : p.soil>=35 ? Math.ceil(y*0.7) : Math.ceil(y/3); if(sp) why.push('🐝 토종벌 특품'); }
+  else if(p.dmg===0) sp = p.soil>=75 ? y : p.soil>=60 ? Math.ceil(y/2) : 0;
   S.inv[p.crop].n += y; S.inv[p.crop].sp += sp;
   p.nut = clamp(p.nut - c.use, 0, 100);
   if(c.fix){ p.nut = clamp(p.nut+25,0,100); p.soil = clamp(p.soil+6,0,100); note('legume'); }
@@ -1902,6 +1904,7 @@ function nightProcess(){
     if(!c.gm){
       if(p.nut < 15) g = 0.5;
       if(W==='heat' && p.mulch<=0){ g *= 0.5; heatHit = true; }
+      if(own('u_bee') && FRUIT[p.crop]) g *= c.days/(c.days-2);   // 토종벌: 2일 빨리
     }
     p.g = Math.min(c.days, p.g + g);
   });
