@@ -51,6 +51,13 @@
   .topbar .brand{display:flex;align-items:center;gap:7px;font-family:'Jua',sans-serif;font-size:15px;background:rgba(255,255,255,.85);padding:5px 12px 5px 8px;border-radius:999px;box-shadow:0 3px 0 rgba(0,0,0,.06);}
   .topbar .back{font-family:'Jua',sans-serif;font-size:14px;color:var(--wood-d);background:rgba(255,255,255,.85);padding:6px 14px;border-radius:999px;box-shadow:0 3px 0 rgba(0,0,0,.06);}
   .shell{max-width:880px;margin:0 auto;padding:8px 14px 20px;}
+  .tb-right{display:flex;align-items:center;gap:8px;}
+  .bgm-btn{width:36px;height:36px;border:0;border-radius:50%;background:rgba(255,255,255,.9);font-size:18px;line-height:1;
+    box-shadow:0 3px 0 rgba(0,0,0,.08);display:grid;place-items:center;padding:0;transition:transform .15s;}
+  .bgm-btn:active{transform:scale(.9);}
+  .bgm-btn.playing{animation:bgmPulse 2.4s ease-in-out infinite;}
+  .bgm-btn.off{filter:grayscale(1);opacity:.7;}
+  @keyframes bgmPulse{50%{box-shadow:0 3px 0 rgba(0,0,0,.08),0 0 0 6px rgba(108,191,98,.25);}}
 
   /* ===== 공용 ===== */
   .card{position:relative;background:var(--paper);border-radius:26px;padding:16px;
@@ -445,7 +452,7 @@
 
 <div class="topbar">
   <a class="brand" href="../index.html"><img src="../assets/eco-rich/sprout.webp" alt="" width="24" height="24"> 3분 놀이터</a>
-  <a class="back" href="../playground.html">← 놀이터로</a>
+  <span class="tb-right"><button class="bgm-btn" id="bgmBtn" type="button" title="배경음악 끄기" aria-label="배경음악 켜기/끄기">🎵</button><a class="back" href="../playground.html">← 놀이터로</a></span>
 </div>
 
 <div class="shell">
@@ -1820,6 +1827,78 @@ function chemShock(kind){
   render();
 }
 
+/* ================= 배경음악 (숲속 피아노·기타, 끊김 없이 반복) ================= */
+var BGM = (function(){
+  var KEY = 'eco-rich-bgm', VOL = 0.38;
+  var on = true, playing = false, ctx = null, gain = null, src = null, buf = null, el = null, useEl = false, loading = null, susTimer = null;
+  try{ on = localStorage.getItem(KEY) !== 'off'; }catch(e){}
+  function paint(){
+    var b = $('bgmBtn'); if(!b) return;
+    b.textContent = on ? '🎵' : '🔇';
+    b.title = on ? '배경음악 끄기' : '배경음악 켜기';
+    b.classList.toggle('off', !on); b.classList.toggle('playing', on && playing);
+  }
+  function load(){
+    if(loading) return loading;
+    var url = window.__BGM || (ART + 'bgm_forest.mp3');
+    loading = new Promise(function(done){
+      function fallback(){ useEl = true; el = new Audio(url); el.loop = true; el.volume = 0; done(); }
+      try{
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if(!AC) return fallback();
+        ctx = new AC(); gain = ctx.createGain(); gain.gain.value = 0; gain.connect(ctx.destination);
+        fetch(url).then(function(r){ return r.arrayBuffer(); })
+          .then(function(ab){ return new Promise(function(ok, no){ ctx.decodeAudioData(ab, ok, no); }); })
+          .then(function(b){ buf = b; done(); })
+          .catch(function(){ try{ ctx.close(); }catch(e){} ctx = null; fallback(); });
+      }catch(e){ fallback(); }
+    });
+    return loading;
+  }
+  function fade(v, sec){
+    if(useEl){
+      var s0 = el.volume, t0 = performance.now();
+      (function step(){ var k = Math.min(1, (performance.now()-t0)/(sec*1000)); el.volume = s0 + (v-s0)*k;
+        if(k < 1) requestAnimationFrame(step); else if(v === 0 && !playing) el.pause(); })();
+      return;
+    }
+    var now = ctx.currentTime; gain.gain.cancelScheduledValues(now); gain.gain.setValueAtTime(gain.gain.value, now); gain.gain.linearRampToValueAtTime(v, now + sec);
+  }
+  function play(){
+    if(!on || playing) return;
+    playing = true; paint(); clearTimeout(susTimer);
+    load().then(function(){
+      if(!playing) return;
+      if(useEl){ var pr = el.play(); if(pr && pr.catch) pr.catch(function(){}); fade(VOL, 1.5); return; }
+      if(ctx.state === 'suspended') ctx.resume();
+      if(!src){ src = ctx.createBufferSource(); src.buffer = buf; src.loop = true; src.connect(gain); src.start(); }
+      fade(VOL, 1.5);
+    });
+  }
+  function stop(sec){
+    if(!playing) return;
+    playing = false; paint(); sec = sec || 0.8;
+    if(!loading) return;
+    loading.then(function(){
+      if(playing) return;
+      fade(0, sec);
+      if(!useEl && ctx) susTimer = setTimeout(function(){ if(!playing && ctx.state === 'running') ctx.suspend(); }, sec*1000 + 80);
+    });
+  }
+  function toggle(){
+    on = !on;
+    try{ localStorage.setItem(KEY, on ? 'on' : 'off'); }catch(e){}
+    if(on) play(); else stop(0.5);
+    paint();
+  }
+  var hidPause = false;
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden){ if(playing){ hidPause = true; stop(0.2); } }
+    else if(hidPause){ hidPause = false; if(!$('endfx').classList.contains('on')) play(); }
+  });
+  return {play:play, stop:stop, toggle:toggle, paint:paint};
+})();
+
 /* ================= 점수 · 랭킹 · 엔딩 ================= */
 function calcScore(kind){
   var days = Math.min(MAX_DAY, S.day-1), parts = [];
@@ -1899,8 +1978,10 @@ function finishGame(kind){
 }
 function playEnding(done){
   var fx = $('endfx'), v = $('endVid'), txt = $('endTxt'), finished = false, guard;
+  BGM.stop(0.6);
   function end(){
     if(finished) return; finished = true; clearTimeout(guard);
+    BGM.play();
     try{ v.pause(); }catch(e){}
     fx.classList.remove('on'); txt.classList.remove('on');
     if(done) done();
@@ -1976,6 +2057,7 @@ function openNoteBook(){
 
 /* ================= 시작 ================= */
 function start(fresh){
+  BGM.play();
   if(fresh || !S) S = newGame();
   $('intro').classList.add('hidden');
   $('game').classList.remove('hidden');
@@ -2048,6 +2130,8 @@ $('btnNew').onclick = function(){
 };
 $('btnContinue').onclick = function(){ S = load(); if(!S || S.over){ S = null; return start(true); } start(false); };
 $('btnNotes').onclick = openNoteBook;
+$('bgmBtn').onclick = BGM.toggle;
+BGM.paint();
 $('resetBtn').onclick = function(){ if(confirm('정말 처음부터 다시 할까요? 지금 농장은 사라져요.')){ start(true); } };
 (function(){
   var sv = load();
