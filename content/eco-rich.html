@@ -145,7 +145,6 @@
     background:url('../assets/eco-rich/bg_farm.webp') center/100% 100% no-repeat, #9BD07D;
     box-shadow:0 0 0 4px #fff,0 0 0 7px var(--wood-l),0 12px 24px rgba(70,110,40,.18);}
   .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
-  .grid.c4{grid-template-columns:repeat(4,1fr);gap:9px;}
   .plot{position:relative;aspect-ratio:1/1;border:0;padding:0;border-radius:22px;overflow:visible;
     box-shadow:inset 0 0 0 4px rgba(120,78,44,.55), inset 0 -10px 0 rgba(0,0,0,.12), 0 5px 0 rgba(96,64,36,.35);transition:transform .12s;}
   .plot::before{content:'';position:absolute;inset:6px;border-radius:17px;pointer-events:none;
@@ -346,6 +345,49 @@
   .bolts i.off{background:#EFE6D6;box-shadow:inset 0 2px 0 rgba(0,0,0,.06);}
   .bolts i.bonus{background:radial-gradient(circle at 35% 30%,#E6F7FF,var(--sky) 45%,var(--sky-d));box-shadow:0 2px 0 #3F86B3;}
   .dock .btn{white-space:nowrap;}
+
+  /* ===== 생태 설계 칸 ===== */
+  .grid{position:relative;}
+  .plot.eco{background:radial-gradient(ellipse at 50% 70%,#BFE6A4 0%,#8DCB72 70%,#76B85E 100%)!important;
+    box-shadow:inset 0 0 0 4px rgba(255,255,255,.55),inset 0 -8px 0 rgba(0,0,0,.08),0 5px 0 rgba(60,110,40,.35);}
+  .plot.eco::before{background:radial-gradient(rgba(255,255,255,.25) 1.5px,transparent 2px) 0 0/14px 14px;}
+  .plot .habitat{position:absolute;left:0;right:0;margin:0 auto;bottom:8%;width:86%;filter:drop-shadow(0 4px 2px rgba(40,70,20,.25));animation:sway 4s ease-in-out infinite;transform-origin:50% 100%;pointer-events:none;}
+  .plot .resident{position:absolute;width:30%;right:6%;top:8%;pointer-events:none;animation:bob 2.2s ease-in-out infinite;filter:drop-shadow(0 2px 1px rgba(0,0,0,.2));}
+  .plot .econame{position:absolute;left:50%;top:-9px;transform:translateX(-50%);font-size:11px;font-weight:700;background:#fff;color:var(--leaf-d);border-radius:8px;padding:0 7px;box-shadow:0 2px 0 rgba(0,0,0,.1);white-space:nowrap;z-index:2;}
+  .plot .helpers{position:absolute;left:4px;bottom:12px;display:flex;gap:1px;z-index:2;}
+  .plot .helpers img{width:22px;height:22px;object-fit:contain;background:rgba(255,255,255,.92);border-radius:50%;padding:1px;box-shadow:0 1px 0 rgba(0,0,0,.15);}
+  .plot .combo{position:absolute;right:4px;bottom:12px;z-index:2;font-size:10.5px;font-weight:700;color:#fff;background:linear-gradient(180deg,#FFB347,#F08A24);border-radius:8px;padding:0 5px;box-shadow:0 2px 0 rgba(0,0,0,.15);}
+  .plot.aura{box-shadow:inset 0 0 0 4px #FFF59A, 0 0 0 3px rgba(255,245,154,.9), 0 0 18px rgba(255,235,120,.9)!important;}
+  .plot.aura::after{content:'🌿';position:absolute;inset:0;border-radius:22px;background:rgba(255,244,140,.32);outline:3px dashed rgba(255,255,255,.95);outline-offset:-7px;pointer-events:none;display:flex;align-items:flex-start;justify-content:center;font-size:18px;padding-top:4px;animation:auraPulse 1s ease-in-out infinite;}
+  @keyframes auraPulse{50%{background:rgba(255,244,140,.12);}}
+  .patrol{position:absolute;width:38px;height:38px;z-index:6;pointer-events:none;object-fit:contain;
+    animation:patrol var(--dur,7s) ease-in-out infinite;animation-delay:var(--delay,0s);filter:drop-shadow(0 3px 2px rgba(0,0,0,.25));}
+  @keyframes patrol{0%,12%{transform:translate(0,0) scale(1);}38%,58%{transform:translate(var(--dx),var(--dy)) scale(1.08);}84%,100%{transform:translate(0,0) scale(1);}}
+  .seed .eco-l{font-size:10px;color:var(--leaf-d);font-weight:700;}
+
+  /* ===== 예찰 놀이 ===== */
+  .scout{position:fixed;inset:0;z-index:91;display:none;align-items:center;justify-content:center;padding:12px;background:rgba(40,60,30,.55);backdrop-filter:blur(3px);}
+  .scout.on{display:flex;}
+  .sc-card{width:100%;max-width:640px;background:var(--paper);border-radius:28px;padding:14px;box-shadow:inset 0 0 0 3px #fff,0 0 0 3px var(--line),0 10px 0 var(--line),0 20px 40px rgba(0,0,0,.25);animation:pop .35s cubic-bezier(.3,1.5,.6,1);}
+  .sc-top{display:flex;align-items:center;gap:10px;font-family:'Jua',sans-serif;font-size:19px;color:var(--wood-d);}
+  .sc-top img{width:36px;height:36px;object-fit:contain;}
+  .sc-top #scInfo{margin-left:auto;font-size:16px;color:var(--leaf-d);}
+  .sc-time{height:12px;background:#F2E8D6;border-radius:99px;overflow:hidden;margin:8px 0 6px;}
+  .sc-time i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#FFB347,#FFD267,#9EE08C);border-radius:99px;}
+  .sc-help{margin:0 0 8px;font-size:13.5px;line-height:1.5;}
+  .sc-arena{position:relative;width:100%;aspect-ratio:4/3;max-height:58vh;border-radius:20px;overflow:hidden;touch-action:manipulation;
+    background:radial-gradient(circle at 30% 30%,#B6E39B 0,#86C76A 45%,#5FA94C 100%);box-shadow:inset 0 0 0 3px rgba(255,255,255,.6);}
+  .sc-arena .lf{position:absolute;width:24%;z-index:3;cursor:pointer;transition:transform .45s cubic-bezier(.3,1.4,.5,1),opacity .45s;filter:drop-shadow(0 4px 3px rgba(30,60,20,.3));}
+  .sc-arena .lf.moved{opacity:.18;pointer-events:none;}
+  .sc-arena .tg{position:absolute;width:12%;z-index:2;cursor:pointer;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25));transition:transform .2s;}
+  .sc-arena .tg.small{width:9%;}
+  .sc-arena .tg.crawl{animation:crawl 3s ease-in-out infinite;}
+  @keyframes crawl{0%,100%{translate:0 0;}50%{translate:14px -6px;}}
+  .sc-arena .tg.found{animation:none;transform:scale(1.5);opacity:0;transition:transform .35s,opacity .35s;pointer-events:none;}
+  .sc-arena .tg.oops{animation:shake .4s 2;}
+  .sc-pop{position:absolute;z-index:5;font-family:'Jua',sans-serif;font-size:14px;color:#fff;background:var(--leaf-d);border-radius:99px;padding:1px 9px;pointer-events:none;white-space:nowrap;animation:fly 1.2s ease-out forwards;}
+  .sc-pop.bad{background:var(--red);}
+  .sc-btns{display:flex;justify-content:flex-end;margin-top:10px;}
 
   /* ===== 랭킹 · 결과 · 엔딩 ===== */
   .intro-extra{display:flex;justify-content:center;margin-top:14px;}
@@ -636,6 +678,13 @@
 <div class="toast" id="toast"></div>
 <div class="tip" id="tip"></div>
 <div class="result" id="result"></div>
+<div class="scout" id="scout"><div class="sc-card">
+  <div class="sc-top"><img src="../assets/eco-rich/t_scout.webp" alt=""><span>아침 예찰</span><span id="scInfo"></span></div>
+  <div class="sc-time"><i id="scTime"></i></div>
+  <p class="sc-help">잎을 눌러 들추고, 숨은 <b>해충 알·해충</b>을 찾아 눌러요! 무당벌레·거미·벌·나비·지렁이는 <b>농장의 친구</b>라 누르면 안 돼요.</p>
+  <div class="sc-arena" id="scArena"></div>
+  <div class="sc-btns"><button class="btn ghost sm" id="scEnd">다 살폈어요</button></div>
+</div></div>
 <div class="endfx" id="endfx">
   <video id="endVid" playsinline preload="none" poster="../assets/eco-rich/ending_poster.jpg"></video>
   <div class="endtxt" id="endTxt"><img src="../assets/eco-rich/sprout.webp" alt=""><p>친환경 생활을<br>실천합시다.</p></div>
@@ -676,7 +725,7 @@ var TOOLS = [
     {id:'hand', name:'손', icon:'🤚', cost:0, st:0, tip:'밭을 눌러 상태를 보거나, 다 자란 작물을 거둬요'},
     {id:'plant', name:'씨앗 심기', icon:'🌱', st:1, tip:'씨앗을 고른 뒤 빈 밭을 눌러요'},
     {id:'weed', name:'손 김매기', icon:'✋', cost:0, st:2, tip:'제초제 없이 손으로 잡초를 뽑아요 (논은 ⚡3)'},
-    {id:'scout', name:'돋보기 예찰', icon:'🔍', cost:0, st:1, instant:true, tip:'밭 전체를 살펴 숨은 해충 알을 찾아요'}
+    {id:'scout', name:'돋보기 예찰', icon:'🔍', cost:0, st:1, instant:true, tip:'20초 동안 잎을 들춰 숨은 해충 알과 해충을 찾는 예찰 놀이'}
   ]},
   {g:'천연 비료', items:[
     {id:'compost', name:'완숙 퇴비', icon:'💩', cost:6, st:1, tip:'가축 분뇨를 발효시킨 퇴비. 흙 +8, 양분 +12'},
@@ -697,6 +746,24 @@ var TOOLS = [
     {id:'duck', name:'오리', icon:'🦆', cost:30, st:1, tip:'논의 잡초를 먹고, 똥은 거름이 돼요'}
   ]}
 ];
+var ECO = {
+  marigold: {name:'메리골드', img:'e_marigold', cost:15, st:1, range:'cross', repel:{aphid:.5, worm:.5}, bio:2,
+             desc:'진한 향기로 진딧물·애벌레가 덜 와요', rangeTxt:'위·아래·옆 4칸'},
+  basil:    {name:'바질', img:'e_basil', cost:15, st:1, range:'cross', repel:{mite:.5}, buddy:{tomato:2}, bio:2,
+             desc:'토마토의 단짝! 옆 토마토 수확 +2, 응애가 덜 와요', rangeTxt:'위·아래·옆 4칸'},
+  flowers:  {name:'꽃 띠', img:'e_flowers', cost:25, st:1, range:'cross', eat:{aphid:.8}, pet:'t_lady', bio:3,
+             desc:'무당벌레가 살면서 옆 칸 진딧물을 매일 밤 잡아먹어요', rangeTxt:'위·아래·옆 4칸'},
+  pond:     {name:'개구리 연못', img:'e_pond', cost:50, st:2, range:'ring', eat:{worm:.5, aphid:.5, mite:.3}, pet:'c_frog', bio:6,
+             desc:'개구리가 둘레의 애벌레·진딧물·응애를 잡아먹어요', rangeTxt:'둘레 8칸'},
+  birdhouse:{name:'새집', img:'e_birdhouse', cost:40, st:2, range:'r2', eat:{worm:.6}, pet:'e_bird', bio:4,
+             desc:'박새가 두 칸 안의 애벌레를 잡아먹어요', rangeTxt:'두 칸 안 넓게'},
+  beehotel: {name:'벌 호텔', img:'e_beehotel', cost:35, st:1, range:'ring', pollin:1, pet:'e_bee', bio:4,
+             desc:'벌이 꽃가루를 옮겨 둘레 열매 작물(토마토·딸기·수박) 수확 +1', rangeTxt:'둘레 8칸'}
+};
+var ECO_ORDER = ['marigold','basil','flowers','pond','birdhouse','beehotel'];
+var FRUIT = {tomato:1, melon:1, berry:1};
+TOOLS.splice(3, 0, {g:'생태 설계', items: ECO_ORDER.map(function(k){ var e = ECO[k];
+  return {id:'eco_'+k, eco:k, name:e.name, img:e.img, cost:e.cost, st:e.st, tip:'빈 밭에 놓아요 · '+e.desc+' ('+e.rangeTxt+')'}; })});
 var TOOLMAP = {}; TOOLS.forEach(function(g){ g.items.forEach(function(t){ TOOLMAP[t.id]=t; }); });
 
 var ITEMS = [
@@ -750,9 +817,11 @@ var NOTES = {
   water:   {e:'💧', t:'물을 지키는 농사', ch:'4. 환경오염 저감', b:'<p>화학비료와 농약은 빗물에 씻겨 <b>하천과 지하수</b>로 흘러가요. 물고기가 사라지고 마시는 물도 오염되지요.</p><p>친환경 농사는 이런 수질 오염을 막아요.</p>'},
   labor:   {e:'💦', t:'높은 노동력', ch:'5. 노동력과 관리', b:'<p>제초제 없이 손으로 풀을 매고, 해충을 날마다 살펴야 해서 친환경 농사는 <b>일손이 훨씬 많이</b> 들어요.</p><p>그래서 이웃끼리 일을 돕는 <b>품앗이</b>가 소중하답니다.</p>'},
   scout:   {e:'🔍', t:'예찰', ch:'5. 노동력과 관리', b:'<p><b>예찰</b>은 병해충이 생겼는지 미리 살피는 일이에요.</p><p>약을 한 번에 뿌리지 않는 친환경 농사에서는, 일찍 찾아 일찍 막는 것이 가장 중요해요.</p>'},
+  companion:{e:'🌼', t:'동반 식물', ch:'2. 생태계 순환', b:'<p>서로 도움이 되는 식물을 가까이 심는 것을 <b>동반 식물(섞어짓기)</b>이라고 해요.</p><p><b>메리골드</b>의 진한 향은 해충을 쫓고, <b>바질</b>은 토마토와 함께 심으면 해충이 줄고 맛도 좋아진다고 알려져 있어요. 콩은 옆 작물에게 질소를 나눠 줘요.</p>'},
+  habitat:{e:'🐸', t:'천적이 사는 집', ch:'2. 생물학적 방제', b:'<p>농장 한쪽에 <b>꽃 띠, 연못, 새집, 곤충 호텔</b>을 만들어 두면 무당벌레·개구리·새·벌이 찾아와 살아요.</p><p>이 생물들이 해충을 잡아먹고 꽃가루를 옮겨 줘서, 농약 없이도 농장이 스스로 균형을 잡아요. 작물 칸이 줄어드는 대신 생태계가 일해 줘요!</p>'},
   price:   {e:'🏷️', t:'친환경 농산물 가격', ch:'5. 노동력과 관리', b:'<p>친환경 농산물은 손이 많이 가고 수확량이 적을 수 있어서 <b>가격이 더 높아요</b>.</p><p>농약을 쓰지 않은 기간이 길면 <b>무농약 → 유기농</b> 인증을 받아 더 제값을 받아요.</p>'}
 };
-var NOTE_ORDER = ['natural','trap','fert','enemy','paddy','bio','rotation','legume','green','carbon','water','labor','scout','price'];
+var NOTE_ORDER = ['natural','trap','fert','enemy','paddy','bio','rotation','legume','green','companion','habitat','carbon','water','labor','scout','price'];
 
 var WEATHERS = {
   sun:  {name:'맑음', e:'☀️', w:50},
@@ -809,8 +878,26 @@ function living(){ return Math.max(0, BASE_LIVING - savings()); }
 function certLv(){ if(S.chemCount>0 && S.chemFree<6) return 0; return S.chemFree>=12 ? 2 : 1; }
 function activePlots(){ return S.plots.slice(0, S.land); }
 function avgSoil(){ var a=activePlots(), t=0; a.forEach(function(p){ t+=p.soil; }); return t/a.length; }
+var COLS = 3;
+function nbOf(i, range){
+  var r = Math.floor(i/COLS), c = i%COLS, out = [];
+  for(var j=0;j<S.land;j++){
+    if(j===i) continue;
+    var dr = Math.abs(Math.floor(j/COLS)-r), dc = Math.abs(j%COLS-c);
+    if(range==='cross' ? dr+dc===1 : range==='ring' ? Math.max(dr,dc)===1 : Math.max(dr,dc)<=2) out.push(j);
+  }
+  return out;
+}
+function helpersOf(i){   // 이 칸을 돕는 생태 칸 종류들
+  var hs = {};
+  for(var j=0;j<S.land;j++){ var e = S.plots[j].eco; if(e && nbOf(j, ECO[e].range).indexOf(i)>=0) hs[e] = true; }
+  if(S.plots.some(function(q,j){ return j<S.land && q.crop==='bean' && nbOf(j,'cross').indexOf(i)>=0; })) hs.bean = true;
+  return Object.keys(hs);
+}
+function ecoRepel(i, t){ var cut = 1; helpersOf(i).forEach(function(k){ var e = ECO[k]; if(e && e.repel && e.repel[t]) cut *= (1-e.repel[t]); }); return cut; }
 function bio(){
-  var b = avgSoil()*0.45 + Math.min(S.chemFree,25)*1.3 + (S.ladyEver?8:0) + (S.helperEver?8:0) + (S.water-100)*0.5;
+  var eb = 0; activePlots().forEach(function(p){ if(p.eco) eb += ECO[p.eco].bio; });
+  var b = avgSoil()*0.45 + Math.min(S.chemFree,25)*1.3 + (S.ladyEver?8:0) + (S.helperEver?8:0) + (S.water-100)*0.5 + Math.min(eb,18);
   return Math.round(clamp(b,0,100));
 }
 function has(c){ return !!S.cre[c]; }
@@ -853,6 +940,7 @@ function plotTip(p, i){
   if(hasWeed(p)) b.push('🌿 잡초가 양분을 빼앗고 있어요 → 손 김매기');
   if(p.mulch>0) b.push('볏짚 덮개 '+p.mulch+'일 남음');
   if(p.melon) b.push('🍉 수박을 이미 심은 밭이에요 (다시 못 심어요)');
+  if(p.crop){ var hs = helpersOf(i); if(hs.length) b.push('🌿 도와주는 이웃: '+hs.map(function(k){ return k==='bean'?'콩(양분)':ECO[k].name; }).join(', ')+(hs.length>=2?' → 생태 콤보! 수확 +'+(hs.length>=3?2:1):'')); }
   m = p.dmg>0 ? '피해 '+p.dmg+' · 수확량이 줄어요' : '';
   return TIP(t, b.join('\n'), m);
 }
@@ -895,7 +983,7 @@ function showModal(){
   });
   $('veil').classList.add('on');
 }
-var NOTE_IMG = {natural:'t_garlic', trap:'t_trap', fert:'t_compost', enemy:'t_lady', paddy:'t_snail', bio:'c_frog', rotation:'tomato', legume:'bean', green:'milk', carbon:'t_compost', water:'c_loach', labor:'t_weed', scout:'t_scout', price:'seal'};
+var NOTE_IMG = {companion:'e_marigold', habitat:'e_pond', natural:'t_garlic', trap:'t_trap', fert:'t_compost', enemy:'t_lady', paddy:'t_snail', bio:'c_frog', rotation:'tomato', legume:'bean', green:'milk', carbon:'t_compost', water:'c_loach', labor:'t_weed', scout:'t_scout', price:'seal'};
 var NOTEBOOK_KEY = 'eco-rich-notes';
 function noteBook(){ try{ return JSON.parse(localStorage.getItem(NOTEBOOK_KEY)||'{}')||{}; }catch(e){ return {}; } }
 function saveNoteBook(id){ try{ var nb = noteBook(); if(!nb[id]){ nb[id] = Date.now(); localStorage.setItem(NOTEBOOK_KEY, JSON.stringify(nb)); } }catch(e){} }
@@ -941,7 +1029,7 @@ function probBadges(p){
 function hasWeed(p){ return p.probs.some(function(q){ return q.t==='weed'; }); }
 function renderFarm(){
   var grid = $('grid'), html='';
-  grid.className = 'grid'+(S.land>9?' c4':'');
+  grid.className = 'grid';
   var shown = Math.min(12, S.land < 12 ? S.land+1 : 12);
   for(var i=0;i<shown;i++){
     var p = S.plots[i];
@@ -950,6 +1038,12 @@ function renderFarm(){
       continue;
     }
     var inner='', cls='plot', bar='';
+    if(p.eco){
+      var E = ECO[p.eco];
+      html += '<button class="plot eco'+(ui.tool!=='hand'?' target':'')+'" data-i="'+i+'"'+TIP('🌿 '+E.name, E.desc+'\n도와주는 범위: '+E.rangeTxt+' (마우스를 올리면 빛나요)', '손으로 누르면 자세히 보기 · 치우기')+'>'+
+        '<span class="econame">'+E.name+'</span>'+IM(E.img,'habitat','animation-delay:-'+(i*0.6)+'s')+(E.pet?IM(E.pet,'resident'):'')+'</button>';
+      continue;
+    }
     if(p.crop){
       var c = CROPS[p.crop], stg = stageOf(p, c.days);
       var im = stg===1 ? 'sprout' : stg===2 ? (c.gm ? cropImg(p.crop) : 'seedling') : cropImg(p.crop);
@@ -965,12 +1059,22 @@ function renderFarm(){
     var marks = '';
     if(p.trap>0) marks += '<span'+TIP('페로몬 트랩', p.trap+'일 동안 나방 애벌레가 생기지 않아요.')+'>'+IM('t_trap')+'</span>';
     if(p.block>0) marks += '<span'+TIP('호밀 효과', p.block+'일 동안 잡초가 나지 않아요.')+'>'+IM('rye')+'</span>';
+    var hs = p.crop ? helpersOf(i) : [], hl = '';
+    hs.slice(0,4).forEach(function(k){ hl += IM(k==='bean' ? 'bean' : ECO[k].img); });
+    var ecoHelp = hs.filter(function(k){ return k!=='bean'; }).length;
     html += '<button class="'+cls+(ui.tool!=='hand'?' target':'')+'" data-i="'+i+'"'+plotTip(p,i)+' style="background:'+soilColor(p.soil)+'">'+
       (p.mulch>0?'<span class="mulch"></span>':'')+(hasWeed(p)?IM('p_weed','weedimg'):'')+inner+bar+
-      '<span class="probs">'+probBadges(p)+'</span><span class="marks">'+marks+'</span></button>';
+      '<span class="probs">'+probBadges(p)+'</span><span class="marks">'+marks+'</span>'+
+      (hl?'<span class="helpers">'+hl+'</span>':'')+(hs.length>=2?'<span class="combo">콤보 '+hs.length+'</span>':'')+'</button>';
   }
   grid.innerHTML = html;
-  grid.querySelectorAll('.plot').forEach(function(b){ b.onclick = function(){ tapPlot(+b.dataset.i, b); }; });
+  grid.querySelectorAll('.plot').forEach(function(b){
+    var i = +b.dataset.i;
+    b.onclick = function(){ tapPlot(i, b); };
+    b.onmouseenter = function(){ showAura(i); };
+    b.onmouseleave = clearAura;
+  });
+  requestAnimationFrame(placePatrols);
 
   var pd = S.paddy, ph='';
   ph += '<span class="lab">논 · 흙 '+Math.round(pd.soil)+'</span>';
@@ -997,9 +1101,40 @@ function renderFarm(){
   renderTools();
 }
 
+function auraTargets(i){
+  var p = S.plots[i], t = TOOLMAP[ui.tool];
+  if(p && p.eco) return nbOf(i, ECO[p.eco].range);
+  if(t && t.eco && p && !p.crop && !p.eco && i < S.land) return nbOf(i, ECO[t.eco].range);
+  if(p && p.crop==='bean') return nbOf(i, 'cross');
+  return [];
+}
+function showAura(i){ clearAura(); auraTargets(i).forEach(function(j){ var el = document.querySelector('.plot[data-i="'+j+'"]'); if(el) el.classList.add('aura'); }); }
+function clearAura(){ document.querySelectorAll('.plot.aura').forEach(function(el){ el.classList.remove('aura'); }); }
+function flashAura(i){ showAura(i); setTimeout(clearAura, 1600); }
+/* 생태 칸에 사는 생물이 이웃 작물 칸을 순찰해요 */
+function placePatrols(){
+  var grid = $('grid'); if(!grid) return;
+  grid.querySelectorAll('.patrol').forEach(function(el){ el.remove(); });
+  var gr = grid.getBoundingClientRect(); if(!gr.width) return;
+  for(var i=0;i<S.land;i++){
+    var p = S.plots[i]; if(!p.eco || !ECO[p.eco].pet) continue;
+    var tg = nbOf(i, ECO[p.eco].range).filter(function(j){ return S.plots[j].crop; });
+    if(!tg.length) continue;
+    var j = tg[Math.floor(rnd()*tg.length)];
+    var a = grid.querySelector('.plot[data-i="'+i+'"]'), b = grid.querySelector('.plot[data-i="'+j+'"]');
+    if(!a || !b) continue;
+    var ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect();
+    var el = document.createElement('img');
+    el.src = ART + ECO[p.eco].pet + '.webp'; el.className = 'patrol'; el.alt = '';
+    el.style.left = (ra.left - gr.left + ra.width*0.5 - 19)+'px'; el.style.top = (ra.top - gr.top + ra.height*0.35 - 19)+'px';
+    el.style.setProperty('--dx', (rb.left-ra.left)+'px'); el.style.setProperty('--dy', (rb.top-ra.top)+'px');
+    el.style.setProperty('--dur', (6+rnd()*3).toFixed(1)+'s'); el.style.setProperty('--delay', (-rnd()*6).toFixed(1)+'s');
+    grid.appendChild(el);
+  }
+}
 function renderTools(){
   var t = TOOLMAP[ui.tool];
-  var hint = t.tip, hi = 't_'+t.id;
+  var hint = t.tip, hi = t.img || ('t_'+t.id);
   if(ui.tool==='plant'){
     var c=CROPS[ui.seed]; hi = cropImg(ui.seed);
     hint = c.name+' 씨앗을 빈 밭에 심어요 · '+(bagN('s_'+ui.seed)>0?'🎒 가방 씨앗 '+bagN('s_'+ui.seed)+'개':'💰'+c.seed)+' ⚡1'+(bagN('s_rice')>0?' · 논 모 🎒'+bagN('s_rice'):'');
@@ -1014,7 +1149,7 @@ function renderTools(){
       var st = it.st ? ' ⚡'+(it.id==='weed'?'2~3':it.st) : '';
       var tmeta = (it.cost?'💰'+it.cost+'  ':'')+(it.st?'⚡'+(it.id==='weed'?'2 (논 3)':it.st):'')+(bagN(it.id)>0?'  · 🎒 가방에 '+bagN(it.id)+'개':'');
       html += '<button class="tool'+(ui.tool===it.id?' on':'')+(it.instant?' act':'')+'" data-t="'+it.id+'"'+TIP(it.name, it.tip+'\n'+(TOOL_MORE[it.id]||''), tmeta.trim()||'무료')+'>'+
-        (bagN(it.id)>0?'<span class="bagn">'+bagN(it.id)+'</span>':'')+IM('t_'+it.id)+'<span class="tn">'+it.name+'</span><span class="tc">'+(cost+st || '무료')+'</span></button>';
+        (bagN(it.id)>0?'<span class="bagn">'+bagN(it.id)+'</span>':'')+IM(it.img || ('t_'+it.id))+'<span class="tn">'+it.name+'</span><span class="tc">'+(cost+st || '무료')+'</span></button>';
     });
     html += '</div>';
     if(g.g==='기본' && ui.tool==='plant'){
@@ -1205,6 +1340,96 @@ function render(){
   save();
 }
 
+/* ================= 아침 예찰 놀이 ================= */
+var SC = null;
+var SC_FRIENDS = [['t_lady','무당벌레'],['c_spider','거미'],['e_bee','꿀벌'],['e_butterfly','나비'],['c_worm','지렁이']];
+function scImg(q){ if(q.t==='mold') return 'p_mold'; if(q.hid) return 'e_eggs'; return {aphid:'e_aphids', mite:'e_mites', worm:'e_cat'}[q.t]; }
+function scName(q){ if(q.t==='mold') return '곰팡이병 잎'; return PESTS[q.t].name + (q.hid ? ' 알' : ''); }
+function startScout(){
+  var arena = $('scArena'), targets = [];
+  activePlots().forEach(function(p, i){ if(!p.crop || p.eco) return; p.probs.forEach(function(q){ if(q.t!=='weed') targets.push({i:i, q:q}); }); });
+  targets.sort(function(){ return rnd()-0.5; }); targets = targets.slice(0, 10);
+  var fr = 2 + (bio()>=40?1:0) + (bio()>=60?1:0), friends = SC_FRIENDS.slice().sort(function(){ return rnd()-0.5; }).slice(0, fr);
+  SC = {targets:targets, found:0, miss:0, left:20, t0:performance.now(), lines:[], done:false};
+  arena.innerHTML = '';
+  // 겹치지 않게 자리 고르기 (백분율)
+  var spots = [];
+  function spot(){ for(var k=0;k<40;k++){ var x = 6 + rnd()*80, y = 8 + rnd()*74, ok = true;
+      spots.forEach(function(s2){ if(Math.abs(s2[0]-x) < 13 && Math.abs(s2[1]-y) < 15) ok = false; });
+      if(ok || k===39){ spots.push([x,y]); return [x,y]; } } }
+  function add(cls, img, x, y, extra){ var el = document.createElement('img'); el.src = ART+img+'.webp'; el.alt=''; el.draggable=false; el.className = cls;
+    el.style.left = x+'%'; el.style.top = y+'%'; if(extra) Object.keys(extra).forEach(function(k){ el.style[k]=extra[k]; }); arena.appendChild(el); return el; }
+  targets.forEach(function(t){
+    var xy = spot(), small = t.q.hid || t.q.t==='mite';
+    var el = add('tg'+(small?' small':'')+(t.q.t==='worm' && !t.q.hid ? ' crawl':''), scImg(t.q), xy[0], xy[1]);
+    el.onclick = function(e){ e.stopPropagation(); scFound(t, el); };
+    if(rnd() < 0.7) t.cover = xy;
+  });
+  friends.forEach(function(f){
+    var xy = spot(), el = add('tg crawl', f[0], xy[0], xy[1], {animationDelay: (-rnd()*3).toFixed(1)+'s'});
+    el.onclick = function(e){ e.stopPropagation(); scOops(f, el); };
+  });
+  // 잎사귀 덮기: 해충 대부분을 가리고, 빈 잎도 섞어요
+  var leaves = targets.filter(function(t){ return t.cover; }).map(function(t){ return t.cover; });
+  while(leaves.length < 14){ leaves.push([4 + rnd()*82, 4 + rnd()*76]); }
+  leaves.forEach(function(xy){
+    var lf = add('lf', ['e_leaf','e_leaf2','e_leaf3'][Math.floor(rnd()*3)], xy[0]-6, xy[1]-8, {transform:'rotate('+Math.floor(rnd()*360)+'deg) scale('+(0.85+rnd()*0.35).toFixed(2)+')'});
+    lf.onclick = function(e){ e.stopPropagation();
+      lf.style.transform = 'translate('+(rnd()<.5?-1:1)*(40+rnd()*40)+'px,'+(rnd()<.5?-1:1)*(30+rnd()*30)+'px) rotate('+Math.floor(rnd()*360)+'deg) scale(.8)';
+      lf.classList.add('moved'); };
+  });
+  $('scInfo').textContent = targets.length ? '찾은 해충 0 / '+targets.length : '해충을 찾아봐요';
+  $('scTime').style.width = '100%';
+  $('scout').classList.add('on');
+  $('scEnd').onclick = function(){ endScout(); };
+  (function tick(){
+    if(!SC || SC.done) return;
+    var left = SC.left - (performance.now()-SC.t0)/1000;
+    $('scTime').style.width = Math.max(0, left/20*100)+'%';
+    if(left <= 0) return endScout();
+    requestAnimationFrame(tick);
+  })();
+}
+function scPop(el, txt, bad){
+  var arena = $('scArena'), ar = arena.getBoundingClientRect(), r = el.getBoundingClientRect(), d = document.createElement('div');
+  d.className = 'sc-pop'+(bad?' bad':''); d.textContent = txt;
+  d.style.left = Math.max(0, Math.min(ar.width-120, r.left-ar.left-20))+'px'; d.style.top = (r.top-ar.top-6)+'px';
+  arena.appendChild(d); setTimeout(function(){ d.remove(); }, 1200);
+}
+function scFound(t, el){
+  if(!SC || SC.done || t.got) return;
+  t.got = true; el.classList.add('found'); SC.found++;
+  var q = t.q, what = scName(q), p = S.plots[t.i], act;
+  if(q.hid){ q.hid = false; act = '발견! 얼른 막아요'; }
+  else if(q.t==='worm'){ p.probs = p.probs.filter(function(x){ return x!==q; }); act = '손으로 잡았어요'; }
+  else { q.st = Math.max(1, q.st-1); act = q.t==='mold' ? '병든 잎을 따냈어요' : '손으로 눌러 줄였어요'; }
+  SC.lines.push((t.i+1)+'번 밭 · '+what+' — '+act);
+  scPop(el, (t.i+1)+'번 밭 '+what+'!');
+  $('scInfo').textContent = '찾은 해충 '+SC.found+' / '+SC.targets.length;
+  if(SC.found >= SC.targets.length) setTimeout(endScout, 500);
+}
+function scOops(f, el){
+  if(!SC || SC.done) return;
+  SC.miss++; SC.left -= 3; el.classList.add('oops'); setTimeout(function(){ el.classList.remove('oops'); }, 800);
+  scPop(el, '앗! '+f[1]+'는 친구예요 (-3초)', true);
+}
+function endScout(){
+  if(!SC || SC.done) return;
+  SC.done = true;
+  $('scout').classList.remove('on');
+  var tot = SC.targets.length, perfect = tot > 0 && SC.found >= tot, body;
+  if(!tot) body = '<p>밭을 꼼꼼히 살폈는데 해충이 없었어요. 건강한 밭이에요! 🌱</p>';
+  else {
+    body = '<div class="box">'+(SC.lines.length ? SC.lines.join('<br>') : '찾은 해충이 없어요')+'</div>';
+    if(!perfect) body += '<p class="small">못 찾은 해충 '+(tot-SC.found)+'곳은 숨어 있다가 밤에 작물을 갉아 먹을 수 있어요.</p>';
+  }
+  if(perfect){ S.scoutGuard = 1; body += '<p><b>⭐ 완벽한 예찰!</b> 해충을 일찍 막아서 오늘 밤 새 해충이 절반으로 줄어요.</p>'; }
+  if(SC.miss) body += '<p class="small">🐞 친구 생물을 '+SC.miss+'번 눌렀어요. 무당벌레·거미·벌·나비·지렁이는 농장을 돕는 친구예요!</p>';
+  modal({icon:'img:t_scout', tag:'🔍 아침 예찰 결과', title: tot ? '해충 '+SC.found+' / '+tot+' 찾기' : '깨끗한 밭!', body:body});
+  note('scout');
+  SC = null; render();
+}
+
 /* ================= 행동 ================= */
 function useSt(n, el){
   if(S.st < n){
@@ -1228,11 +1453,10 @@ function chooseTool(id, el){
 
 function instantTool(id, el){
   if(id==='scout'){
+    if(modalQ.length) return;
     if(!useSt(1)) return;
-    var found = 0;
-    activePlots().concat([S.paddy]).forEach(function(p){ p.probs.forEach(function(q){ if(q.hid){ q.hid=false; found++; } }); });
-    toast(found ? '🔍 숨어 있던 해충 알 '+found+'곳을 찾았어요! 얼른 막아요' : '🔍 꼼꼼히 살폈어요. 아직은 괜찮아요!');
-    note('scout');
+    startScout();
+    return;
   } else if(id==='lady' || id==='chile'){
     var t = TOOLMAP[id];
     if(S.money < t.cost) return toast('💰 돈이 모자라요 ('+t.cost+' 필요)');
@@ -1251,12 +1475,17 @@ function instantTool(id, el){
 function tapPlot(i, el){
   if(i >= S.land){ ui.tab='market'; render(); return toast('🗺️ 시장에서 밭을 넓힐 수 있어요'); }
   var p = S.plots[i], t = ui.tool;
+  if(p.eco){
+    if(t==='hand') return ecoInfo(i);
+    return toast('🌿 '+ECO[p.eco].name+' 칸이에요. 손으로 누르면 치울 수 있어요');
+  }
+  if(TOOLMAP[t] && TOOLMAP[t].eco) return placeEco(i, TOOLMAP[t].eco, el);
   if(t==='hand'){
-    if(p.crop && p.g >= CROPS[p.crop].days) return harvest(p, el);
+    if(p.crop && p.g >= CROPS[p.crop].days) return harvest(p, el, i);
     return plotInfo(p, i);
   }
   if(t==='plant'){
-    if(p.crop && p.g >= CROPS[p.crop].days) return harvest(p, el);
+    if(p.crop && p.g >= CROPS[p.crop].days) return harvest(p, el, i);
     if(p.crop) return toast('이미 작물이 자라고 있어요');
     var c = CROPS[ui.seed];
     if(ui.seed==='melon' && p.melon) return toast('🍉 이 밭엔 이미 수박을 심었어요. 수박은 연작 피해가 아주 심해서 한 칸에 딱 한 번만 심을 수 있어요');
@@ -1320,6 +1549,27 @@ function tapPlot(i, el){
   if(t==='snail' || t==='duck') return toast(tool.icon+' '+tool.name+'는 아래쪽 논에 풀어요');
 }
 
+function placeEco(i, key, el){
+  var p = S.plots[i], E = ECO[key];
+  if(p.crop) return toast('작물이 없는 빈 밭에 놓아요');
+  if(S.money < E.cost) return toast('💰 돈이 모자라요 ('+E.cost+' 필요)');
+  if(!useSt(E.st)) return;
+  pay(E.cost, el);
+  p.eco = key; p.probs = []; p.dead = false; p.mulch = 0;
+  var lc = E.name.charCodeAt(E.name.length-1), eul = (lc>=0xAC00 && (lc-0xAC00)%28) ? '을' : '를';
+  toast('🌿 '+E.name+eul+' 만들었어요! '+E.desc);
+  note(key==='marigold'||key==='basil' ? 'companion' : 'habitat');
+  render(); flashAura(i);
+}
+function ecoInfo(i){
+  var p = S.plots[i], E = ECO[p.eco];
+  var tg = nbOf(i, E.range).map(function(j){ return (j+1)+'번'; }).join(', ');
+  modal({icon:'img:'+E.img, tag:'🌿 생태 설계', title:E.name,
+    body:'<p>'+E.desc+'</p><div class="box">도와주는 범위: <b>'+E.rangeTxt+'</b><br>지금 돕는 밭: '+(tg||'없음')+'</div>'+
+      '<p class="small">생태 칸은 작물을 기를 수 없는 대신 이웃 밭을 지켜 줘요. 서로 다른 생태 도우미가 2개 이상 돕는 밭은 <b>생태 콤보</b>로 수확이 늘어요!</p>',
+    btns:[{t:'좋아요'},{t:'🧹 치우기', c:'ghost', fn:function(){ p.eco = null; toast(E.name+' 칸을 치웠어요. 다시 빈 밭이에요'); }}]});
+  flashAura(i);
+}
 function plotInfo(p, i){
   var body = '';
   if(p.crop){
@@ -1341,7 +1591,8 @@ function plotInfo(p, i){
   modal({icon:'img:'+(p.crop?cropImg(p.crop):'sprout'), title:(i+1)+'번 밭', body:body});
 }
 
-function harvest(p, el){
+function harvest(p, el, idx){
+  if(idx==null) idx = S.plots.indexOf(p);
   var c = CROPS[p.crop];
   if(c.gm){
     if(!useSt(2)) return;
@@ -1357,6 +1608,12 @@ function harvest(p, el){
   if(!useSt(1)) return;
   var y = c.yield * (0.6 + p.soil/250 + p.nut/250) - Math.floor(p.dmg/2) + (own('u_bee') && (p.crop==='tomato'||p.crop==='melon'||p.crop==='berry') ? 1 : 0);
   y = Math.max(1, Math.round(y));
+  var hs = helpersOf(idx), extra = 0, why = [];
+  hs.forEach(function(k){ var E = ECO[k]; if(!E) return;
+    if(E.buddy && E.buddy[p.crop]){ extra += E.buddy[p.crop]; why.push(E.name+' 단짝 +'+E.buddy[p.crop]); }
+    if(E.pollin && FRUIT[p.crop]){ extra += E.pollin; why.push('벌 꽃가루받이 +'+E.pollin); } });
+  if(hs.length>=2){ var cb = hs.length>=3 ? 2 : 1; extra += cb; why.push('생태 콤보 +'+cb); }
+  y += extra;
   var sp = 0;
   if(p.dmg===0) sp = p.soil>=75 ? y : p.soil>=60 ? Math.ceil(y/2) : 0;
   S.inv[p.crop].n += y; S.inv[p.crop].sp += sp;
@@ -1366,7 +1623,7 @@ function harvest(p, el){
   p.last = c.fam; p.rep=false; p.crop=null; p.g=0; p.dmg=0;
   p.probs = p.probs.filter(function(q){ return q.t==='weed'; });
   fly(el, c.emoji+' +'+y, '');
-  toast(c.emoji+' '+c.name+' '+y+'개 수확!'+(sp?' (특품 '+sp+'개 ✨)':'')+(c.fix?' 콩 뿌리 덕분에 양분 +25':''));
+  toast(c.emoji+' '+c.name+' '+y+'개 수확!'+(sp?' (특품 '+sp+'개 ✨)':'')+(why.length?' 🌿 '+why.join(' · '):'')+(c.fix?' 콩 뿌리 덕분에 양분 +25':''));
   render();
 }
 
@@ -1594,6 +1851,27 @@ function nightProcess(){
   if(S.lady>0) activePlots().forEach(function(p){ p.probs = p.probs.filter(function(q){ return q.t!=='aphid'; }); });
   if(S.chile>0) activePlots().forEach(function(p){ p.probs = p.probs.filter(function(q){ return q.t!=='mite'; }); });
 
+  // 2-1) 생태 칸에 사는 생물들이 이웃 칸의 해충을 잡아먹어요
+  var ate = {};
+  for(var ei=0; ei<S.land; ei++){
+    var ep = S.plots[ei]; if(!ep.eco || !ECO[ep.eco].eat) continue;
+    var EE = ECO[ep.eco];
+    nbOf(ei, EE.range).forEach(function(j){
+      var tp = S.plots[j];
+      tp.probs = tp.probs.filter(function(q){
+        var ch = EE.eat[q.t];
+        if(ch && rnd() < ch){ ate[ep.eco] = (ate[ep.eco]||0)+1; return false; }
+        return true;
+      });
+    });
+  }
+  Object.keys(ate).forEach(function(k){
+    var who = {flowers:'🐞 꽃 띠의 무당벌레', pond:'🐸 연못의 개구리', birdhouse:'🐦 새집의 박새'}[k] || ECO[k].name;
+    log.push([who.split(' ')[0], who.split(' ').slice(1).join(' ')+'가 해충 '+ate[k]+'마리를 잡아먹었어요']);
+  });
+  // 콩은 옆 칸에 양분을 나눠 줘요
+  for(var bi=0; bi<S.land; bi++){ if(S.plots[bi].crop==='bean') nbOf(bi,'cross').forEach(function(j){ var q = S.plots[j]; if(q.crop) q.nut = clamp(q.nut+2,0,100); }); }
+
   // 3) 병해충 진행 · 피해
   var missed = 0, died = [];
   function progress(p, isPaddy){
@@ -1632,12 +1910,14 @@ function nightProcess(){
 
   // 5) 새 병해충 · 잡초
   var mod = 1; if(has('spider')) mod *= 0.85; if(has('frog')) mod *= 0.75;
-  activePlots().forEach(function(p){
+  if(S.scoutGuard){ mod *= 0.5; S.scoutGuard = 0; }
+  activePlots().forEach(function(p, pi){
+    if(p.eco) return;
     if(p.crop && !CROPS[p.crop].gm){
       var ch = 0.24 * mod * (p.rep?2:1) * (p.soil<35?1.4:p.soil>70?0.7:1);
       if(p.probs.filter(function(q){ return q.t!=='weed'; }).length < 2 && rnd() < ch){
         var t = pick({aphid:3, mite:2, worm:3, mold: (W==='rain'?6:2)});
-        var blocked = (t==='aphid'&&S.lady>0) || (t==='mite'&&S.chile>0) || (t==='worm'&&p.trap>0);
+        var blocked = (t==='aphid'&&S.lady>0) || (t==='mite'&&S.chile>0) || (t==='worm'&&p.trap>0) || rnd() > ecoRepel(pi, t);
         if(!blocked && !p.probs.some(function(q){ return q.t===t; })) p.probs.push({t:t, st:1, hid:true});
       }
     }
@@ -1653,6 +1933,7 @@ function nightProcess(){
     if(p.trap>0) p.trap--;
     if(p.block>0) p.block--;
     if(has('worm')) p.soil = clamp(p.soil+1,0,100);
+    if(p.eco) p.soil = clamp(p.soil+1,0,100);
   });
   if(S.lady>0) S.lady--;
   if(S.chile>0) S.chile--;
@@ -1677,7 +1958,7 @@ function nightProcess(){
   CREATURES.forEach(function(cr){
     if(!S.cre[cr.id] && b >= cr.need && (!cr.paddy || S.helperEver)){ S.cre[cr.id] = S.day; newCre.push(cr); }
   });
-  newCre.forEach(function(cr){ log.push([cr.emoji,'<b>'+cr.name+'</b>이(가) 돌아왔어요! '+cr.eff]); });
+  newCre.forEach(function(cr){ var lc = cr.name.charCodeAt(cr.name.length-1); var ga = (lc>=0xAC00 && (lc-0xAC00)%28) ? '이' : '가'; log.push([cr.emoji,'<b>'+cr.name+'</b>'+ga+' 돌아왔어요! '+cr.eff]); });
 
   if(S.money < 5 && !SELLABLE.some(function(k){ return S.inv[k].n>0; })){ S.money += 40; log.push(['👵','할머니가 씨앗값 하라고 용돈 💰40을 보내 주셨어요']); }
 
@@ -2067,7 +2348,8 @@ function start(fresh){
   if(fresh){
     modal({icon:'img:grandma', title:'할머니의 편지', body:'<p>“밭 두 곳에 <b>상추</b>와 <b>콩</b>을 심어 두었단다. 다 자라면 반짝일 거야.”</p>'+
       '<p>“벌레가 생겨도 농약은 쓰지 말거라. 마늘이며 님오일, 무당벌레가 있지 않니. 그리고 <b>날마다 밭을 살피는 것</b>(🔍 예찰)을 잊지 말고!”</p>'+
-      '<div class="box">💡 도구를 고르고 → 밭을 눌러요<br>💡 일손 ⚡을 다 쓰면 🌙 하루 마치기</div>', btns:[{t:'할머니, 잘 해 볼게요!'}]});
+      '<p>“빈 밭에 <b>꽃이나 연못, 새집</b>을 만들어 두면 무당벌레·개구리·새가 이사 와서 이웃 밭을 지켜 준단다. 여러 친구가 함께 지키는 밭은 더 풍성해지지(생태 콤보)!”</p>'+
+      '<div class="box">💡 도구를 고르고 → 밭을 눌러요<br>💡 🔍 예찰을 누르면 잎을 들춰 해충을 찾는 놀이가 시작돼요<br>💡 일손 ⚡을 다 쓰면 🌙 하루 마치기</div>', btns:[{t:'할머니, 잘 해 볼게요!'}]});
   }
 }
 
