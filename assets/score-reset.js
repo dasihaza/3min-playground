@@ -22,14 +22,14 @@
     ["farm_rankings/climate_hero_top", "top"],      // 기후 히어로: 지구를 구해 줘!
     ["farm_rankings/clinic_top", "top"],            // 튼튼 소아과 병원놀이
     ["farm_rankings/winter_home_top", "top"],       // 우리 집 겨울나기
-    ["farm_rankings/eco_rich_top5", "top5"],        // 친환경 농부
+    ["farm_rankings/eco_rich_top5_v2", "top5"],     // 친환경 농부
     ["flag_rankings/diff_8", "top3"],               // 세계 국기 짝 맞추기
     ["flag_rankings/diff_15", "top3"],
     ["flag_rankings/diff_25", "top3"]
   ];
 
   /* 이 기기에 남은 점수 : 최고 기록은 지우고, 진행 기록은 열린 단계만 남겨요 */
-  var BEST_KEYS = ["getbeol-best", "getbeol-best-easy", "climateHeroSave", "climateHeroRank", "clinicBest", "clinicRank", "eco-rich-local-top5"];
+  var BEST_KEYS = ["getbeol-best", "getbeol-best-easy", "climateHeroSave", "climateHeroRank", "clinicBest", "clinicRank", "eco-rich-local-top5-v2"];
   var PROGRESS_KEYS = ["bubble-prince-v1", "gas-hero-v1", "sound-post-progress", "winter-home-progress", "baramgil"];
 
   function clearLocal(){
