@@ -3008,6 +3008,10 @@ function openBook(fromTitle=false){
   b.querySelectorAll('.bk[data-k]').forEach(d=>d.onclick=()=>{ b.querySelector('#det').innerHTML=cardHTML(d.dataset.k); b.querySelector('#det').scrollIntoView({behavior:'smooth'}); });
 }
 
+// 같은 이름은 가장 높은 기록 하나만 보여요 (이름 앞뒤 공백은 무시)
+function bestPerName(list){ const best=new Map();
+  for(const r of list){ const k=String(r.name||'히어로').trim(); const b=best.get(k); if(!b||r.score>b.score) best.set(k,r); }
+  return [...best.values()].sort((a,b)=>b.score-a.score); }
 // 3min-playground.com에서는 다른 게임과 같은 Firestore 문서에 TOP 30을 저장해요.
 const FB={ ref:null,
   init(){ if(this.ref!==null) return this.ref; this.ref=false;
@@ -3016,9 +3020,9 @@ const FB={ ref:null,
       this.ref=firebase.firestore().collection('farm_rankings').doc('climate_hero_top');
     }catch(e){ this.ref=false; } return this.ref; },
   clean(r){ return r&&typeof r.score==='number'&&isFinite(r.score)&&r.score>=0&&r.score<1e6; },
-  async top(){ const ref=this.init(); if(!ref) throw new Error('no firebase'); const d=await ref.get(); return ((d.exists&&d.data().top)||[]).filter(r=>this.clean(r)).sort((a,b)=>b.score-a.score); },
+  async top(){ const ref=this.init(); if(!ref) throw new Error('no firebase'); const d=await ref.get(); return bestPerName(((d.exists&&d.data().top)||[]).filter(r=>this.clean(r))); },
   async add(en){ const ref=this.init(); if(!ref) return; const d=await ref.get(); const arr=((d.exists&&d.data().top)||[]).filter(r=>this.clean(r)&&r.id!==en.id);
-    arr.push({id:en.id,name:String(en.name||'히어로').slice(0,8),job:en.job,score:Math.round(en.score),time:en.time,date:en.date}); arr.sort((a,b)=>b.score-a.score); await ref.set({top:arr.slice(0,30)}); }
+    arr.push({id:en.id,name:String(en.name||'히어로').slice(0,8),job:en.job,score:Math.round(en.score),time:en.time,date:en.date}); await ref.set({top:bestPerName(arr).slice(0,30)}); }
 };
 const Rank={
   db:null, tried:false,
@@ -3028,8 +3032,8 @@ const Rank={
   async top(){
     if(FB.init()){ try{ const l=await Promise.race([FB.top(),sleep(8000).then(()=>{throw new Error('timeout')})]); return {list:l.slice(0,5),shared:true}; }catch(e){ console.warn('rank fb',e); } }
     const db=await this.getDb();
-    if(db){ try{ const r=await Promise.race([db.collection('ranking').orderBy('score','desc').limit(5).get(),sleep(8000).then(()=>{throw new Error('timeout')})]); return {list:this.norm(r).slice(0,5),shared:true}; }catch(e){ console.warn('rank db',e); } }
-    return {list:this.local().sort((a,b)=>b.score-a.score).slice(0,5),shared:false};
+    if(db){ try{ const r=await Promise.race([db.collection('ranking').orderBy('score','desc').limit(100).get(),sleep(8000).then(()=>{throw new Error('timeout')})]); return {list:bestPerName(this.norm(r)).slice(0,5),shared:true}; }catch(e){ console.warn('rank db',e); } }
+    return {list:bestPerName(this.local()).slice(0,5),shared:false};
   },
   async add(en){
     try{ const l=this.local(); l.push(en); l.sort((a,b)=>b.score-a.score); localStorage.setItem('climateHeroRank',JSON.stringify(l.slice(0,20))); }catch(e){}
