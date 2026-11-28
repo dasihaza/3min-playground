@@ -112,9 +112,14 @@
   #pad button{font-family:'Jua',sans-serif;font-size:28px;height:68px;border-radius:16px;border:2px solid var(--line);background:var(--panel2);color:var(--ink);touch-action:none;}
   #pad button.on{background:var(--gold);color:#3a2306;}
   #pad .dodge{font-size:16px;color:var(--red);}
+  #pad .sk{font-size:16px;color:#7ef0ff;height:56px;line-height:1.1;}
+  #pad .sk.br{color:var(--green);}
+  #pad .sk small{display:block;font-size:11px;color:var(--ink-soft);}
   @media (pointer:coarse){ #pad{display:grid;} }
   body.showpad #pad{display:grid;}
-  @media (max-width:640px){ .ov{position:fixed;z-index:10;} .grid{grid-template-columns:repeat(3,1fr);} header h1{font-size:18px;} }
+  header > div{display:flex;gap:4px;flex-shrink:0;}
+  @media (max-width:640px){ .ov{position:fixed;z-index:10;} .grid{grid-template-columns:repeat(3,1fr);} header h1{font-size:18px;}
+    header a{font-size:0;} header a::before{content:'←';font-size:20px;} }
   .help{max-width:960px;padding:12px 16px 30px;color:var(--ink-soft);font-size:13px;line-height:1.7;}
   .help b{color:var(--ink);}
   @media (prefers-reduced-motion:reduce){ .chest,.card{animation:none;} }
@@ -141,9 +146,11 @@
       <div class="keys">
         <div class="key"><kbd>←</kbd><kbd>↑</kbd><kbd>→</kbd><kbd>↓</kbd> 방향 막기 (WASD도 돼요)</div>
         <div class="key"><kbd>SPACE</kbd> 빨간 공격 피하기</div>
+        <div class="key"><kbd>Q</kbd> 필살기 (기력 5) · <kbd>E</kbd> 숨 고르기 (기력 3)</div>
         <div class="key"><kbd>ESC</kbd> 일시정지</div>
       </div>
       <p>반격으로 몬스터 <b style="color:#ff5a6e">체력</b>을 0으로 만들면 승리! 퍼펙트로 막으면 반격이 더 세요.</p>
+      <p>패링하면 <b style="color:#7ef0ff">기력</b>이 쌓여요. 공격이 멈춘 틈에 기술을 써요!</p>
       <p>단계를 깨면 <b style="color:#ffd45e">보물상자</b>에서 장비가 나와요. 미리 마구 누르면 잠깐 굳어요.</p>
       <div><button class="btn" id="startBtn">시작하기</button><button class="btn sub" id="gearBtn2">🎒 장비</button></div>
     </div>
@@ -166,6 +173,7 @@
     <span></span><button data-k="up">↑</button><span></span>
     <button data-k="left">←</button><button data-k="dodge" class="dodge">피하기</button><button data-k="right">→</button>
     <span></span><button data-k="down">↓</button><span></span>
+    <button data-k="skill" class="sk">필살기<small>기력 5</small></button><span></span><button data-k="breath" class="sk br">숨 고르기<small>기력 3</small></button>
   </div>
 </div>
 
@@ -200,6 +208,8 @@
   <b>공격 종류</b> · 하얀 원: 일반 공격 · <span style="color:#ffb04a">주황 큰 원</span>: 강공격(2칸 피해) ·
   <span style="color:#b48cff">보라 원</span>: 속임수일 수 있어요(중간에 사라지면 누르지 마세요) ·
   <span style="color:#5ec8ff">파란 원</span>: 멈췄다 오는 지연 공격 · <span style="color:#ff5a6e">빨간 원</span>: 막을 수 없어요, SPACE로 피하기!<br>
+  <b>기력</b> · 퍼펙트 +1, GOOD +0.5, 속임수 간파 +0.5 (최대 5칸) · <kbd>Q</kbd> 필살기(5칸): 검 연속 베기 · 창 꿰뚫기 · 도끼 내려찍기 ·
+  <kbd>E</kbd> 숨 고르기(3칸): 하트 1칸 회복 · 공격 원이 없을 때만 쓸 수 있어요<br>
   <b>반격 피해</b> = 공격력 × (퍼펙트면 무기 배율) − 몬스터 방어력 · <b>장비 등급</b>:
   <span style="color:var(--g0)">기본</span> · <span style="color:var(--g1)">드문</span> · <span style="color:var(--g2)">희귀</span> ·
   <span style="color:var(--g3)">영웅</span> · <span style="color:var(--g4)">전설</span>
@@ -250,11 +260,11 @@ const ARMOR = {
 };
 const WEAPONS = {
   sword: { atk: [10, 14, 19, 25, 32], perfMul: [1.5, 1.6, 1.7, 1.85, 2.0], pierce: 0, heavyMul: [1, 1, 1, 1, 1],
-           feat: '균형형 · 퍼펙트 반격이 강해요' },
+           feat: '균형형 · 퍼펙트 반격이 강해요', skill: '연속 베기', skillFx: '즉시 퍼펙트 베기 1번 + 다음 반격 3번이 퍼펙트 피해' },
   spear: { atk: [8, 11, 15, 20, 26], perfMul: [1.35, 1.4, 1.45, 1.5, 1.6], pierce: [40, 50, 60, 75, 90], heavyMul: [1, 1, 1, 1, 1],
-           feat: '관통형 · 단단한 몬스터의 방어를 뚫어요' },
+           feat: '관통형 · 단단한 몬스터의 방어를 뚫어요', skill: '꿰뚫기', skillFx: '방어력을 100% 무시하는 강한 찌르기 (공격력 ×3.5)' },
   axe:   { atk: [12, 16, 21, 27, 35], perfMul: [1.2, 1.25, 1.3, 1.35, 1.4], pierce: 0, heavyMul: [2, 2.2, 2.4, 2.7, 3],
-           feat: '파괴형 · 강공격(주황)을 막으면 큰 반격' },
+           feat: '파괴형 · 강공격(주황)을 막으면 큰 반격', skill: '내려찍기', skillFx: '공격력 ×2.5 강타 + 이번 판 몬스터 방어력 -3' },
 };
 function gc(g){ return GRADES[g].c; }
 function itemKey(it){ return it.slot === 'weapon' ? it.wt : it.slot; }
@@ -269,6 +279,7 @@ function itemFx(it){
     if (it.wt === 'spear') out.push('방어력 ' + w.pierce[g] + '% 무시');
     if (it.wt === 'axe') out.push('강공격 막으면 반격 ×' + w.heavyMul[g]);
     out.push({ feat: w.feat });
+    out.push({ feat: '필살기(Q) ' + w.skill + ': ' + w.skillFx });
   } else if (it.slot === 'helmet'){
     out.push('퍼펙트 판정 +' + ARMOR.helmet.perfWin[g] + 'ms');
     out.push({ feat: '퍼펙트를 내기 쉬워져요' });
@@ -402,6 +413,9 @@ const sfx = {
   go(){ tone(880, 0.2, 'square', 0.05); },
   tick(){ tone(440, 0.08, 'square', 0.04); },
   chest(sp){ noise(0.3, 0.3, 1500); [523, 784, 1046, 1568].forEach((f, i) => tone(f, 0.4, 'triangle', 0.07, null, .25 + i * 0.07)); if (sp) [1318, 1760, 2093].forEach((f, i) => tone(f, 0.5, 'sine', 0.05, null, .6 + i * 0.09)); },
+  skill(){ [392, 523, 659, 784, 1046].forEach((f, i) => tone(f, 0.18, 'sawtooth', 0.045, null, i * 0.035)); noise(0.3, 0.3, 2000, true); },
+  heal(){ [784, 988, 1318].forEach((f, i) => tone(f, 0.3, 'sine', 0.07, null, i * 0.08)); },
+  ready(big){ tone(big ? 1318 : 988, 0.12, 'triangle', 0.05); tone(big ? 1760 : 1318, 0.18, 'triangle', 0.05, null, 0.08); },
   equip(){ tone(660, 0.08, 'square', 0.04); tone(990, 0.12, 'square', 0.04, null, 0.06); },
 };
 
@@ -455,6 +469,12 @@ const STAGES = [
 ];
 const KIND_LEAD = { n: 1, h: 1.35, f: 1, dl: 1.55, red: 1.05 };
 const KIND_DMG = { n: 1, h: 2, f: 1, dl: 1, red: 2 };
+// 기력: 퍼펙트 +1, GOOD +0.5, 간파 +0.5 / 필살기 5칸, 숨 고르기 3칸
+const KI_MAX = 5, KI_SKILL = 5, KI_BREATH = 3;
+const KI_GAIN = { perfect: 1, good: .5, read: .5 };
+const SKILL_SAFE = 250;   // 공격 원이 이 시간(ms) 안에 나타나면 기술을 못 씀
+const SKILL_DELAY = 700;  // 기술을 쓰면 다음 공격이 이만큼 늦게 옴
+const FIST_SKILL = { skill: '주먹 연타', skillFx: '공격력 ×3 연타' };
 
 // 위치
 const PX = 300, PY = 318, MX = 690, MY = 330;
@@ -481,6 +501,7 @@ function newGame(idx){
     perfect: 0, good: 0, hits: 0, combo: 0, maxCombo: 0, dmgDealt: 0,
     introStart: T, lastDir: 'left', monLunge: -9999, monHurt: -9999, plHurt: -9999,
     guard: null, counterAt: -9999, counterWt: S.wt, breakAt: 0, countdown: 4, dead: false,
+    def: st.def, ki: 0, sureCrit: 0, skillFx: null, skillsUsed: 0, breaths: 0, kiTold: false,
   };
   particles = []; texts = [];
   state = 'intro';
@@ -537,19 +558,20 @@ function spotXY(dir){ return [PX + SPOT[dir][0], PY + SPOT[dir][1]]; }
 function counterDamage(perfect, heavy, combo){
   const S = G.S;
   let raw = S.atk * (perfect ? S.perfMul : 1) * (heavy ? S.heavyMul : 1) * (1 + Math.min(combo, 10) * S.combo / 100);
-  const def = G.st.def * (1 - S.pierce / 100);
+  const def = G.def * (1 - S.pierce / 100);
   return Math.max(1, Math.round(raw - def));
 }
 
 function strike(s){
-  const dmg = counterDamage(s.perfect, s.heavy, s.combo);
+  const dmg = s.dmg != null ? s.dmg : counterDamage(s.perfect, s.heavy, s.combo);
   G.mhp -= dmg; G.dmgDealt += dmg; G.monHurt = T;
-  const big = s.perfect || (s.heavy && G.S.heavyMul > 1);
+  const big = s.perfect || s.skill || (s.heavy && G.S.heavyMul > 1);
   sfx.slash(G.S.wt, big);
   hitstop = Math.max(hitstop, big ? 60 : 30); shake = Math.max(shake, big ? 9 : 5);
   burst(MX - 30, MY - 40, big ? '#ffd45e' : '#ffffff', big ? 26 : 14, 8);
-  const label = (s.heavy && G.S.heavyMul > 1) ? '파괴! ' + dmg : s.perfect ? '치명! ' + dmg : String(dmg);
-  addText(MX + rand(-20, 20), MY - 130 - (G.st.look.size || 1) * 20, label, big ? '#ffd45e' : '#ffffff', big ? 40 : 30);
+  const label = s.label ? s.label + ' ' + dmg : (s.heavy && G.S.heavyMul > 1) ? '파괴! ' + dmg : s.perfect ? '치명! ' + dmg : String(dmg);
+  addText(MX + rand(-20, 20), MY - 130 - (G.st.look.size || 1) * 20 - (s.skill ? 20 : 0), label, s.skill ? '#7ef0ff' : big ? '#ffd45e' : '#ffffff', s.skill ? 46 : big ? 40 : 30);
+  if (s.after) s.after();
   if (G.st.phase2 && !G.phase2 && G.mhp <= G.st.mhp / 2 && G.mhp > 0){
     G.phase2 = true; G.lead = G.st.lead * G.st.phase2.lead; G.patterns = G.st.phase2.patterns;
     addText(MX, 160, '분노! 2페이즈', '#ff5a6e', 40); shake = 14;
@@ -579,8 +601,22 @@ function takeHit(a, label){
   if (G.hp <= 0){ G.hp = 0; G.dead = true; endStage(false); }
 }
 
+function addKi(v){
+  const before = G.ki;
+  G.ki = Math.min(KI_MAX, G.ki + v);
+  if (before < KI_BREATH && G.ki >= KI_BREATH && G.hp < G.maxHp) sfx.ready(false);
+  if (before < KI_SKILL && G.ki >= KI_SKILL){
+    sfx.ready(true);
+    if (!G.kiTold){ G.kiTold = true; addText(W / 2, 470, '기력 가득! 공격이 멈췄을 때 Q 필살기', '#7ef0ff', 24); }
+  }
+}
 function onParry(a, diff){
-  const perfect = diff <= G.S.perfWin;
+  const realPerfect = diff <= G.S.perfWin;
+  let perfect = realPerfect;
+  if (!perfect && G.sureCrit > 0) perfect = true; // 검 필살기: 다음 반격 퍼펙트 처리
+  const buffed = G.sureCrit > 0;
+  if (G.sureCrit > 0) G.sureCrit--;
+  addKi(realPerfect ? KI_GAIN.perfect : KI_GAIN.good);
   a.done = true;
   G.combo++; G.maxCombo = Math.max(G.maxCombo, G.combo);
   const [x, y] = spotXY(a.dir);
@@ -594,9 +630,60 @@ function onParry(a, diff){
     burst(x, y, perfect ? '#ffd45e' : '#ffffff', perfect ? 34 : 18, perfect ? 9 : 6);
     addText(x, y - 62, perfect ? 'PERFECT!' : 'GOOD', perfect ? '#ffd45e' : '#bfe8ff', perfect ? 34 : 28);
   }
-  if (perfect){ G.perfect++; hitstop = a.k === 'h' ? 110 : 70; shake = a.k === 'h' ? 10 : 5; }
+  if (realPerfect){ G.perfect++; hitstop = a.k === 'h' ? 110 : 70; shake = a.k === 'h' ? 10 : 5; }
   else { G.good++; shake = 3; }
-  G.strikes.push({ at: T + C_HIT, perfect, heavy: a.k === 'h', combo: G.combo });
+  G.strikes.push({ at: T + C_HIT, perfect, heavy: a.k === 'h', combo: G.combo, label: buffed ? '연속 베기!' : null });
+}
+
+// =====================================================================
+// 기술 (Q 필살기, E 숨 고르기)
+// =====================================================================
+function skillBlocked(){
+  return G.attacks.some(a => !a.done && a.t0 <= T + SKILL_SAFE) || G.strikes.length > 0 || T - G.counterAt < C_END;
+}
+function pushBackAttacks(){
+  for (const a of G.attacks){ a.t0 += SKILL_DELAY; a.ti += SKILL_DELAY; if (a.fakeAt) a.fakeAt += SKILL_DELAY; }
+  G.nextAt = Math.max(G.nextAt, T + SKILL_DELAY);
+}
+function trySkill(kind){
+  ac();
+  if (state !== 'play' || !G) return;
+  const cost = kind === 'skill' ? KI_SKILL : KI_BREATH;
+  if (G.ki < cost){ addText(PX, PY + 175, '기력이 부족해요 (' + cost + '칸 필요)', '#a59fba', 22); sfx.early(); return; }
+  if (kind === 'breath' && G.hp >= G.maxHp){ addText(PX, PY + 175, '체력이 가득해요', '#a59fba', 22); sfx.early(); return; }
+  if (skillBlocked()){ addText(PX, PY + 175, '지금은 못 써요! 공격 사이에 써요', '#a59fba', 22); sfx.early(); return; }
+  G.ki -= cost;
+  pushBackAttacks();
+  if (kind === 'breath'){
+    G.hp = Math.min(G.maxHp, G.hp + 1); G.breaths++;
+    sfx.heal();
+    G.skillFx = { at: T, name: '숨 고르기', col: '#6be38a' };
+    burst(PX, PY - 20, '#6be38a', 26, 5);
+    addText(PX, PY - 120, '+1 ♥', '#6be38a', 36);
+    return;
+  }
+  // 필살기
+  G.skillsUsed++;
+  const S = G.S, wt = S.wt;
+  const info = wt ? WEAPONS[wt] : FIST_SKILL;
+  sfx.skill();
+  G.skillFx = { at: T, name: info.skill + '!', col: S.wg ? gc(S.wg) : '#7ef0ff' };
+  G.guard = null; G.counterAt = T - C_GUARD; // 바로 달려 나감
+  hitstop = 120; shake = 8;
+  const at = T + (C_HIT - C_GUARD);
+  const raw = m => S.atk * m;
+  const minusDef = v => Math.max(1, Math.round(v - G.def * (1 - S.pierce / 100)));
+  if (wt === 'sword'){
+    G.strikes.push({ at, skill: true, label: '연속 베기!', dmg: minusDef(raw(S.perfMul)), after: () => { G.sureCrit = 3; addText(PX, PY - 150, '다음 반격 3번 퍼펙트!', '#7ef0ff', 24); } });
+  } else if (wt === 'spear'){
+    G.strikes.push({ at, skill: true, label: '꿰뚫기!', dmg: Math.round(raw(3.5)) });
+  } else if (wt === 'axe'){
+    G.strikes.push({ at, skill: true, label: '내려찍기!', dmg: minusDef(raw(2.5)), after: () => {
+      if (G.def > 0){ const d = Math.min(3, G.def); G.def -= d; addText(MX, MY - 230, '방어력 -' + d, '#ff9a3c', 28); }
+    } });
+  } else {
+    G.strikes.push({ at, skill: true, label: '주먹 연타!', dmg: minusDef(raw(3)) });
+  }
 }
 
 // =====================================================================
@@ -638,6 +725,11 @@ window.addEventListener('keydown', e => {
     togglePause(); return;
   }
   if (e.code === 'KeyM'){ toggleMute(); return; }
+  if ((e.code === 'KeyQ' || e.code === 'KeyE') && state === 'play'){
+    e.preventDefault(); if (e.repeat) return;
+    const k = e.code === 'KeyQ' ? 'skill' : 'breath';
+    trySkill(k); flashPad(k); return;
+  }
   const k = KEYMAP[e.code];
   if (k && (state === 'play' || state === 'intro')){
     e.preventDefault();
@@ -650,7 +742,12 @@ window.addEventListener('keydown', e => {
   }
 });
 document.querySelectorAll('#pad button').forEach(b => {
-  b.addEventListener('pointerdown', e => { e.preventDefault(); press(b.dataset.k); flashPad(b.dataset.k); });
+  b.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    const k = b.dataset.k;
+    if (k === 'skill' || k === 'breath') trySkill(k); else press(k);
+    flashPad(k);
+  });
 });
 function flashPad(k){
   const b = document.querySelector('#pad button[data-k="' + k + '"]'); if (!b) return;
@@ -730,7 +827,7 @@ function endStage(win){
     $('resStat').innerHTML =
       '<div>PERFECT<b>' + G.perfect + '</b></div><div>GOOD<b>' + G.good + '</b></div>' +
       '<div>맞은 횟수<b>' + G.hits + '</b></div><div>최대 콤보<b>' + G.maxCombo + '</b></div>' +
-      '<div>준 피해<b>' + G.dmgDealt + '</b></div>';
+      '<div>준 피해<b>' + G.dmgDealt + '</b></div><div>필살기<b>' + G.skillsUsed + '</b></div><div>숨 고르기<b>' + G.breaths + '</b></div>';
     const bt = $('resBtns'); bt.innerHTML = '';
     const mk = (label, cls, fn) => { const b = document.createElement('button'); b.className = 'btn' + (cls ? ' ' + cls : ''); b.textContent = label; b.onclick = fn; bt.appendChild(b); };
     const navs = () => {
@@ -918,7 +1015,7 @@ function update(dt){
     if (a.ti - T < 130 && a.ti - T > -40 && !a.canceled) G.monLunge = Math.max(G.monLunge, a.ti - 130);
     if (T > a.ti + G.S.goodWin){
       a.done = true;
-      if (a.canceled){ const [x, y] = spotXY(a.dir); addText(x, y - 60, '간파!', '#b48cff', 26); G.combo++; }
+      if (a.canceled){ const [x, y] = spotXY(a.dir); addText(x, y - 60, '간파!', '#b48cff', 26); G.combo++; addKi(KI_GAIN.read); }
       else takeHit(a);
       if (state !== 'play') return;
     }
@@ -1284,16 +1381,53 @@ function drawHUD(){
   ctx.fillText(Math.ceil(Math.max(0, G.mhp)) + ' / ' + G.st.mhp, bx + bw / 2, by + 14);
   ctx.textAlign = 'right'; ctx.fillStyle = '#a59fba'; ctx.font = '14px Jua';
   const pierceTxt = G.S.pierce ? ' (창 관통 ' + G.S.pierce + '%)' : '';
-  ctx.fillText('🛡 방어력 ' + G.st.def + pierceTxt, W - 30, by + 38);
+  if (G.def < G.st.def) ctx.fillStyle = '#ff9a3c';
+  ctx.fillText('🛡 방어력 ' + G.def + (G.def < G.st.def ? ' (원래 ' + G.st.def + ')' : '') + pierceTxt, W - 30, by + 38);
   // 콤보 & 공격력
   ctx.textAlign = 'left';
   ctx.font = '15px Jua'; ctx.fillStyle = '#a59fba';
-  ctx.fillText('⚔ 공격력 ' + G.S.atk, 22, 76);
-  if (G.combo >= 2){ ctx.font = '26px Jua'; ctx.fillStyle = '#ffd45e'; ctx.fillText(G.combo + ' 콤보', 22, 106); }
+  ctx.fillText('⚔ 공격력 ' + G.S.atk + (G.sureCrit ? '  ·  연속 베기 ' + G.sureCrit : ''), 22, 76);
+  drawKi();
+  if (G.combo >= 2){ ctx.font = '26px Jua'; ctx.fillStyle = '#ffd45e'; ctx.fillText(G.combo + ' 콤보', 22, 150); }
   if (T < G.lockUntil){
     ctx.textAlign = 'center'; ctx.font = '16px Jua'; ctx.fillStyle = '#a59fba';
     ctx.fillText('경직…', PX, PY + 150);
   }
+}
+function drawKi(){
+  const x0 = 22, y0 = 88, cw = 30, ch = 12, gap = 4;
+  const blocked = state !== 'play' || skillBlocked();
+  ctx.font = '13px Jua'; ctx.fillStyle = '#7ef0ff'; ctx.textAlign = 'left';
+  ctx.fillText('기력', x0, y0 + 11);
+  const bx = x0 + 34;
+  for (let i = 0; i < KI_MAX; i++){
+    const x = bx + i * (cw + gap);
+    ctx.fillStyle = 'rgba(0,0,0,.45)'; roundRect(x, y0, cw, ch, 4); ctx.fill();
+    const f = Math.max(0, Math.min(1, G.ki - i));
+    if (f > 0){
+      ctx.fillStyle = G.ki >= KI_SKILL ? (Math.floor(T / 200) % 2 ? '#7ef0ff' : '#c4f8ff') : '#4fb8d6';
+      roundRect(x, y0, cw * f, ch, 4); ctx.fill();
+    }
+    if (i === KI_BREATH - 1){ ctx.fillStyle = 'rgba(107,227,138,.9)'; ctx.fillRect(x + cw + gap / 2 - 1, y0 - 3, 2, ch + 6); }
+  }
+  const canQ = G.ki >= KI_SKILL && !blocked, canE = G.ki >= KI_BREATH && G.hp < G.maxHp && !blocked;
+  ctx.font = '13px Jua';
+  ctx.fillStyle = canQ ? '#7ef0ff' : 'rgba(165,159,186,.6)';
+  ctx.fillText('Q 필살기', x0, y0 + 32);
+  ctx.fillStyle = canE ? '#6be38a' : 'rgba(165,159,186,.6)';
+  ctx.fillText('E 숨 고르기', x0 + 70, y0 + 32);
+}
+function drawSkillFx(){
+  const f = G.skillFx; if (!f) return;
+  const e = T - f.at; if (e > 900){ G.skillFx = null; return; }
+  const a = e < 120 ? e / 120 : 1 - (e - 120) / 780;
+  ctx.save();
+  ctx.globalAlpha = a * .22; ctx.fillStyle = f.col; ctx.fillRect(0, 0, W, H);
+  ctx.globalAlpha = a; ctx.fillStyle = 'rgba(10,8,16,.7)'; ctx.fillRect(0, 196, W, 70);
+  ctx.textAlign = 'center'; ctx.font = (48 + (e < 120 ? (1 - e / 120) * 20 : 0)) + 'px Jua';
+  ctx.lineWidth = 6; ctx.strokeStyle = 'rgba(0,0,0,.7)'; ctx.strokeText(f.name, W / 2, 248);
+  ctx.fillStyle = f.col; ctx.fillText(f.name, W / 2, 248);
+  ctx.restore();
 }
 function heart(x, y, c){
   ctx.fillStyle = c; ctx.beginPath();
@@ -1348,6 +1482,7 @@ function draw(){
   ctx.globalAlpha = 1;
   ctx.restore();
   drawHUD();
+  drawSkillFx();
   if (state === 'intro' || (state === 'paused' && pausedFrom === 'intro')) drawIntro();
   const hh = T - G.plHurt;
   if (hh < 300){ ctx.fillStyle = 'rgba(255,40,60,' + (1 - hh / 300) * .25 + ')'; ctx.fillRect(0, 0, W, H); }
@@ -1367,7 +1502,7 @@ fitCanvas();
 requestAnimationFrame(loop);
 
 // 테스트용 (콘솔): unlockAll() 모든 단계 열기
-window.__parry = { get G(){ return G; }, get T(){ return T; }, get state(){ return state; }, press, newGame, save: () => save, openGear };
+window.__parry = { get G(){ return G; }, get T(){ return T; }, get state(){ return state; }, press, newGame, save: () => save, openGear, trySkill, skillBlocked: () => skillBlocked() };
 window.unlockAll = () => { save.unlocked = STAGES.length; persist(); buildGrid(); };
 })();
 </script>
