@@ -481,6 +481,19 @@ const FIST_SKILL = { skill: '주먹 연타', skillFx: '공격력 ×3 연타' };
 // 위치
 const PX = 300, PY = 318, MX = 690, MY = 330;
 const SPOT = { left: [-150, 0], right: [150, 0], up: [0, -148], down: [0, 112], dodge: [0, -10] };
+// 막기 자세 (주인공 기준 좌표, 0도=칼끝이 위, 180도=칼끝이 아래)
+// 팔꿈치를 위로 접어 손을 높이 들고, 칼끝은 아래로 → 칼날이 대각선으로 몸을 가림
+const GUARD_POSE = {
+  right: { elbow: [36, -30], hand: [30, -62], ang: 2.36 },  // 앞: 칼끝이 앞-아래로
+  up:    { elbow: [34, -52], hand: [10, -98], ang: 1.92 },  // 위: 손을 머리 위로, 칼날이 머리를 덮음
+  left:  { elbow: [26, -58], hand: [0, -88], ang: -2.25 },  // 뒤: 손을 머리 위로, 칼끝이 머리 뒤-아래로
+  down:  { elbow: [42, -26], hand: [30, -40], ang: 2.75 },  // 아래: 칼끝을 거의 바닥으로
+};
+const BLADE_HIT = 46; // 칼날에서 공격이 부딪히는 지점 (손에서 거리)
+function guardContact(dir){
+  const g = GUARD_POSE[dir];
+  return [PX + g.hand[0] + Math.sin(g.ang) * BLADE_HIT, PY + g.hand[1] - Math.cos(g.ang) * BLADE_HIT];
+}
 const GLYPH = { left: '←', right: '→', up: '↑', down: '↓', dodge: 'SPACE' };
 const MNEAR = PX + 270;         // 적이 공격하러 다가오는 위치
 const REACH = 165;              // 반격할 때 적 앞에서 멈추는 거리
@@ -633,7 +646,7 @@ function onParry(a, diff){
   const [x, y] = spotXY(a.dir);
   G.guard = a.dir; G.guardAt = T; G.monStagger = T;
   resolveChain(a, true);
-  if (a.dir !== 'dodge') G.clashes.push({ x, y, at: T, perfect: realPerfect, heavy: a.k === 'h', rot: Math.random() });
+  if (a.dir !== 'dodge'){ const [cx, cy] = guardContact(a.dir); G.clashes.push({ x: cx, y: cy, at: T, perfect: realPerfect, heavy: a.k === 'h', rot: Math.random() }); }
   if (realPerfect) G.flashAt = T;
   if (a.dir === 'dodge'){
     sfx.dodge();
@@ -641,7 +654,8 @@ function onParry(a, diff){
     burst(x, y, '#ffffff', 14, 5);
   } else {
     sfx.parry(perfect);
-    burst(x, y, perfect ? '#ffd45e' : '#ffffff', perfect ? 34 : 18, perfect ? 9 : 6);
+    const [bx, by] = guardContact(a.dir);
+    burst(bx, by, perfect ? '#ffd45e' : '#ffffff', perfect ? 34 : 18, perfect ? 9 : 6);
     addText(x, y - 62, perfect ? 'PERFECT!' : 'GOOD', perfect ? '#ffd45e' : '#bfe8ff', perfect ? 34 : 28);
   }
   if (realPerfect){ G.perfect++; hitstop = a.k === 'h' ? 110 : 70; shake = a.k === 'h' ? 10 : 5; }
@@ -1170,16 +1184,23 @@ function drawHero(o){
     ctx.fillStyle = '#1e1a28'; ctx.beginPath(); ctx.arc(12, -44, 3, 0, 7); ctx.fill();
   }
   // 팔 + 장갑 + 무기
-  let hx = 24, hy = 6, ang = .35;
+  let hx = 24, hy = 6, ang = .35, elbow = null, grip = 0;
   if (o.pose === 'guard' && o.guardDir && o.guardDir !== 'dodge'){
-    const [dx, dy] = SPOT[o.guardDir]; hx = dx * .12; hy = -6 + dy * .12; ang = Math.atan2(dx, -dy);
+    const g = GUARD_POSE[o.guardDir], rc = o.recoil || 0;
+    // 부딪힌 순간 칼이 공격 반대쪽으로 살짝 밀림
+    const px = -Math.sin(g.ang + Math.PI / 2) * 7 * rc, py = Math.cos(g.ang + Math.PI / 2) * 7 * rc;
+    hx = g.hand[0] + px; hy = g.hand[1] + py; elbow = [g.elbow[0] + px * .5, g.elbow[1] + py * .5]; ang = g.ang + rc * .12;
+    if (eq.weapon && eq.weapon.wt === 'spear') grip = 48; // 창은 자루 가운데를 쥠
   } else if (o.pose === 'swing'){
     if (eq.weapon && eq.weapon.wt === 'spear'){ ang = Math.PI / 2; hx = 24 + o.sw * 34; hy = 0; }
     else { ang = o.back ? 1.8 - o.sw * 2.7 : -0.9 + o.sw * 2.7; hx = 24; hy = -2; }
   }
   ctx.strokeStyle = flash ? '#ff8a9a' : shade(base, -.25); ctx.lineWidth = 11; ctx.lineCap = 'round';
-  ctx.beginPath(); ctx.moveTo(14, -12); ctx.lineTo(hx, hy); ctx.stroke();
-  ctx.save(); ctx.translate(hx, hy); ctx.rotate(ang);
+  ctx.beginPath(); ctx.moveTo(14, -12);
+  if (elbow){ ctx.lineTo(elbow[0], elbow[1]); }
+  ctx.lineTo(hx, hy); ctx.stroke();
+  if (elbow){ ctx.fillStyle = flash ? '#ff8a9a' : shade(base, -.35); ctx.beginPath(); ctx.arc(elbow[0], elbow[1], 6.5, 0, 7); ctx.fill(); }
+  ctx.save(); ctx.translate(hx, hy); ctx.rotate(ang); ctx.translate(0, grip);
   if (eq.weapon) drawWeaponShape(eq.weapon.wt, eq.weapon.g);
   ctx.restore();
   ctx.fillStyle = eq.gloves ? (eq.gloves.g ? gc(eq.gloves.g) : '#8a6a48') : '#f2c9a0';
@@ -1204,8 +1225,9 @@ function drawPlayer(){
     sw = Math.max(0, Math.min(1, (e - (RIP_IN + i * A.step) + 50) / 90));
     back = i % 2 === 1;
   }
-  if (pose === 'idle' && T - G.guardAt < 180) pose = G.guard === 'dodge' ? 'dodge' : 'guard';
-  drawHero({ x: PX + dx + kb, y: PY + bob, eq: G.eq, pose, sw, back, guardDir: G.guard, hurt });
+  if (pose === 'idle' && T - G.guardAt < 230) pose = G.guard === 'dodge' ? 'dodge' : 'guard';
+  const recoil = Math.max(0, 1 - (T - G.guardAt) / 110);
+  drawHero({ x: PX + dx + kb, y: PY + bob, eq: G.eq, pose, sw, back, guardDir: G.guard, hurt, recoil });
   // 회피 잔상
   const ge = T - G.guardAt;
   if (ge < 300 && G.guard === 'dodge'){
@@ -1261,8 +1283,8 @@ function drawTrails(){
     const dur = TRAIL[a.k], st = a.ti - dur;
     if (T < st || T > a.ti + 40) continue;
     const u = Math.min(1, (T - st) / dur), uh = u * u;
-    const S = [G.monX - 50, MY - 60], E = spotXY(a.dir), mx = (S[0] + E[0]) / 2;
-    const C = a.dir === 'up' ? [mx, PY - 300] : a.dir === 'down' ? [mx, PY + 230] : a.dir === 'left' ? [PX + 40, PY - 280] : a.dir === 'right' ? [mx, E[1] - 50] : [mx, S[1] - 30];
+    const S = [G.monX - 50, MY - 60], E = a.dir === 'dodge' ? [PX, PY - 20] : guardContact(a.dir), mx = (S[0] + E[0]) / 2;
+    const C = a.dir === 'up' ? [mx, PY - 300] : a.dir === 'down' ? [mx, PY + 230] : a.dir === 'left' ? [PX + 20, PY - 300] : a.dir === 'right' ? [mx, E[1] - 50] : [mx, S[1] - 30];
     const col = KCOL[a.k];
     ctx.save(); ctx.lineCap = 'round'; ctx.shadowColor = col; ctx.shadowBlur = 16;
     const seg = 10, u0 = Math.max(0, uh - .45);
