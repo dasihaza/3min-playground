@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>패링 마스터</title>
-<meta name="description" content="수묵화로 그린 무협 패링 액션 게임. 적의 공격을 방향과 타이밍에 맞춰 막고 반격하세요. 장비와 무기를 모아 강해지는 1~10단계.">
+<title>역류검 — 먼저 치지 않는 자</title>
+<meta name="description" content="수묵화로 그린 무협 액션 게임 역류검. 먼저 치지 않는다. 적의 공격을 방향과 타이밍에 맞춰 받아내고 되돌려준다. 장비와 무기를 모아 강해지는 1~10단계.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Brush+Script&family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
@@ -63,7 +63,8 @@
 
   /* 타이틀: 캔버스의 타이틀 그림 위에 글씨만 */
   #ovTitle{background:linear-gradient(180deg, rgba(239,229,207,0) 40%, rgba(239,229,207,.0) 55%, rgba(20,15,10,.55) 100%);backdrop-filter:none;justify-content:space-between;padding:4% 16px 3%;}
-  .logo{display:flex;align-items:center;gap:10px;margin-left:18%;}
+  .logo{display:flex;flex-direction:column;align-items:center;gap:2px;margin-left:18%;}
+  .logo .sub{font-family:var(--body);font-weight:800;font-size:clamp(13px,1.9vw,18px);letter-spacing:.5em;color:var(--crimson);padding-left:.5em;text-shadow:0 0 10px rgba(239,229,207,.9);}
   .logo h2{font-size:clamp(56px,11vw,120px);color:var(--ink);text-shadow:0 0 18px rgba(239,229,207,.9);}
   .seal{display:inline-flex;align-items:center;justify-content:center;width:clamp(38px,6vw,60px);height:clamp(38px,6vw,60px);border-radius:4px;
         background:var(--crimson);color:#fbefe0;font-family:var(--brush);font-size:clamp(28px,4.6vw,46px);line-height:1;padding-top:.08em;transform:rotate(-6deg);
@@ -192,7 +193,7 @@
 <body>
 <header>
   <span class="ver">체험판 · 1~10단계</span>
-  <h1>패링 <span>마스터</span></h1>
+  <h1>역류<span>검</span></h1>
   <div>
     <button class="hbtn" id="gearBtn">장비</button>
     <button class="hbtn" id="muteBtn">소리</button>
@@ -205,7 +206,7 @@
     <canvas id="cv" width="960" height="540"></canvas>
 
     <div class="ov show" id="ovTitle">
-      <div class="logo"><h2>패링 마스터</h2><span class="seal" aria-hidden="true">검</span></div>
+      <div class="logo"><h2>역류검</h2><div class="sub">먼저 치지 않는 자</div></div>
       <div class="titleBottom">
         <div class="keys">
           <div class="key"><kbd>←↑→↓</kbd> 같은 방향으로 막기 (WASD)</div>
@@ -240,7 +241,7 @@
     <span></span><button data-k="up">↑</button><span></span>
     <button data-k="left">←</button><button data-k="dodge" class="dodge">피하기</button><button data-k="right">→</button>
     <span></span><button data-k="down">↓</button><span></span>
-    <button data-k="skill" class="sk">필살기<small>기력 5</small></button><span></span><button data-k="breath" class="sk br">숨 고르기<small>기력 3</small></button>
+    <button data-k="skill" class="sk">필살기<small>반탄기 5</small></button><span></span><button data-k="breath" class="sk br">숨 고르기<small>반탄기 3</small></button>
   </div>
 </div>
 
@@ -288,7 +289,7 @@
   <b>공격 종류</b> · 먹색 원: 일반 공격 · <span style="color:#e0743c">주황 원</span>: 강공격(2칸 피해) ·
   <span style="color:#a98ce0">보라 점선</span>: 속임수일 수 있어요(중간에 사라지면 누르지 마세요) ·
   <span style="color:#7aa7f0">푸른 원</span>: 멈칫했다 오는 공격 · <span style="color:#ea5a50">붉은 원</span>: 막을 수 없어요, SPACE로 피하기<br>
-  <b>기력</b> · 퍼펙트 +1, GOOD +0.5, 속임수 간파 +0.5 (최대 5칸) · <kbd>Q</kbd> 필살기(5칸): 검 연속 베기 · 창 꿰뚫기 · 도끼 내려찍기 ·
+  <b>반탄기(反彈氣)</b> · 적의 힘을 받아낼 때 쌓이는 기운 · 퍼펙트 +1, GOOD +0.5, 속임수 간파 +0.5 (최대 5칸) · <kbd>Q</kbd> 필살기(5칸): 검 연속 베기 · 창 꿰뚫기 · 도끼 내려찍기 ·
   <kbd>E</kbd> 숨 고르기(3칸): 하트 1칸 회복 · 공격 원이 없을 때만 쓸 수 있어요<br>
   <b>반격 피해</b> = 공격력 × (퍼펙트면 무기 배율) − 몬스터 방어력 · <b>장비 등급</b>:
   <span style="color:#b9b0a2">기본</span> · <span style="color:#5fbf6b">드문</span> · <span style="color:#5b93ea">희귀</span> ·
@@ -587,7 +588,7 @@ const STAGES = [
 ];
 const KIND_LEAD = { n: 1, h: 1.35, f: 1, dl: 1.55, red: 1.05 };
 const KIND_DMG = { n: 1, h: 2, f: 1, dl: 1, red: 2 };
-// 기력: 퍼펙트 +1, GOOD +0.5, 간파 +0.5 / 필살기 5칸, 숨 고르기 3칸
+// 반탄기(화면의 이름, 코드에서는 ki): 퍼펙트 +1, GOOD +0.5, 간파 +0.5 / 필살기 5칸, 숨 고르기 3칸
 const KI_MAX = 5, KI_SKILL = 5, KI_BREATH = 3;
 const KI_GAIN = { perfect: 1, good: .5, read: .5 };
 const SKILL_SAFE = 250;   // 공격 원이 이 시간(ms) 안에 나타나면 기술을 못 씀
@@ -752,7 +753,7 @@ function addKi(v){
   if (before < KI_BREATH && G.ki >= KI_BREATH && G.hp < G.maxHp) sfx.ready(false);
   if (before < KI_SKILL && G.ki >= KI_SKILL){
     sfx.ready(true);
-    if (!G.kiTold){ G.kiTold = true; addText(W / 2, 470, '기력 가득! 공격이 멈췄을 때 Q 필살기', '#7ef0ff', 24); }
+    if (!G.kiTold){ G.kiTold = true; addText(W / 2, 470, '반탄기가 가득 찼다! 공격이 멈춘 틈에 Q 필살기', '#7ef0ff', 24); }
   }
 }
 function onParry(a, diff){
@@ -805,7 +806,7 @@ function trySkill(kind){
   ac();
   if (state !== 'play' || !G) return;
   const cost = kind === 'skill' ? KI_SKILL : KI_BREATH;
-  if (G.ki < cost){ addText(PX, PY + 175, '기력이 부족해요 (' + cost + '칸 필요)', '#a59fba', 22); sfx.early(); return; }
+  if (G.ki < cost){ addText(PX, PY + 175, '반탄기가 부족하다 (' + cost + '칸 필요)', '#a59fba', 22); sfx.early(); return; }
   if (kind === 'breath' && G.hp >= G.maxHp){ addText(PX, PY + 175, '체력이 가득해요', '#a59fba', 22); sfx.early(); return; }
   if (skillBlocked()){ addText(PX, PY + 175, '지금은 못 써요! 공격 사이에 써요', '#a59fba', 22); sfx.early(); return; }
   G.ki -= cost;
@@ -1635,9 +1636,9 @@ function drawHUD(){
 }
 function drawKi(){
   const x0 = 18, y0 = 84, blocked = state !== 'play' || skillBlocked();
-  ctx.textAlign = 'left'; ctx.font = '24px ' + BRUSH; ctx.fillStyle = JADE; ctx.fillText('기력', x0, y0 + 7);
+  ctx.textAlign = 'left'; ctx.font = '24px ' + BRUSH; ctx.fillStyle = JADE; ctx.fillText('반탄기', x0, y0 + 7);
   for (let i = 0; i < KI_MAX; i++){
-    const cx = x0 + 52 + i * 22, f = Math.max(0, Math.min(1, G.ki - i));
+    const cx = x0 + 62 + i * 22, f = Math.max(0, Math.min(1, G.ki - i));
     ctx.beginPath(); ctx.arc(cx, y0, 8, 0, 7); ctx.fillStyle = 'rgba(239,229,207,.8)'; ctx.fill();
     ctx.strokeStyle = 'rgba(27,23,20,.55)'; ctx.lineWidth = 1.5; ctx.stroke();
     if (f > 0){
@@ -1648,8 +1649,8 @@ function drawKi(){
   }
   const canQ = G.ki >= KI_SKILL && !blocked, canE = G.ki >= KI_BREATH && G.hp < G.maxHp && !blocked;
   ctx.font = '700 12px ' + BODY;
-  ctx.fillStyle = canQ ? JADE : 'rgba(93,82,71,.55)'; ctx.fillText('Q 필살기', x0 + 168, y0 + 4);
-  ctx.fillStyle = canE ? '#2f7a3c' : 'rgba(93,82,71,.55)'; ctx.fillText('E 숨 고르기', x0 + 232, y0 + 4);
+  ctx.fillStyle = canQ ? JADE : 'rgba(93,82,71,.55)'; ctx.fillText('Q 필살기', x0 + 178, y0 + 4);
+  ctx.fillStyle = canE ? '#2f7a3c' : 'rgba(93,82,71,.55)'; ctx.fillText('E 숨 고르기', x0 + 242, y0 + 4);
 }
 function drawSkillFx(){
   const f = G.skillFx; if (!f) return;
