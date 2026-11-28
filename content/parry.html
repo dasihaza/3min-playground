@@ -263,8 +263,8 @@ const WEAPONS = {
            feat: '균형형 · 퍼펙트 반격이 강해요', skill: '연속 베기', skillFx: '즉시 퍼펙트 베기 1번 + 다음 반격 3번이 퍼펙트 피해' },
   spear: { atk: [8, 11, 15, 20, 26], perfMul: [1.35, 1.4, 1.45, 1.5, 1.6], pierce: [40, 50, 60, 75, 90], heavyMul: [1, 1, 1, 1, 1],
            feat: '관통형 · 단단한 몬스터의 방어를 뚫어요', skill: '꿰뚫기', skillFx: '방어력을 100% 무시하는 강한 찌르기 (공격력 ×3.5)' },
-  axe:   { atk: [12, 16, 21, 27, 35], perfMul: [1.2, 1.25, 1.3, 1.35, 1.4], pierce: 0, heavyMul: [2, 2.2, 2.4, 2.7, 3],
-           feat: '파괴형 · 강공격(주황)을 막으면 큰 반격', skill: '내려찍기', skillFx: '공격력 ×2.5 강타 + 이번 판 몬스터 방어력 -3' },
+  axe:   { atk: [11, 15, 20, 26, 33], perfMul: [1.2, 1.25, 1.3, 1.35, 1.4], pierce: 0, heavyMul: [1.8, 2, 2.2, 2.4, 2.7],
+           feat: '파괴형 · 강공격(주황)을 막으면 큰 반격', skill: '내려찍기', skillFx: '공격력 ×2.2 강타 + 이번 판 몬스터 방어력 -2 (최대 2번 겹침)' },
 };
 function gc(g){ return GRADES[g].c; }
 function itemKey(it){ return it.slot === 'weapon' ? it.wt : it.slot; }
@@ -474,6 +474,7 @@ const KI_MAX = 5, KI_SKILL = 5, KI_BREATH = 3;
 const KI_GAIN = { perfect: 1, good: .5, read: .5 };
 const SKILL_SAFE = 250;   // 공격 원이 이 시간(ms) 안에 나타나면 기술을 못 씀
 const SKILL_DELAY = 700;  // 기술을 쓰면 다음 공격이 이만큼 늦게 옴
+const AXE_SKILL_MUL = 2.2, AXE_DEF_BREAK = 2, AXE_BREAK_MAX = 2; // 도끼 내려찍기: 강타 배율, 방어력 깎기, 최대 겹침 횟수
 const FIST_SKILL = { skill: '주먹 연타', skillFx: '공격력 ×3 연타' };
 
 // 위치
@@ -678,8 +679,10 @@ function trySkill(kind){
   } else if (wt === 'spear'){
     G.strikes.push({ at, skill: true, label: '꿰뚫기!', dmg: Math.round(raw(3.5)) });
   } else if (wt === 'axe'){
-    G.strikes.push({ at, skill: true, label: '내려찍기!', dmg: minusDef(raw(2.5)), after: () => {
-      if (G.def > 0){ const d = Math.min(3, G.def); G.def -= d; addText(MX, MY - 230, '방어력 -' + d, '#ff9a3c', 28); }
+    G.strikes.push({ at, skill: true, label: '내려찍기!', dmg: minusDef(raw(AXE_SKILL_MUL)), after: () => {
+      G.axeBreaks = (G.axeBreaks || 0) + 1;
+      if (G.axeBreaks > AXE_BREAK_MAX) addText(MX, MY - 230, '방어력은 더 못 깎아요', '#a59fba', 22);
+      else if (G.def > 0){ const d = Math.min(AXE_DEF_BREAK, G.def); G.def -= d; addText(MX, MY - 230, '방어력 -' + d, '#ff9a3c', 28); }
     } });
   } else {
     G.strikes.push({ at, skill: true, label: '주먹 연타!', dmg: minusDef(raw(3)) });
