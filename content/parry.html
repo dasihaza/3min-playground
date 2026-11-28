@@ -142,7 +142,8 @@
 
     <div class="ov show" id="ovTitle">
       <h2>패링 마스터</h2>
-      <p>원이 <b style="color:#fff">딱 닿는 순간</b> 같은 방향 키로 막으면, 자동으로 <b style="color:#ffd45e">반격</b>해요!</p>
+      <p>적이 공격해 와요! 원이 <b style="color:#fff">딱 닿는 순간</b> 같은 방향 키로 막아요.</p>
+      <p>적의 연속 공격을 끝까지 막아내면, 막은 횟수만큼 <b style="color:#ffd45e">반격</b>해요!</p>
       <div class="keys">
         <div class="key"><kbd>←</kbd><kbd>↑</kbd><kbd>→</kbd><kbd>↓</kbd> 방향 막기 (WASD도 돼요)</div>
         <div class="key"><kbd>SPACE</kbd> 빨간 공격 피하기</div>
@@ -390,7 +391,7 @@ function noise(dur, vol, freq, hp){
   s.connect(f).connect(g).connect(a.destination); s.start(t);
 }
 const sfx = {
-  parry(p){ tone(p ? 1980 : 1480, 0.22, 'square', 0.07); tone(p ? 2960 : 2220, 0.16, 'triangle', 0.08); noise(0.07, 0.35, 3500, true); if (p) tone(3960, 0.3, 'sine', 0.05, null, 0.02); },
+  parry(p){ tone(p ? 240 : 190, 0.12, 'square', 0.07, 90); tone(p ? 1980 : 1480, 0.22, 'square', 0.07); tone(p ? 2960 : 2220, 0.16, 'triangle', 0.08); noise(0.07, 0.35, 3500, true); if (p) tone(3960, 0.3, 'sine', 0.05, null, 0.02); },
   dodge(){ noise(0.18, 0.3, 1200, true); tone(500, 0.15, 'sine', 0.06, 1200); },
   slash(wt, crit){
     if (wt === 'axe'){ noise(0.2, 0.5, 600); tone(110, 0.2, 'sawtooth', 0.1, 60); }
@@ -436,10 +437,10 @@ const NORMAL_CHEST = { grade: 0 }, SPECIAL_CHEST = { grade: 1, special: true };
 const STAGES = [
   { name: '말랑 슬라임', look: { kind: 'slime', body: '#6be38a' }, php: 5, mhp: 75, def: 0, lead: 1300, gap: [1000, 1500],
     dirs: ['left', 'right'], patterns: [[N()]], chest: NORMAL_CHEST,
-    tip: '원이 가운데 동그라미에 닿을 때 ← → 로 막으면 반격해요!' },
+    tip: '적의 공격을 ← → 로 막아내면, 틈을 노려 반격해요!' },
   { name: '몽둥이 고블린', look: { kind: 'humanoid', body: '#7cb342', skin: '#9ccc65', size: .85, head: 'ears', weapon: 'club' }, php: 5, mhp: 110, def: 1, lead: 1150, gap: [900, 1300],
     dirs: ['left', 'right', 'up'], patterns: [[N()], [N()], [N(), N(800)]], chest: NORMAL_CHEST,
-    tip: '이번엔 ↑ 공격도 와요. 두 번 연속 공격도 조심!' },
+    tip: '연속 공격은 끝까지 막아야 반격할 수 있어요!' },
   { name: '잿빛 늑대', look: { kind: 'wolf', body: '#8d93a3' }, php: 5, mhp: 150, def: 2, lead: 1000, gap: [800, 1200],
     dirs: D4, patterns: [[N()], [N(), N(600)], [N(), N(600, 's')]], chest: NORMAL_CHEST,
     tip: '네 방향 모두! ↓ 공격도 막아야 해요.' },
@@ -481,8 +482,11 @@ const FIST_SKILL = { skill: '주먹 연타', skillFx: '공격력 ×3 연타' };
 const PX = 300, PY = 318, MX = 690, MY = 330;
 const SPOT = { left: [-150, 0], right: [150, 0], up: [0, -148], down: [0, 112], dodge: [0, -10] };
 const GLYPH = { left: '←', right: '→', up: '↑', down: '↓', dodge: 'SPACE' };
-const LUNGE = 230;              // 반격 때 달려가는 거리
-const C_GUARD = 60, C_HIT = 120, C_BACK = 170, C_END = 270; // 반격 동작 시간표(ms)
+const MNEAR = PX + 270;         // 적이 공격하러 다가오는 위치
+const REACH = 165;              // 반격할 때 적 앞에서 멈추는 거리
+const RIP_IN = 90, RIP_OUT = 130, RIP_DELAY = 150; // 반격: 돌진 시간, 복귀 시간, 마지막 막기 후 기다림
+const RIP_STEP = { sword: 150, spear: 130, axe: 200, fist: 120 }; // 반격 한 번 사이 간격
+const TRAIL = { n: 170, h: 230, f: 170, dl: 170, red: 200 };     // 적 공격 궤적이 날아오는 시간
 
 // =====================================================================
 // 상태
@@ -501,7 +505,8 @@ function newGame(idx){
     lead: st.lead, patterns: st.patterns, phase2: false,
     perfect: 0, good: 0, hits: 0, combo: 0, maxCombo: 0, dmgDealt: 0,
     introStart: T, lastDir: 'left', monLunge: -9999, monHurt: -9999, plHurt: -9999,
-    guard: null, counterAt: -9999, counterWt: S.wt, breakAt: 0, countdown: 4, dead: false,
+    guard: null, guardAt: -9999, act: null, parried: [], chainOk: true, lastTi: -1,
+    monX: MX, monStagger: -9999, clashes: [], slashes: [], flashAt: -9999, breakAt: 0, countdown: 4, dead: false,
     def: st.def, ki: 0, sureCrit: 0, skillFx: null, skillsUsed: 0, breaths: 0, kiTold: false,
   };
   particles = []; texts = [];
@@ -515,6 +520,7 @@ function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
 
 function spawnPattern(){
   const pat = pick(G.patterns);
+  G.lastTi = -1; G.chainOk = true; G.parried = [];
   let off = 0; const items = [];
   for (const el of pat){
     off += el.t;
@@ -569,25 +575,29 @@ function strike(s){
   const big = s.perfect || s.skill || (s.heavy && G.S.heavyMul > 1);
   sfx.slash(G.S.wt, big);
   hitstop = Math.max(hitstop, big ? 60 : 30); shake = Math.max(shake, big ? 9 : 5);
-  burst(MX - 30, MY - 40, big ? '#ffd45e' : '#ffffff', big ? 26 : 14, 8);
+  burst(G.monX - 30, MY - 40, big ? '#ffd45e' : '#ffffff', big ? 26 : 14, 8);
+  G.slashes.push({ at: T, i: s.i || 0, big });
   const label = s.label ? s.label + ' ' + dmg : (s.heavy && G.S.heavyMul > 1) ? '파괴! ' + dmg : s.perfect ? '치명! ' + dmg : String(dmg);
-  addText(MX + rand(-20, 20), MY - 130 - (G.st.look.size || 1) * 20 - (s.skill ? 20 : 0), label, s.skill ? '#7ef0ff' : big ? '#ffd45e' : '#ffffff', s.skill ? 46 : big ? 40 : 30);
+  addText(G.monX + rand(-20, 20), MY - 130 - (G.st.look.size || 1) * 20 - (s.skill ? 20 : 0), label, s.skill ? '#7ef0ff' : big ? '#ffd45e' : '#ffffff', s.skill ? 46 : big ? 40 : 30);
   if (s.after) s.after();
   if (G.st.phase2 && !G.phase2 && G.mhp <= G.st.mhp / 2 && G.mhp > 0){
     G.phase2 = true; G.lead = G.st.lead * G.st.phase2.lead; G.patterns = G.st.phase2.patterns;
-    addText(MX, 160, '분노! 2페이즈', '#ff5a6e', 40); shake = 14;
+    addText(G.monX, 160, '분노! 2페이즈', '#ff5a6e', 40); shake = 14;
   }
   if (G.mhp <= 0){
     G.mhp = 0;
     state = 'break'; G.breakAt = T; G.attacks = []; G.strikes = [];
     hitstop = 260; shake = 22; sfx.kill();
-    burst(MX, MY - 60, '#ffd45e', 60, 10);
-    addText(MX, MY - 180, '처치!', '#ffd45e', 60);
+    burst(G.monX, MY - 60, '#ffd45e', 60, 10);
+    addText(G.monX, MY - 180, '처치!', '#ffd45e', 60);
   }
 }
 
+// 한 번의 연속 공격 중 가장 늦게 오는 공격의 결과 = 반격 기회 여부
+function resolveChain(a, ok){ if (a.ti >= G.lastTi){ G.lastTi = a.ti; G.chainOk = ok; } }
 function takeHit(a, label){
   G.combo = 0;
+  resolveChain(a, false);
   if (G.S.ignore && Math.random() * 100 < G.S.ignore){
     sfx.block(); burst(PX, PY - 20, '#9ad8ff', 16, 5);
     addText(PX, PY - 110, '갑옷이 막았다!', '#9ad8ff', 28);
@@ -621,7 +631,10 @@ function onParry(a, diff){
   a.done = true;
   G.combo++; G.maxCombo = Math.max(G.maxCombo, G.combo);
   const [x, y] = spotXY(a.dir);
-  G.guard = a.dir; G.counterAt = T;
+  G.guard = a.dir; G.guardAt = T; G.monStagger = T;
+  resolveChain(a, true);
+  if (a.dir !== 'dodge') G.clashes.push({ x, y, at: T, perfect: realPerfect, heavy: a.k === 'h', rot: Math.random() });
+  if (realPerfect) G.flashAt = T;
   if (a.dir === 'dodge'){
     sfx.dodge();
     addText(x, y - 70, perfect ? '완벽한 회피!' : '회피!', '#ff9aa8', perfect ? 34 : 28);
@@ -633,14 +646,21 @@ function onParry(a, diff){
   }
   if (realPerfect){ G.perfect++; hitstop = a.k === 'h' ? 110 : 70; shake = a.k === 'h' ? 10 : 5; }
   else { G.good++; shake = 3; }
-  G.strikes.push({ at: T + C_HIT, perfect, heavy: a.k === 'h', combo: G.combo, label: buffed ? '연속 베기!' : null });
+  G.parried.push({ perfect, heavy: a.k === 'h', combo: G.combo, label: buffed ? '연속 베기!' : null });
 }
 
 // =====================================================================
 // 기술 (Q 필살기, E 숨 고르기)
 // =====================================================================
 function skillBlocked(){
-  return G.attacks.some(a => !a.done && a.t0 <= T + SKILL_SAFE) || G.strikes.length > 0 || T - G.counterAt < C_END;
+  return G.attacks.some(a => !a.done && a.t0 <= T + SKILL_SAFE) || G.strikes.length > 0 || !!G.act;
+}
+// 플레이어가 적에게 달려가 list 순서대로 베는 동작
+function startAct(list, delay){
+  const step = RIP_STEP[G.S.wt || 'fist'];
+  const start = T + (delay || 0), n = list.length;
+  G.act = { start, n, step, dur: RIP_IN + (n - 1) * step + 70 + RIP_OUT };
+  list.forEach((st, i) => { st.at = start + RIP_IN + i * step; st.i = i; G.strikes.push(st); });
 }
 function pushBackAttacks(){
   for (const a of G.attacks){ a.t0 += SKILL_DELAY; a.ti += SKILL_DELAY; if (a.fakeAt) a.fakeAt += SKILL_DELAY; }
@@ -669,23 +689,23 @@ function trySkill(kind){
   const info = wt ? WEAPONS[wt] : FIST_SKILL;
   sfx.skill();
   G.skillFx = { at: T, name: info.skill + '!', col: S.wg ? gc(S.wg) : '#7ef0ff' };
-  G.guard = null; G.counterAt = T - C_GUARD; // 바로 달려 나감
+  G.guard = null;
   hitstop = 120; shake = 8;
-  const at = T + (C_HIT - C_GUARD);
+  const at = 0, push = st => startAct([st], 0);
   const raw = m => S.atk * m;
   const minusDef = v => Math.max(1, Math.round(v - G.def * (1 - S.pierce / 100)));
   if (wt === 'sword'){
-    G.strikes.push({ at, skill: true, label: '연속 베기!', dmg: minusDef(raw(S.perfMul)), after: () => { G.sureCrit = 3; addText(PX, PY - 150, '다음 반격 3번 퍼펙트!', '#7ef0ff', 24); } });
+    push({ at, skill: true, label: '연속 베기!', dmg: minusDef(raw(S.perfMul)), after: () => { G.sureCrit = 3; addText(PX, PY - 150, '다음 반격 3번 퍼펙트!', '#7ef0ff', 24); } });
   } else if (wt === 'spear'){
-    G.strikes.push({ at, skill: true, label: '꿰뚫기!', dmg: Math.round(raw(3.5)) });
+    push({ at, skill: true, label: '꿰뚫기!', dmg: Math.round(raw(3.5)) });
   } else if (wt === 'axe'){
-    G.strikes.push({ at, skill: true, label: '내려찍기!', dmg: minusDef(raw(AXE_SKILL_MUL)), after: () => {
+    push({ at, skill: true, label: '내려찍기!', dmg: minusDef(raw(AXE_SKILL_MUL)), after: () => {
       G.axeBreaks = (G.axeBreaks || 0) + 1;
-      if (G.axeBreaks > AXE_BREAK_MAX) addText(MX, MY - 230, '방어력은 더 못 깎아요', '#a59fba', 22);
-      else if (G.def > 0){ const d = Math.min(AXE_DEF_BREAK, G.def); G.def -= d; addText(MX, MY - 230, '방어력 -' + d, '#ff9a3c', 28); }
+      if (G.axeBreaks > AXE_BREAK_MAX) addText(G.monX, MY - 230, '방어력은 더 못 깎아요', '#a59fba', 22);
+      else if (G.def > 0){ const d = Math.min(AXE_DEF_BREAK, G.def); G.def -= d; addText(G.monX, MY - 230, '방어력 -' + d, '#ff9a3c', 28); }
     } });
   } else {
-    G.strikes.push({ at, skill: true, label: '주먹 연타!', dmg: minusDef(raw(3)) });
+    push({ at, skill: true, label: '주먹 연타!', dmg: minusDef(raw(3)) });
   }
 }
 
@@ -1000,6 +1020,13 @@ function update(dt){
     if (T - G.breakAt > 1500 && !G.ended){ G.ended = true; endStage(true); }
     return;
   }
+  // 적은 공격할 때 다가오고, 끝나면 물러남
+  const near = MNEAR + ((G.st.look.size || 1) - 1) * 50;
+  const busy = G.attacks.length > 0 || G.act || G.strikes.length > 0;
+  if (state !== 'break') G.monX += ((busy ? near : MX) - G.monX) * Math.min(1, dt / 110);
+  if (G.act && T >= G.act.start + G.act.dur) G.act = null;
+  G.clashes = G.clashes.filter(c => T - c.at < 320);
+  G.slashes = G.slashes.filter(c => T - c.at < 200);
   if (state !== 'play') return;
 
   // 반격 타격
@@ -1015,16 +1042,28 @@ function update(dt){
       a.canceled = true; sfx.fake();
       const [x, y] = spotXY(a.dir); burst(x, y, '#b48cff', 12, 3); addText(x, y - 60, '?!', '#b48cff', 30);
     }
-    if (a.ti - T < 130 && a.ti - T > -40 && !a.canceled) G.monLunge = Math.max(G.monLunge, a.ti - 130);
     if (T > a.ti + G.S.goodWin){
       a.done = true;
-      if (a.canceled){ const [x, y] = spotXY(a.dir); addText(x, y - 60, '간파!', '#b48cff', 26); G.combo++; addKi(KI_GAIN.read); }
+      if (a.canceled){ const [x, y] = spotXY(a.dir); addText(x, y - 60, '간파!', '#b48cff', 26); G.combo++; addKi(KI_GAIN.read); resolveChain(a, true); }
       else takeHit(a);
       if (state !== 'play') return;
     }
   }
   G.attacks = G.attacks.filter(a => !a.done);
-  if (G.attacks.length === 0 && G._hadAttacks){ G.nextAt = T + rand(...G.st.gap); }
+  if (G.attacks.length === 0 && G._hadAttacks){
+    // 적의 연속 공격이 끝남 → 마지막 공격을 막았으면 막은 횟수만큼 반격
+    let wait = 0;
+    if (G.parried.length){
+      if (G.chainOk){
+        const n = G.parried.length;
+        addText(PX + 40, PY - 175, n > 1 ? '반격 ×' + n + '!' : '반격!', '#ffd45e', 32);
+        startAct(G.parried, RIP_DELAY);
+        wait = RIP_DELAY + G.act.dur;
+      } else addText(PX, PY - 175, '반격 기회를 놓쳤다…', '#a59fba', 26);
+      G.parried = [];
+    }
+    G.nextAt = T + wait + rand(...G.st.gap);
+  }
   if (G.attacks.length === 0 && T >= G.nextAt) spawnPattern();
   G._hadAttacks = G.attacks.length > 0;
 }
@@ -1136,7 +1175,7 @@ function drawHero(o){
     const [dx, dy] = SPOT[o.guardDir]; hx = dx * .12; hy = -6 + dy * .12; ang = Math.atan2(dx, -dy);
   } else if (o.pose === 'swing'){
     if (eq.weapon && eq.weapon.wt === 'spear'){ ang = Math.PI / 2; hx = 24 + o.sw * 34; hy = 0; }
-    else { ang = -0.9 + o.sw * 2.7; hx = 24; hy = -2; }
+    else { ang = o.back ? 1.8 - o.sw * 2.7 : -0.9 + o.sw * 2.7; hx = 24; hy = -2; }
   }
   ctx.strokeStyle = flash ? '#ff8a9a' : shade(base, -.25); ctx.lineWidth = 11; ctx.lineCap = 'round';
   ctx.beginPath(); ctx.moveTo(14, -12); ctx.lineTo(hx, hy); ctx.stroke();
@@ -1153,51 +1192,116 @@ function drawPlayer(){
   const hurt = T - G.plHurt < 250;
   const kb = hurt ? (1 - (T - G.plHurt) / 250) * -18 : 0;
   const bob = Math.sin(T / 300) * 2;
-  const e = T - G.counterAt;
-  let dx = 0, pose = 'idle', sw = 0;
-  if (e < C_GUARD) pose = G.guard === 'dodge' ? 'dodge' : 'guard';
-  else if (e < C_HIT){ dx = LUNGE * (e - C_GUARD) / (C_HIT - C_GUARD); pose = 'swing'; }
-  else if (e < C_BACK){ dx = LUNGE; pose = 'swing'; sw = (e - C_HIT + 30) / (C_BACK - C_HIT + 30); }
-  else if (e < C_END){ dx = LUNGE * (1 - (e - C_BACK) / (C_END - C_BACK)); pose = 'swing'; sw = 1; }
-  if (e < C_HIT && pose === 'swing') sw = Math.max(0, (e - C_HIT + 30) / 80);
-  drawHero({ x: PX + dx + kb, y: PY + bob, eq: G.eq, pose, sw: Math.min(1, sw), guardDir: G.guard, hurt });
+  let dx = 0, pose = 'idle', sw = 0, back = false;
+  const A = G.act;
+  if (A && T >= A.start && T < A.start + A.dur){
+    const e = T - A.start;
+    const reach = Math.max(0, G.monX - PX - REACH);
+    const k = e < RIP_IN ? e / RIP_IN : e > A.dur - RIP_OUT ? (A.dur - e) / RIP_OUT : 1;
+    dx = reach * (1 - Math.pow(1 - k, 2));
+    pose = 'swing';
+    const i = Math.max(0, Math.min(A.n - 1, Math.floor((e - RIP_IN + 60) / A.step)));
+    sw = Math.max(0, Math.min(1, (e - (RIP_IN + i * A.step) + 50) / 90));
+    back = i % 2 === 1;
+  }
+  if (pose === 'idle' && T - G.guardAt < 180) pose = G.guard === 'dodge' ? 'dodge' : 'guard';
+  drawHero({ x: PX + dx + kb, y: PY + bob, eq: G.eq, pose, sw, back, guardDir: G.guard, hurt });
   // 회피 잔상
-  if (e < 300 && G.guard === 'dodge'){
-    ctx.strokeStyle = 'rgba(255,255,255,' + (1 - e / 300) * .6 + ')'; ctx.lineWidth = 3;
+  const ge = T - G.guardAt;
+  if (ge < 300 && G.guard === 'dodge'){
+    ctx.strokeStyle = 'rgba(255,255,255,' + (1 - ge / 300) * .6 + ')'; ctx.lineWidth = 3;
     for (let i = 0; i < 3; i++){ ctx.beginPath(); ctx.moveTo(PX - 60 - i * 14, PY - 40 + i * 30); ctx.lineTo(PX - 100 - i * 14, PY - 40 + i * 30); ctx.stroke(); }
   }
-  // 반격 베기 효과
-  if (e >= C_HIT - 10 && e < C_HIT + 110){
-    const k = (e - C_HIT + 10) / 120, a = 1 - k;
-    const wt = G.S.wt;
-    ctx.save(); ctx.globalAlpha = a;
-    const col = G.S.wg ? gc(G.S.wg) : '#ffffff';
-    ctx.strokeStyle = col; ctx.lineCap = 'round';
+  // 반격 베기 효과 (적 몸에)
+  const wt = G.S.wt, col = G.S.wg ? gc(G.S.wg) : '#ffffff';
+  for (const sl of G.slashes){
+    const k = (T - sl.at) / 200, a = 1 - k;
+    if (k < 0 || k > 1) continue;
+    ctx.save(); ctx.globalAlpha = a; ctx.strokeStyle = col; ctx.lineCap = 'round';
+    ctx.shadowColor = col; ctx.shadowBlur = 12;
     if (wt === 'spear'){
-      ctx.lineWidth = 8 * a + 2;
-      ctx.beginPath(); ctx.moveTo(MX - 160, MY - 40); ctx.lineTo(MX - 20 + k * 60, MY - 40); ctx.stroke();
+      ctx.lineWidth = 9 * a + 2; const yy = MY - 40 + (sl.i % 3 - 1) * 22;
+      ctx.beginPath(); ctx.moveTo(G.monX - 150, yy); ctx.lineTo(G.monX + 10 + k * 70, yy); ctx.stroke();
     } else {
       ctx.lineWidth = (wt === 'axe' ? 16 : 10) * a + 2;
-      ctx.beginPath(); ctx.arc(MX - 70, MY - 40, wt === 'axe' ? 85 : 70, -1.3 + k * .3, 1.1 + k * .3); ctx.stroke();
+      ctx.translate(G.monX - 30, MY - 40); if (sl.i % 2) ctx.scale(1, -1);
+      ctx.beginPath(); ctx.arc(-40, 0, wt === 'axe' ? 85 : 70, -1.3 + k * .3, 1.1 + k * .3); ctx.stroke();
     }
     ctx.restore();
   }
 }
 
+// 막는 순간: 무기끼리 부딪히는 불꽃과 충격파
+function drawClashes(){
+  for (const c of G.clashes){
+    const e = T - c.at, k = e / 320; if (k < 0 || k > 1) continue;
+    const big = c.perfect, col = big ? '#ffd45e' : '#ffffff';
+    ctx.save(); ctx.translate(c.x, c.y);
+    // 번쩍
+    if (e < 90){ ctx.globalAlpha = 1 - e / 90; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(0, 0, big ? 44 : 30, 0, 7); ctx.fill(); }
+    // 충격파
+    ctx.globalAlpha = 1 - k; ctx.strokeStyle = col; ctx.lineWidth = (big ? 8 : 5) * (1 - k) + 1;
+    ctx.beginPath(); ctx.arc(0, 0, 24 + k * (big ? 120 : 75) * (c.heavy ? 1.3 : 1), 0, 7); ctx.stroke();
+    // 불꽃 줄기
+    ctx.rotate(c.rot * 6.28); ctx.lineCap = 'round'; ctx.lineWidth = big ? 5 : 3;
+    const rays = big ? 10 : 7;
+    for (let i = 0; i < rays; i++){
+      const a = i / rays * 6.28, r1 = 12 + k * 40, r2 = 30 + k * (big ? 95 : 60) * (i % 2 ? .6 : 1);
+      ctx.beginPath(); ctx.moveTo(Math.cos(a) * r1, Math.sin(a) * r1); ctx.lineTo(Math.cos(a) * r2, Math.sin(a) * r2); ctx.stroke();
+    }
+    ctx.restore();
+  }
+}
+
+// 적의 공격 궤적: 적의 무기에서 막아야 할 자리로 날아옴
+function trailPoint(S, C, E, u){ const v = 1 - u; return [v * v * S[0] + 2 * v * u * C[0] + u * u * E[0], v * v * S[1] + 2 * v * u * C[1] + u * u * E[1]]; }
+function drawTrails(){
+  for (const a of G.attacks){
+    if (a.done || a.canceled) continue;
+    const dur = TRAIL[a.k], st = a.ti - dur;
+    if (T < st || T > a.ti + 40) continue;
+    const u = Math.min(1, (T - st) / dur), uh = u * u;
+    const S = [G.monX - 50, MY - 60], E = spotXY(a.dir), mx = (S[0] + E[0]) / 2;
+    const C = a.dir === 'up' ? [mx, PY - 300] : a.dir === 'down' ? [mx, PY + 230] : a.dir === 'left' ? [PX + 40, PY - 280] : a.dir === 'right' ? [mx, E[1] - 50] : [mx, S[1] - 30];
+    const col = KCOL[a.k];
+    ctx.save(); ctx.lineCap = 'round'; ctx.shadowColor = col; ctx.shadowBlur = 16;
+    const seg = 10, u0 = Math.max(0, uh - .45);
+    let prev = trailPoint(S, C, E, u0);
+    for (let i = 1; i <= seg; i++){
+      const uu = u0 + (uh - u0) * i / seg, pt = trailPoint(S, C, E, uu);
+      ctx.globalAlpha = .25 + .75 * i / seg; ctx.strokeStyle = col; ctx.lineWidth = (a.k === 'h' ? 4 : 2) + (a.k === 'h' ? 14 : 9) * i / seg;
+      ctx.beginPath(); ctx.moveTo(prev[0], prev[1]); ctx.lineTo(pt[0], pt[1]); ctx.stroke();
+      prev = pt;
+    }
+    ctx.globalAlpha = 1; ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(prev[0], prev[1], a.k === 'h' ? 9 : 6, 0, 7); ctx.fill();
+    ctx.restore();
+  }
+}
+
+let monWeaponRot = 0;
 function drawMonster(){
   const L = G.st.look;
   const broken = state === 'break' || (state === 'result' && !G.dead);
-  let ox = 0, oy = 0;
-  const lunge = T - G.monLunge;
-  if (lunge >= 0 && lunge < 260){ const p = lunge < 130 ? lunge / 130 : 1 - (lunge - 130) / 130; ox = -120 * p; }
-  const soon = G.attacks.find(a => !a.done && !a.canceled && T > a.t0 && a.ti - T < 400 && a.ti > T);
-  if (soon && lunge > 260) ox += 14;
+  let ox = 0, oy = 0, tilt = 0;
+  // 가장 가까운 공격: 무기를 들었다가(+) 내리침(-)
+  monWeaponRot = 0;
+  const next = G.attacks.filter(a => !a.done && !a.canceled).sort((a, b) => a.ti - b.ti)[0];
+  if (next){
+    const r = next.ti - T, wind = TRAIL[next.k] + 160;
+    if (r < wind && r > TRAIL[next.k]){ const p = 1 - (r - TRAIL[next.k]) / 160; monWeaponRot = .7 * p; ox = 14 * p; tilt = .06 * p; }
+    else if (r <= TRAIL[next.k] && r > -60){ const p = Math.min(1, 1 - r / TRAIL[next.k]); monWeaponRot = .7 - 1.9 * p; ox = -36 * p; tilt = -.08 * p; }
+  }
+  // 막히면 튕겨 나며 휘청
+  const se = T - G.monStagger;
+  if (se < 280){ const p = 1 - se / 280; ox += 34 * p; tilt += .14 * p; monWeaponRot = 1.1 * p; }
   if (T - G.monHurt < 180) ox += 22 * (1 - (T - G.monHurt) / 180);
   if (broken){ ox = 30; oy = Math.min(40, (T - G.breakAt) / 20); }
   const s = L.size || 1;
   const bob = Math.sin(T / 260) * 3;
-  ctx.save(); ctx.translate(MX + ox, MY + oy + bob);
+  ctx.save(); ctx.translate(G.monX + ox, MY + oy + bob);
   ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(0, 72 - bob - oy, 70 * s, 12, 0, 0, 7); ctx.fill();
+  if (!broken && tilt){ ctx.translate(0, 70); ctx.rotate(tilt); ctx.translate(0, -70); }
   if (broken){ ctx.rotate(Math.min(.35, (T - G.breakAt) / 2000)); ctx.globalAlpha = Math.max(.35, 1 - (T - G.breakAt) / 1800); }
   const hurt = T - G.monHurt < 90;
   if (L.kind === 'slime') drawSlime(L, hurt);
@@ -1209,7 +1313,7 @@ function drawMonster(){
     for (let i = 0; i < 3; i++){
       const a = T / 300 + i * 2.1;
       ctx.fillStyle = '#ffd45e'; ctx.font = '22px Jua'; ctx.textAlign = 'center';
-      ctx.fillText('★', MX + 30 + Math.cos(a) * 40, MY - 120 * s + Math.sin(a) * 10);
+      ctx.fillText('★', G.monX + 30 + Math.cos(a) * 40, MY - 120 * s + Math.sin(a) * 10);
     }
   }
 }
@@ -1310,6 +1414,7 @@ function drawHumanoid(L, hurt, s){
 function drawMonWeapon(w){
   ctx.save();
   ctx.translate(-30, 0);
+  ctx.rotate(monWeaponRot);
   ctx.lineCap = 'round';
   if (w === 'club'){ ctx.rotate(-.6); ctx.fillStyle = '#8d5a34'; roundRect(-6, -60, 14, 70, 6); ctx.fill(); ctx.beginPath(); ctx.arc(1, -60, 13, 0, 7); ctx.fill(); }
   else if (w === 'sword'){ ctx.rotate(-.7); ctx.fillStyle = '#cfd6e4'; ctx.fillRect(-3, -80, 8, 76); ctx.fillStyle = '#8d5a34'; ctx.fillRect(-12, -6, 26, 6); ctx.fillRect(-2, 0, 6, 16); }
@@ -1359,7 +1464,7 @@ function drawIndicators(){
     ctx.globalAlpha = 1;
     if (!a.canceled && p > .1){
       ctx.strokeStyle = col; ctx.globalAlpha = .12 * alpha; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.moveTo(MX - 40, MY - 40); ctx.lineTo(x, y); ctx.stroke(); ctx.globalAlpha = 1;
+      ctx.beginPath(); ctx.moveTo(G.monX - 40, MY - 40); ctx.lineTo(x, y); ctx.stroke(); ctx.globalAlpha = 1;
     }
   }
   ctx.textBaseline = 'alphabetic';
@@ -1468,6 +1573,8 @@ function draw(){
   drawMonster();
   drawPlayer();
   drawIndicators();
+  drawTrails();
+  drawClashes();
   for (const p of particles){
     const l = 1 - (T - p.born) / p.life;
     ctx.globalAlpha = l; ctx.fillStyle = p.color;
@@ -1487,6 +1594,8 @@ function draw(){
   drawHUD();
   drawSkillFx();
   if (state === 'intro' || (state === 'paused' && pausedFrom === 'intro')) drawIntro();
+  const fe = T - G.flashAt;
+  if (fe < 90){ ctx.fillStyle = 'rgba(255,250,230,' + (1 - fe / 90) * .3 + ')'; ctx.fillRect(0, 0, W, H); }
   const hh = T - G.plHurt;
   if (hh < 300){ ctx.fillStyle = 'rgba(255,40,60,' + (1 - hh / 300) * .25 + ')'; ctx.fillRect(0, 0, W, H); }
 }
